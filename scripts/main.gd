@@ -29,6 +29,9 @@ var remaining := 0
 var resolving := false
 var won := false
 var lost := false
+var active_target := Vector2i(-1, -1)
+var active_slot := -1
+var activity_text := ""
 
 var board_grid: GridContainer
 var slots_grid: GridContainer
@@ -69,6 +72,9 @@ func _reset_level() -> void:
 	resolving = false
 	won = false
 	lost = false
+	active_target = Vector2i(-1, -1)
+	active_slot = -1
+	activity_text = ""
 
 func _build_ui() -> void:
 	for child in get_children():
@@ -212,8 +218,21 @@ func _refresh() -> void:
 				style.bg_color = PALETTE[color_name]
 				style.border_color = Color("#fff0b2") if _is_accessible(x, y) else PALETTE[color_name].darkened(0.55)
 			style.set_border_width_all(3 if color_name != "" and _is_accessible(x, y) else 1)
+			if Vector2i(x, y) == active_target:
+				style.bg_color = PALETTE[color_name].lightened(0.18)
+				style.border_color = Color("#fff8d6")
+				style.set_border_width_all(4)
 			style.set_corner_radius_all(5)
 			tile.add_theme_stylebox_override("panel", style)
+			if Vector2i(x, y) == active_target:
+				var ant_marker := Label.new()
+				ant_marker.text = "🐜"
+				ant_marker.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+				ant_marker.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+				ant_marker.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+				ant_marker.add_theme_font_size_override("font_size", 20)
+				ant_marker.mouse_filter = Control.MOUSE_FILTER_IGNORE
+				tile.add_child(ant_marker)
 			board_grid.add_child(tile)
 
 	for child in slots_grid.get_children():
@@ -227,7 +246,7 @@ func _refresh() -> void:
 		else:
 			var c: String = slots[i]["color"]
 			var ants: int = slots[i]["ants"]
-			button.text = str(i + 1) + "\n🐜 " + str(ants)
+			button.text = ("▶ " if active_slot == i else "") + str(i + 1) + "\n🐜 " + str(ants)
 			button.disabled = true
 			var style := StyleBoxFlat.new()
 			style.bg_color = PALETTE[c].darkened(0.55)
@@ -248,7 +267,9 @@ func _refresh() -> void:
 		message.text = "Победа! Рисунок полностью собран муравейником! ✨"
 	elif lost:
 		message.text = "Поражение: все пять ячеек заняты, ходов больше нет."
-	elif not resolving:
+	elif resolving:
+		message.text = activity_text
+	else:
 		var free_slots := _free_slot_count()
 		message.text = "Свободных пусковых ячеек: %d из %d" % [free_slots, SLOT_COUNT]
 
@@ -266,38 +287,59 @@ func _place_next(slot_index: int) -> void:
 		return
 	slots[slot_index] = incoming[next_container].duplicate(true)
 	next_container += 1
-	message.text = "Контейнер установлен. Муравьи ищут доступные пиксели своего цвета…"
+	activity_text = "Контейнер установлен — муравьи отправились за пикселями!"
 	_resolve_all_slots()
 	_refresh()
 
 func _resolve_all_slots() -> void:
+	if resolving:
+		return
 	resolving = true
+	_refresh()
 	var changed := true
 	while changed:
 		changed = false
-		# Приоритет автозапуска фиксирован: слева направо. Выбор ячейки
-		# задаёт позицию контейнера в очереди обработки этого цикла.
+		# Автозапуск и приоритет обработки фиксированы: слева направо.
 		for i in range(SLOT_COUNT):
 			if slots[i] == null:
 				continue
 			var container: Dictionary = slots[i]
+			active_slot = i
 			while int(container.ants) > 0:
 				var target := _find_accessible_pixel(str(container.color))
 				if target.x < 0:
+					activity_text = "%s контейнер в ячейке %d ждёт открытия пикселя." % [NAMES[str(container.color)], i + 1]
 					break
+				active_target = target
+				activity_text = "Муравей из ячейки %d забирает %s пиксель · осталось муравьёв: %d" % [i + 1, NAMES[str(container.color)].to_lower(), int(container.ants)]
+				_refresh()
+				await get_tree().create_timer(0.12).timeout
 				board[target.y][target.x] = ""
 				remaining -= 1
 				container.ants = int(container.ants) - 1
+				active_target = Vector2i(-1, -1)
 				changed = true
+				_refresh()
+				await get_tree().create_timer(0.045).timeout
 			if int(container.ants) <= 0:
+				activity_text = "Контейнер в ячейке %d опустел — ячейка свободна." % [i + 1]
 				slots[i] = null
 			else:
 				slots[i] = container
+			active_target = Vector2i(-1, -1)
+			active_slot = -1
+			_refresh()
+		if remaining <= 0:
+			break
 	if remaining <= 0:
 		won = true
 	elif _is_defeat():
 		lost = true
+	active_target = Vector2i(-1, -1)
+	active_slot = -1
 	resolving = false
+	activity_text = ""
+	_refresh()
 
 func _is_defeat() -> bool:
 	if _free_slot_count() > 0:
