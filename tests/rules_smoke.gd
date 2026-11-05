@@ -19,7 +19,7 @@ func _run() -> void:
 		quit(1)
 		return
 
-	var game := packed.instantiate()
+	var game: Variant = packed.instantiate()
 	root.add_child(game)
 	await process_frame
 
