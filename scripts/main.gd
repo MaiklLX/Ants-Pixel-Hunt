@@ -312,9 +312,11 @@ func _resolve_all_slots() -> void:
 				active_target = target
 				activity_text = "Муравей из ячейки %d забирает %s пиксель · осталось муравьёв: %d" % [i + 1, NAMES[str(container.color)].to_lower(), int(container.ants)]
 				_refresh()
-				await _animate_ant_to_pixel(i, target)
+				var returning_ant: Control = await _animate_ant_to_pixel(i, target)
 				await _animate_pixel_pickup(target)
 				board[target.y][target.x] = ""
+				if is_instance_valid(returning_ant):
+					await _animate_ant_return(returning_ant, i)
 				remaining -= 1
 				container.ants = int(container.ants) - 1
 				active_target = Vector2i(-1, -1)
@@ -342,19 +344,19 @@ func _resolve_all_slots() -> void:
 	_refresh()
 
 
-func _animate_ant_to_pixel(slot_index: int, target: Vector2i) -> void:
+func _animate_ant_to_pixel(slot_index: int, target: Vector2i) -> Control:
 	await get_tree().process_frame
 	if not is_instance_valid(fx_layer):
-		return
+		return null
 	var target_index := target.y * SIZE + target.x
 	if slot_index < 0 or slot_index >= slots_grid.get_child_count():
-		return
+		return null
 	if target_index < 0 or target_index >= board_grid.get_child_count():
-		return
+		return null
 	var source_control := slots_grid.get_child(slot_index) as Control
 	var target_control := board_grid.get_child(target_index) as Control
 	if source_control == null or target_control == null:
-		return
+		return null
 	var ant := Control.new()
 	ant.set_script(load("res://scripts/ant_visual.gd"))
 	ant.size = Vector2(38, 34)
@@ -368,6 +370,28 @@ func _animate_ant_to_pixel(slot_index: int, target: Vector2i) -> void:
 	tween.set_parallel(true)
 	tween.tween_property(ant, "position", end_global - fx_layer.global_position - ant.size * 0.5, 0.26).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 	tween.tween_property(ant, "scale", Vector2(1.15, 1.15), 0.26).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	await tween.finished
+	return ant
+
+
+func _animate_ant_return(ant: Control, slot_index: int) -> void:
+	await get_tree().process_frame
+	if not is_instance_valid(ant) or not is_instance_valid(fx_layer):
+		return
+	if slot_index < 0 or slot_index >= slots_grid.get_child_count():
+		ant.queue_free()
+		return
+	var source_control := slots_grid.get_child(slot_index) as Control
+	if source_control == null:
+		ant.queue_free()
+		return
+	var start_global := ant.get_global_rect().get_center()
+	var end_global := source_control.get_global_rect().get_center()
+	ant.rotation = (end_global - start_global).angle()
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(ant, "position", end_global - fx_layer.global_position - ant.size * 0.5, 0.22).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	tween.tween_property(ant, "scale", Vector2(0.82, 0.82), 0.22).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	await tween.finished
 	if is_instance_valid(ant):
 		ant.queue_free()
