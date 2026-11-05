@@ -32,6 +32,7 @@ var lost := false
 var active_target := Vector2i(-1, -1)
 var active_slot := -1
 var activity_text := ""
+var resolution_log: Array[Dictionary] = []
 
 var board_grid: GridContainer
 var slots_grid: GridContainer
@@ -290,7 +291,7 @@ func _place_next(slot_index: int) -> void:
 	await _resolve_all_slots()
 	_refresh()
 
-func _resolve_all_slots() -> void:
+func _resolve_all_slots(animate: bool = true) -> void:
 	if resolving:
 		return
 	resolving = true
@@ -312,11 +313,15 @@ func _resolve_all_slots() -> void:
 				active_target = target
 				activity_text = "Муравей из ячейки %d забирает %s пиксель · осталось муравьёв: %d" % [i + 1, NAMES[str(container.color)].to_lower(), int(container.ants)]
 				_refresh()
-				var returning_ant: Control = await _animate_ant_to_pixel(i, target)
-				await _animate_pixel_pickup(target)
-				board[target.y][target.x] = ""
-				if is_instance_valid(returning_ant):
-					await _animate_ant_return(returning_ant, i)
+				resolution_log.append({"slot": i, "color": str(container.color), "x": target.x, "y": target.y})
+				if animate:
+					var returning_ant: Control = await _animate_ant_to_pixel(i, target)
+					await _animate_pixel_pickup(target)
+					board[target.y][target.x] = ""
+					if is_instance_valid(returning_ant):
+						await _animate_ant_return(returning_ant, i)
+				else:
+					board[target.y][target.x] = ""
 				remaining -= 1
 				container.ants = int(container.ants) - 1
 				active_target = Vector2i(-1, -1)
