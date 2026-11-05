@@ -39,6 +39,7 @@ var board_status: Label
 var queue_status: Label
 var message: Label
 var restart_button: Button
+var fx_layer: Control
 
 func _ready() -> void:
 	_reset_level()
@@ -92,6 +93,12 @@ func _build_ui() -> void:
 	safe.add_theme_constant_override("margin_top", 16)
 	safe.add_theme_constant_override("margin_bottom", 12)
 	add_child(safe)
+
+	fx_layer = Control.new()
+	fx_layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	fx_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	fx_layer.z_index = 50
+	add_child(fx_layer)
 
 	var layout := VBoxContainer.new()
 	layout.add_theme_constant_override("separation", 9)
@@ -224,15 +231,6 @@ func _refresh() -> void:
 				style.set_border_width_all(4)
 			style.set_corner_radius_all(5)
 			tile.add_theme_stylebox_override("panel", style)
-			if Vector2i(x, y) == active_target:
-				var ant_marker := Label.new()
-				ant_marker.text = "🐜"
-				ant_marker.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-				ant_marker.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-				ant_marker.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-				ant_marker.add_theme_font_size_override("font_size", 20)
-				ant_marker.mouse_filter = Control.MOUSE_FILTER_IGNORE
-				tile.add_child(ant_marker)
 			board_grid.add_child(tile)
 
 	for child in slots_grid.get_children():
@@ -257,6 +255,7 @@ func _refresh() -> void:
 		button.pressed.connect(_place_next.bind(i))
 		slots_grid.add_child(button)
 
+	restart_button.disabled = resolving
 	board_status.text = "Пикселей осталось: %d" % remaining
 	if next_container < incoming.size():
 		var upcoming: Dictionary = incoming[next_container]
@@ -313,7 +312,7 @@ func _resolve_all_slots() -> void:
 				active_target = target
 				activity_text = "Муравей из ячейки %d забирает %s пиксель · осталось муравьёв: %d" % [i + 1, NAMES[str(container.color)].to_lower(), int(container.ants)]
 				_refresh()
-				await get_tree().create_timer(0.12).timeout
+				await _animate_ant_to_pixel(i, target)
 				board[target.y][target.x] = ""
 				remaining -= 1
 				container.ants = int(container.ants) - 1
@@ -340,6 +339,41 @@ func _resolve_all_slots() -> void:
 	resolving = false
 	activity_text = ""
 	_refresh()
+
+
+func _animate_ant_to_pixel(slot_index: int, target: Vector2i) -> void:
+	await get_tree().process_frame
+	if not is_instance_valid(fx_layer):
+		return
+	var target_index := target.y * SIZE + target.x
+	if slot_index < 0 or slot_index >= slots_grid.get_child_count():
+		return
+	if target_index < 0 or target_index >= board_grid.get_child_count():
+		return
+	var source_control := slots_grid.get_child(slot_index) as Control
+	var target_control := board_grid.get_child(target_index) as Control
+	if source_control == null or target_control == null:
+		return
+	var ant := Label.new()
+	ant.text = "🐜"
+	ant.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	ant.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	ant.size = Vector2(34, 28)
+	ant.add_theme_font_size_override("font_size", 24)
+	ant.add_theme_color_override("font_color", Color("#fff0b2"))
+	ant.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	fx_layer.add_child(ant)
+	var start_global := source_control.get_global_rect().get_center()
+	var end_global := target_control.get_global_rect().get_center()
+	ant.position = start_global - fx_layer.global_position - ant.size * 0.5
+	ant.rotation = (end_global - start_global).angle()
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(ant, "position", end_global - fx_layer.global_position - ant.size * 0.5, 0.26).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(ant, "scale", Vector2(1.15, 1.15), 0.26).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	await tween.finished
+	if is_instance_valid(ant):
+		ant.queue_free()
 
 func _is_defeat() -> bool:
 	if _free_slot_count() > 0:
