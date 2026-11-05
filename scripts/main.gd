@@ -288,7 +288,7 @@ func _place_next(slot_index: int) -> void:
 	slots[slot_index] = incoming[next_container].duplicate(true)
 	next_container += 1
 	activity_text = "Контейнер установлен — муравьи отправились за пикселями!"
-	_resolve_all_slots()
+	await _resolve_all_slots()
 	_refresh()
 
 func _resolve_all_slots() -> void:
