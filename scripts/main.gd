@@ -44,21 +44,24 @@ func _ready() -> void:
 
 func _reset_level() -> void:
 	board = [
-		["red", "blue", "red", "blue", "red", "blue", "red"],
-		["blue", "yellow", "green", "yellow", "green", "yellow", "blue"],
-		["red", "green", "purple", "purple", "purple", "green", "red"],
-		["blue", "yellow", "purple", "purple", "red", "yellow", "blue"],
-		["red", "green", "red", "blue", "blue", "green", "red"],
-		["blue", "yellow", "green", "yellow", "green", "yellow", "blue"],
-		["red", "blue", "red", "blue", "red", "blue", "red"]
+		["green", "green", "red", "green", "purple", "yellow", "green"],
+		["red", "purple", "purple", "blue", "yellow", "red", "red"],
+		["red", "purple", "green", "red", "yellow", "yellow", "red"],
+		["purple", "yellow", "blue", "blue", "blue", "red", "red"],
+		["purple", "blue", "green", "blue", "purple", "yellow", "red"],
+		["yellow", "red", "red", "blue", "red", "purple", "green"],
+		["purple", "red", "blue", "green", "yellow", "yellow", "green"]
 	]
 	incoming = [
-		{"color":"purple", "ants":2}, {"color":"yellow", "ants":4},
-		{"color":"red", "ants":5}, {"color":"green", "ants":4},
-		{"color":"blue", "ants":4}, {"color":"purple", "ants":3},
-		{"color":"yellow", "ants":4}, {"color":"red", "ants":5},
-		{"color":"green", "ants":4}, {"color":"blue", "ants":5},
-		{"color":"red", "ants":4}, {"color":"blue", "ants":5}
+		{"color":"yellow", "ants":3}, {"color":"blue", "ants":4},
+		{"color":"purple", "ants":2}, {"color":"blue", "ants":2},
+		{"color":"red", "ants":6}, {"color":"purple", "ants":6},
+		{"color":"blue", "ants":1}, {"color":"green", "ants":3},
+		{"color":"purple", "ants":1}, {"color":"yellow", "ants":1},
+		{"color":"green", "ants":1}, {"color":"green", "ants":5},
+		{"color":"yellow", "ants":1}, {"color":"red", "ants":2},
+		{"color":"yellow", "ants":4}, {"color":"blue", "ants":1},
+		{"color":"red", "ants":6}
 	]
 	slots = [null, null, null, null, null]
 	next_container = 0
@@ -134,7 +137,7 @@ func _build_ui() -> void:
 	board_panel.add_child(board_grid)
 
 	var slot_title := Label.new()
-	slot_title.text = "ПУСКОВЫЕ ЯЧЕЙКИ · 5"
+	slot_title.text = "ПУСКОВЫЕ ЯЧЕЙКИ · ПРИОРИТЕТ 1 → 5"
 	slot_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	slot_title.add_theme_font_size_override("font_size", 15)
 	slot_title.add_theme_color_override("font_color", Color("#f5d58a"))
@@ -161,7 +164,7 @@ func _build_ui() -> void:
 	layout.add_child(message)
 
 	var rule := Label.new()
-	rule.text = "Автозапуск при помещении. Контейнеры обрабатываются слева направо; закрытые цвета ждут открытия пикселей."
+	rule.text = "Автозапуск при помещении. Очерёдность обработки слева направо: ячейка 1 раньше ячейки 5. Закрытые цвета ждут открытия пикселей."
 	rule.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	rule.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	rule.add_theme_font_size_override("font_size", 11)
