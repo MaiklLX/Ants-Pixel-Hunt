@@ -44,11 +44,11 @@ func _ready() -> void:
 
 func _reset_level() -> void:
 	board = [
-		["red", "blue", "yellow", "green", "red", "blue", "yellow"],
-		["blue", "yellow", "green", "red", "blue", "yellow", "green"],
-		["yellow", "green", "red", "blue", "yellow", "green", "red"],
-		["green", "red", "blue", "yellow", "green", "red", "blue"],
-		["red", "blue", "yellow", "green", "red", "blue", "yellow"],
+		["red", "blue", "yellow", "green", "purple", "blue", "yellow"],
+		["blue", "yellow", "green", "red", "blue", "purple", "green"],
+		["yellow", "green", "red", "blue", "yellow", "green", "purple"],
+		["green", "red", "blue", "purple", "green", "red", "blue"],
+		["red", "blue", "purple", "green", "red", "blue", "yellow"],
 		["blue", "yellow", "green", "red", "blue", "yellow", "green"],
 		["yellow", "green", "red", "blue", "yellow", "green", "red"]
 	]
@@ -69,7 +69,6 @@ func _reset_level() -> void:
 	resolving = false
 	won = false
 	lost = false
-	message.text = "Помести следующий контейнер в любую свободную пусковую ячейку."
 
 func _build_ui() -> void:
 	for child in get_children():
