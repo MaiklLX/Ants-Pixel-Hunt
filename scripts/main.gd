@@ -313,6 +313,7 @@ func _resolve_all_slots() -> void:
 				activity_text = "Муравей из ячейки %d забирает %s пиксель · осталось муравьёв: %d" % [i + 1, NAMES[str(container.color)].to_lower(), int(container.ants)]
 				_refresh()
 				await _animate_ant_to_pixel(i, target)
+				await _animate_pixel_pickup(target)
 				board[target.y][target.x] = ""
 				remaining -= 1
 				container.ants = int(container.ants) - 1
@@ -374,6 +375,21 @@ func _animate_ant_to_pixel(slot_index: int, target: Vector2i) -> void:
 	await tween.finished
 	if is_instance_valid(ant):
 		ant.queue_free()
+
+
+func _animate_pixel_pickup(target: Vector2i) -> void:
+	var target_index := target.y * SIZE + target.x
+	if target_index < 0 or target_index >= board_grid.get_child_count():
+		return
+	var tile := board_grid.get_child(target_index) as Control
+	if tile == null:
+		return
+	tile.pivot_offset = tile.size * 0.5
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(tile, "scale", Vector2(0.12, 0.12), 0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+	tween.tween_property(tile, "modulate:a", 0.0, 0.12).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	await tween.finished
 
 func _is_defeat() -> bool:
 	if _free_slot_count() > 0:
