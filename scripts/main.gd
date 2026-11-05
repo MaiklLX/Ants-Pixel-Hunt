@@ -400,6 +400,23 @@ func _animate_ant_return(ant: Control, slot_index: int) -> void:
 	tween.tween_property(ant, "scale", Vector2(0.82, 0.82), 0.22).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	await tween.finished
 	if is_instance_valid(ant):
+		# Отделяем добытый пиксель от муравья и анимируем его передачу внутрь ячейки.
+		var delivery := ColorRect.new()
+		delivery.color = Color("#ffe08a")
+		delivery.size = Vector2(9, 9)
+		delivery.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		fx_layer.add_child(delivery)
+		delivery.position = end_global - fx_layer.global_position + Vector2(8, -7) - delivery.size * 0.5
+		delivery.pivot_offset = delivery.size * 0.5
+		var delivery_tween := create_tween()
+		delivery_tween.set_parallel(true)
+		delivery_tween.tween_property(delivery, "position", end_global - fx_layer.global_position - delivery.size * 0.5, 0.13).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+		delivery_tween.tween_property(delivery, "scale", Vector2(0.18, 0.18), 0.13).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		delivery_tween.tween_property(delivery, "modulate:a", 0.0, 0.13).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+		await delivery_tween.finished
+		if is_instance_valid(delivery):
+			delivery.queue_free()
+
 		var pulse := ColorRect.new()
 		pulse.color = Color("#ffe08a")
 		pulse.size = Vector2(12, 12)
