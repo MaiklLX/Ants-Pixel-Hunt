@@ -394,10 +394,6 @@ func _animate_ant_return(ant: Control, slot_index: int) -> void:
 	cargo.position = Vector2(24, 5)
 	cargo.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ant.add_child(cargo)
-	var cargo_glow := StyleBoxFlat.new()
-	cargo_glow.bg_color = Color("#ffe08a")
-	cargo_glow.set_corner_radius_all(2)
-	cargo.add_theme_stylebox_override("panel", cargo_glow) if cargo is Panel else null
 	var tween := create_tween()
 	tween.set_parallel(true)
 	tween.tween_property(ant, "position", end_global - fx_layer.global_position - ant.size * 0.5, 0.22).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
