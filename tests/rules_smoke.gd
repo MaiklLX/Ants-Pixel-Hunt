@@ -86,17 +86,16 @@ func _run() -> void:
 	# Integration: slots resolve in strict left-to-right order when both can move.
 	game.board = []
 	for y in range(game.SIZE):
-		var row: Array = []
+		game.board.append([])
 		for x in range(game.SIZE):
-			row.append("red")
-		game.board.append(row)
+			game.board[y].append("red")
 	game.board[0][0] = "blue"
 	game.slots = [{"color":"blue", "ants":1}, null, null, null, {"color":"red", "ants":1}]
 	game.remaining = game.SIZE * game.SIZE
 	game.resolution_log.clear()
 	await game._resolve_all_slots(false)
 	_check(game.resolution_log.size() == 2, "both ready containers collect one pixel")
-	_check(game.resolution_log[0].slot == 0 and game.resolution_log[1].slot == 4, "collection trace follows slot order 1 to 5")
+	_check(game.resolution_log[0]["slot"] == 0 and game.resolution_log[1]["slot"] == 4, "collection trace follows slot order 1 to 5")
 	_check(game.slots[0] == null and game.slots[4] == null, "empty containers release their slots")
 
 	# Integration: a blocked early slot gets another turn after a later slot clears its neighbors.
@@ -114,7 +113,7 @@ func _run() -> void:
 	game.resolution_log.clear()
 	await game._resolve_all_slots(false)
 	_check(game.resolution_log.size() == game.SIZE * game.SIZE, "later container exposes and clears the final hidden pixel")
-	_check(game.resolution_log[0].slot == 4 and game.resolution_log[game.resolution_log.size() - 1].slot == 0, "waiting first slot gets priority on the next resolution pass")
+	_check(game.resolution_log[0]["slot"] == 4 and game.resolution_log[game.resolution_log.size() - 1]["slot"] == 0, "waiting first slot gets priority on the next resolution pass")
 	_check(game.remaining == 0 and game.won, "complete resolution produces victory")
 
 	game.queue_free()
