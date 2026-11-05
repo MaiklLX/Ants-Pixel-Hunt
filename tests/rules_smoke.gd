@@ -23,6 +23,20 @@ func _run() -> void:
 	root.add_child(game)
 	await process_frame
 
+	# The total ant supply for each color must exactly match the board.
+	var board_counts := {"red":0, "blue":0, "yellow":0, "green":0, "purple":0}
+	var queue_counts := {"red":0, "blue":0, "yellow":0, "green":0, "purple":0}
+	for y in range(game.SIZE):
+		for x in range(game.SIZE):
+			var pixel_color: String = game.board[y][x]
+			if pixel_color != "":
+				board_counts[pixel_color] += 1
+	for container in game.incoming:
+		var container_color: String = str(container.color)
+		queue_counts[container_color] += int(container.ants)
+	for color in board_counts.keys():
+		_check(board_counts[color] == queue_counts[color], "container supply matches " + color + " pixel count")
+
 	# Boundary pixels are always accessible.
 	_check(game._is_accessible(0, 0), "board-edge pixel is accessible")
 
