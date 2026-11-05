@@ -400,7 +400,22 @@ func _animate_ant_return(ant: Control, slot_index: int) -> void:
 	tween.tween_property(ant, "scale", Vector2(0.82, 0.82), 0.22).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	await tween.finished
 	if is_instance_valid(ant):
-		ant.queue_free()
+		var pulse := ColorRect.new()
+		pulse.color = Color("#ffe08a")
+		pulse.size = Vector2(12, 12)
+		pulse.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		fx_layer.add_child(pulse)
+		pulse.position = end_global - fx_layer.global_position - pulse.size * 0.5
+		pulse.pivot_offset = pulse.size * 0.5
+		var pulse_tween := create_tween()
+		pulse_tween.set_parallel(true)
+		pulse_tween.tween_property(pulse, "scale", Vector2(2.2, 2.2), 0.14).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		pulse_tween.tween_property(pulse, "modulate:a", 0.0, 0.14).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+		await pulse_tween.finished
+		if is_instance_valid(pulse):
+			pulse.queue_free()
+		if is_instance_valid(ant):
+			ant.queue_free()
 
 
 func _animate_pixel_pickup(target: Vector2i) -> void:
