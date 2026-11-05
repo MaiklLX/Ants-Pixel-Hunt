@@ -44,24 +44,21 @@ func _ready() -> void:
 
 func _reset_level() -> void:
 	board = [
-		["red", "blue", "yellow", "green", "purple", "blue", "yellow"],
-		["blue", "yellow", "green", "red", "blue", "purple", "green"],
-		["yellow", "green", "red", "blue", "yellow", "green", "purple"],
-		["green", "red", "blue", "purple", "green", "red", "blue"],
-		["red", "blue", "purple", "green", "red", "blue", "yellow"],
-		["blue", "yellow", "green", "red", "blue", "yellow", "green"],
-		["yellow", "green", "red", "blue", "yellow", "green", "red"]
+		["red", "blue", "red", "blue", "red", "blue", "red"],
+		["blue", "yellow", "green", "yellow", "green", "yellow", "blue"],
+		["red", "green", "purple", "purple", "purple", "green", "red"],
+		["blue", "yellow", "purple", "purple", "red", "yellow", "blue"],
+		["red", "green", "red", "blue", "blue", "green", "red"],
+		["blue", "yellow", "green", "yellow", "green", "yellow", "blue"],
+		["red", "blue", "red", "blue", "red", "blue", "red"]
 	]
 	incoming = [
-		{"color":"red", "ants":5}, {"color":"blue", "ants":3},
-		{"color":"yellow", "ants":6}, {"color":"green", "ants":4},
-		{"color":"purple", "ants":2}, {"color":"red", "ants":4},
-		{"color":"blue", "ants":5}, {"color":"green", "ants":3},
-		{"color":"yellow", "ants":4}, {"color":"purple", "ants":3},
-		{"color":"red", "ants":6}, {"color":"blue", "ants":4},
-		{"color":"green", "ants":5}, {"color":"yellow", "ants":3},
-		{"color":"red", "ants":4}, {"color":"blue", "ants":5},
-		{"color":"green", "ants":4}, {"color":"yellow", "ants":5}
+		{"color":"purple", "ants":2}, {"color":"yellow", "ants":4},
+		{"color":"red", "ants":5}, {"color":"green", "ants":4},
+		{"color":"blue", "ants":4}, {"color":"purple", "ants":3},
+		{"color":"yellow", "ants":4}, {"color":"red", "ants":5},
+		{"color":"green", "ants":4}, {"color":"blue", "ants":5},
+		{"color":"red", "ants":4}, {"color":"blue", "ants":5}
 	]
 	slots = [null, null, null, null, null]
 	next_container = 0
@@ -164,7 +161,7 @@ func _build_ui() -> void:
 	layout.add_child(message)
 
 	var rule := Label.new()
-	rule.text = "Муравей уносит 1 пиксель своего цвета. Закрытые пиксели откроются после удаления соседей."
+	rule.text = "Автозапуск при помещении. Контейнеры обрабатываются слева направо; закрытые цвета ждут открытия пикселей."
 	rule.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	rule.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	rule.add_theme_font_size_override("font_size", 11)
@@ -275,6 +272,8 @@ func _resolve_all_slots() -> void:
 	var changed := true
 	while changed:
 		changed = false
+		# Приоритет автозапуска фиксирован: слева направо. Выбор ячейки
+		# задаёт позицию контейнера в очереди обработки этого цикла.
 		for i in range(SLOT_COUNT):
 			if slots[i] == null:
 				continue
