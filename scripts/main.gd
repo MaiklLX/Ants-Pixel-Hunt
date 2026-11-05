@@ -16,12 +16,12 @@ const SLOT_LIMIT := 3
 const CELL_SIZE := 42
 
 var level := [
-	["red", "blue", "yellow", "green", "red", "blue"],
-	["blue", "yellow", "green", "red", "blue", "yellow"],
-	["yellow", "green", "red", "blue", "yellow", "green"],
-	["green", "red", "blue", "yellow", "green", "red"],
-	["red", "blue", "yellow", "green", "red", "blue"],
-	["blue", "yellow", "green", "red", "blue", "yellow"]
+	["red", "blue", "yellow", "red", "blue", "yellow"],
+	["blue", "yellow", "red", "blue", "yellow", "red"],
+	["yellow", "red", "blue", "yellow", "red", "blue"],
+	["red", "blue", "yellow", "red", "blue", "yellow"],
+	["blue", "yellow", "red", "blue", "yellow", "red"],
+	["yellow", "red", "blue", "yellow", "red", "blue"]
 ]
 var ant_groups: Array[Dictionary] = []
 var occupied_slots: Array[String] = []
@@ -50,7 +50,6 @@ func _build_level() -> void:
 		{"color": "red", "count": 4, "used": false},
 		{"color": "blue", "count": 4, "used": false},
 		{"color": "yellow", "count": 4, "used": false},
-		{"color": "green", "count": 4, "used": false}
 	]
 	occupied_slots.clear()
 	busy = false
