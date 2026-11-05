@@ -60,20 +60,28 @@ func _run() -> void:
 	# Defeat requires five occupied slots and no available matching move.
 	for y in range(game.SIZE):
 		for x in range(game.SIZE):
-			game.board[y][x] = "blue"
+			game.board[y][x] = "green"
+	game.board[3][3] = "blue"
 	game.remaining = game.SIZE * game.SIZE
 	game.slots = [
 		{"color":"red", "ants":1},
 		{"color":"red", "ants":1},
 		{"color":"red", "ants":1},
 		{"color":"red", "ants":1},
-		{"color":"red", "ants":1}
+		{"color":"blue", "ants":1}
 	]
-	_check(game._is_defeat(), "five blocked containers with pixels remaining means defeat")
-	game.slots[0] = {"color":"blue", "ants":1}
-	_check(not game._is_defeat(), "one available matching move prevents defeat")
+	_check(not game._is_accessible(3, 3), "interior matching pixel remains blocked")
+	_check(game._is_defeat(), "five occupied containers without an accessible match means defeat")
+	game.board[3][2] = ""
+	_check(not game._is_defeat(), "opening one side of a matching pixel prevents defeat")
+	game.board[3][2] = "green"
+	game.slots[4] = {"color":"blue", "ants":0}
+	_check(game._is_defeat(), "empty container cannot prevent defeat")
 	game.slots[0] = null
 	_check(not game._is_defeat(), "a free launch slot prevents defeat")
+	game.slots[0] = {"color":"red", "ants":1}
+	game.remaining = 0
+	_check(not game._is_defeat(), "empty board cannot produce defeat")
 
 	game.queue_free()
 	if failed:
