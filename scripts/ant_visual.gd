@@ -14,7 +14,7 @@ func _process(delta: float) -> void:
 func _draw() -> void:
 	var c := Vector2(size.x * 0.5, size.y * 0.5)
 	var swing := sin(phase) * 3.0
-		var outline := Color("#17231c")
+	var outline := Color("#17231c")
 	var amber := Color("#f2bd62")
 
 	# Мягкая тень и три сегмента тела.
