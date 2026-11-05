@@ -27,6 +27,7 @@ var ant_groups: Array[Dictionary] = []
 var occupied_slots: Array[String] = []
 var remaining := 0
 var busy := false
+var game_over := false
 var status_label: Label
 var counter_label: Label
 var slots_box: HBoxContainer
@@ -49,10 +50,15 @@ func _build_level() -> void:
 	ant_groups = [
 		{"color": "red", "count": 4, "used": false},
 		{"color": "blue", "count": 4, "used": false},
-		{"color": "yellow", "count": 4, "used": false},
+		{"color": "yellow", "count": 12, "used": false},
+		{"color": "green", "count": 4, "used": false}, # Ловушка: на поле нет зелёных пикселей.
 	]
+	ant_groups[0].count = 12
+	ant_groups[1].count = 12
+
 	occupied_slots.clear()
 	busy = false
+	game_over = false
 
 func _build_ui() -> void:
 	for child in get_children():
@@ -201,7 +207,7 @@ func _refresh_all() -> void:
 		var group: Dictionary = ant_groups[i]
 		var button := Button.new()
 		button.custom_minimum_size = Vector2(145, 82)
-		button.disabled = group.used or busy or occupied_slots.size() >= SLOT_LIMIT
+		button.disabled = group.used or busy or game_over or occupied_slots.size() >= SLOT_LIMIT
 		button.text = "🐜  " + COLOR_NAMES[group.color] + "\n" + str(group.count) + " муравья"
 		button.add_theme_font_size_override("font_size", 14)
 		var normal := StyleBoxFlat.new()
@@ -218,14 +224,14 @@ func _refresh_all() -> void:
 
 	counter_label.text = "Осталось пикселей: %d" % remaining
 	if remaining == 0:
-		message_label.text = "Уровень пройден! Муравьи собрали весь урожай! ✨"
-	elif occupied_slots.size() >= SLOT_LIMIT:
-		message_label.text = "Мест больше нет. Начни уровень заново и выбери другой порядок."
+		message_label.text = "Победа! Все пиксели собраны! ✨"
+	elif game_over:
+		message_label.text = "Ячейки закончились! Ты выбрал лишнюю команду. Попробуй ещё раз."
 	elif not busy:
-		message_label.text = "Выбери цветную команду — муравьи съедят пиксели своего цвета!"
+		message_label.text = "Внимание: не каждая команда найдёт добычу. Береги 3 ячейки!"
 
 func _select_group(index: int) -> void:
-	if busy or remaining <= 0 or index >= ant_groups.size():
+	if busy or game_over or remaining <= 0 or index >= ant_groups.size():
 		return
 	var group: Dictionary = ant_groups[index]
 	if group.used:
@@ -255,8 +261,11 @@ func _select_group(index: int) -> void:
 	busy = false
 	if remaining == 0:
 		message_label.text = "Победа! Весь урожай собран! ✨"
+	elif occupied_slots.size() >= SLOT_LIMIT:
+		game_over = true
+		message_label.text = "Поражение: все 3 ячейки заняты, а пиксели остались."
 	elif eaten == 0:
-		message_label.text = "Здесь больше нет пикселей этого цвета."
+		message_label.text = "Ой! Эта команда не нашла ни одного пикселя. Ячейка потеряна."
 	_refresh_all()
 
 func _refresh_grid_only() -> void:
