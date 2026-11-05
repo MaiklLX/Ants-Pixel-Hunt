@@ -371,11 +371,13 @@ func _animate_ant_to_pixel(slot_index: int, target: Vector2i) -> Control:
 	fx_layer.add_child(ant)
 	var start_global := source_control.get_global_rect().get_center()
 	var end_global := target_control.get_global_rect().get_center()
-	ant.position = _global_to_fx_local(start_global) - ant.size * 0.5
-	ant.rotation = (end_global - start_global).angle()
+	var start_local := _global_to_fx_local(start_global)
+	var end_local := _global_to_fx_local(end_global)
+	ant.position = start_local - ant.size * 0.5
+	ant.rotation = (end_local - start_local).angle()
 	var tween := create_tween()
 	tween.set_parallel(true)
-	tween.tween_property(ant, "position", _global_to_fx_local(end_global) - ant.size * 0.5, 0.26).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(ant, "position", end_local - ant.size * 0.5, 0.26).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 	tween.tween_property(ant, "scale", Vector2(1.15, 1.15), 0.26).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	await tween.finished
 	return ant
@@ -394,7 +396,9 @@ func _animate_ant_return(ant: Control, slot_index: int) -> void:
 		return
 	var start_global := ant.get_global_rect().get_center()
 	var end_global := source_control.get_global_rect().get_center()
-	ant.rotation = (end_global - start_global).angle()
+	var start_local := _global_to_fx_local(start_global)
+	var end_local := _global_to_fx_local(end_global)
+	ant.rotation = (end_local - start_local).angle()
 	var cargo := ColorRect.new()
 	cargo.color = Color("#ffe08a")
 	cargo.size = Vector2(8, 8)
@@ -403,7 +407,7 @@ func _animate_ant_return(ant: Control, slot_index: int) -> void:
 	ant.add_child(cargo)
 	var tween := create_tween()
 	tween.set_parallel(true)
-	tween.tween_property(ant, "position", _global_to_fx_local(end_global) - ant.size * 0.5, 0.22).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	tween.tween_property(ant, "position", end_local - ant.size * 0.5, 0.22).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	tween.tween_property(ant, "scale", Vector2(0.82, 0.82), 0.22).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	await tween.finished
 	if is_instance_valid(ant):
