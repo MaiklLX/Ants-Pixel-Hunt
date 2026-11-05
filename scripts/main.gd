@@ -1,325 +1,316 @@
 extends Control
 
-const COLORS := {
-	"red": Color("#f16b62"),
-	"blue": Color("#62a9ed"),
-	"yellow": Color("#f4c95d"),
-	"green": Color("#65c58b")
+const PALETTE := {
+	"red": Color("#ef665f"),
+	"blue": Color("#5da8ed"),
+	"yellow": Color("#f2c85b"),
+	"green": Color("#65c58b"),
+	"purple": Color("#b18ae8")
 }
-const COLOR_NAMES := {
-	"red": "КРАСНЫЕ",
-	"blue": "СИНИЕ",
-	"yellow": "ЖЁЛТЫЕ",
-	"green": "ЗЕЛЁНЫЕ"
+const NAMES := {
+	"red": "КРАСНЫЕ", "blue": "СИНИЕ", "yellow": "ЖЁЛТЫЕ",
+	"green": "ЗЕЛЁНЫЕ", "purple": "ФИОЛЕТОВЫЕ"
 }
-const GRID_SIZE := 5
-const CELL_SIZE := 48
-const MAX_MISTAKES := 3
-const ENTRANCE := Vector2i(4, 2)
-const DIRECTIONS: Array[Vector2i] = [
+const SIZE := 7
+const SLOT_COUNT := 5
+const CELL_SIZE := 42
+const DIRS: Array[Vector2i] = [
 	Vector2i(-1, 0), Vector2i(1, 0),
 	Vector2i(0, -1), Vector2i(0, 1)
 ]
 
-# Камни образуют стены. Добыча лежит в узком коридоре от входа:
-# красная -> синяя -> жёлтая -> красная.
-var level: Array = []
-var ant_groups: Array[Dictionary] = []
-var mistakes := 0
+# Авторский тестовый рисунок. Пустая строка означает уже унесённый пиксель.
+var board: Array = []
+# Контейнеры выдаются строго по одному, в указанном порядке.
+var incoming: Array[Dictionary] = []
+var slots: Array = [null, null, null, null, null]
+var next_container := 0
 var remaining := 0
-var busy := false
-var game_over := false
+var resolving := false
 var won := false
+var lost := false
 
-var counter_label: Label
-var mistakes_label: Label
-var grid_box: GridContainer
-var ants_box: GridContainer
-var message_label: Label
+var board_grid: GridContainer
+var slots_grid: GridContainer
+var board_status: Label
+var queue_status: Label
+var message: Label
 var restart_button: Button
 
 func _ready() -> void:
-	_build_level()
+	_reset_level()
 	_build_ui()
-	_refresh_all()
+	_refresh()
 
-func _build_level() -> void:
-	level = [
-		["rock", "rock", "red", "rock", "rock"],
-		["rock", "rock", "yellow", "rock", "rock"],
-		["rock", "rock", "blue", "rock", "rock"],
-		["rock", "rock", "red", "rock", "rock"],
-		["rock", "rock", "", "rock", "rock"]
+func _reset_level() -> void:
+	board = [
+		["red", "blue", "yellow", "green", "red", "blue", "yellow"],
+		["blue", "yellow", "green", "red", "blue", "yellow", "green"],
+		["yellow", "green", "red", "blue", "yellow", "green", "red"],
+		["green", "red", "blue", "yellow", "green", "red", "blue"],
+		["red", "blue", "yellow", "green", "red", "blue", "yellow"],
+		["blue", "yellow", "green", "red", "blue", "yellow", "green"],
+		["yellow", "green", "red", "blue", "yellow", "green", "red"]
 	]
-	ant_groups = [
-		{"color": "red", "used": false, "name": "Красный отряд А"},
-		{"color": "blue", "used": false, "name": "Синий отряд"},
-		{"color": "yellow", "used": false, "name": "Жёлтый отряд"},
-		{"color": "red", "used": false, "name": "Красный отряд Б"},
-		{"color": "green", "used": false, "name": "Разведчики"}
+	incoming = [
+		{"color":"red", "ants":5}, {"color":"blue", "ants":3},
+		{"color":"yellow", "ants":6}, {"color":"green", "ants":4},
+		{"color":"purple", "ants":2}, {"color":"red", "ants":4},
+		{"color":"blue", "ants":5}, {"color":"green", "ants":3},
+		{"color":"yellow", "ants":4}, {"color":"purple", "ants":3},
+		{"color":"red", "ants":6}, {"color":"blue", "ants":4},
+		{"color":"green", "ants":5}, {"color":"yellow", "ants":3},
+		{"color":"red", "ants":4}, {"color":"blue", "ants":5},
+		{"color":"green", "ants":4}, {"color":"yellow", "ants":5}
 	]
-	mistakes = 0
-	remaining = 4
-	busy = false
-	game_over = false
+	slots = [null, null, null, null, null]
+	next_container = 0
+	remaining = SIZE * SIZE
+	resolving = false
 	won = false
+	lost = false
+	message.text = "Помести следующий контейнер в любую свободную пусковую ячейку."
 
 func _build_ui() -> void:
 	for child in get_children():
 		child.queue_free()
 
-	var background := ColorRect.new()
-	background.color = Color("#0e1714")
-	background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(background)
+	var bg := ColorRect.new()
+	bg.color = Color("#101a16")
+	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(bg)
 
 	var safe := MarginContainer.new()
 	safe.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	safe.add_theme_constant_override("margin_left", 18)
-	safe.add_theme_constant_override("margin_right", 18)
-	safe.add_theme_constant_override("margin_top", 20)
-	safe.add_theme_constant_override("margin_bottom", 18)
+	safe.add_theme_constant_override("margin_left", 12)
+	safe.add_theme_constant_override("margin_right", 12)
+	safe.add_theme_constant_override("margin_top", 16)
+	safe.add_theme_constant_override("margin_bottom", 12)
 	add_child(safe)
 
 	var layout := VBoxContainer.new()
-	layout.add_theme_constant_override("separation", 10)
+	layout.add_theme_constant_override("separation", 9)
 	safe.add_child(layout)
 
-	var brand := Label.new()
-	brand.text = "🐜  МУРАВЬИШКИ"
-	brand.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	brand.add_theme_font_size_override("font_size", 25)
-	brand.add_theme_color_override("font_color", Color("#f5d58a"))
-	layout.add_child(brand)
+	var title := Label.new()
+	title.text = "🐜  МУРАВЬИШКИ"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 25)
+	title.add_theme_color_override("font_color", Color("#f5d58a"))
+	layout.add_child(title)
 
 	var subtitle := Label.new()
 	subtitle.text = "ПИКСЕЛЬНАЯ ОХОТА"
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	subtitle.add_theme_font_size_override("font_size", 15)
+	subtitle.add_theme_font_size_override("font_size", 14)
 	subtitle.add_theme_color_override("font_color", Color("#b9c9bd"))
 	layout.add_child(subtitle)
 
 	var level_title := Label.new()
-	level_title.text = "УРОВЕНЬ 1 · УЗКИЙ ПРОХОД"
+	level_title.text = "УРОВЕНЬ 1 · ПЯТЬ ПУСКОВЫХ ЯЧЕЕК"
 	level_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	level_title.add_theme_font_size_override("font_size", 18)
+	level_title.add_theme_font_size_override("font_size", 15)
 	level_title.add_theme_color_override("font_color", Color.WHITE)
 	layout.add_child(level_title)
 
-	counter_label = Label.new()
-	counter_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	counter_label.add_theme_font_size_override("font_size", 15)
-	counter_label.add_theme_color_override("font_color", Color("#c5d4c9"))
-	layout.add_child(counter_label)
+	board_status = Label.new()
+	board_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	board_status.add_theme_font_size_override("font_size", 14)
+	board_status.add_theme_color_override("font_color", Color("#d5e2d7"))
+	layout.add_child(board_status)
 
 	var board_panel := PanelContainer.new()
-	var board_style := StyleBoxFlat.new()
-	board_style.bg_color = Color("#18251f")
-	board_style.set_corner_radius_all(20)
-	board_style.content_margin_left = 12
-	board_style.content_margin_right = 12
-	board_style.content_margin_top = 12
-	board_style.content_margin_bottom = 12
-	board_panel.add_theme_stylebox_override("panel", board_style)
+	var panel_style := StyleBoxFlat.new()
+	panel_style.bg_color = Color("#1a2922")
+	panel_style.set_corner_radius_all(16)
+	panel_style.content_margin_left = 8
+	panel_style.content_margin_right = 8
+	panel_style.content_margin_top = 8
+	panel_style.content_margin_bottom = 8
+	board_panel.add_theme_stylebox_override("panel", panel_style)
 	board_panel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	layout.add_child(board_panel)
 
-	grid_box = GridContainer.new()
-	grid_box.columns = GRID_SIZE
-	grid_box.add_theme_constant_override("h_separation", 5)
-	grid_box.add_theme_constant_override("v_separation", 5)
-	board_panel.add_child(grid_box)
+	board_grid = GridContainer.new()
+	board_grid.columns = SIZE
+	board_grid.add_theme_constant_override("h_separation", 3)
+	board_grid.add_theme_constant_override("v_separation", 3)
+	board_panel.add_child(board_grid)
 
-	var entrance_label := Label.new()
-	entrance_label.text = "ВХОД В МУРАВЕЙНИК  ▼"
-	entrance_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	entrance_label.add_theme_font_size_override("font_size", 13)
-	entrance_label.add_theme_color_override("font_color", Color("#8bd3a4"))
-	layout.add_child(entrance_label)
+	var slot_title := Label.new()
+	slot_title.text = "ПУСКОВЫЕ ЯЧЕЙКИ · 5"
+	slot_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	slot_title.add_theme_font_size_override("font_size", 15)
+	slot_title.add_theme_color_override("font_color", Color("#f5d58a"))
+	layout.add_child(slot_title)
 
-	var rule_label := Label.new()
-	rule_label.text = "Съесть можно только партию, до которой открыт проход."
-	rule_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	rule_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	rule_label.add_theme_font_size_override("font_size", 13)
-	rule_label.add_theme_color_override("font_color", Color("#d5e2d7"))
-	layout.add_child(rule_label)
+	slots_grid = GridContainer.new()
+	slots_grid.columns = SLOT_COUNT
+	slots_grid.add_theme_constant_override("h_separation", 5)
+	layout.add_child(slots_grid)
 
-	mistakes_label = Label.new()
-	mistakes_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	mistakes_label.add_theme_font_size_override("font_size", 15)
-	mistakes_label.add_theme_color_override("font_color", Color("#f5d58a"))
-	layout.add_child(mistakes_label)
+	queue_status = Label.new()
+	queue_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	queue_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	queue_status.add_theme_font_size_override("font_size", 14)
+	queue_status.add_theme_color_override("font_color", Color("#d5e2d7"))
+	layout.add_child(queue_status)
 
-	message_label = Label.new()
-	message_label.text = "Сначала доступна только добыча у входа. Продумай порядок!"
-	message_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	message_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	message_label.custom_minimum_size.y = 42
-	message_label.add_theme_font_size_override("font_size", 14)
-	message_label.add_theme_color_override("font_color", Color("#d5e2d7"))
-	layout.add_child(message_label)
+	message = Label.new()
+	message.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	message.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	message.custom_minimum_size.y = 48
+	message.add_theme_font_size_override("font_size", 13)
+	message.add_theme_color_override("font_color", Color("#c8d8cc"))
+	layout.add_child(message)
 
-	var ant_title := Label.new()
-	ant_title.text = "ВЫБЕРИ ОТРЯД"
-	ant_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	ant_title.add_theme_font_size_override("font_size", 15)
-	ant_title.add_theme_color_override("font_color", Color("#d9e3d9"))
-	layout.add_child(ant_title)
-
-	ants_box = GridContainer.new()
-	ants_box.columns = 2
-	ants_box.add_theme_constant_override("h_separation", 8)
-	ants_box.add_theme_constant_override("v_separation", 8)
-	layout.add_child(ants_box)
+	var rule := Label.new()
+	rule.text = "Муравей уносит 1 пиксель своего цвета. Закрытые пиксели откроются после удаления соседей."
+	rule.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	rule.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	rule.add_theme_font_size_override("font_size", 11)
+	rule.add_theme_color_override("font_color", Color("#91a69a"))
+	layout.add_child(rule)
 
 	restart_button = Button.new()
 	restart_button.text = "↻  Начать заново"
-	restart_button.custom_minimum_size = Vector2(0, 48)
-	restart_button.add_theme_font_size_override("font_size", 17)
+	restart_button.custom_minimum_size.y = 44
 	restart_button.pressed.connect(_restart)
 	layout.add_child(restart_button)
 
-func _get_reachable_empty_cells() -> Dictionary:
-	var reached: Dictionary = {}
-	var queue: Array[Vector2i] = []
+func _is_accessible(x: int, y: int) -> bool:
+	for direction in DIRS:
+		var nx: int = x + direction.x
+		var ny: int = y + direction.y
+		if nx < 0 or nx >= SIZE or ny < 0 or ny >= SIZE:
+			return true
+		if board[ny][nx] == "":
+			return true
+	return false
 
-	if level[ENTRANCE.y][ENTRANCE.x] != "":
-		return reached
-
-	queue.append(ENTRANCE)
-	reached[ENTRANCE] = true
-	var head := 0
-	while head < queue.size():
-		var current: Vector2i = queue[head]
-		head += 1
-		for direction in DIRECTIONS:
-			var next_cell: Vector2i = current + direction
-			if next_cell.x < 0 or next_cell.x >= GRID_SIZE:
-				continue
-			if next_cell.y < 0 or next_cell.y >= GRID_SIZE:
-				continue
-			if reached.has(next_cell):
-				continue
-			if level[next_cell.y][next_cell.x] != "":
-				continue
-			reached[next_cell] = true
-			queue.append(next_cell)
-	return reached
-
-func _get_accessible_batch(color: String) -> Vector2i:
-	var reached := _get_reachable_empty_cells()
-	for y in range(GRID_SIZE):
-		for x in range(GRID_SIZE):
-			if level[y][x] != color:
-				continue
-			var target := Vector2i(x, y)
-			for direction in DIRECTIONS:
-				if reached.has(target + direction):
-					return target
+func _find_accessible_pixel(color: String) -> Vector2i:
+	for y in range(SIZE):
+		for x in range(SIZE):
+			if board[y][x] == color and _is_accessible(x, y):
+				return Vector2i(x, y)
 	return Vector2i(-1, -1)
 
-func _refresh_all() -> void:
-	if not is_instance_valid(grid_box):
+func _refresh() -> void:
+	if not is_instance_valid(board_grid):
 		return
-
-	for child in grid_box.get_children():
+	for child in board_grid.get_children():
 		child.queue_free()
-
-	var reached := _get_reachable_empty_cells()
-	for y in range(GRID_SIZE):
-		for x in range(GRID_SIZE):
-			var cell := Panel.new()
-			cell.custom_minimum_size = Vector2(CELL_SIZE, CELL_SIZE)
+	for y in range(SIZE):
+		for x in range(SIZE):
+			var color_name: String = board[y][x]
+			var tile := Panel.new()
+			tile.custom_minimum_size = Vector2(CELL_SIZE, CELL_SIZE)
 			var style := StyleBoxFlat.new()
-			var value: String = level[y][x]
-			if value == "rock":
-				style.bg_color = Color("#34423b")
-				style.border_color = Color("#52645a")
-			elif value == "":
-				style.bg_color = Color("#1c3027") if reached.has(Vector2i(x, y)) else Color("#26352e")
-				style.border_color = Color("#42634f")
+			if color_name == "":
+				style.bg_color = Color("#1a2922")
+				style.border_color = Color("#263a30")
 			else:
-				style.bg_color = COLORS[value]
-				var target := Vector2i(x, y)
-				var is_accessible := false
-				for direction in DIRECTIONS:
-					if reached.has(target + direction):
-						is_accessible = true
-				style.border_color = Color("#fff0b2") if is_accessible else COLORS[value].darkened(0.55)
-			style.set_border_width_all(3 if value != "rock" and value != "" else 1)
-			style.set_corner_radius_all(7)
-			cell.add_theme_stylebox_override("panel", style)
-			grid_box.add_child(cell)
+				style.bg_color = PALETTE[color_name]
+				style.border_color = Color("#fff0b2") if _is_accessible(x, y) else PALETTE[color_name].darkened(0.55)
+			style.set_border_width_all(3 if color_name != "" and _is_accessible(x, y) else 1)
+			style.set_corner_radius_all(5)
+			tile.add_theme_stylebox_override("panel", style)
+			board_grid.add_child(tile)
 
-	for child in ants_box.get_children():
+	for child in slots_grid.get_children():
 		child.queue_free()
-	for i in range(ant_groups.size()):
-		var group: Dictionary = ant_groups[i]
-		var color: String = group.color
+	for i in range(SLOT_COUNT):
 		var button := Button.new()
-		button.custom_minimum_size = Vector2(142, 58)
-		button.disabled = group.used or busy or game_over
-		var group_title: String = group.name
-		button.text = "🐜  " + group_title + "\n" + COLOR_NAMES[color]
-		button.add_theme_font_size_override("font_size", 12)
-		var normal := StyleBoxFlat.new()
-		normal.bg_color = COLORS[color].darkened(0.58)
-		normal.set_corner_radius_all(12)
-		normal.set_border_width_all(2)
-		normal.border_color = COLORS[color]
-		button.add_theme_stylebox_override("normal", normal)
-		button.add_theme_stylebox_override("disabled", normal)
-		button.pressed.connect(_select_group.bind(i))
-		ants_box.add_child(button)
+		button.custom_minimum_size = Vector2(58, 66)
+		if slots[i] == null:
+			button.text = str(i + 1) + "\n＋"
+			button.disabled = lost or won or resolving or next_container >= incoming.size()
+		else:
+			var c: String = slots[i]["color"]
+			var ants: int = slots[i]["ants"]
+			button.text = str(i + 1) + "\n🐜 " + str(ants)
+			button.disabled = true
+			var style := StyleBoxFlat.new()
+			style.bg_color = PALETTE[c].darkened(0.55)
+			style.border_color = PALETTE[c]
+			style.set_border_width_all(2)
+			style.set_corner_radius_all(9)
+			button.add_theme_stylebox_override("normal", style)
+		button.pressed.connect(_place_next.bind(i))
+		slots_grid.add_child(button)
 
-	counter_label.text = "Осталось партий: %d" % remaining
-	mistakes_label.text = "Ошибки: %d / %d" % [mistakes, MAX_MISTAKES]
-	if won:
-		message_label.text = "Победа! Ты открыл весь проход! ✨"
-	elif game_over:
-		message_label.text = "Три ошибки! Муравьишки запутались. Попробуй ещё раз."
-
-func _select_group(index: int) -> void:
-	if busy or game_over or won or index < 0 or index >= ant_groups.size():
-		return
-
-	var group: Dictionary = ant_groups[index]
-	if group.used:
-		return
-
-	var target := _get_accessible_batch(group.color)
-	group.used = true
-	ant_groups[index] = group
-	busy = true
-
-	if target.x < 0:
-		mistakes += 1
-		message_label.text = "Проход закрыт или такой добычи сейчас нет. Потерян ход!"
-		_refresh_all()
-		await get_tree().create_timer(0.35).timeout
-		busy = false
-		if mistakes >= MAX_MISTAKES:
-			game_over = true
-			message_label.text = "Три ошибки! Муравьишки запутались. Попробуй ещё раз."
-		_refresh_all()
-		return
-
-	message_label.text = "Отряд нашёл свою партию! Прокладываем путь…"
-	_refresh_all()
-	await get_tree().create_timer(0.35).timeout
-	level[target.y][target.x] = ""
-	remaining -= 1
-	busy = false
-
-	if remaining == 0:
-		won = true
-		message_label.text = "Победа! Ты открыл весь проход! ✨"
+	board_status.text = "Пикселей осталось: %d" % remaining
+	if next_container < incoming.size():
+		var upcoming: Dictionary = incoming[next_container]
+		queue_status.text = "СЛЕДУЮЩИЙ КОНТЕЙНЕР: %s · %d муравьёв" % [NAMES[upcoming.color], upcoming.ants]
 	else:
-		message_label.text = "Путь изменился. Посмотри, какая партия открылась теперь."
-	_refresh_all()
+		queue_status.text = "Контейнеры в очереди закончились."
+	if won:
+		message.text = "Победа! Рисунок полностью собран муравейником! ✨"
+	elif lost:
+		message.text = "Поражение: все пять ячеек заняты, ходов больше нет."
+	elif not resolving:
+		var free_slots := _free_slot_count()
+		message.text = "Свободных пусковых ячеек: %d из %d" % [free_slots, SLOT_COUNT]
+
+func _free_slot_count() -> int:
+	var count := 0
+	for slot in slots:
+		if slot == null:
+			count += 1
+	return count
+
+func _place_next(slot_index: int) -> void:
+	if resolving or won or lost or slot_index < 0 or slot_index >= SLOT_COUNT:
+		return
+	if slots[slot_index] != null or next_container >= incoming.size():
+		return
+	slots[slot_index] = incoming[next_container].duplicate(true)
+	next_container += 1
+	message.text = "Контейнер установлен. Муравьи ищут доступные пиксели своего цвета…"
+	_resolve_all_slots()
+	_refresh()
+
+func _resolve_all_slots() -> void:
+	resolving = true
+	var changed := true
+	while changed:
+		changed = false
+		for i in range(SLOT_COUNT):
+			if slots[i] == null:
+				continue
+			var container: Dictionary = slots[i]
+			while int(container.ants) > 0:
+				var target := _find_accessible_pixel(str(container.color))
+				if target.x < 0:
+					break
+				board[target.y][target.x] = ""
+				remaining -= 1
+				container.ants = int(container.ants) - 1
+				changed = true
+			if int(container.ants) <= 0:
+				slots[i] = null
+			else:
+				slots[i] = container
+	if remaining <= 0:
+		won = true
+	elif _is_defeat():
+		lost = true
+	resolving = false
+
+func _is_defeat() -> bool:
+	if _free_slot_count() > 0:
+		return false
+	# Поражение только если ни один из уже размещённых контейнеров
+	# не может подобрать ни одного доступного пикселя своего цвета.
+	for slot in slots:
+		if slot == null:
+			continue
+		if _find_accessible_pixel(str(slot.color)).x >= 0 and int(slot.ants) > 0:
+			return false
+	return remaining > 0
 
 func _restart() -> void:
-	_build_level()
+	_reset_level()
 	_build_ui()
-	_refresh_all()
+	_refresh()
