@@ -355,13 +355,9 @@ func _animate_ant_to_pixel(slot_index: int, target: Vector2i) -> void:
 	var target_control := board_grid.get_child(target_index) as Control
 	if source_control == null or target_control == null:
 		return
-	var ant := Label.new()
-	ant.text = "🐜"
-	ant.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	ant.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	ant.size = Vector2(34, 28)
-	ant.add_theme_font_size_override("font_size", 24)
-	ant.add_theme_color_override("font_color", Color("#fff0b2"))
+	var ant := Control.new()
+	ant.set_script(load("res://scripts/ant_visual.gd"))
+	ant.size = Vector2(38, 34)
 	ant.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	fx_layer.add_child(ant)
 	var start_global := source_control.get_global_rect().get_center()
