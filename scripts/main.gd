@@ -344,6 +344,13 @@ func _resolve_all_slots() -> void:
 	_refresh()
 
 
+
+func _global_to_fx_local(global_point: Vector2) -> Vector2:
+	if not is_instance_valid(fx_layer):
+		return global_point
+	return fx_layer.get_global_transform().affine_inverse() * global_point
+
+
 func _animate_ant_to_pixel(slot_index: int, target: Vector2i) -> Control:
 	await get_tree().process_frame
 	if not is_instance_valid(fx_layer):
@@ -364,11 +371,11 @@ func _animate_ant_to_pixel(slot_index: int, target: Vector2i) -> Control:
 	fx_layer.add_child(ant)
 	var start_global := source_control.get_global_rect().get_center()
 	var end_global := target_control.get_global_rect().get_center()
-	ant.position = start_global - fx_layer.global_position - ant.size * 0.5
+	ant.position = _global_to_fx_local(start_global) - ant.size * 0.5
 	ant.rotation = (end_global - start_global).angle()
 	var tween := create_tween()
 	tween.set_parallel(true)
-	tween.tween_property(ant, "position", end_global - fx_layer.global_position - ant.size * 0.5, 0.26).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(ant, "position", _global_to_fx_local(end_global) - ant.size * 0.5, 0.26).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 	tween.tween_property(ant, "scale", Vector2(1.15, 1.15), 0.26).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	await tween.finished
 	return ant
@@ -396,7 +403,7 @@ func _animate_ant_return(ant: Control, slot_index: int) -> void:
 	ant.add_child(cargo)
 	var tween := create_tween()
 	tween.set_parallel(true)
-	tween.tween_property(ant, "position", end_global - fx_layer.global_position - ant.size * 0.5, 0.22).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	tween.tween_property(ant, "position", _global_to_fx_local(end_global) - ant.size * 0.5, 0.22).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	tween.tween_property(ant, "scale", Vector2(0.82, 0.82), 0.22).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	await tween.finished
 	if is_instance_valid(ant):
@@ -406,11 +413,11 @@ func _animate_ant_return(ant: Control, slot_index: int) -> void:
 		delivery.size = Vector2(9, 9)
 		delivery.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		fx_layer.add_child(delivery)
-		delivery.position = end_global - fx_layer.global_position + Vector2(8, -7) - delivery.size * 0.5
+		delivery.position = _global_to_fx_local(end_global) + Vector2(8, -7) - delivery.size * 0.5
 		delivery.pivot_offset = delivery.size * 0.5
 		var delivery_tween := create_tween()
 		delivery_tween.set_parallel(true)
-		delivery_tween.tween_property(delivery, "position", end_global - fx_layer.global_position - delivery.size * 0.5, 0.13).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+		delivery_tween.tween_property(delivery, "position", _global_to_fx_local(end_global) - delivery.size * 0.5, 0.13).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
 		delivery_tween.tween_property(delivery, "scale", Vector2(0.18, 0.18), 0.13).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 		delivery_tween.tween_property(delivery, "modulate:a", 0.0, 0.13).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
 		await delivery_tween.finished
@@ -422,7 +429,7 @@ func _animate_ant_return(ant: Control, slot_index: int) -> void:
 		pulse.size = Vector2(12, 12)
 		pulse.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		fx_layer.add_child(pulse)
-		pulse.position = end_global - fx_layer.global_position - pulse.size * 0.5
+		pulse.position = _global_to_fx_local(end_global) - pulse.size * 0.5
 		pulse.pivot_offset = pulse.size * 0.5
 		var pulse_tween := create_tween()
 		pulse_tween.set_parallel(true)
