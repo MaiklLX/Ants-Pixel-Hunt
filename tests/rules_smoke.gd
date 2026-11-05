@@ -44,6 +44,9 @@ func _run() -> void:
 	_check(game._find_accessible_pixel("purple") == Vector2i(-1, -1), "missing color returns no target")
 
 	# Defeat requires five occupied slots and no available matching move.
+	for y in range(game.SIZE):
+		for x in range(game.SIZE):
+			game.board[y][x] = "blue"
 	game.remaining = game.SIZE * game.SIZE
 	game.slots = [
 		{"color":"red", "ants":1},
