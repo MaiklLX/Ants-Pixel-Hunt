@@ -14,12 +14,11 @@ func _process(delta: float) -> void:
 func _draw() -> void:
 	var c := Vector2(size.x * 0.5, size.y * 0.5)
 	var swing := sin(phase) * 3.0
-	var dark := Color("#26352b")
-	var outline := Color("#17231c")
+		var outline := Color("#17231c")
 	var amber := Color("#f2bd62")
 
 	# Мягкая тень и три сегмента тела.
-	draw_ellipse(c + Vector2(0, 7), Vector2(13, 4), Color(0, 0, 0, 0.22))
+	draw_circle(c + Vector2(0, 7), 7.0, Color(0, 0, 0, 0.22))
 	draw_line(c + Vector2(-3, 1), c + Vector2(-10, -8 + swing), outline, 3.0, true)
 	draw_line(c + Vector2(-3, 1), c + Vector2(-10, 8 - swing), outline, 3.0, true)
 	draw_line(c + Vector2(1, 1), c + Vector2(0, -10 - swing), outline, 2.6, true)
