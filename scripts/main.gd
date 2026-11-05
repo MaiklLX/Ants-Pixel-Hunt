@@ -77,6 +77,7 @@ func _reset_level() -> void:
 	active_target = Vector2i(-1, -1)
 	active_slot = -1
 	activity_text = ""
+	resolution_log.clear()
 
 func _build_ui() -> void:
 	for child in get_children():
