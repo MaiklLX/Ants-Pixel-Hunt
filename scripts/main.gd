@@ -31,7 +31,7 @@ var game_over := false
 var status_label: Label
 var counter_label: Label
 var slots_box: HBoxContainer
-var ants_box: HBoxContainer
+var ants_box: GridContainer
 var grid_box: GridContainer
 var message_label: Label
 var restart_button: Button
@@ -48,8 +48,8 @@ func _build_level() -> void:
 			if not color.is_empty():
 				remaining += 1
 	ant_groups = [
-		{"color": "red", "count": 4, "used": false},
-		{"color": "blue", "count": 4, "used": false},
+		{"color": "red", "count": 12, "used": false},
+		{"color": "blue", "count": 12, "used": false},
 		{"color": "yellow", "count": 12, "used": false},
 		{"color": "green", "count": 4, "used": false}, # Ловушка: на поле нет зелёных пикселей.
 	]
@@ -139,7 +139,7 @@ func _build_ui() -> void:
 	layout.add_child(slots_box)
 
 	message_label = Label.new()
-	message_label.text = "Выбери цветную команду — муравьи съедят пиксели своего цвета!"
+	message_label.text = "Выбирай внимательно: среди команд есть пустышка. Ячеек всего три!"
 	message_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	message_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	message_label.custom_minimum_size.y = 54
@@ -154,9 +154,10 @@ func _build_ui() -> void:
 	ant_title.add_theme_color_override("font_color", Color("#d9e3d9"))
 	layout.add_child(ant_title)
 
-	ants_box = HBoxContainer.new()
-	ants_box.alignment = BoxContainer.ALIGNMENT_CENTER
-	ants_box.add_theme_constant_override("separation", 9)
+	ants_box = GridContainer.new()
+	ants_box.columns = 2
+	ants_box.add_theme_constant_override("h_separation", 9)
+	ants_box.add_theme_constant_override("v_separation", 9)
 	layout.add_child(ants_box)
 
 	restart_button = Button.new()
@@ -227,8 +228,7 @@ func _refresh_all() -> void:
 		message_label.text = "Победа! Все пиксели собраны! ✨"
 	elif game_over:
 		message_label.text = "Ячейки закончились! Ты выбрал лишнюю команду. Попробуй ещё раз."
-	elif not busy:
-		message_label.text = "Внимание: не каждая команда найдёт добычу. Береги 3 ячейки!"
+
 
 func _select_group(index: int) -> void:
 	if busy or game_over or remaining <= 0 or index >= ant_groups.size():
@@ -265,7 +265,9 @@ func _select_group(index: int) -> void:
 		game_over = true
 		message_label.text = "Поражение: все 3 ячейки заняты, а пиксели остались."
 	elif eaten == 0:
-		message_label.text = "Ой! Эта команда не нашла ни одного пикселя. Ячейка потеряна."
+		message_label.text = "Ой! Команда не нашла добычу. Одна ячейка потеряна."
+	else:
+		message_label.text = "Отличная работа! Выбери следующую команду."
 	_refresh_all()
 
 func _refresh_grid_only() -> void:
