@@ -63,7 +63,10 @@ function buildIncoming(board){
   while(left>0){const ants=Math.min(900,left);queues[color].push({color,ants});left-=ants;}
  }
  const deck=[];
- for(const color of colors)deck.push(...queues[color]);
+ // Interleave colors instead of locking the first nine choices to one color.
+ // This lets the player keep several color layers represented in the five live slots.
+ let pending=true;
+ while(pending){pending=false;for(const color of colors){const box=queues[color].shift();if(box){deck.push(box);pending=true;}}}
  return deck;
 }
 export const INCOMING=buildIncoming(INITIAL_BOARD);
