@@ -1,10 +1,11 @@
-import {COLORS,INCOMING,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,createGame,canChoose,chooseTopColumn,findNextMove,findAntWave,applyAntMove,completeBoxDeparture,serializeGame,restoreGame,isDefeat} from "./game.js";
+import {COLORS,INCOMING,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,createGame,canChoose,chooseTopColumn,findAccessiblePixels,applyAntMove,completeBoxDeparture,serializeGame,restoreGame,isDefeat} from "./game.js";
 import {loadLocal,saveLocal,clearLocal} from "./storage.js";
 const $=id=>document.getElementById(id);
 const shell=$("app-shell"),boardEl=$("board"),slotsEl=$("slots"),choicesEl=$("choices"),antLayer=$("ant-layer"),conveyorEl=$("conveyor");
 const boardCtx=boardEl.getContext("2d"),antCtx=antLayer.getContext("2d");
 let state=createGame(),resolverRunning=false,resetting=false,antFrame=0,hasSavedGame=false,gameStarted=false;
-const loadingSlots=new Set();
+const loadingSlots=new Set(),workerPromises=new Map(),reservedTargets=new Set();
+let workerSequence=0;
 const colorRGB=Object.fromEntries(Object.entries(COLORS).map(([key,value])=>[key,value.hex.match(/[\da-f]{2}/gi).map(v=>parseInt(v,16))]));
 function renderBoard(){
  const image=boardCtx.createImageData(GRID_SIZE,GRID_SIZE),empty=[231,240,228];
@@ -127,7 +128,12 @@ function createAntSprite(color,carrying,gait){
  ctx.fillStyle="#24352c";ctx.beginPath();ctx.arc(4.02,-.8,.28,0,Math.PI*2);ctx.fill();
  ctx.fillStyle="#f3a29a";ctx.globalAlpha=.82;ctx.beginPath();ctx.arc(4.45,1.05,.62,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
  ctx.fillStyle="#ffffff88";ctx.beginPath();ctx.ellipse(-3.8,-1.15,.9,.45,-.25,0,Math.PI*2);ctx.fill();
- if(carrying){ctx.fillStyle="#f6d36e";ctx.strokeStyle="#8e6c2d";ctx.lineWidth=.7;ctx.beginPath();ctx.arc(-6.3,2.2,1.8,0,Math.PI*2);ctx.fill();ctx.stroke();}
+ if(carrying){
+  ctx.fillStyle="#24352c";ctx.fillRect(-9,0,6,6);
+  ctx.fillStyle=body;ctx.fillRect(-9.5,-.5,5,5);
+  ctx.fillStyle="#ffffff99";ctx.fillRect(-9,-.5,3,1.2);
+  ctx.fillStyle="#00000033";ctx.fillRect(-5.5,1,1,3.5);
+ }
  antSpriteCache.set(key,sprite);return sprite;
 }
 function drawAnt(ctx,point,color,carrying,index,direction=0){
@@ -138,53 +144,36 @@ function drawAnt(ctx,point,color,carrying,index,direction=0){
  ctx.drawImage(createAntSprite(color,carrying,gait),-13,-12);
  ctx.restore();
 }
-async function animateAntWave(moves){
- resizeAntLayer();
- const now=performance.now();
- const runners=moves.map((move,index)=>{
-  const start=slotCenter(move.slot),end=cellCenter(move.target.x,move.target.y);
-  const distance=Math.hypot(end.x-start.x,end.y-start.y),seed=(index*9301+move.target.x*49297+move.target.y*233)%9973/9973;
-  const bend=(seed-.5)*Math.min(72,Math.max(18,distance*.18));
-  const delay=(index%23)*58+seed*90;
-  return{move,start,end,control:curveControl(start,end,bend),returnControl:curveControl(end,start,-bend*.72),delivered:false,
-   delay,outbound:2700+distance*1.65+(seed-.5)*450,pause:520+seed*330,
-   returning:2350+distance*1.35+(seed-.5)*380};
- });
+async function animateAntTrip(move,index){
+ const shellRect=shell.getBoundingClientRect(),dpr=Math.min(2,window.devicePixelRatio||1);
+ const layer=document.createElement("canvas");layer.className="ant-worker-layer";
+ layer.width=Math.max(1,Math.round(shellRect.width*dpr));layer.height=Math.max(1,Math.round(shellRect.height*dpr));
+ layer.style.width=shellRect.width+"px";layer.style.height=shellRect.height+"px";shell.append(layer);
+ const ctx=layer.getContext("2d");ctx.setTransform(dpr,0,0,dpr,0,0);
+ const start=slotCenter(move.slot),end=cellCenter(move.target.x,move.target.y);
+ const distance=Math.hypot(end.x-start.x,end.y-start.y),seed=(index*9301+move.target.x*49297+move.target.y*233)%9973/9973;
+ const bend=(seed-.5)*Math.min(72,Math.max(18,distance*.18));
+ const control=curveControl(start,end,bend),returnControl=curveControl(end,start,-bend*.72);
+ const outbound=850+distance*.78+(seed-.5)*120,returning=720+distance*.62+(seed-.5)*100,startTime=performance.now();
+ let picked=false;
  return new Promise(resolve=>{
-  const draw=timestamp=>{
-   const rect=shell.getBoundingClientRect();
-   antCtx.clearRect(0,0,rect.width,rect.height);
-   let finished=0;
-   runners.forEach((runner,index)=>{
-    const elapsed=timestamp-now-runner.delay;
-    if(elapsed<0)return;
-    const outboundEnd=runner.outbound,returnStart=outboundEnd+runner.pause,total=returnStart+runner.returning;
-    if(elapsed>=total){
-     if(!runner.delivered){
-      runner.delivered=true;
-      applyAntMove(state,runner.move.slot,runner.move.target);
-      boardCtx.fillStyle="#e7f0e4";boardCtx.fillRect(runner.move.target.x*BLOCK_SIZE,runner.move.target.y*BLOCK_SIZE,BLOCK_SIZE,BLOCK_SIZE);
-     }
-     finished++;return;
-    }
-    let point,carrying=false,direction=0;
-    if(elapsed<outboundEnd){
-     const t=Math.min(1,elapsed/outboundEnd);point=quadPoint(runner.start,runner.control,runner.end,t);
-     const tangent=quadTangent(runner.start,runner.control,runner.end,t);direction=Math.atan2(tangent.y,tangent.x);
-    }else if(elapsed<returnStart){
-     point=runner.end;carrying=true;
-     const tangent=quadTangent(runner.start,runner.control,runner.end,1);direction=Math.atan2(tangent.y,tangent.x);
-    }else{
-     carrying=true;const t=Math.min(1,(elapsed-returnStart)/runner.returning);
-     point=quadPoint(runner.end,runner.returnControl,runner.start,t);
-     const tangent=quadTangent(runner.end,runner.returnControl,runner.start,t);direction=Math.atan2(tangent.y,tangent.x);
-    }
-    drawAnt(antCtx,point,runner.move.color,carrying,index,direction);
-   });
-   if(finished===runners.length){antCtx.clearRect(0,0,rect.width,rect.height);resolve();return;}
-   antFrame=requestAnimationFrame(draw);
+  const frame=timestamp=>{
+   const elapsed=timestamp-startTime;
+   if(elapsed>=outbound&&!picked){
+    picked=true;applyAntMove(state,move.slot,move.target);
+    renderBoard();renderSlots();renderChoices();
+    $("message").textContent="Муравьишка забрал кубик и несёт его в свой бокс";
+   }
+   const returningNow=elapsed>=outbound;
+   const t=returningNow?Math.min(1,(elapsed-outbound)/returning):Math.min(1,elapsed/outbound);
+   const point=returningNow?quadPoint(end,returnControl,start,t):quadPoint(start,control,end,t);
+   const tangent=returningNow?quadTangent(end,returnControl,start,t):quadTangent(start,control,end,t);
+   ctx.clearRect(0,0,shellRect.width,shellRect.height);
+   drawAnt(ctx,point,move.color,returningNow,index,Math.atan2(tangent.y,tangent.x));
+   if(elapsed>=outbound+returning){layer.remove();resolve();return;}
+   requestAnimationFrame(frame);
   };
-  antFrame=requestAnimationFrame(draw);
+  requestAnimationFrame(frame);
  });
 }
 function drawTransportBox(ctx,point,color,scale=1,tilt=0){
@@ -242,27 +231,28 @@ async function animateBoxLoading(source,slot,color){
  });
 }
 async function animateBoxDepartures(slotIndices){
- resizeAntLayer();
+ const shellRect=shell.getBoundingClientRect(),dpr=Math.min(2,window.devicePixelRatio||1);
+ const layer=document.createElement("canvas");layer.className="flight-layer";
+ layer.width=Math.max(1,Math.round(shellRect.width*dpr));layer.height=Math.max(1,Math.round(shellRect.height*dpr));
+ layer.style.width=shellRect.width+"px";layer.style.height=shellRect.height+"px";shell.append(layer);
+ const ctx=layer.getContext("2d");ctx.setTransform(dpr,0,0,dpr,0,0);
  const starts=slotIndices.map(slot=>({slot,start:slotCenter(slot),color:state.slots[slot]?.color||"yellow"}));
- const belt=pointFor(conveyorEl),shellRect=shell.getBoundingClientRect(),startTime=performance.now(),duration=2600;
+ const belt=pointFor(conveyorEl),startTime=performance.now(),duration=1750;
  return new Promise(resolve=>{
   const frame=timestamp=>{
-   const elapsed=timestamp-startTime;
-   antCtx.clearRect(0,0,shellRect.width,shellRect.height);
+   const elapsed=timestamp-startTime;ctx.clearRect(0,0,shellRect.width,shellRect.height);
    let finished=0;
    starts.forEach((item,index)=>{
-    const delay=index*260,t=Math.max(0,Math.min(1,(elapsed-delay)/duration));
-    if(elapsed<delay){finished++;return;}
-    if(t>=1){finished++;return;}
+    const delay=index*170,t=Math.max(0,Math.min(1,(elapsed-delay)/duration));
+    if(elapsed<delay){finished++;return;}if(t>=1){finished++;return;}
     const lift=quadPoint(item.start,{x:item.start.x-22,y:(item.start.y+belt.y)/2},{x:item.start.x,y:belt.y},Math.min(1,t*2.2));
     const progress=Math.max(0,(t-.42)/.58);
-    const point={x:lift.x+(shellRect.width+35-lift.x)*progress,y:lift.y+(belt.y-lift.y)*progress};
-    drawTransportBox(antCtx,point,item.color);
+    drawTransportBox(ctx,{x:lift.x+(shellRect.width+35-lift.x)*progress,y:lift.y+(belt.y-lift.y)*progress},item.color);
    });
-   if(finished===starts.length){antCtx.clearRect(0,0,shellRect.width,shellRect.height);resolve();return;}
-   antFrame=requestAnimationFrame(frame);
+   if(finished===starts.length){layer.remove();resolve();return;}
+   requestAnimationFrame(frame);
   };
-  antFrame=requestAnimationFrame(frame);
+  requestAnimationFrame(frame);
  });
 }
 async function save(){
@@ -270,39 +260,51 @@ async function save(){
  if(ok){hasSavedGame=true;updateMainMenu();}
  $("save-status").textContent=ok?"Прогресс сохранён на устройстве":"Не удалось сохранить прогресс";
 }
-async function runResolver(){
- if(resolverRunning||state.won||state.lost)return;
- resolverRunning=true;
+function findWorkerTarget(color){
+ const candidates=findAccessiblePixels(state.board,color);
+ return candidates.find(target=>!reservedTargets.has(target.x+","+target.y))||null;
+}
+async function runSlotWorker(slot){
  try{
-  while(!resetting&&(state.remaining>0||state.slots.some(box=>box?.status==="departing"))){
-   const departing=state.slots.map((box,index)=>box?.status==="departing"?index:-1).filter(index=>index>=0);
-   if(departing.length){
-    await animateBoxDepartures(departing);
-    for(const slot of departing)completeBoxDeparture(state,slot);
+  while(!resetting){
+   const box=state.slots[slot];if(!box||box.ants<=0||box.status==="departing")break;
+   const target=findWorkerTarget(box.color);if(!target)break;
+   const key=target.x+","+target.y;reservedTargets.add(key);
+   state.activeSlots=[...workerPromises.keys()];renderSlots();
+   try{await animateAntTrip({slot,color:box.color,target},++workerSequence);}
+   finally{reservedTargets.delete(key);}
+   if(resetting)break;
+   if(state.slots[slot]?.status==="departing"){
+    await animateBoxDepartures([slot]);completeBoxDeparture(state,slot);
     renderSlots();renderConveyor();await save();
    }
-   const wave=findAntWave(state);if(!wave.length)break;
-   state.activeSlots=[...new Set(wave.map(move=>move.slot))];
-   state.message=`Муравьишки несут крупные блоки · в работе ${wave.length.toLocaleString("ru-RU")}`;
-   renderSlots();$("message").textContent=state.message;
-   await animateAntWave(wave);
-   if(resetting)break;
-   // Each pixel disappears at the exact moment its own ant reaches the box.
-   state.activeSlots=[];renderBoard();renderSlots();renderChoices();
-   if(state.remaining%100===0||state.remaining===0)await save();
+   if(state.remaining===0||state.remaining%35===0)await save();
+   kickColony();
   }
- }catch(error){console.error("Ant colony animation interrupted",error);}
+ }catch(error){console.error("Ant worker interrupted",slot,error);}
  finally{
-  cancelAnimationFrame(antFrame);antCtx.clearRect(0,0,antLayer.width,antLayer.height);
-  resolverRunning=false;state.activeSlots=[];
-  if(!resetting){
-   if(state.remaining===0){state.won=true;state.message="Победа! Портрет собран ✨";}
-   else if(isDefeat(state)){state.lost=true;state.message="Поражение: все пять стартовых отсеков заняты, доступных пикселей нет.";}
-   else state.message=`Колония отдыхает и ждёт подходящий бокс · свободно отсеков: ${state.slots.filter(box=>!box).length}`;
-   render();await save();
-   if(findNextMove(state)||state.slots.some(box=>box?.status==="departing"))queueMicrotask(runResolver);
-  }
+  workerPromises.delete(slot);resolverRunning=workerPromises.size>0;
+  state.activeSlots=[...workerPromises.keys()];renderSlots();
+  if(!resetting)settleColony();
  }
+}
+function settleColony(){
+ if(resolverRunning||workerPromises.size||loadingSlots.size||resetting)return;
+ if(state.remaining===0){state.won=true;state.message="Победа! Портрет собран ✨";}
+ else if(isDefeat(state)){state.lost=true;state.message="Поражение: все пять стартовых отсеков заняты, доступных пикселей нет.";}
+ else state.message=`Колония ждёт подходящий цвет · свободно отсеков: ${state.slots.filter(box=>!box).length}`;
+ render();void save();
+}
+function kickColony(){
+ if(resetting||state.won||state.lost)return;
+ for(let slot=0;slot<state.slots.length;slot++){
+  const box=state.slots[slot];
+  if(!box||box.ants<=0||box.status==="departing"||workerPromises.has(slot))continue;
+  if(!findWorkerTarget(box.color))continue;
+  const task=runSlotWorker(slot);workerPromises.set(slot,task);
+ }
+ resolverRunning=workerPromises.size>0;state.activeSlots=[...workerPromises.keys()];
+ renderSlots();if(!resolverRunning)settleColony();
 }
 async function onChoose(column){
  if(resetting||!canChoose(state))return;
@@ -325,11 +327,11 @@ async function onChoose(column){
     {duration:430,easing:"cubic-bezier(.2,.8,.25,1)"}
    );
   }
-  if(!resetting&&!resolverRunning&&loadingSlots.size===0)void runResolver();
+  if(!resetting&&loadingSlots.size===0)kickColony();
  }
 }
 async function restart(){
- if(resetting||resolverRunning||loadingSlots.size>0)return;
+ if(resetting||workerPromises.size>0||loadingSlots.size>0)return;
  resetting=true;renderChoices();state=createGame();await clearLocal();resetting=false;render();
  $("save-status").textContent="Новая игра";
 }
@@ -344,12 +346,12 @@ function updateMainMenu(){
 function showMainMenu(){shell.classList.add("menu-open");updateMainMenu();}
 function startGame(){
  shell.classList.remove("menu-open");gameStarted=true;updateMainMenu();
- if(!resolverRunning&&(findNextMove(state)||state.slots.some(box=>box?.status==="departing")))queueMicrotask(runResolver);
+ kickColony();
 }
 async function startFreshGame(){
- if(resolverRunning||loadingSlots.size>0)return;
+ if(workerPromises.size>0||loadingSlots.size>0)return;
  resetting=true;cancelAnimationFrame(antFrame);state=createGame();await clearLocal();resetting=false;
- hasSavedGame=false;gameStarted=true;render();$("save-status").textContent="Новая игра";shell.classList.remove("menu-open");updateMainMenu();
+ hasSavedGame=false;gameStarted=true;render();$("save-status").textContent="Новая игра";shell.classList.remove("menu-open");updateMainMenu();kickColony();
 }
 async function boot(){
  const saved=await loadLocal();hasSavedGame=Boolean(saved);if(saved)state=restoreGame(saved);
