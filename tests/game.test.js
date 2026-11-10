@@ -220,6 +220,7 @@ test("choosing a butterfly box refills from the butterfly deck, not the frog dec
   if(s.tray[0][column]===null)column=s.tray[0].findIndex(index=>index!==null);
   if(column<0)break;
   assert.equal(chooseTopColumn(s,column),true);
+  const occupied=s.slots.findIndex(Boolean);assert.ok(occupied>=0);s.slots[occupied]=null;
  }
  assert.ok(s.nextContainer<=deck.length);
  assert.ok(s.tray.flat().every(index=>index===null||(index>=0&&index<deck.length)));
