@@ -300,32 +300,34 @@ export function chooseTopColumn(state,column){
  if(!canChoose(state)||!Number.isInteger(column)||column<0||column>=TRAY_SIZE)return false;
  const selectedIndex=state.tray[0][column],incoming=getIncoming(state.levelId);
  if(selectedIndex===null||selectedIndex===undefined||isLockedBox(state,selectedIndex))return false;
- const freeSlot=state.slots.findIndex(slot=>slot===null),box=incoming[selectedIndex];
- if(freeSlot<0||!box)return false;
- const partner=getLinkedPartner(state.levelId,selectedIndex);
- if(state.pendingLinkedIndex!==null&&state.pendingLinkedIndex!==undefined&&selectedIndex!==state.pendingLinkedIndex)return false;
+ const box=incoming[selectedIndex];if(!box)return false;
+ const freeSlots=state.slots.map((slot,index)=>slot===null?index:-1).filter(index=>index>=0);
+ const shiftColumn=lane=>{
+  state.tray[0][lane]=state.tray[1][lane];state.tray[1][lane]=state.tray[2][lane];
+  state.tray[2][lane]=state.nextContainer<incoming.length?state.nextContainer:null;
+  if(state.nextContainer<incoming.length)state.nextContainer++;
+ };
  if(box.special==="linked"){
-  if(state.pendingLinkedIndex===null||state.pendingLinkedIndex===undefined){
-   if(freeSlotCount(state)<2||!state.tray[0].includes(partner))return false;
-   state.pendingLinkedIndex=partner;
-  }else if(selectedIndex===state.pendingLinkedIndex)state.pendingLinkedIndex=null;
- }else if(state.pendingLinkedIndex!==null&&state.pendingLinkedIndex!==undefined)return false;
- state.slots[freeSlot]={...box,sourceIndex:selectedIndex};
- // The sealed crate opens only after ordinary crates have actually been placed
- // from both other lanes. Repeated placements from one lane count only once.
- if(!box.special&&selectedIndex!==LOCKED_BOX_INDEX&&column!==LOCKED_BOX_COLUMN){
-  const openedFrom=[...new Set(state.lockProgressColumns||[])];
-  if(!openedFrom.includes(column))openedFrom.push(column);
-  state.lockProgressColumns=openedFrom;
-  if(openedFrom.length>=2){state.lockedBoxOpen=true;state.message="Щёлк! Пломба снята — закрытый бокс открыт!";}
+  const partnerIndex=getLinkedPartner(state.levelId,selectedIndex),partnerColumn=state.tray[0].findIndex(index=>index===partnerIndex);
+  if(partnerColumn<0||partnerColumn===column||freeSlots.length<2)return false;
+  const partnerBox=incoming[partnerIndex];
+  if(!partnerBox||partnerBox.special!=="linked"||partnerBox.pairId!==box.pairId)return false;
+  const placements=[{slot:freeSlots[0],index:selectedIndex,crate:box},{slot:freeSlots[1],index:partnerIndex,crate:partnerBox}];
+  for(const item of placements)state.slots[item.slot]={...item.crate,sourceIndex:item.index};
+  shiftColumn(column);shiftColumn(partnerColumn);state.pendingLinkedIndex=null;
+  state.message="Связанная пара отправлена вместе — оба бокса заняли стартовые отсеки!";
+  return true;
  }
- state.tray[0][column]=state.tray[1][column];state.tray[1][column]=state.tray[2][column];
- state.tray[2][column]=state.nextContainer<incoming.length?state.nextContainer:null;
- if(state.nextContainer<incoming.length)state.nextContainer++;
- state.message=state.pendingLinkedIndex!==null&&state.pendingLinkedIndex!==undefined
-  ? "Цепочка началась! Теперь выбери второй связанный бокс."
-  : box.special==="linked"?"Связанная пара собрана — муравьишки отправляются вместе!"
-  : `${COLORS[box.color].name}: бокс отправлен в стартовый отсек ${freeSlot+1}`;
+ if(state.pendingLinkedIndex!==null&&state.pendingLinkedIndex!==undefined)return false;
+ const freeSlot=freeSlots[0];if(freeSlot===undefined)return false;
+ state.slots[freeSlot]={...box,sourceIndex:selectedIndex};
+ // Only ordinary boxes from two distinct lanes contribute to the sealed crate.
+ if(!box.special&&selectedIndex!==LOCKED_BOX_INDEX&&column!==LOCKED_BOX_COLUMN){
+  const openedFrom=[...new Set(state.lockProgressColumns||[])];if(!openedFrom.includes(column))openedFrom.push(column);
+  state.lockProgressColumns=openedFrom;if(openedFrom.length>=2){state.lockedBoxOpen=true;state.message="Щёлк! Пломба снята — закрытый бокс открыт!";}
+ }
+ shiftColumn(column);state.pendingLinkedIndex=null;
+ state.message=`${COLORS[box.color].name}: бокс отправлен в стартовый отсек ${freeSlot+1}`;
  return true;
 }
 export function findNextMove(state){
@@ -386,7 +388,7 @@ export function restoreGame(saved){
  }
  return {...fresh,...saved,tray,sortedBoxes:saved.sortedBoxes||0,
   lockedBoxOpen:!!saved.lockedBoxOpen,lockProgressColumns:[...new Set((saved.lockProgressColumns||[]).filter(column=>column===0||column===1))],
-  pendingLinkedIndex:getLinkedPair(fresh.levelId).includes(saved.pendingLinkedIndex)?saved.pendingLinkedIndex:null,
+  pendingLinkedIndex:null,
   slots:saved.slots.map(box=>box&&box.ants<=0?{...box,status:"departing"}:box),
   resolving:false,activeSlot:-1,activeTarget:null,activeSlots:[],
   message:saved.won?"Победа! Полянка собрана ✨":saved.lost?"Поражение: пять стартовых отсеков заняты, ходов больше нет.":"Выбери бокс — каждый муравей унесёт один крупный цветной блок"};
