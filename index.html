@@ -61,6 +61,7 @@
       <span class="level-kicker">ПОЛЯНКА № 1</span>
       <h2>Портрет лягушонка</h2>
       <p id="board-status" class="board-status">Крупных блоков осталось: 35×35</p>
+      <div class="level-progress" role="progressbar" aria-label="Сбор пиксельного портрета" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="progress-fill"></span></div>
     </section>
 
     <section class="board-wrap" aria-label="Игровое поле">
@@ -86,6 +87,16 @@
     </section>
 
     <p id="message" class="message" role="status" aria-live="polite">Выбери бокс с муравьями — они отправятся на поиски пикселей</p>
+    <section id="result-overlay" class="result-overlay" role="dialog" aria-modal="true" aria-labelledby="result-title" hidden>
+      <div class="result-card">
+        <div id="result-emoji" class="result-emoji" aria-hidden="true">🌼</div>
+        <p class="result-kicker">ПОЛЯНКА № 1</p>
+        <h2 id="result-title">Портрет собран!</h2>
+        <p id="result-copy">Все цветные кубики нашли своё место. Отличная работа, команда!</p>
+        <button id="result-retry" class="menu-primary" type="button">Сыграть ещё раз <span aria-hidden="true">↻</span></button>
+        <button id="result-menu" class="menu-secondary" type="button">В главное меню</button>
+      </div>
+    </section>
     <div class="bottom-actions">
       <button id="restart" class="restart-button" type="button"><span aria-hidden="true">↻</span> Начать заново</button>
       <span id="save-status" class="save-status">Сохранение на устройстве</span>
