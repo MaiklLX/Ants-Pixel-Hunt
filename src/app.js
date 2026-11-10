@@ -92,9 +92,9 @@ function drawAnt(ctx,point,color,carrying,index){
  const pulse=.8+Math.sin(index*.7+performance.now()*.002)*.12;
  ctx.save();ctx.translate(point.x,point.y);
  ctx.shadowColor=COLORS[color].hex;ctx.shadowBlur=carrying?9:4;
- ctx.fillStyle=COLORS[color].hex;ctx.beginPath();ctx.arc(0,0,2.45*pulse,0,Math.PI*2);ctx.fill();
- ctx.shadowBlur=0;ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(1.25,-1.1,1,0,Math.PI*2);ctx.fill();
- if(carrying){ctx.fillStyle="#f6d36e";ctx.beginPath();ctx.arc(-3,1,1.8,0,Math.PI*2);ctx.fill();}
+ ctx.fillStyle=COLORS[color].hex;ctx.beginPath();ctx.arc(0,0,1.65*pulse,0,Math.PI*2);ctx.fill();
+ ctx.shadowBlur=0;ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(.9,-.75,.72,0,Math.PI*2);ctx.fill();
+ if(carrying){ctx.fillStyle="#f6d36e";ctx.beginPath();ctx.arc(-2.2,.8,1.25,0,Math.PI*2);ctx.fill();}
  ctx.restore();
 }
 async function animateAntWave(moves){
