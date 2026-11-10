@@ -98,7 +98,7 @@ function renderChoices(){
   const preview=document.createElement("div");preview.className="queue-preview";preview.setAttribute("aria-label","Следующие боксы в колонке");
   for(let row=1;row<TRAY_SIZE;row++){const nextIndex=state.tray[row][col],nextBox=nextIndex===null||nextIndex===undefined?null:getIncoming(state.levelId)[nextIndex];
    const peek=document.createElement("span");peek.className="queue-peek"+(nextBox?"":" empty");
-   if(nextBox){peek.style.setProperty("--peek-color",COLORS[nextBox.color].hex);peek.title=`Далее: ${COLORS[nextBox.color].name}, ${nextBox.ants} кубиков`;}else peek.title="Очередь закончилась";
+   if(nextBox){peek.style.setProperty("--peek-color",COLORS[nextBox.color].hex);peek.title=`Далее: ${COLORS[nextBox.color].name}, ${nextBox.ants} муравьёв`;}else peek.title="Очередь закончилась";
    preview.append(peek);
   }
   lane.append(preview);choicesEl.append(lane);
