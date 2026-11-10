@@ -96,8 +96,12 @@ function renderChoices(){
   const preview=document.createElement("div");preview.className="queue-preview";preview.setAttribute("aria-label","Следующие боксы в колонке");
   for(let row=1;row<TRAY_SIZE;row++){const nextIndex=state.tray[row][col],nextBox=nextIndex===null||nextIndex===undefined?null:getIncoming(state.levelId)[nextIndex];
    const peek=document.createElement("span");peek.className="queue-peek"+(nextBox?"":" empty");
-   if(nextBox){peek.style.setProperty("--peek-color",COLORS[nextBox.color].hex);peek.textContent=String(nextBox.ants);peek.title=`${COLORS[nextBox.color].name}: ${nextBox.ants} муравьёв`;}else{peek.textContent="·";peek.title="Очередь закончилась";}
-   preview.append(peek);
+   if(nextBox){peek.style.setProperty("--peek-color",COLORS[nextBox.color].hex);
+    const crate=document.createElement("i");crate.className="peek-crate";crate.setAttribute("aria-hidden","true");
+    const count=document.createElement("strong");count.textContent=String(nextBox.ants);
+    const ant=document.createElement("small");ant.textContent="🐜";peek.append(crate,count,ant);
+    peek.title=`${COLORS[nextBox.color].name}: ${nextBox.ants} муравьёв`;peek.setAttribute("aria-label",peek.title);
+   }else{peek.textContent="·";peek.title="Очередь закончилась";}preview.append(peek);
   }
   lane.append(preview);choicesEl.append(lane);
   const old=oldPositions.get(button.dataset.boxIndex);
@@ -299,7 +303,8 @@ function drawTransportBox(ctx,point,color,scale=1,tilt=0){
  ctx.fillStyle="#f7e9c9";ctx.fillRect(3,3,9,5);ctx.fillStyle="#8a7047";ctx.fillRect(5,4,5,1);ctx.fillRect(5,6,3,1);
  ctx.fillStyle="#f8e8c6";for(const [x,y] of [[-15,-4],[-15,5],[15,-4],[15,5]]){ctx.beginPath();ctx.arc(x,y,1,0,Math.PI*2);ctx.fill();}
  ctx.strokeStyle="#fff8";ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(-17,-6);ctx.lineTo(-11,-12);ctx.lineTo(10,-12);ctx.stroke();
- ctx.restore();
+ ctx.fillStyle="#f8e8c6";ctx.strokeStyle="#9a794b";ctx.lineWidth=.75;ctx.beginPath();ctx.arc(0,5.2,2.2,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle="#fff8df";ctx.beginPath();ctx.arc(0,5.2,.8,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#f6e4bd";for(const [x,y] of [[-16,-5],[16,-5],[-16,6],[16,6]]){ctx.beginPath();ctx.roundRect(x-1.1,y-1.6,2.2,3.2,.6);ctx.fill();}ctx.restore();
 }
 function drawBoxSparkles(ctx,point,color,progress){
  ctx.save();ctx.fillStyle="#fff8d9";ctx.shadowColor=COLORS[color].hex;ctx.shadowBlur=7;
@@ -322,25 +327,16 @@ async function animateBoxLoading(source,slot,color){
  const exit={x:belt.left+belt.width*.88-shellRect.left,y:belt.top+belt.height/2-shellRect.top};
  const finish=slot,p1=curveControl(source,entry,Math.min(28,Math.max(12,Math.abs(entry.x-source.x)*.08)));
  const p3=curveControl(exit,finish,-Math.min(30,Math.max(14,Math.abs(finish.y-exit.y)*.16)));
- const duration=1250,startTime=performance.now();let lastFrame=0;
- return new Promise(resolve=>{
-  const frame=timestamp=>{
-   if(timestamp-lastFrame<1000/30){requestAnimationFrame(frame);return;}lastFrame=timestamp;
-   const t=Math.min(1,(timestamp-startTime)/duration);
-   let point;
-   if(t<.36){point=quadPoint(source,p1,entry,t/.36);}
-   else if(t<.78){const u=(t-.36)/.42;point={x:entry.x+(exit.x-entry.x)*u,y:entry.y-Math.sin(u*Math.PI)*2};}
-   else{point=quadPoint(exit,p3,finish,(t-.78)/.22);}
-   ctx.clearRect(0,0,shellRect.width,shellRect.height);
-   const beltTilt=t<.36?-.06*(1-t/.36):t<.78?Math.sin((t-.36)/.42*Math.PI)*.025:.07*(1-(t-.78)/.22);
-   const animatedPoint={x:point.x,y:point.y-Math.sin(t*Math.PI)*3};
-   drawTransportBox(ctx,animatedPoint,color,1+Math.sin(t*Math.PI)*.08,beltTilt);
-   drawBoxSparkles(ctx,animatedPoint,color,t);
-   if(t>=1){ctx.clearRect(0,0,shellRect.width,shellRect.height);flightLayer.remove();resolve();return;}
-   requestAnimationFrame(frame);
-  };
-  requestAnimationFrame(frame);
- });
+ const duration=1580,startTime=performance.now();let lastFrame=0;const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+ return new Promise(resolve=>{const frame=timestamp=>{
+  if(timestamp-lastFrame<1000/30){requestAnimationFrame(frame);return;}lastFrame=timestamp;
+  const t=Math.min(1,(timestamp-startTime)/duration),a=ease(Math.min(1,t/.3)),b=ease(Math.max(0,Math.min(1,(t-.3)/.44))),c=ease(Math.max(0,(t-.74)/.26));
+  let point;if(t<.3)point=quadPoint(source,p1,entry,a);else if(t<.74)point={x:entry.x+(exit.x-entry.x)*b,y:entry.y-Math.sin(b*Math.PI)*3};else point=quadPoint(exit,p3,finish,c);
+  ctx.clearRect(0,0,shellRect.width,shellRect.height);
+  const beltTilt=t<.3?-.085*(1-a):t<.74?Math.sin(b*Math.PI)*.018:.085*(1-c),bob=Math.sin(timestamp*.009)*1.15,stretch=1+Math.sin(t*Math.PI)*.055;
+  const animatedPoint={x:point.x,y:point.y-Math.sin(t*Math.PI)*3+bob};drawTransportBox(ctx,animatedPoint,color,stretch,beltTilt);drawBoxSparkles(ctx,animatedPoint,color,t);
+  if(t>=1){ctx.clearRect(0,0,shellRect.width,shellRect.height);flightLayer.remove();resolve();return;}requestAnimationFrame(frame);
+ };requestAnimationFrame(frame);});
 }
 async function animateBoxDepartures(slotIndices){
  const shellRect=shell.getBoundingClientRect(),dpr=Math.min(1.5,window.devicePixelRatio||1);
@@ -349,7 +345,7 @@ async function animateBoxDepartures(slotIndices){
  layer.style.width=shellRect.width+"px";layer.style.height=shellRect.height+"px";shell.append(layer);
  const ctx=layer.getContext("2d");ctx.setTransform(dpr,0,0,dpr,0,0);
  const starts=slotIndices.map(slot=>({slot,start:slotCenter(slot),color:state.slots[slot]?.color||"yellow"}));
- const belt=pointFor(conveyorEl),startTime=performance.now(),duration=1750;let lastFrame=0;
+ const belt=pointFor(conveyorEl),startTime=performance.now(),duration=1900;let lastFrame=0;const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
  return new Promise(resolve=>{
   const frame=timestamp=>{
    if(timestamp-lastFrame<1000/30){requestAnimationFrame(frame);return;}lastFrame=timestamp;
@@ -358,8 +354,8 @@ async function animateBoxDepartures(slotIndices){
    starts.forEach((item,index)=>{
     const delay=index*170,t=Math.max(0,Math.min(1,(elapsed-delay)/duration));
     if(elapsed<delay){finished++;return;}if(t>=1){finished++;return;}
-    const lift=quadPoint(item.start,{x:item.start.x-22,y:(item.start.y+belt.y)/2},{x:item.start.x,y:belt.y},Math.min(1,t*2.2));
-    const progress=Math.max(0,(t-.42)/.58);
+    const lift=quadPoint(item.start,{x:item.start.x-24,y:(item.start.y+belt.y)/2},{x:item.start.x,y:belt.y},ease(Math.min(1,t*2.1)));
+    const progress=ease(Math.max(0,(t-.38)/.62));
     drawTransportBox(ctx,{x:lift.x+(shellRect.width+35-lift.x)*progress,y:lift.y+(belt.y-lift.y)*progress},item.color);
    });
    if(finished===starts.length){layer.remove();resolve();return;}
@@ -458,16 +454,25 @@ async function onChoose(column){
 }
 function updateMainMenu(){
  const primary=$("start-game"),fresh=$("new-game"),progress=$("menu-progress"),level=getLevel(state.levelId);
- $("menu-level-name").textContent=level.name;$("menu-level-number").textContent=`ПОЛЯНКА ${String(level.number).padStart(2,"0")}`;$("menu-level-emoji").textContent=level.emoji;
+ $("menu-level-name").textContent="Полянка готова к исследованию";$("menu-level-number").textContent=`ПОЛЯНКА ${String(level.number).padStart(2,"0")}`;$("menu-level-emoji").textContent="📦";
  const list=$("campaign-levels");
- if(list){list.replaceChildren();for(const item of LEVELS){const unlocked=isLevelUnlocked(item),button=document.createElement("button");button.type="button";button.className="campaign-level"+(item.id===state.levelId?" current":"")+(unlocked?"":" locked");button.disabled=!unlocked;button.innerHTML=`<span class="campaign-emoji">${item.emoji}</span><span class="campaign-copy"><small>${item.chapter} · ${String(item.number).padStart(2,"0")}</small><strong>${item.name}</strong></span><span class="campaign-state">${completedLevels().has(item.id)?"✓":unlocked?"›":"🔒"}</span>`;button.addEventListener("click",()=>{if(unlocked)void startFreshGame(item.id);});list.append(button);}}
+ if(list){list.replaceChildren();for(const item of LEVELS){
+  const unlocked=isLevelUnlocked(item),done=completedLevels().has(item.id),button=document.createElement("button");button.type="button";
+  button.className="campaign-level"+(item.id===state.levelId?" current":"")+(unlocked?"":" locked");button.disabled=!unlocked;
+  const icon=document.createElement("span");icon.className="campaign-emoji";icon.textContent=unlocked?"📦":"🔒";
+  const copy=document.createElement("span");copy.className="campaign-copy";
+  const number=document.createElement("small");number.textContent=`${item.chapter} · ${String(item.number).padStart(2,"0")}`;
+  const name=document.createElement("strong");name.textContent=unlocked?(done?"Пройдена":"Открыта"):"Ещё не открыта";copy.append(number,name);
+  const status=document.createElement("span");status.className="campaign-state";status.textContent=done?"✓":unlocked?"›":"🔒";
+  button.append(icon,copy,status);button.addEventListener("click",()=>{if(unlocked)void startFreshGame(item.id);});list.append(button);
+ }}
 
  primary.textContent=gameStarted?"Вернуться на полянку":"Начать охоту";
  primary.disabled=resetAfterMenu;
  primary.querySelector("span")?.remove();
  const arrow=document.createElement("span");arrow.setAttribute("aria-hidden","true");arrow.textContent="→";primary.append(arrow);
  fresh.hidden=true;
- progress.textContent=`${level.chapter} · ${level.hint}`;
+ progress.textContent=isLevelUnlocked(level)?"Открыта · можно отправляться":"Полянка пока закрыта";
 }
 function showMainMenu(){
  shell.classList.add("menu-open");
