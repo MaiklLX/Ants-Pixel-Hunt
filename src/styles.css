@@ -225,3 +225,11 @@ body{background:radial-gradient(ellipse at 50% 0%,#f8fffb 0%,#e9f4eb 54%,#dcebe2
 .restart-button{border:1px solid #fff;background:linear-gradient(145deg,#fff,#e4efe6);box-shadow:0 3px 0 #c5d8c7,0 5px 9px #55745a20}
 .flight-layer{position:absolute;inset:0;z-index:22;pointer-events:none}
 @media(prefers-reduced-motion:reduce){.choice-card,.slot{transition:none}}
+
+
+/* KT-028.1: the receiving bays feel like padded docks for the arriving cargo. */
+.slot{position:relative;overflow:hidden;isolation:isolate}
+.slot.filled::before{content:"";position:absolute;inset:3px 4px auto;height:5px;border-radius:8px;background:linear-gradient(90deg,#fff0, color-mix(in srgb,var(--box-color,#b9d3b3) 28%,#fff),#fff0);pointer-events:none}
+.slot.loading{border-color:color-mix(in srgb,var(--box-color,#d9bd7d) 65%,#fff);background:linear-gradient(150deg,#fffdf5 0%,color-mix(in srgb,var(--box-color,#f4ead2) 18%,#fff) 58%,#e9f1e7 100%);box-shadow:0 0 0 2px color-mix(in srgb,var(--box-color,#e5c98a) 22%,transparent),0 4px 12px #55745a20,inset 0 2px #fff}
+.slot.loading::after{content:"ПРИЁМ";font-size:8px;font-weight:950;letter-spacing:.8px;color:color-mix(in srgb,var(--box-color,#a17b3f) 68%,#7b765e);text-shadow:0 1px #fff}
+@media(prefers-reduced-motion:reduce){.slot.loading::after{animation:none}}
