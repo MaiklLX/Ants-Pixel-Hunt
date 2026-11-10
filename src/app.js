@@ -1,4 +1,4 @@
-import {COLORS,INCOMING,SIZE,SLOT_COUNT,TRAY_SIZE,createGame,canChoose,chooseTopColumn,findNextMove,findAntWave,applyAntMove,completeBoxDeparture,serializeGame,restoreGame,isDefeat} from "./game.js";
+import {COLORS,INCOMING,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,createGame,canChoose,chooseTopColumn,findNextMove,findAntWave,applyAntMove,completeBoxDeparture,serializeGame,restoreGame,isDefeat} from "./game.js";
 import {loadLocal,saveLocal,clearLocal} from "./storage.js";
 const $=id=>document.getElementById(id);
 const shell=$("app-shell"),boardEl=$("board"),slotsEl=$("slots"),choicesEl=$("choices"),antLayer=$("ant-layer"),conveyorEl=$("conveyor");
@@ -12,7 +12,7 @@ function renderBoard(){
   image.data[index]=rgb[0];image.data[index+1]=rgb[1];image.data[index+2]=rgb[2];image.data[index+3]=255;
  }
  boardCtx.putImageData(image,0,0);
- $("board-status").textContent=`Пикселей осталось: ${state.remaining.toLocaleString("ru-RU")}`;
+ $("board-status").textContent=`Крупных блоков осталось: ${state.remaining.toLocaleString("ru-RU")}`;
 }
 function renderSlots(){
  slotsEl.replaceChildren();
@@ -48,9 +48,9 @@ function renderChoices(){
    const pos=document.createElement("span");pos.className="choice-number";pos.textContent=`РЯД ${row+1} · КОЛОНКА ${col+1}`;
    const dots=document.createElement("span");dots.className="ant-dots";dots.textContent=Array.from({length:Math.min(box.ants,8)},()=>"●").join(" ");
    const name=document.createElement("strong");name.textContent=COLORS[box.color].name;
-   const count=document.createElement("small");count.textContent=`${box.ants.toLocaleString("ru-RU")} муравьёв`;
+   const count=document.createElement("small");count.textContent=`${box.ants.toLocaleString("ru-RU")} блоков`;
    button.append(pos,dots,name,count);
-   button.setAttribute("aria-label",row===0?`Выбрать бокс: ${COLORS[box.color].name}, ${box.ants} муравьёв`:`Закрытый бокс ряда ${row+1}: ${COLORS[box.color].name}, ${box.ants} муравьёв`);
+   button.setAttribute("aria-label",row===0?`Выбрать бокс: ${COLORS[box.color].name}, ${box.ants} муравьёв`:`Закрытый бокс ряда ${row+1}: ${COLORS[box.color].name}, ${box.ants} крупных блоков`);
   }else{button.classList.add("empty-box");button.textContent="Очередь пуста";}
   if(row===0)button.addEventListener("click",()=>onChoose(col));
   choicesEl.append(button);
@@ -151,7 +151,7 @@ async function animateAntWave(moves){
      if(!runner.delivered){
       runner.delivered=true;
       applyAntMove(state,runner.move.slot,runner.move.target);
-      boardCtx.fillStyle="#e7f0e4";boardCtx.fillRect(runner.move.target.x,runner.move.target.y,1,1);
+      boardCtx.fillStyle="#e7f0e4";boardCtx.fillRect(runner.move.target.x*BLOCK_SIZE,runner.move.target.y*BLOCK_SIZE,BLOCK_SIZE,BLOCK_SIZE);
      }
      finished++;return;
     }
@@ -224,7 +224,7 @@ async function runResolver(){
    }
    const wave=findAntWave(state);if(!wave.length)break;
    state.activeSlots=[...new Set(wave.map(move=>move.slot))];
-   state.message=`Рой неспешно собирает ресурсы · в работе ${wave.length.toLocaleString("ru-RU")} муравьёв`;
+   state.message=`Муравьишки несут крупные блоки · в работе ${wave.length.toLocaleString("ru-RU")}`;
    renderSlots();$("message").textContent=state.message;
    await animateAntWave(wave);
    if(resetting)break;
