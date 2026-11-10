@@ -200,7 +200,7 @@ export function getIncoming(levelId="meadow-01"){
  const id=getLevel(levelId).id;
  if(!incomingCache.has(id)){
   const deck=buildIncoming(createArtworkBoard(id));
-  const start=deck.length>=14?12:deck.length>=11?9:3;
+  const start=deck.length>=14?LINKED_BOX_START:deck.length>=11?9:3;
   if(deck.length>start+1){
    deck[start]={...deck[start],special:"linked",pairId:id+"-linked"};
    deck[start+1]={...deck[start+1],special:"linked",pairId:id+"-linked"};
@@ -322,7 +322,10 @@ export function chooseTopColumn(state,column){
  state.tray[0][column]=state.tray[1][column];state.tray[1][column]=state.tray[2][column];
  state.tray[2][column]=state.nextContainer<incoming.length?state.nextContainer:null;
  if(state.nextContainer<incoming.length)state.nextContainer++;
- state.message=`${COLORS[box.color].name}: бокс отправлен в стартовый отсек ${freeSlot+1}`;
+ state.message=state.pendingLinkedIndex!==null&&state.pendingLinkedIndex!==undefined
+  ? "Цепочка началась! Теперь выбери второй связанный бокс."
+  : box.special==="linked"?"Связанная пара собрана — муравьишки отправляются вместе!"
+  : `${COLORS[box.color].name}: бокс отправлен в стартовый отсек ${freeSlot+1}`;
  return true;
 }
 export function findNextMove(state){
