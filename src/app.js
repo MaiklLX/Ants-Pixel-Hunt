@@ -1,11 +1,12 @@
 import {COLORS,INCOMING,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,createGame,canChoose,chooseTopColumn,findAntWave,applyAntMove,completeBoxDeparture,serializeGame,restoreGame,isDefeat} from "./game.js";
 import {loadLocal,saveLocal,clearLocal} from "./storage.js";
+import {getAntTripFrame} from "./ant-animation.js";
 const $=id=>document.getElementById(id);
 const shell=$("app-shell"),boardEl=$("board"),slotsEl=$("slots"),choicesEl=$("choices"),antLayer=$("ant-layer"),conveyorEl=$("conveyor");
 const boardCtx=boardEl.getContext("2d"),antCtx=antLayer.getContext("2d");
 let state=createGame(),resolverRunning=false,resetting=false,antFrame=0,hasSavedGame=false,gameStarted=false;
 const TOTAL_BLOCKS=state.remaining;
-const loadingSlots=new Set(),workerPromises=new Map(),reservedTargets=new Set();
+const loadingSlots=new Set(),workerPromises=new Map(),reservedTargets=new Set(),activeAnts=new Map();
 let workerSequence=0;
 const colorRGB=Object.fromEntries(Object.entries(COLORS).map(([key,value])=>[key,value.hex.match(/[\da-f]{2}/gi).map(v=>parseInt(v,16))]));
 function renderBoard(){
@@ -178,44 +179,43 @@ function trailPoint(points,t){
  const calc=(a,b,c,d)=>.5*((2*b)+(-a+c)*u+(2*a-5*b+4*c-d)*u*u+(-a+3*b-3*c+d)*u*u*u);
  return{x:calc(p0.x,p1.x,p2.x,p3.x),y:calc(p0.y,p1.y,p2.y,p3.y)};
 }
-async function animateAntTrip(move,index,onPickup=()=>{}){
- const shellRect=shell.getBoundingClientRect(),dpr=Math.min(2,window.devicePixelRatio||1);
- const layer=document.createElement("canvas");layer.className="ant-worker-layer";
- layer.width=Math.max(1,Math.round(shellRect.width*dpr));layer.height=Math.max(1,Math.round(shellRect.height*dpr));
- layer.style.width=shellRect.width+"px";layer.style.height=shellRect.height+"px";shell.append(layer);
- const ctx=layer.getContext("2d");ctx.setTransform(dpr,0,0,dpr,0,0);
+function renderAntFrame(timestamp){
+ antCtx.clearRect(0,0,antLayer.width,antLayer.height);
+ for(const [workerId,ant] of activeAnts){
+  const phase=getAntTripFrame(timestamp-ant.startTime,ant.delay,ant.outbound,ant.returning);
+  if(phase.waiting)continue;
+  if(phase.picked&&!ant.picked){
+   ant.picked=true;
+   if(applyAntMove(state,ant.move.slot,ant.move.target))ant.onPickup();
+   renderBoard();renderSlots();renderChoices();
+   $("message").textContent="Муравьишки собирают кубики по извилистым тропинкам";
+   kickColony();
+  }
+  if(phase.finished){
+   activeAnts.delete(workerId);
+   ant.resolve();
+   continue;
+  }
+  const trail=phase.returningNow?ant.returnTrail:ant.outboundTrail;
+  const point=trailPoint(trail,phase.progress);
+  const before=trailPoint(trail,Math.max(0,phase.progress-.012));
+  const after=trailPoint(trail,Math.min(1,phase.progress+.012));
+  const tangent={x:after.x-before.x,y:after.y-before.y};
+  drawAnt(antCtx,point,ant.move.color,phase.returningNow,workerId,Math.atan2(tangent.y,tangent.x));
+ }
+ if(activeAnts.size)antFrame=requestAnimationFrame(renderAntFrame);
+ else antFrame=0;
+}
+function animateAntTrip(move,index,onPickup=()=>{}){
+ const shellRect=shell.getBoundingClientRect();
  const start=slotCenter(move.slot),end=cellCenter(move.target.x,move.target.y);
  const seed=(index*9301+move.target.x*49297+move.target.y*233)%9973/9973;
  const outboundTrail=makeAntTrail(start,end,seed,1),returnTrail=makeAntTrail(end,start,(seed+.371)%1,.72);
  const distance=Math.hypot(end.x-start.x,end.y-start.y);
  const delay=index*175+seed*95,outbound=2050+distance*.82,returning=1800+distance*.68;
- const startTime=performance.now();let picked=false;
  return new Promise(resolve=>{
-  const frame=timestamp=>{
-   const elapsed=timestamp-startTime;
-   if(elapsed<delay){requestAnimationFrame(frame);return;}
-   const tripElapsed=elapsed-delay;
-   if(tripElapsed>=outbound&&!picked){
-    picked=true;
-    if(applyAntMove(state,move.slot,move.target))onPickup();
-    renderBoard();renderSlots();renderChoices();
-    $("message").textContent="Муравьишки собирают кубики по извилистым тропинкам";
-    kickColony();
-   }
-   const returningNow=tripElapsed>=outbound;
-   const duration=returningNow?returning:outbound;
-   const raw=Math.min(1,Math.max(0,(tripElapsed-(returningNow?outbound:0))/duration));
-   const eased=raw*raw*(3-2*raw);
-   const trail=returningNow?returnTrail:outboundTrail;
-   const point=trailPoint(trail,eased);
-   const before=trailPoint(trail,Math.max(0,eased-.012)),after=trailPoint(trail,Math.min(1,eased+.012));
-   const tangent={x:after.x-before.x,y:after.y-before.y};
-   ctx.clearRect(0,0,shellRect.width,shellRect.height);
-   drawAnt(ctx,point,move.color,returningNow,index,Math.atan2(tangent.y,tangent.x));
-   if(tripElapsed>=outbound+returning){layer.remove();resolve();return;}
-   requestAnimationFrame(frame);
-  };
-  requestAnimationFrame(frame);
+  activeAnts.set(index,{move,onPickup,resolve,startTime:performance.now(),delay,outbound,returning,outboundTrail,returnTrail});
+  if(!antFrame)antFrame=requestAnimationFrame(renderAntFrame);
  });
 }
 function drawTransportBox(ctx,point,color,scale=1,tilt=0){
