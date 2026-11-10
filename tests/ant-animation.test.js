@@ -9,12 +9,16 @@ test("ant trip waits for its staggered launch without starting motion early",()=
 });
 
 test("ant trip smoothly reaches pickup after outbound travel",()=>{
- const frame=getAntTripFrame(1150,150,1000,900);
- assert.equal(frame.waiting,false);
- assert.equal(frame.picked,true);
- assert.equal(frame.returningNow,false);
- assert.equal(frame.progress,1);
- assert.equal(frame.finished,false);
+ const outbound=getAntTripFrame(1149,150,1000,900);
+ assert.equal(outbound.waiting,false);
+ assert.equal(outbound.picked,false);
+ assert.equal(outbound.returningNow,false);
+ assert.ok(outbound.progress>0.99);
+ assert.equal(outbound.finished,false);
+ const pickup=getAntTripFrame(1150,150,1000,900);
+ assert.equal(pickup.picked,true);
+ assert.equal(pickup.returningNow,true);
+ assert.equal(pickup.progress,0);
 });
 
 test("ant trip returns along its own route and completes only after return duration",()=>{
