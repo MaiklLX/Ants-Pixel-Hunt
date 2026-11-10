@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {COLORS,createGame,LEVELS,getLevel,getIncoming,createArtworkBoard,resolveAll,INITIAL_BOARD,INCOMING,isAccessible,getExposedPixels,findAccessiblePixel,findAccessiblePixels,findAntWave,chooseTopColumn,findNextMove,applyAntMove,completeBoxDeparture,freeSlotCount,isDefeat,SIZE,GRID_SIZE,BLOCK_SIZE,BOX_CAPACITY,SLOT_COUNT,TRAY_SIZE,canChoose,restoreGame,serializeGame,countOutboundBySlot,countSlotWorkers,canDepartSlot,isLockedBox,LOCKED_BOX_INDEX,LOCKED_BOX_COLUMN} from "../src/game.js";
+import {COLORS,createGame,LEVELS,getLevel,getIncoming,createArtworkBoard,resolveAll,INITIAL_BOARD,INCOMING,isAccessible,getExposedPixels,findAccessiblePixel,findAccessiblePixels,findAntWave,chooseTopColumn,findNextMove,applyAntMove,completeBoxDeparture,freeSlotCount,isDefeat,SIZE,GRID_SIZE,BLOCK_SIZE,BOX_CAPACITY,SLOT_COUNT,TRAY_SIZE,canChoose,restoreGame,serializeGame,countOutboundBySlot,countSlotWorkers,canDepartSlot,isLockedBox,getLinkedPair,LOCKED_BOX_INDEX,LOCKED_BOX_COLUMN} from "../src/game.js";
 const smallBoard=()=>Array.from({length:5},()=>Array(5).fill("green"));
 
 test("the authored frog is built from large collectible blocks on a 350x350 display grid",()=>{
@@ -332,4 +332,48 @@ test("sealed crate progress is normalized and preserved by save data",()=>{
 });
 test("every campaign deck has a crate at the sealed-box position",()=>{
  for(const level of LEVELS)assert.ok(getIncoming(level.id).length>LOCKED_BOX_INDEX,level.name+" needs a sealed crate position");
+});
+
+
+test("linked crates require two free slots and the paired crate to be visible",()=>{
+ const s=createGame(),pair=getLinkedPair(s.levelId);
+ assert.equal(pair.length,2);
+ s.tray[0][0]=pair[0];
+ s.tray[0][1]=null;
+ assert.equal(chooseTopColumn(s,0),false,"the first linked crate waits until its partner reaches the top");
+ assert.equal(s.pendingLinkedIndex,null);
+ s.tray[0][1]=pair[1];
+ s.slots[0]={color:"red",ants:1};
+ s.slots[1]={color:"blue",ants:1};
+ s.slots[2]={color:"green",ants:1};
+ s.slots[3]={color:"yellow",ants:1};
+ assert.equal(chooseTopColumn(s,0),false,"a linked pair cannot start with fewer than two free slots");
+});
+test("linked crates are selected consecutively and block every unrelated choice",()=>{
+ const s=createGame(),pair=getLinkedPair(s.levelId);
+ s.tray[0][0]=pair[0];s.tray[0][1]=pair[1];
+ assert.equal(chooseTopColumn(s,0),true);
+ assert.equal(s.pendingLinkedIndex,pair[1]);
+ assert.equal(chooseTopColumn(s,2),false,"no unrelated crate can interrupt a linked pair");
+ assert.equal(chooseTopColumn(s,1),true);
+ assert.equal(s.pendingLinkedIndex,null);
+ assert.equal(s.slots[0].special,"linked");
+ assert.equal(s.slots[1].special,"linked");
+});
+test("linked-pair selection state survives save and restore",()=>{
+ const s=createGame(),pair=getLinkedPair(s.levelId);
+ s.tray[0][0]=pair[0];s.tray[0][1]=pair[1];
+ assert.equal(chooseTopColumn(s,0),true);
+ const restored=restoreGame(serializeGame(s));
+ assert.equal(restored.pendingLinkedIndex,pair[1]);
+ assert.equal(chooseTopColumn(restored,1),true);
+ assert.equal(restored.pendingLinkedIndex,null);
+});
+test("every campaign deck places its linked pair outside the sealed-box position",()=>{
+ for(const level of LEVELS){
+  const pair=getLinkedPair(level.id);
+  assert.equal(pair.length,2,level.name+" needs exactly one linked pair");
+  assert.ok(pair.every(index=>index!==LOCKED_BOX_INDEX));
+  assert.notEqual(pair[0]%TRAY_SIZE,pair[1]%TRAY_SIZE,"linked crates must be in different lanes");
+ }
 });
