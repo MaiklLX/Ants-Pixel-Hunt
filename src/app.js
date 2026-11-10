@@ -1,11 +1,10 @@
-import {COLORS,INCOMING,SIZE,SLOT_COUNT,createGame,canPlace,placeNext,resolveAll,serializeGame,restoreGame,isAccessible} from "./game.js";
+import {COLORS,INCOMING,SIZE,SLOT_COUNT,createGame,canPlace,placeNext,serializeGame,restoreGame,isAccessible,findAccessiblePixel,isDefeat} from "./game.js";
 import {loadLocal,saveLocal,clearLocal} from "./storage.js";
 
 const $ = id => document.getElementById(id);
 const boardEl=$("board"), slotsEl=$("slots"), antLayer=$("ant-layer");
 let state=createGame();
 let busy=false;
-let saveTimer=0;
 
 function renderBoard(){
   boardEl.replaceChildren();
@@ -81,9 +80,6 @@ async function save(){
   const ok=await saveLocal(serializeGame(state));
   $("save-status").textContent=ok?"Прогресс сохранён на устройстве":"Не удалось сохранить прогресс";
 }
-function scheduleSave(){
-  clearTimeout(saveTimer);saveTimer=setTimeout(save,120);
-}
 async function onPlace(index){
   if(busy||!placeNext(state,index))return;
   busy=true;state.resolving=true;render();state.resolving=false;
@@ -95,7 +91,7 @@ async function onPlace(index){
       const container=state.slots[i];if(!container)continue;
       state.activeSlot=i;renderSlots();
       while(container.ants>0){
-        const target=(await import("./game.js")).findAccessiblePixel(state.board,container.color);
+        const target=findAccessiblePixel(state.board,container.color);
         if(!target)break;
         state.activeTarget=target;renderBoard();
         await animateAnt(i,target.x,target.y);
@@ -109,7 +105,7 @@ async function onPlace(index){
   }
   state.activeTarget=null;state.activeSlot=-1;state.resolving=false;busy=false;
   if(state.remaining===0){state.won=true;state.message="Победа! Поле полностью очищено ✨";}
-  else if((await import("./game.js")).isDefeat(state)){state.lost=true;state.message="Поражение: все пять ячеек заняты, доступных ходов нет.";}
+  else if(isDefeat(state)){state.lost=true;state.message="Поражение: все пять ячеек заняты, доступных ходов нет.";}
   else state.message=`Свободных пусковых ячеек: ${state.slots.filter(x=>!x).length} из ${SLOT_COUNT}`;
   render();await save();
 }
