@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {COLORS,createGame,LEVELS,getLevel,getIncoming,createArtworkBoard,resolveAll,INITIAL_BOARD,INCOMING,isAccessible,getExposedPixels,findAccessiblePixel,findAccessiblePixels,findAntWave,chooseTopColumn,findNextMove,applyAntMove,completeBoxDeparture,freeSlotCount,isDefeat,SIZE,GRID_SIZE,BLOCK_SIZE,BOX_CAPACITY,SLOT_COUNT,TRAY_SIZE,canChoose,restoreGame,serializeGame,countOutboundBySlot,countSlotWorkers,canDepartSlot} from "../src/game.js";
+import {COLORS,createGame,LEVELS,getLevel,getIncoming,createArtworkBoard,resolveAll,INITIAL_BOARD,INCOMING,isAccessible,getExposedPixels,findAccessiblePixel,findAccessiblePixels,findAntWave,chooseTopColumn,findNextMove,applyAntMove,completeBoxDeparture,freeSlotCount,isDefeat,SIZE,GRID_SIZE,BLOCK_SIZE,BOX_CAPACITY,SLOT_COUNT,TRAY_SIZE,canChoose,restoreGame,serializeGame,countOutboundBySlot,countSlotWorkers,canDepartSlot,isLockedBox,LOCKED_BOX_INDEX,LOCKED_BOX_COLUMN} from "../src/game.js";
 const smallBoard=()=>Array.from({length:5},()=>Array(5).fill("green"));
 
 test("the authored frog is built from large collectible blocks on a 350x350 display grid",()=>{
@@ -297,4 +297,39 @@ test("a large ant box can wait while a smaller matching box clears and frees its
  assert.equal(freeSlotCount(s),4);
  assert.equal(s.won,false);
  assert.equal(isDefeat(s),false,"waiting alone is not a loss while a slot remains free");
+});
+
+
+test("the sealed crate stays hidden until ordinary boxes are placed from both other lanes",()=>{
+ const s=createGame();
+ assert.equal(isLockedBox(s,LOCKED_BOX_INDEX),true);
+ assert.equal(getIncoming(s.levelId).length>LOCKED_BOX_INDEX,true);
+ // Repeating the same lane does not satisfy the second requirement.
+ assert.equal(chooseTopColumn(s,0),true);s.slots[0]=null;
+ assert.equal(chooseTopColumn(s,0),true);s.slots[0]=null;
+ assert.deepEqual(s.lockProgressColumns,[0]);
+ // The sealed crate's own lane never contributes to its opening.
+ assert.equal(chooseTopColumn(s,LOCKED_BOX_COLUMN),true);s.slots[0]=null;
+ assert.equal(chooseTopColumn(s,LOCKED_BOX_COLUMN),true);s.slots[0]=null;
+ assert.equal(s.tray[0][LOCKED_BOX_COLUMN],LOCKED_BOX_INDEX);
+ assert.equal(chooseTopColumn(s,LOCKED_BOX_COLUMN),false,"sealed crate cannot be selected early");
+ assert.equal(isLockedBox(s,LOCKED_BOX_INDEX),true);
+ // A real placement from the other lane completes the two-lane requirement.
+ assert.equal(chooseTopColumn(s,1),true);
+ assert.deepEqual(s.lockProgressColumns,[0,1]);
+ assert.equal(s.lockedBoxOpen,true);
+ assert.equal(isLockedBox(s,LOCKED_BOX_INDEX),false);
+ assert.equal(chooseTopColumn(s,LOCKED_BOX_COLUMN),true,"opened crate becomes a normal selectable box");
+});
+test("sealed crate progress is normalized and preserved by save data",()=>{
+ const s=createGame();s.lockProgressColumns=[0,0,2,1];s.lockedBoxOpen=false;
+ const restored=restoreGame(serializeGame(s));
+ assert.deepEqual(restored.lockProgressColumns,[0,1]);
+ assert.equal(restored.lockedBoxOpen,false);
+ const opened=createGame();opened.lockedBoxOpen=true;opened.lockProgressColumns=[0,1];
+ const restoredOpened=restoreGame(serializeGame(opened));
+ assert.equal(restoredOpened.lockedBoxOpen,true);
+});
+test("every campaign deck has a crate at the sealed-box position",()=>{
+ for(const level of LEVELS)assert.ok(getIncoming(level.id).length>LOCKED_BOX_INDEX,level.name+" needs a sealed crate position");
 });
