@@ -175,7 +175,7 @@ async function runResolver(){
  if(resolverRunning||state.won||state.lost)return;
  resolverRunning=true;
  try{
-  while(!resetting&&state.remaining>0){
+  while(!resetting&&(state.remaining>0||state.slots.some(box=>box?.status==="departing"))){
    const departing=state.slots.map((box,index)=>box?.status==="departing"?index:-1).filter(index=>index>=0);
    if(departing.length){
     await animateBoxDepartures(departing);
