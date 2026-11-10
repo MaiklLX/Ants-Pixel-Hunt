@@ -4,6 +4,8 @@ export const BLOCK_SIZE=GRID_SIZE/SIZE;
 export const BOX_CAPACITY=60;
 export const SLOT_COUNT=5;
 export const TRAY_SIZE=3;
+export const LOCKED_BOX_INDEX=8;
+export const LOCKED_BOX_COLUMN=2;
 export const COLORS={
  red:{hex:"#e96f67",name:"Коралловые",short:"КР"},
  blue:{hex:"#68b5e8",name:"Голубые",short:"ГЛ"},
@@ -205,6 +207,7 @@ export function createGame(levelId="meadow-01"){
   tray:Array.from({length:TRAY_SIZE},(_,row)=>Array.from({length:TRAY_SIZE},(_,col)=>row*TRAY_SIZE+col)),
   nextContainer:TRAY_SIZE*TRAY_SIZE,remaining:board.reduce((sum,row)=>sum+row.filter(Boolean).length,0),won:false,lost:false,resolving:false,
   activeSlot:-1,activeTarget:null,activeSlots:[],sortedBoxes:0,
+  lockedBoxOpen:false,lockProgressColumns:[],
   message:"Собирай рисунок снаружи внутрь — внутренние блоки откроются следом",resolutionLog:[]};
 }
 export function getExposedPixels(board){
@@ -273,13 +276,24 @@ export function freeSlotCount(state){return state.slots.filter(slot=>slot===null
 export function canChoose(state){
  return !state.won&&!state.lost&&freeSlotCount(state)>0&&state.tray[0].some(index=>index!==null);
 }
+export function isLockedBox(state,index){
+ return index===LOCKED_BOX_INDEX&&!state.lockedBoxOpen;
+}
 export function chooseTopColumn(state,column){
  if(!canChoose(state)||!Number.isInteger(column)||column<0||column>=TRAY_SIZE)return false;
  const selectedIndex=state.tray[0][column],incoming=getIncoming(state.levelId);
- if(selectedIndex===null||selectedIndex===undefined)return false;
+ if(selectedIndex===null||selectedIndex===undefined||isLockedBox(state,selectedIndex))return false;
  const freeSlot=state.slots.findIndex(slot=>slot===null),box=incoming[selectedIndex];
  if(freeSlot<0||!box)return false;
  state.slots[freeSlot]={...box,sourceIndex:selectedIndex};
+ // The sealed crate opens only after ordinary crates have actually been placed
+ // from both other lanes. Repeated placements from one lane count only once.
+ if(!box.special&&selectedIndex!==LOCKED_BOX_INDEX&&column!==LOCKED_BOX_COLUMN){
+  const openedFrom=[...new Set(state.lockProgressColumns||[])];
+  if(!openedFrom.includes(column))openedFrom.push(column);
+  state.lockProgressColumns=openedFrom;
+  if(openedFrom.length>=2){state.lockedBoxOpen=true;state.message="Щёлк! Пломба снята — закрытый бокс открыт!";}
+ }
  state.tray[0][column]=state.tray[1][column];state.tray[1][column]=state.tray[2][column];
  state.tray[2][column]=state.nextContainer<incoming.length?state.nextContainer:null;
  if(state.nextContainer<incoming.length)state.nextContainer++;
@@ -327,7 +341,8 @@ export function resolveAll(state){
 }
 export function serializeGame(state){
  return {levelId:state.levelId||"meadow-01",board:state.board,slots:state.slots,tray:state.tray,nextContainer:state.nextContainer,
-  remaining:state.remaining,won:state.won,lost:state.lost,sortedBoxes:state.sortedBoxes||0,resolutionLog:state.resolutionLog.slice(-300)};
+  remaining:state.remaining,won:state.won,lost:state.lost,sortedBoxes:state.sortedBoxes||0,
+  lockedBoxOpen:!!state.lockedBoxOpen,lockProgressColumns:[...(state.lockProgressColumns||[])],resolutionLog:state.resolutionLog.slice(-300)};
 }
 export function restoreGame(saved){
  const fresh=createGame(saved?.levelId||"meadow-01"),incoming=getIncoming(fresh.levelId);
@@ -342,6 +357,7 @@ export function restoreGame(saved){
   }));
  }
  return {...fresh,...saved,tray,sortedBoxes:saved.sortedBoxes||0,
+  lockedBoxOpen:!!saved.lockedBoxOpen,lockProgressColumns:[...new Set((saved.lockProgressColumns||[]).filter(column=>column===0||column===1))],
   slots:saved.slots.map(box=>box&&box.ants<=0?{...box,status:"departing"}:box),
   resolving:false,activeSlot:-1,activeTarget:null,activeSlots:[],
   message:saved.won?"Победа! Полянка собрана ✨":saved.lost?"Поражение: пять стартовых отсеков заняты, ходов больше нет.":"Выбери бокс — каждый муравей унесёт один крупный цветной блок"};
