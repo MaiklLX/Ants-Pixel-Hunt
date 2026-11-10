@@ -6,6 +6,7 @@ export const SLOT_COUNT=5;
 export const TRAY_SIZE=3;
 export const LOCKED_BOX_INDEX=8;
 export const LOCKED_BOX_COLUMN=2;
+export const LINKED_BOX_START=12;
 export const COLORS={
  red:{hex:"#e96f67",name:"Коралловые",short:"КР"},
  blue:{hex:"#68b5e8",name:"Голубые",short:"ГЛ"},
@@ -197,8 +198,24 @@ function buildIncoming(board){
 const incomingCache=new Map();
 export function getIncoming(levelId="meadow-01"){
  const id=getLevel(levelId).id;
- if(!incomingCache.has(id))incomingCache.set(id,buildIncoming(createArtworkBoard(id)));
+ if(!incomingCache.has(id)){
+  const deck=buildIncoming(createArtworkBoard(id));
+  const start=deck.length>=14?12:deck.length>=11?9:3;
+  if(deck.length>start+1){
+   deck[start]={...deck[start],special:"linked",pairId:id+"-linked"};
+   deck[start+1]={...deck[start+1],special:"linked",pairId:id+"-linked"};
+  }
+  incomingCache.set(id,deck);
+ }
  return incomingCache.get(id);
+}
+export function getLinkedPair(levelId="meadow-01"){
+ const pair=getIncoming(levelId).filter(box=>box.special==="linked");
+ return pair.length===2?pair.map(box=>getIncoming(levelId).indexOf(box)):[];
+}
+export function getLinkedPartner(levelId,index){
+ const pair=getLinkedPair(levelId);
+ return pair.includes(index)?pair.find(value=>value!==index):null;
 }
 export const INCOMING=getIncoming();
 export function createGame(levelId="meadow-01"){
@@ -207,7 +224,7 @@ export function createGame(levelId="meadow-01"){
   tray:Array.from({length:TRAY_SIZE},(_,row)=>Array.from({length:TRAY_SIZE},(_,col)=>row*TRAY_SIZE+col)),
   nextContainer:TRAY_SIZE*TRAY_SIZE,remaining:board.reduce((sum,row)=>sum+row.filter(Boolean).length,0),won:false,lost:false,resolving:false,
   activeSlot:-1,activeTarget:null,activeSlots:[],sortedBoxes:0,
-  lockedBoxOpen:false,lockProgressColumns:[],
+  lockedBoxOpen:false,lockProgressColumns:[],pendingLinkedIndex:null,
   message:"Собирай рисунок снаружи внутрь — внутренние блоки откроются следом",resolutionLog:[]};
 }
 export function getExposedPixels(board){
@@ -285,6 +302,14 @@ export function chooseTopColumn(state,column){
  if(selectedIndex===null||selectedIndex===undefined||isLockedBox(state,selectedIndex))return false;
  const freeSlot=state.slots.findIndex(slot=>slot===null),box=incoming[selectedIndex];
  if(freeSlot<0||!box)return false;
+ const partner=getLinkedPartner(state.levelId,selectedIndex);
+ if(state.pendingLinkedIndex!==null&&state.pendingLinkedIndex!==undefined&&selectedIndex!==state.pendingLinkedIndex)return false;
+ if(box.special==="linked"){
+  if(state.pendingLinkedIndex===null||state.pendingLinkedIndex===undefined){
+   if(freeSlotCount(state)<2||!state.tray[0].includes(partner))return false;
+   state.pendingLinkedIndex=partner;
+  }else if(selectedIndex===state.pendingLinkedIndex)state.pendingLinkedIndex=null;
+ }else if(state.pendingLinkedIndex!==null&&state.pendingLinkedIndex!==undefined)return false;
  state.slots[freeSlot]={...box,sourceIndex:selectedIndex};
  // The sealed crate opens only after ordinary crates have actually been placed
  // from both other lanes. Repeated placements from one lane count only once.
@@ -342,7 +367,7 @@ export function resolveAll(state){
 export function serializeGame(state){
  return {levelId:state.levelId||"meadow-01",board:state.board,slots:state.slots,tray:state.tray,nextContainer:state.nextContainer,
   remaining:state.remaining,won:state.won,lost:state.lost,sortedBoxes:state.sortedBoxes||0,
-  lockedBoxOpen:!!state.lockedBoxOpen,lockProgressColumns:[...(state.lockProgressColumns||[])],resolutionLog:state.resolutionLog.slice(-300)};
+  lockedBoxOpen:!!state.lockedBoxOpen,lockProgressColumns:[...(state.lockProgressColumns||[])],pendingLinkedIndex:state.pendingLinkedIndex??null,resolutionLog:state.resolutionLog.slice(-300)};
 }
 export function restoreGame(saved){
  const fresh=createGame(saved?.levelId||"meadow-01"),incoming=getIncoming(fresh.levelId);
@@ -358,6 +383,7 @@ export function restoreGame(saved){
  }
  return {...fresh,...saved,tray,sortedBoxes:saved.sortedBoxes||0,
   lockedBoxOpen:!!saved.lockedBoxOpen,lockProgressColumns:[...new Set((saved.lockProgressColumns||[]).filter(column=>column===0||column===1))],
+  pendingLinkedIndex:getLinkedPair(fresh.levelId).includes(saved.pendingLinkedIndex)?saved.pendingLinkedIndex:null,
   slots:saved.slots.map(box=>box&&box.ants<=0?{...box,status:"departing"}:box),
   resolving:false,activeSlot:-1,activeTarget:null,activeSlots:[],
   message:saved.won?"Победа! Полянка собрана ✨":saved.lost?"Поражение: пять стартовых отсеков заняты, ходов больше нет.":"Выбери бокс — каждый муравей унесёт один крупный цветной блок"};
