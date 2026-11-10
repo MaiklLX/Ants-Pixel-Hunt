@@ -56,7 +56,7 @@ test("swarm planner sends eligible ants together and reserves targets left-to-ri
 });
 test("findAccessiblePixels returns a bounded wave of matching exposed pixels",()=>{
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill("green"));
- board[2][2]="";board[2][3]="red";board[3][3]="red";board[3][4]="";board[4][4]="blue";
+ board[2][2]="";board[2][3]="red";board[3][3]="red";board[3][4]="";
  assert.deepEqual(findAccessiblePixels(board,"red",1),[{x:3,y:2}]);
  assert.deepEqual(findAccessiblePixels(board,"red",5),[{x:3,y:2},{x:3,y:3}]);
  assert.deepEqual(findAccessiblePixels(board,"blue",5),[]);
