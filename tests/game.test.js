@@ -8,7 +8,7 @@ test("the authored level is a 250x250 frog portrait illustration with five slots
  assert.equal(INITIAL_BOARD.length,250);assert.ok(INITIAL_BOARD.every(r=>r.length===250));
  assert.equal(s.board.length,SIZE);assert.equal(s.slots.length,SLOT_COUNT);
  assert.equal(s.tray.length,TRAY_SIZE);assert.ok(s.tray.every(r=>r.length===TRAY_SIZE));
- const colors=new Set(INITIAL_BOARD.flat());assert.deepEqual([...colors].sort(),["blue","green","purple","red","yellow"]);
+ const colors=new Set(INITIAL_BOARD.flat().filter(Boolean));assert.deepEqual([...colors].sort(),["blue","green","purple","red","yellow"]);\n assert.ok(s.remaining>0&&s.remaining<SIZE*SIZE);assert.ok(INITIAL_BOARD.some(row=>row.includes("")));
 });
 test("the box deck contains exactly enough ants to collect every pixel by color",()=>{
  const totals={red:0,blue:0,yellow:0,green:0,purple:0};
@@ -41,7 +41,7 @@ test("accessibility checks use actual board dimensions",()=>{
 test("legacy 7x7 save starts the new authored level instead of stretching old pixels",()=>{
  const old=Array.from({length:7},()=>Array(7).fill("green"));
  const restored=restoreGame({board:old,slots:Array(5).fill(null),remaining:49});
- assert.equal(restored.board.length,250);assert.equal(restored.remaining,62500);
+ assert.equal(restored.board.length,250);assert.equal(restored.remaining,createGame().remaining);
 });
 test("250x250 board survives save restoration",()=>{
  const board=Array.from({length:250},()=>Array(250).fill("green"));board[0][0]="red";
