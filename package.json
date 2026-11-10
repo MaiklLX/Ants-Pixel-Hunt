@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "engines": { "node": ">=22" },
   "description": "Муравьишки: Пиксельная охота — HTML5/PWA",
   "scripts": {
     "test": "node --test",
@@ -12,11 +13,11 @@
     "android": "cap open android"
   },
   "devDependencies": {
-    "@capacitor/cli": "^7.4.3",
+    "@capacitor/cli": "^8.0.0",
     "vite": "^6.4.1"
   },
   "dependencies": {
-    "@capacitor/core": "^7.4.3",
-    "@capacitor/android": "^7.4.3"
+    "@capacitor/core": "^8.0.0",
+    "@capacitor/android": "^8.0.0"
   }
 }
