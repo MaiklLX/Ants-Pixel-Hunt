@@ -1,4 +1,4 @@
-import {COLORS,INCOMING,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,createGame,canChoose,chooseTopColumn,findAccessiblePixels,applyAntMove,completeBoxDeparture,serializeGame,restoreGame,isDefeat} from "./game.js";
+import {COLORS,INCOMING,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,createGame,canChoose,chooseTopColumn,findAntWave,applyAntMove,completeBoxDeparture,serializeGame,restoreGame,isDefeat} from "./game.js";
 import {loadLocal,saveLocal,clearLocal} from "./storage.js";
 const $=id=>document.getElementById(id);
 const shell=$("app-shell"),boardEl=$("board"),slotsEl=$("slots"),choicesEl=$("choices"),antLayer=$("ant-layer"),conveyorEl=$("conveyor");
@@ -144,7 +144,7 @@ function drawAnt(ctx,point,color,carrying,index,direction=0){
  ctx.drawImage(createAntSprite(color,carrying,gait),-13,-12);
  ctx.restore();
 }
-async function animateAntTrip(move,index){
+async function animateAntTrip(move,index,onPickup=()=>{}){
  const shellRect=shell.getBoundingClientRect(),dpr=Math.min(2,window.devicePixelRatio||1);
  const layer=document.createElement("canvas");layer.className="ant-worker-layer";
  layer.width=Math.max(1,Math.round(shellRect.width*dpr));layer.height=Math.max(1,Math.round(shellRect.height*dpr));
@@ -160,9 +160,10 @@ async function animateAntTrip(move,index){
   const frame=timestamp=>{
    const elapsed=timestamp-startTime;
    if(elapsed>=outbound&&!picked){
-    picked=true;applyAntMove(state,move.slot,move.target);
+    picked=true;
+    if(applyAntMove(state,move.slot,move.target))onPickup();
     renderBoard();renderSlots();renderChoices();
-    $("message").textContent="Муравьишка забрал кубик и несёт его в свой бокс";
+    $("message").textContent="Муравьишки отправились за доступными кубиками";
     kickColony();
    }
    const returningNow=elapsed>=outbound;
@@ -261,32 +262,25 @@ async function save(){
  if(ok){hasSavedGame=true;updateMainMenu();}
  $("save-status").textContent=ok?"Прогресс сохранён на устройстве":"Не удалось сохранить прогресс";
 }
-function findWorkerTarget(color){
- const candidates=findAccessiblePixels(state.board,color);
- return candidates.find(target=>!reservedTargets.has(target.x+","+target.y))||null;
-}
-async function runSlotWorker(slot){
+async function runSlotWorker(slot,target,workerId){
+ const key=target.x+","+target.y;
  try{
-  while(!resetting){
-   const box=state.slots[slot];if(!box||box.ants<=0||box.status==="departing")break;
-   const target=findWorkerTarget(box.color);if(!target)break;
-   const key=target.x+","+target.y;reservedTargets.add(key);
-   state.activeSlots=[...workerPromises.keys()];renderSlots();
-   try{await animateAntTrip({slot,color:box.color,target},++workerSequence);}
-   finally{reservedTargets.delete(key);}
-   if(resetting)break;
-   if(state.slots[slot]?.status==="departing"){
-    await animateBoxDepartures([slot]);completeBoxDeparture(state,slot);
-    renderSlots();renderConveyor();await save();
-   }
-   if(state.remaining===0||state.remaining%35===0)await save();
-   kickColony();
-  }
+  await animateAntTrip({slot,color:state.slots[slot]?.color,target},workerId,()=>{
+   const worker=workerPromises.get(workerId);if(worker)worker.picked=true;
+   reservedTargets.delete(key);
+  });
  }catch(error){console.error("Ant worker interrupted",slot,error);}
  finally{
-  workerPromises.delete(slot);resolverRunning=workerPromises.size>0;
-  state.activeSlots=[...workerPromises.keys()];renderSlots();
-  if(!resetting)settleColony();
+  reservedTargets.delete(key);workerPromises.delete(workerId);
+  const otherWorkers=[...workerPromises.values()].some(worker=>worker.slot===slot);
+  if(!resetting&&!otherWorkers&&state.slots[slot]?.status==="departing"){
+   await animateBoxDepartures([slot]);completeBoxDeparture(state,slot);
+   renderSlots();renderConveyor();await save();
+  }
+  resolverRunning=workerPromises.size>0;
+  state.activeSlots=[...new Set([...workerPromises.values()].map(worker=>worker.slot))];
+  renderSlots();
+  if(!resetting){kickColony();settleColony();}
  }
 }
 function settleColony(){
@@ -298,13 +292,17 @@ function settleColony(){
 }
 function kickColony(){
  if(resetting||state.won||state.lost)return;
- for(let slot=0;slot<state.slots.length;slot++){
-  const box=state.slots[slot];
-  if(!box||box.ants<=0||box.status==="departing"||workerPromises.has(slot))continue;
-  if(!findWorkerTarget(box.color))continue;
-  const task=runSlotWorker(slot);workerPromises.set(slot,task);
+ const pendingBySlot=new Map();
+ for(const worker of workerPromises.values())if(!worker.picked)pendingBySlot.set(worker.slot,(pendingBySlot.get(worker.slot)||0)+1);
+ const wave=findAntWave(state,reservedTargets,pendingBySlot);
+ for(const move of wave){
+  const workerId=++workerSequence,key=move.target.x+","+move.target.y;
+  reservedTargets.add(key);
+  workerPromises.set(workerId,{slot:move.slot,picked:false});
+  void runSlotWorker(move.slot,move.target,workerId);
  }
- resolverRunning=workerPromises.size>0;state.activeSlots=[...workerPromises.keys()];
+ resolverRunning=workerPromises.size>0;
+ state.activeSlots=[...new Set([...workerPromises.values()].map(worker=>worker.slot))];
  renderSlots();if(!resolverRunning)settleColony();
 }
 async function onChoose(column){
