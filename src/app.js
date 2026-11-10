@@ -1,4 +1,4 @@
-import {COLORS,INCOMING,SIZE,SLOT_COUNT,TRAY_SIZE,createGame,canChoose,chooseTopColumn,findNextMove,findAccessiblePixels,applyAntMove,serializeGame,restoreGame,isDefeat} from "./game.js";
+import {COLORS,INCOMING,SIZE,SLOT_COUNT,TRAY_SIZE,createGame,canChoose,chooseTopColumn,findNextMove,findAntWave,applyAntMove,serializeGame,restoreGame,isDefeat} from "./game.js";
 import {loadLocal,saveLocal,clearLocal} from "./storage.js";
 const $=id=>document.getElementById(id);
 const boardEl=$("board"),slotsEl=$("slots"),choicesEl=$("choices"),antLayer=$("ant-layer");
@@ -123,15 +123,7 @@ async function runResolver(){
   // One wave sends every currently eligible ant at once. Targets are reserved
   // left-to-right so two boxes can never claim the same pixel.
   while(!resetting&&state.remaining>0){
-   const wave=[],reserved=new Set();
-   for(let slot=0;slot<SLOT_COUNT;slot++){
-    const box=state.slots[slot];if(!box||box.ants<=0)continue;
-    const targets=findAccessiblePixels(state.board,box.color,box.ants);
-    for(const target of targets){
-     const key=target.x+","+target.y;if(reserved.has(key))continue;
-     reserved.add(key);wave.push({slot,color:box.color,target});
-    }
-   }
+   const wave=findAntWave(state);
    if(!wave.length)break;
    state.activeSlot=-1;state.activeTarget=null;renderBoard();renderSlots();
    await animateAntWave(wave);
