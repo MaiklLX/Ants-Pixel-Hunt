@@ -4,6 +4,7 @@ const $=id=>document.getElementById(id);
 const shell=$("app-shell"),boardEl=$("board"),slotsEl=$("slots"),choicesEl=$("choices"),antLayer=$("ant-layer"),conveyorEl=$("conveyor");
 const boardCtx=boardEl.getContext("2d"),antCtx=antLayer.getContext("2d");
 let state=createGame(),resolverRunning=false,resetting=false,antFrame=0,hasSavedGame=false,gameStarted=false;
+const TOTAL_BLOCKS=state.remaining;
 const loadingSlots=new Set(),workerPromises=new Map(),reservedTargets=new Set();
 let workerSequence=0;
 const colorRGB=Object.fromEntries(Object.entries(COLORS).map(([key,value])=>[key,value.hex.match(/[\da-f]{2}/gi).map(v=>parseInt(v,16))]));
@@ -22,7 +23,11 @@ function renderBoard(){
   }
  }
  boardCtx.putImageData(image,0,0);
- $("board-status").textContent=`Крупных блоков осталось: ${state.remaining.toLocaleString("ru-RU")}`;
+ $("board-status").textContent=`Осталось кубиков: ${state.remaining.toLocaleString("ru-RU")}`;
+ const collected=TOTAL_BLOCKS-state.remaining,percent=Math.round(collected/TOTAL_BLOCKS*100);
+ const progress=$("progress-fill"),track=progress?.parentElement;
+ if(progress)progress.style.width=percent+"%";
+ if(track)track.setAttribute("aria-valuenow",String(percent));
 }
 function renderSlots(){
  slotsEl.replaceChildren();
@@ -77,6 +82,7 @@ function renderChoices(){
 function render(){
  renderBoard();renderSlots();renderChoices();renderConveyor();
  $("message").textContent=state.message;$("restart").disabled=resetting||resolverRunning||loadingSlots.size>0;
+ updateResultOverlay();
 }
 function resizeAntLayer(){
  const rect=shell.getBoundingClientRect(),dpr=Math.min(2,window.devicePixelRatio||1);
@@ -317,6 +323,19 @@ async function runSlotWorker(slot,target,workerId){
   if(!resetting){kickColony();settleColony();}
  }
 }
+function updateResultOverlay(){
+ const overlay=$("result-overlay");
+ if(!overlay)return;
+ const complete=state.won,failed=state.lost;
+ overlay.hidden=!(complete||failed);
+ if(!complete&&!failed)return;
+ $("result-emoji").textContent=complete?"🏆":"🐜";
+ $("result-title").textContent=complete?"Портрет собран!":"Колония остановилась";
+ $("result-copy").textContent=complete
+  ?"Все цветные кубики нашли своё место. Отличная работа, команда!"
+  :"Все пять отсеков заняты, а доступных кубиков нужных цветов больше нет. Попробуй другой порядок боксов.";
+ $("result-retry").textContent=complete?"Собрать портрет ещё раз":"Попробовать снова";
+}
 function settleColony(){
  if(resolverRunning||workerPromises.size||loadingSlots.size||resetting)return;
  if(state.remaining===0){state.won=true;state.message="Победа! Портрет собран ✨";}
@@ -396,6 +415,8 @@ $("restart").addEventListener("click",restart);
 $("menu-toggle").addEventListener("click",showMainMenu);
 $("start-game").addEventListener("click",startGame);
 $("new-game").addEventListener("click",startFreshGame);
+$("result-retry").addEventListener("click",startFreshGame);
+$("result-menu").addEventListener("click",showMainMenu);
 $("how-to-play").addEventListener("click",()=>{
  const panel=$("how-panel");panel.hidden=!panel.hidden;
  $("how-to-play").textContent=panel.hidden?"Как играть?":"Свернуть правила";
