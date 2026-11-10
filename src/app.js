@@ -105,7 +105,7 @@ async function animateAntWave(moves){
   const distance=Math.hypot(end.x-start.x,end.y-start.y),seed=(index*9301+move.target.x*49297+move.target.y*233)%9973/9973;
   const bend=(seed-.5)*Math.min(72,Math.max(18,distance*.18));
   const delay=(index%23)*58+seed*90;
-  return{move,start,end,control:curveControl(start,end,bend),returnControl:curveControl(end,start,-bend*.72),
+  return{move,start,end,control:curveControl(start,end,bend),returnControl:curveControl(end,start,-bend*.72),delivered:false,
    delay,outbound:2700+distance*1.65+(seed-.5)*450,pause:520+seed*330,
    returning:2350+distance*1.35+(seed-.5)*380};
  });
@@ -118,7 +118,14 @@ async function animateAntWave(moves){
     const elapsed=timestamp-now-runner.delay;
     if(elapsed<0)return;
     const outboundEnd=runner.outbound,returnStart=outboundEnd+runner.pause,total=returnStart+runner.returning;
-    if(elapsed>=total){finished++;return;}
+    if(elapsed>=total){
+     if(!runner.delivered){
+      runner.delivered=true;
+      applyAntMove(state,runner.move.slot,runner.move.target);
+      boardCtx.fillStyle="#e7f0e4";boardCtx.fillRect(runner.move.target.x,runner.move.target.y,1,1);
+     }
+     finished++;return;
+    }
     let point,carrying=false;
     if(elapsed<outboundEnd){
      const t=Math.min(1,elapsed/outboundEnd);point=quadPoint(runner.start,runner.control,runner.end,t);
@@ -188,8 +195,7 @@ async function runResolver(){
    renderSlots();$("message").textContent=state.message;
    await animateAntWave(wave);
    if(resetting)break;
-   // A pixel is removed only after its ant has carried it back to its own box.
-   for(const move of wave)applyAntMove(state,move.slot,move.target);
+   // Each pixel disappears at the exact moment its own ant reaches the box.
    state.activeSlots=[];renderBoard();renderSlots();renderChoices();
    if(state.remaining%100===0||state.remaining===0)await save();
   }
