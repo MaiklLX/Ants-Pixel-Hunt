@@ -70,7 +70,7 @@ export const INCOMING=buildIncoming(INITIAL_BOARD);
 export function createGame(){
  return {board:INITIAL_BOARD.map(row=>[...row]),slots:Array(SLOT_COUNT).fill(null),
   tray:Array.from({length:TRAY_SIZE},(_,row)=>Array.from({length:TRAY_SIZE},(_,col)=>row*TRAY_SIZE+col)),
-  nextContainer:TRAY_SIZE*TRAY_SIZE,remaining:SIZE*SIZE,won:false,lost:false,resolving:false,
+  nextContainer:TRAY_SIZE*TRAY_SIZE,remaining:INITIAL_BOARD.reduce((sum,row)=>sum+row.filter(Boolean).length,0),won:false,lost:false,resolving:false,
   activeSlot:-1,activeTarget:null,activeSlots:[],sortedBoxes:0,
   message:"Выбери бокс в верхнем ряду — отправим муравьишек за ресурсами",resolutionLog:[]};
 }
