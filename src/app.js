@@ -49,7 +49,7 @@ function renderChoices(){
 function render(){
  renderBoard();renderSlots();renderChoices();
  $("message").textContent=state.message;
- $("restart").disabled=resetting;
+ $("restart").disabled=resetting||resolverRunning;
 }
 function cellCenter(x,y){
  const cell=boardEl.children[y*SIZE+x],frame=antLayer.getBoundingClientRect(),rect=cell.getBoundingClientRect();
@@ -116,7 +116,7 @@ function onChoose(column){
  runResolver();
 }
 async function restart(){
- if(resetting)return;
+ if(resetting||resolverRunning)return;
  resetting=true;renderChoices();
  state=createGame();await clearLocal();resetting=false;render();
  $("save-status").textContent="Новая игра";
