@@ -103,4 +103,4 @@
 - Карта кампании теперь показывает шесть полянок; доступность уровней по-прежнему зависит от прохождения предыдущего.
 - Генерация очередей и сохранения по levelId остаются общими для всех уровней.
 - PWA cache v10, app-version KT-040.
-- Проверить финальные npm tests, production build, GitHub Pages, Godot check и Android debug APK.
+- Добавлен тест полной проходимости всех шести карт через resolveAll. Проверить финальные npm tests, production build, GitHub Pages, Godot check и Android debug APK на последнем SHA.
