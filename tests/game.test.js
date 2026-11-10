@@ -164,7 +164,7 @@ test("a box cannot depart while any ant assigned to its slot is still travelling
 });
 
 test("campaign levels have distinct deterministic artwork and exact matching box decks",()=>{
- assert.equal(LEVELS.length,3);
+ assert.equal(LEVELS.length,6);
  const signatures=new Set();
  for(const level of LEVELS){
   const board=createArtworkBoard(level.id),deck=getIncoming(level.id);
