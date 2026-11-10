@@ -1,4 +1,4 @@
-import {COLORS,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,LEVELS,getLevel,getIncoming,createGame,canChoose,chooseTopColumn,findAntWave,applyAntMove,completeBoxDeparture,isDefeat,getExposedPixels,countOutboundBySlot,countSlotWorkers,canDepartSlot} from "./game.js";
+import {COLORS,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,LEVELS,getLevel,getIncoming,createGame,canChoose,chooseTopColumn,isLockedBox,findAntWave,applyAntMove,completeBoxDeparture,isDefeat,getExposedPixels,countOutboundBySlot,countSlotWorkers,canDepartSlot} from "./game.js";
 import {getAntTripFrame,getAntLaunchDelay} from "./ant-animation.js";
 import {isCampaignLevelUnlocked,getNextCampaignLevel} from "./campaign.js";
 import {BUILDINGS,createEconomy,normalizeEconomy,collectCube,completeMeadow,purchaseBuilding,buildingCost} from "./economy.js";
@@ -101,10 +101,16 @@ function renderChoices(){
  for(let col=0;col<TRAY_SIZE;col++){
   const lane=document.createElement("div");lane.className="queue-lane";
   const index=state.tray[0][col],box=index===null||index===undefined?null:getIncoming(state.levelId)[index];
-  const button=document.createElement("button");button.type="button";button.className="choice-card"+(box?" selectable":" empty-box");
+  const sealed=box&&isLockedBox(state,index);
+  const button=document.createElement("button");button.type="button";button.className="choice-card"+(sealed?" sealed-box":box?" selectable":" empty-box");
   if(index!==null&&index!==undefined)button.dataset.boxIndex=String(index);
-  button.disabled=!box||resetting||resetAfterMenu||state.won||state.lost||!canChoose(state);
-  if(box){button.style.setProperty("--ant-color",COLORS[box.color].hex);
+  button.disabled=!box||sealed||resetting||resetAfterMenu||state.won||state.lost||!canChoose(state);
+  if(sealed){
+   const crate=document.createElement("span");crate.className="choice-crate sealed-crate";crate.textContent="🔒";
+   const count=document.createElement("small");count.className="sealed-progress";count.textContent=`${(state.lockProgressColumns||[]).length}/2`;
+   button.append(crate,count);button.title="Закрытый бокс откроется после размещения обычных боксов из двух других колонок";
+   button.setAttribute("aria-label",`Закрытый бокс, прогресс открытия ${(state.lockProgressColumns||[]).length} из 2`);
+  }else if(box){button.style.setProperty("--ant-color",COLORS[box.color].hex);
    const crate=document.createElement("span");crate.className="choice-crate";crate.setAttribute("aria-hidden","true");
    const gem=document.createElement("i");gem.style.setProperty("--gem-color",COLORS[box.color].hex);crate.append(gem);
    const count=document.createElement("small");count.textContent=`${box.ants.toLocaleString("ru-RU")} 🐜`;
@@ -115,7 +121,12 @@ function renderChoices(){
   for(let row=1;row<TRAY_SIZE;row++){const nextIndex=state.tray[row][col],nextBox=nextIndex===null||nextIndex===undefined?null:getIncoming(state.levelId)[nextIndex];
    const peek=document.createElement("span");peek.className="queue-peek"+(nextBox?"":" empty");peek.dataset.queueStep=String(row);
    const order=document.createElement("span");order.className="peek-order";order.textContent=String(row);peek.append(order);
-   if(nextBox){
+   const sealedPreview=nextBox&&isLockedBox(state,nextIndex);
+   if(sealedPreview){
+    peek.classList.add("sealed-peek");const lock=document.createElement("span");lock.className="peek-lock";lock.textContent="🔒";
+    const progress=document.createElement("small");progress.className="peek-count";progress.textContent=`${(state.lockProgressColumns||[]).length}/2`;
+    peek.append(lock,progress);peek.title="Закрытый бокс";peek.setAttribute("aria-label",`Закрытый бокс, прогресс ${(state.lockProgressColumns||[]).length} из 2`);
+   }else if(nextBox){
     const color=COLORS[nextBox.color];peek.style.setProperty("--peek-color",color.hex);
     const chip=document.createElement("i");chip.className="peek-color-chip";chip.setAttribute("aria-hidden","true");
     const meta=document.createElement("span");meta.className="peek-meta";
@@ -459,7 +470,7 @@ async function onChoose(column){
  const sourceRect=sourceNode.getBoundingClientRect(),shellRect=shell.getBoundingClientRect();
  const source={x:sourceRect.left+sourceRect.width/2-shellRect.left,y:sourceRect.top+sourceRect.height/2-shellRect.top};
  const freeSlot=state.slots.findIndex(box=>box===null),box=getIncoming(state.levelId)[selectedIndex];
- if(freeSlot<0||!box||!chooseTopColumn(state,column))return;
+ if(freeSlot<0||!box||isLockedBox(state,selectedIndex)||!chooseTopColumn(state,column))return;
  loadingSlots.add(freeSlot);
  state.message="Бокс направляется прямо в стартовый отсек "+(freeSlot+1);
  render();
