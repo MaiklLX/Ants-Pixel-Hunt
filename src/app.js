@@ -267,6 +267,7 @@ async function animateBoxDepartures(slotIndices){
 }
 async function save(){
  const ok=await saveLocal(serializeGame(state));
+ if(ok){hasSavedGame=true;updateMainMenu();}
  $("save-status").textContent=ok?"Прогресс сохранён на устройстве":"Не удалось сохранить прогресс";
 }
 async function runResolver(){
