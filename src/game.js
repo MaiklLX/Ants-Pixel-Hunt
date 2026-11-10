@@ -49,7 +49,7 @@ export const INITIAL_BOARD=createArtworkBoard();
 function buildIncoming(board){
  const totals={red:0,blue:0,yellow:0,green:0,purple:0};
  for(const row of board)for(const color of row)totals[color]++;
- const colors=["red","blue","yellow","green","purple"],queues={};
+ const colors=["green","purple","blue","yellow","red"],queues={};
  for(const color of colors){
   queues[color]=[];let left=totals[color];
   while(left>0){const ants=Math.min(900,left);queues[color].push({color,ants});left-=ants;}
