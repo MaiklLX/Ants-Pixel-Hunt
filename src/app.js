@@ -387,7 +387,7 @@ async function onChoose(column){
 }
 async function restart(){
  if(resetting||workerPromises.size>0||loadingSlots.size>0)return;
- resetting=true;renderChoices();state=createGame(state.levelId);totalBlocks=state.remaining;await clearLocal(state.levelId);resetting=false;render();
+ resetting=true;renderChoices();state=createGame(state.levelId);totalBlocks=state.remaining;await clearLocal(state.levelId);resetting=false;render();await save();
  $("save-status").textContent="Новая игра";
 }
 function updateMainMenu(){
@@ -410,7 +410,7 @@ function startGame(){
 async function startFreshGame(levelId=state.levelId){
  if(workerPromises.size>0||loadingSlots.size>0)return;
  resetting=true;cancelAnimationFrame(antFrame);state=createGame(levelId);totalBlocks=state.remaining;await clearLocal(state.levelId);resetting=false;
- hasSavedGame=false;gameStarted=true;render();$("save-status").textContent="Новая игра";shell.classList.remove("menu-open");updateMainMenu();kickColony();
+ hasSavedGame=false;gameStarted=true;render();await save();$("save-status").textContent="Новая игра";shell.classList.remove("menu-open");updateMainMenu();kickColony();
 }
 async function boot(){
  const saved=await loadLocal();hasSavedGame=Boolean(saved);if(saved)state=restoreGame(saved);totalBlocks=createGame(state.levelId).remaining;
