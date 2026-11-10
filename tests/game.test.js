@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import {createGame,INITIAL_BOARD,INCOMING,isAccessible,findAccessiblePixel,findAccessiblePixels,findAntWave,chooseTopColumn,findNextMove,applyAntMove,completeBoxDeparture,resolveAll,freeSlotCount,isDefeat,SIZE,SLOT_COUNT,TRAY_SIZE,canChoose,restoreGame,serializeGame} from "../src/game.js";
 const smallBoard=()=>Array.from({length:5},()=>Array(5).fill("green"));
 
-test("the authored level is a 250x250 butterfly illustration with five slots and a 3x3 rack",()=>{
+test("the authored level is a 250x250 frog portrait illustration with five slots and a 3x3 rack",()=>{
  const s=createGame();
  assert.equal(INITIAL_BOARD.length,250);assert.ok(INITIAL_BOARD.every(r=>r.length===250));
  assert.equal(s.board.length,SIZE);assert.equal(s.slots.length,SLOT_COUNT);
