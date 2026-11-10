@@ -17,7 +17,7 @@ test("selection fills the first free start compartment, not a player-selected lo
 });
 test("each column advances independently and exhausted columns show empty cells",()=>{
  const s=createGame();for(let i=0;i<5;i++)assert.equal(chooseTopColumn(s,0),true);
- assert.deepEqual(s.tray.map(r=>r[0]),[6,9,12]);assert.equal(s.nextContainer,14);
+ assert.deepEqual(s.tray.map(r=>r[0]),[11,12,13]);assert.equal(s.nextContainer,14);
 });
 test("tray choices remain available while ants are resolving",()=>{
  const s=createGame();s.resolving=true;assert.equal(canChoose(s),true);assert.equal(chooseTopColumn(s,0),true);
