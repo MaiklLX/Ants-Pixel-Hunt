@@ -94,15 +94,20 @@ function renderChoices(){
   button.addEventListener("click",()=>onChoose(col));lane.append(button);
   const preview=document.createElement("div");preview.className="queue-preview";preview.setAttribute("aria-label","Следующие боксы в колонке");
   for(let row=1;row<TRAY_SIZE;row++){const nextIndex=state.tray[row][col],nextBox=nextIndex===null||nextIndex===undefined?null:getIncoming(state.levelId)[nextIndex];
-   const peek=document.createElement("span");peek.className="queue-peek"+(nextBox?"":" empty");
+   const peek=document.createElement("span");peek.className="queue-peek"+(nextBox?"":" empty");peek.dataset.queueStep=String(row);
+   const order=document.createElement("span");order.className="peek-order";order.textContent=String(row);peek.append(order);
    if(nextBox){
     const color=COLORS[nextBox.color];peek.style.setProperty("--peek-color",color.hex);
     const chip=document.createElement("i");chip.className="peek-color-chip";chip.setAttribute("aria-hidden","true");
     const meta=document.createElement("span");meta.className="peek-meta";
     const count=document.createElement("small");count.className="peek-count";count.textContent=String(nextBox.ants)+" 🐜";
     meta.append(count);peek.append(chip,meta);
-    peek.title=`${nextBox.ants} муравьёв`;peek.setAttribute("aria-label",`${color.name}, ${nextBox.ants} муравьёв`);
-   }else{peek.textContent="·";peek.title="Очередь закончилась";}preview.append(peek);
+    peek.title=`Следующий бокс №${row}: ${nextBox.ants} муравьёв`;peek.setAttribute("aria-label",`Бокс в очереди номер ${row}, цвет ${color.name}, ${nextBox.ants} муравьёв`);
+   }else{
+    const empty=document.createElement("span");empty.className="peek-empty-mark";empty.textContent="—";peek.append(empty);
+    peek.title=`Позиция ${row}: очередь закончилась`;peek.setAttribute("aria-label",peek.title);
+   }
+   preview.append(peek);
   }
   lane.append(preview);choicesEl.append(lane);
   const old=oldPositions.get(button.dataset.boxIndex);
