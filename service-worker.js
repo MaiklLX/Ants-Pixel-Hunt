@@ -1,4 +1,4 @@
-const CACHE = "ants-pixel-hunt-shell-v7";
+const CACHE = "ants-pixel-hunt-shell-v8";
 const APP_FILES = [
   "./","./index.html","./manifest.webmanifest","./src/styles.css",
   "./src/app.js","./src/game.js","./src/storage.js",
