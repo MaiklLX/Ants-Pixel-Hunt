@@ -96,7 +96,9 @@ async function onPlace(index){
         state.activeTarget=target;renderBoard();
         await animateAnt(i,target.x,target.y);
         state.board[target.y][target.x]="";container.ants--;state.remaining--;
+        state.resolutionLog.push({slot:i,color:container.color,x:target.x,y:target.y});
         state.activeTarget=null;changed=true;renderBoard();
+        await save();
         await sleep(45);
       }
       if(container.ants<=0)state.slots[i]=null;
