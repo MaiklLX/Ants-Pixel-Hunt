@@ -376,3 +376,66 @@ body{background:radial-gradient(ellipse at 50% 0%,#f8fffb 0%,#e9f4eb 54%,#dcebe2
 .campaign-state{font-size:11px;font-weight:900;color:#79a16f;line-height:1}
 #result-next{margin-top:7px}
 @media(max-width:599px){.campaign-picker{gap:5px}.campaign-level{min-height:64px;padding:4px 2px}.campaign-emoji{font-size:18px}.campaign-copy strong{font-size:8px}}
+
+
+/* KT-042 — cheerful 2D toy-world finish: soft volume, glossy faces and warm garden light. */
+body{background:radial-gradient(ellipse at 50% 0%,#fffdf2 0%,#f1faee 42%,#e4f2e7 100%)}
+.app-shell{
+ background:
+  radial-gradient(ellipse at 12% 8%,#fff9d8a8 0 8%,transparent 28%),
+  radial-gradient(ellipse at 92% 22%,#d5f0e2aa 0 10%,transparent 29%),
+  linear-gradient(180deg,#fafff7 0%,#f0faef 48%,#e7f4e9 100%);
+}
+.board-wrap{
+ border:2px solid #fff;
+ border-radius:25px;
+ padding:9px;
+ background:linear-gradient(145deg,#fffef9 0%,#f5e9d7 46%,#d9e9d7 100%);
+ box-shadow:0 2px 0 #fff,0 7px 0 #bfd8c4,0 13px 25px #466d4b28,inset 0 2px 5px #ffffff;
+}
+.board{border-radius:15px;background:#f2f0df;image-rendering:auto;box-shadow:inset 0 2px 8px #536f4c24}
+.slots{
+ background:linear-gradient(180deg,#eaf6e9 0%,#d7ebd9 100%);
+ border:1px solid #fff;
+ box-shadow:inset 0 2px 5px #8ebc9630,0 3px 0 #c5dfc9;
+}
+.slot{
+ border:1px solid #fff;
+ border-bottom:4px solid color-mix(in srgb,var(--box-color,#b9d3b3) 58%,#87a98a);
+ border-radius:14px;
+ background:linear-gradient(155deg,#fff 0%,color-mix(in srgb,var(--box-color,#eaf5e5) 17%,#fff) 62%,color-mix(in srgb,var(--box-color,#eaf5e5) 34%,#edf5e8) 100%);
+ box-shadow:0 3px 0 #b6d2b8,0 6px 11px #42684a20,inset 0 2px 2px #fff;
+}
+.slot.filled{box-shadow:0 3px 0 color-mix(in srgb,var(--box-color) 55%,#91b394),0 7px 12px #42684a24,inset 0 2px 2px #fff}
+.choice-card{
+ border:1px solid #fff;
+ border-bottom:4px solid color-mix(in srgb,var(--ant-color,#c9dfcd) 60%,#88a98e);
+ border-radius:16px;
+ background:linear-gradient(150deg,#fff 0%,color-mix(in srgb,var(--ant-color,#eaf5ed) 14%,#fff) 56%,color-mix(in srgb,var(--ant-color,#eaf5ed) 28%,#edf6eb) 100%);
+ box-shadow:0 3px 0 #c1d9c2,0 7px 13px #4b76531c,inset 0 2px 2px #fff;
+}
+.choice-card:not(:disabled):active{transform:translateY(2px) scale(.985);box-shadow:0 1px 0 #c1d9c2,0 3px 7px #4b76531c}
+.choice-card .choice-crate{
+ border:1px solid #fff;
+ border-radius:9px;
+ background:linear-gradient(145deg,#fff,color-mix(in srgb,var(--ant-color) 28%,#fff));
+ box-shadow:0 2px 0 color-mix(in srgb,var(--ant-color) 44%,#a5c3a8),0 3px 6px #365d3d22,inset 0 1px 2px #fff;
+ text-shadow:0 1px #fff;
+}
+.conveyor{
+ border:1px solid #fff;
+ background:linear-gradient(180deg,#f7f0dc,#e7d9b9);
+ box-shadow:inset 0 2px 4px #8e704322,0 3px 0 #d4c39f,0 5px 9px #765f3c18;
+}
+.belt{background:linear-gradient(180deg,#9ebc9c,#6f9674);box-shadow:inset 0 2px 3px #365b3d66,0 1px #fff}
+.belt i{background:linear-gradient(145deg,#f9f0d9,#c9b58c);box-shadow:0 1px 0 #806c4c}
+.message{color:#5d8064;font-weight:650}
+.level-heading h2{color:#477550;text-shadow:0 1px #fff}
+.restart-button,.menu-secondary{box-shadow:0 3px 0 #d9c99f,0 6px 10px #77613a17,inset 0 1px #fff}
+.result-card{border:2px solid #fff;box-shadow:0 7px 0 #c5dfc6,0 20px 50px #20372955,inset 0 2px #fff}
+@media(max-width:599px){
+ .board-wrap{padding:7px;border-radius:20px}
+ .slot{border-bottom-width:3px}
+ .choice-card{border-bottom-width:3px}
+}
+@media(prefers-reduced-motion:reduce){.choice-card:not(:disabled):active{transform:none}}
