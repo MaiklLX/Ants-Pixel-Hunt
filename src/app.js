@@ -149,13 +149,20 @@ function makeAntTrail(start,end,seed,spread=1){
  const nx=-dy/len,ny=dx/len;
  let value=Math.floor(seed*2147483647)%2147483647;
  const random=()=>{value=(value*48271)%2147483647;return value/2147483647;};
- const count=Math.max(4,Math.min(7,Math.round(len/105)+3));
+ // More waypoints and overlapping waves create a wandering colony trail, not a single broad bend.
+ const count=Math.max(8,Math.min(13,Math.round(len/62)+5));
+ const phase=random()*Math.PI*2,frequency=1.25+random()*.9;
+ const amplitude=(25+random()*27)*spread;
  const points=[start];
  for(let i=1;i<count;i++){
-  const t=i/count,side=(random()-.5)*2;
-  const wave=Math.sin(t*Math.PI)*(13+random()*22)*spread;
-  const along=(random()-.5)*Math.min(20,len*.045);
-  points.push({x:start.x+dx*t+nx*(side*wave)+dx/len*along,y:start.y+dy*t+ny*(side*wave)+dy/len*along});
+  const t=i/count;
+  const irregular=Math.sin(t*Math.PI)*(Math.sin(t*Math.PI*frequency+phase)*.62+(random()-.5)*.8);
+  const lateral=irregular*amplitude;
+  const along=(random()-.5)*Math.min(25,len*.055);
+  points.push({
+   x:start.x+dx*t+nx*lateral+dx/len*along,
+   y:start.y+dy*t+ny*lateral+dy/len*along
+  });
  }
  points.push(end);return points;
 }
@@ -175,7 +182,7 @@ async function animateAntTrip(move,index,onPickup=()=>{}){
  const seed=(index*9301+move.target.x*49297+move.target.y*233)%9973/9973;
  const outboundTrail=makeAntTrail(start,end,seed,1),returnTrail=makeAntTrail(end,start,(seed+.371)%1,.72);
  const distance=Math.hypot(end.x-start.x,end.y-start.y);
- const delay=(index%8)*105+seed*55,outbound=1150+distance*.52,returning=950+distance*.42;
+ const delay=index*175+seed*95,outbound=2050+distance*.82,returning=1800+distance*.68;
  const startTime=performance.now();let picked=false;
  return new Promise(resolve=>{
   const frame=timestamp=>{
