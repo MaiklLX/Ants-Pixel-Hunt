@@ -61,7 +61,7 @@ function renderChoices(){
   const index=state.tray[0][col],box=index===null||index===undefined?null:getIncoming(state.levelId)[index];
   const button=document.createElement("button");button.type="button";button.className="choice-card"+(box?" selectable":" empty-box");
   if(index!==null&&index!==undefined)button.dataset.boxIndex=String(index);
-  button.disabled=!box||resetting||state.won||state.lost||!canChoose(state);
+  button.disabled=!box||resetting||resetAfterMenu||state.won||state.lost||!canChoose(state);
   if(box){button.style.setProperty("--ant-color",COLORS[box.color].hex);
    const crate=document.createElement("span");crate.className="choice-crate";crate.textContent="◆";
    const name=document.createElement("strong");name.textContent=COLORS[box.color].name;
@@ -363,7 +363,7 @@ function kickColony(){
  renderSlots();if(!resolverRunning)settleColony();
 }
 async function onChoose(column){
- if(resetting||!canChoose(state))return;
+ if(resetting||resetAfterMenu||!canChoose(state))return;
  const selectedIndex=state.tray[0][column],sourceNode=choicesEl.querySelector('[data-box-index="'+selectedIndex+'"]');
  if(!sourceNode)return;
  const sourceRect=sourceNode.getBoundingClientRect(),shellRect=shell.getBoundingClientRect();
@@ -387,7 +387,7 @@ async function onChoose(column){
  }
 }
 async function restart(){
- if(resetting||workerPromises.size>0||loadingSlots.size>0)return;
+ if(resetting||resetAfterMenu||workerPromises.size>0||loadingSlots.size>0)return;
  resetting=true;renderChoices();state=createGame(state.levelId);totalBlocks=state.remaining;resetting=false;render();
  $("save-status").textContent="Новая партия · прогресс уровня не сохраняется";
 }
@@ -416,6 +416,7 @@ function maybeFinalizeMenuExit(){
  render();$("save-status").textContent="Партия сброшена · открытые полянки сохранены";updateMainMenu();
 }
 function startGame(){
+ if(resetAfterMenu)return;
  shell.classList.remove("menu-open");gameStarted=true;updateMainMenu();
  kickColony();
 }
