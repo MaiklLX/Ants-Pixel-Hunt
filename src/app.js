@@ -111,7 +111,7 @@ function render(){
  $("level-title").textContent=level.name;
  $("board").setAttribute("aria-label",`${level.name}: цветная пиксельная картина на сетке 35 на 35`);
  renderBoard();renderSlots();renderChoices();renderConveyor();
- $("message").textContent=state.message;$("restart").disabled=resetting||resolverRunning||loadingSlots.size>0;
+ $("message").textContent=state.message;
  updateResultOverlay();
 }
 function resizeAntLayer(){
@@ -456,11 +456,6 @@ async function onChoose(column){
   if(!resetting&&loadingSlots.size===0){if(resetAfterMenu)maybeFinalizeMenuExit();else kickColony();}
  }
 }
-async function restart(){
- if(resetting||resetAfterMenu||workerPromises.size>0||loadingSlots.size>0)return;
- resetting=true;renderChoices();state=createGame(state.levelId);totalBlocks=state.remaining;resetting=false;render();
- $("save-status").textContent="Новая партия · прогресс уровня не сохраняется";
-}
 function updateMainMenu(){
  const primary=$("start-game"),fresh=$("new-game"),progress=$("menu-progress"),level=getLevel(state.levelId);
  $("menu-level-name").textContent=level.name;$("menu-level-number").textContent=`ПОЛЯНКА ${String(level.number).padStart(2,"0")}`;$("menu-level-emoji").textContent=level.emoji;
@@ -510,7 +505,6 @@ async function boot(){
  }
  $("save-status").textContent="Партия не сохраняется · открытые полянки сохраняются";
 }
-$("restart").addEventListener("click",restart);
 $("menu-toggle").addEventListener("click",showMainMenu);
 $("start-game").addEventListener("click",startGame);
 $("new-game").addEventListener("click",()=>startFreshGame(state.levelId));
