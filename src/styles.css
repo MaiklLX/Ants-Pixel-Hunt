@@ -439,3 +439,97 @@ body{background:radial-gradient(ellipse at 50% 0%,#fffdf2 0%,#f1faee 42%,#e4f2e7
  .choice-card{border-bottom-width:3px}
 }
 @media(prefers-reduced-motion:reduce){.choice-card:not(:disabled):active{transform:none}}
+
+
+/* KT-043 — miniature garden factory: tactile crates, a layered moving belt and restrained motion. */
+.choice-card .choice-crate{
+ position:relative;isolation:isolate;display:grid;place-items:center;
+ width:39px;height:29px;margin:3px 0 1px;border:1px solid #a77c4e;
+ border-radius:7px 7px 9px 9px;
+ background:linear-gradient(155deg,#f7dfb2 0%,#d7ad70 54%,#b98750 100%);
+ box-shadow:0 3px 0 #987044,0 5px 8px #536d4a28,inset 0 1px 2px #fff9;
+ transform:perspective(70px) rotateX(5deg);
+}
+.choice-card .choice-crate::before{
+ content:"";position:absolute;z-index:2;left:-2px;right:-2px;top:-5px;height:8px;
+ border:1px solid #b58b59;border-radius:5px;
+ background:linear-gradient(180deg,#fff0d1,#d5ae78);
+ box-shadow:0 1px 2px #7d603b55;
+}
+.choice-card .choice-crate::after{
+ content:"";position:absolute;z-index:3;left:5px;right:5px;top:5px;bottom:4px;
+ border-left:1px solid #fff6;border-right:1px solid #87623b66;
+ background:linear-gradient(90deg,#ffffff20,transparent 38%,#79532b18 100%);
+ pointer-events:none;
+}
+.choice-card .choice-crate i{
+ position:relative;z-index:1;width:13px;height:13px;border-radius:3px;
+ background:linear-gradient(145deg,#fff 0%,var(--gem-color) 34%,color-mix(in srgb,var(--gem-color) 65%,#344c38) 100%);
+ border:1px solid #ffffffc9;transform:rotate(45deg);
+ box-shadow:0 1px 3px #314c3655,0 0 8px color-mix(in srgb,var(--gem-color) 42%,transparent);
+}
+.choice-card.selectable .choice-crate{animation:crate-idle 3.8s ease-in-out infinite}
+.choice-card.selectable:nth-child(2) .choice-crate{animation-delay:-1.2s}
+.choice-card.selectable:nth-child(3) .choice-crate{animation-delay:-2.4s}
+.choice-card strong{letter-spacing:.1px}
+.choice-card small{font-variant-numeric:tabular-nums;font-weight:750;color:#78927b}
+.conveyor{
+ position:relative;isolation:isolate;overflow:hidden;height:44px;
+ grid-template-columns:48px minmax(0,1fr) 58px;gap:7px;padding:6px 9px;
+ border:1px solid #d6c39c;border-radius:15px;
+ background:
+  linear-gradient(180deg,#fff9e9 0%,#f0e3c7 40%,#dfc99f 100%);
+ box-shadow:0 3px 0 #c9b58d,0 6px 12px #77603b20,inset 0 2px 3px #fff;
+}
+.conveyor::before{
+ content:"";position:absolute;inset:3px;border:1px solid #fff9;border-radius:11px;
+ pointer-events:none;z-index:-1;
+}
+.conveyor-in,.conveyor-out{
+ position:relative;z-index:1;padding:4px 3px;border-radius:7px;
+ background:linear-gradient(180deg,#fff9e8,#e6d3a9);
+ box-shadow:0 2px 0 #c4ad7e,inset 0 1px #fff;
+ color:#94764a;font-size:7px;letter-spacing:.45px;
+}
+.belt{
+ position:relative;height:25px;overflow:hidden;border:1px solid #64886b;border-radius:8px;
+ background:
+  repeating-linear-gradient(90deg,#668d70 0 9px,#9dbd91 9px 15px,#739a78 15px 23px);
+ background-size:46px 100%;
+ animation:belt-scroll .72s linear infinite;
+ box-shadow:inset 0 3px 4px #365b3d66,inset 0 -2px 2px #d9edce66,0 2px 0 #557a5c;
+}
+.belt::before{
+ content:"";position:absolute;inset:2px 0 auto;height:3px;
+ background:linear-gradient(90deg,transparent,#ffffffa8 22%,#ffffff30 76%,transparent);
+ opacity:.8;pointer-events:none;
+}
+.belt::after{
+ content:"";position:absolute;top:-5px;bottom:-5px;width:22px;left:-28px;
+ background:linear-gradient(90deg,transparent,#ffffff55,transparent);
+ transform:skewX(-22deg);animation:belt-glint 2.8s ease-in-out infinite;
+}
+.belt i{
+ position:relative;z-index:1;flex:0 0 9px;width:9px;height:9px;border-radius:50%;
+ border:1px solid #668765;
+ background:radial-gradient(circle at 32% 25%,#fff 0 18%,#e9e3c8 35%,#a8bd98 100%);
+ box-shadow:0 1px 2px #354e3866,inset 0 1px #fff;
+ animation:roller-turn .9s linear infinite;
+}
+.slot.filled{animation:slot-breathe 4.6s ease-in-out infinite}
+.slot.active{border-color:#e3c47e;box-shadow:0 0 0 2px #e8c87970,0 0 15px #e8c87942,inset 0 1px #fff}
+@keyframes belt-scroll{to{background-position:46px 0}}
+@keyframes belt-glint{0%,30%{left:-28px;opacity:0}45%{opacity:.9}75%,100%{left:110%;opacity:0}}
+@keyframes crate-idle{0%,100%{transform:perspective(70px) rotateX(5deg) translateY(0)}50%{transform:perspective(70px) rotateX(5deg) translateY(-2px)}}
+@keyframes slot-breathe{0%,100%{filter:brightness(1)}50%{filter:brightness(1.025)}}
+@media(max-width:599px){
+ .choice-card .choice-crate{width:32px;height:24px;margin:2px 0 0}
+ .choice-card .choice-crate i{width:11px;height:11px}
+ .conveyor{height:29px;padding:3px 6px;grid-template-columns:39px minmax(0,1fr) 47px;gap:4px;border-radius:11px}
+ .conveyor-in,.conveyor-out{font-size:6px;padding:3px 2px}
+ .belt{height:18px;border-radius:6px}
+ .belt i{flex-basis:7px;width:7px;height:7px}
+}
+@media(prefers-reduced-motion:reduce){
+ .choice-card.selectable .choice-crate,.slot.filled,.belt,.belt i,.belt::after{animation:none}
+}
