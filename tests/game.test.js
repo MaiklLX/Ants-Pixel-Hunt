@@ -18,28 +18,41 @@ test("a pixel is accessible at an edge or beside an empty orthogonal cell",()=>{
   const board=[["red","blue"],["green","yellow"]];
   assert.equal(isAccessible(board,0,0),true);
   assert.equal(isAccessible(board,1,1),true);
-  assert.equal(isAccessible([["red","blue","green"],["yellow","purple","red"],["blue","green","yellow"]],1,1),false);
+  const enclosed=Array.from({length:SIZE},()=>Array(SIZE).fill("green"));
+  enclosed[3][3]="purple";
+  assert.equal(isAccessible(enclosed,3,3),false);
 });
-test("only one next container can be placed into a free slot",()=>{
+test("a pixel becomes accessible after its same-color neighbor is removed",()=>{
+  const state=createGame();
+  state.board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
+  state.board[2][3]="red";
+  state.board[3][3]="red";
+  state.remaining=2;
+  state.slots[0]={color:"red",ants:2};
+  assert.deepEqual(findAccessiblePixel(state.board,"red"),{x:3,y:2});
+  resolveAll(state);
+  assert.equal(state.remaining,0);
+  assert.equal(state.won,true);
+  assert.deepEqual(state.resolutionLog.map(x=>[x.x,x.y]),[[3,2],[3,3]]);
+});
+test("placement consumes one queue item and cannot reuse an occupied slot",()=>{
   const state=createGame();
   assert.equal(placeNext(state,2),true);
   assert.equal(state.nextContainer,1);
   assert.equal(placeNext(state,2),false);
   assert.equal(state.slots.filter(Boolean).length,1);
 });
-test("resolver processes containers left-to-right and logs actual removals",()=>{
+test("resolver gives the first turn to the leftmost occupied slot",()=>{
   const state=createGame();
-  // Put two containers in known slots; the first available yellow takes all reachable yellow pixels.
-  state.slots[0]={color:"yellow",ants:3};
-  state.slots[3]={color:"blue",ants:4};
+  state.board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
+  state.board[0][0]="red";
+  state.board[6][6]="blue";
+  state.remaining=2;
+  state.slots[0]={color:"red",ants:1};
+  state.slots[4]={color:"blue",ants:1};
   resolveAll(state);
-  assert.ok(state.resolutionLog.length>0);
-  assert.equal(state.resolutionLog[0].slot,0);
-  for(let i=1;i<state.resolutionLog.length;i++){
-    const prev=state.resolutionLog[i-1],cur=state.resolutionLog[i];
-    // A slot may repeat while it collects; otherwise the next slot is never earlier.
-    assert.ok(cur.slot>=prev.slot || cur.slot===0);
-  }
+  assert.deepEqual(state.resolutionLog.map(x=>x.slot),[0,4]);
+  assert.equal(state.won,true);
 });
 test("defeat requires all five slots occupied and no available matching move",()=>{
   const state=createGame();
@@ -51,11 +64,12 @@ test("defeat requires all five slots occupied and no available matching move",()
   state.slots[4]=null;
   assert.equal(isDefeat(state),false);
 });
-test("a fully cleared board wins",()=>{
+test("win state is reached when the board has no remaining pixels",()=>{
   const state=createGame();
   state.board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
   state.remaining=0;
-  state.won=true;
-  assert.equal(state.remaining,0);
+  state.slots[0]={color:"red",ants:0};
+  resolveAll(state);
   assert.equal(state.won,true);
+  assert.equal(state.remaining,0);
 });
