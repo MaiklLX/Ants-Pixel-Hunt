@@ -215,8 +215,9 @@ test("only empty space connected to the outside can expose a block",()=>{
 });
 test("choosing a butterfly box refills from the butterfly deck, not the frog deck length",()=>{
  const levelId="garden-02",s=createGame(levelId),deck=getIncoming(levelId);
- for(let i=0;i<Math.min(deck.length,TRAY_SIZE*TRAY_SIZE+4);i++){
-  const column=s.tray[0].findIndex(index=>index!==null);
+ for(let i=0;i<deck.length;i++){
+  let column=i%TRAY_SIZE;
+  if(s.tray[0][column]===null)column=s.tray[0].findIndex(index=>index!==null);
   if(column<0)break;
   assert.equal(chooseTopColumn(s,column),true);
  }
