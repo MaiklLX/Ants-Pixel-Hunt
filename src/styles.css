@@ -47,7 +47,10 @@ h1{font-size:23px;line-height:1;margin:0;letter-spacing:2px;color:#56835e;font-w
 .choice-status{font-size:10px;color:#829984;margin:0}
 .choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(3,minmax(67px,auto));gap:7px}
 .choice-card{min-width:0;min-height:67px;border:1px solid #d3e4ce;border-radius:14px;background:linear-gradient(155deg,#fff,#f2f8ed);color:#45674c;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:8px 4px;box-shadow:0 3px 9px #527e4810;transition:transform .12s,border-color .12s,box-shadow .12s}
-.choice-card:not(:disabled):active{transform:scale(.97)}\n.choice-card.locked{background:linear-gradient(155deg,#f4f8ef,#e8f0e4);border-style:dashed;border-color:#dce7d8;box-shadow:none;opacity:.78}\n.choice-card.locked .choice-number{color:#a4b3a1}\n.choice-card.empty-box{font-size:10px;color:#9bac98;justify-content:center}
+.choice-card:not(:disabled):active{transform:scale(.97)}
+.choice-card.locked{background:linear-gradient(155deg,#f4f8ef,#e8f0e4);border-style:dashed;border-color:#dce7d8;box-shadow:none;opacity:.78}
+.choice-card.locked .choice-number{color:#a4b3a1}
+.choice-card.empty-box{font-size:10px;color:#9bac98;justify-content:center}
 .choice-card:disabled{opacity:.55}
 .choice-number{font-size:8px;letter-spacing:1px;color:#9aaf96;font-weight:850}
 .ant-dots{font-size:12px;letter-spacing:1px;color:var(--ant-color);text-shadow:0 1px 0 #fff}
