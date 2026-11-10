@@ -115,10 +115,15 @@ function buildIncoming(board){
  while(pending){pending=false;for(const color of colors){const box=queues[color].shift();if(box){deck.push(box);pending=true;}}}
  return deck;
 }
-export function getIncoming(levelId="meadow-01"){return buildIncoming(createArtworkBoard(levelId));}
+const incomingCache=new Map();
+export function getIncoming(levelId="meadow-01"){
+ const id=getLevel(levelId).id;
+ if(!incomingCache.has(id))incomingCache.set(id,buildIncoming(createArtworkBoard(id)));
+ return incomingCache.get(id);
+}
 export const INCOMING=getIncoming();
 export function createGame(levelId="meadow-01"){
- const board=createArtworkBoard(levelId),incoming=getIncoming(levelId);
+ const board=createArtworkBoard(levelId);
  return {levelId:getLevel(levelId).id,board,slots:Array(SLOT_COUNT).fill(null),
   tray:Array.from({length:TRAY_SIZE},(_,row)=>Array.from({length:TRAY_SIZE},(_,col)=>row*TRAY_SIZE+col)),
   nextContainer:TRAY_SIZE*TRAY_SIZE,remaining:board.reduce((sum,row)=>sum+row.filter(Boolean).length,0),won:false,lost:false,resolving:false,
