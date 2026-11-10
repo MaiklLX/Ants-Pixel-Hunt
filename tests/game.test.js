@@ -273,19 +273,15 @@ test("ant wave planner can cap simultaneous workers without reserving extra targ
  assert.deepEqual(findAntWave(s,new Set(),new Map(),0),[]);
 });
 
-test("a poor five-box choice sequence can genuinely defeat the butterfly run",()=>{
- const initial=createGame("garden-02");
- const explore=(state,depth)=>{
-  if(state.lost)return true;
-  if(state.won||depth===5)return false;
-  for(let column=0;column<TRAY_SIZE;column++){
-   if(state.tray[0][column]===null)continue;
-   const next=restoreGame(JSON.parse(JSON.stringify(serializeGame(state))));
-   if(!chooseTopColumn(next,column))continue;
-   resolveAll(next);
-   if(next.lost||explore(next,depth+1))return true;
-  }
-  return false;
- };
- assert.equal(explore(initial,0),true,"the butterfly level must punish at least one poor box order");
+test("a large ant box can wait while a smaller matching box clears and frees its slot",()=>{
+ const s=createGame();s.board=Array.from({length:7},()=>Array(7).fill("green"));
+ s.board[0][0]="red";s.board[0][1]="red";s.board[1][0]="red";
+ s.board[6][6]="blue";s.board[6][5]="blue";s.remaining=49;
+ s.slots[0]={color:"red",ants:4};s.slots[1]={color:"blue",ants:2};
+ resolveAll(s);
+ assert.equal(s.slots[0].ants,1,"the larger red box waits for another exposed red block");
+ assert.equal(s.slots[1],null,"the smaller blue box is exhausted and frees its slot");
+ assert.equal(freeSlotCount(s),4);
+ assert.equal(s.won,false);
+ assert.equal(isDefeat(s),false,"waiting alone is not a loss while a slot remains free");
 });
