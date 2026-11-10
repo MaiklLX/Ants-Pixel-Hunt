@@ -1,7 +1,7 @@
-const CACHE = "ants-pixel-hunt-shell-v12";
+const CACHE = "ants-pixel-hunt-shell-v13";
 const APP_FILES = [
   "./","./index.html","./manifest.webmanifest","./src/styles.css",
-  "./src/app.js","./src/game.js","./src/storage.js",
+  "./src/app.js","./src/game.js","./src/ant-animation.js","./src/storage.js",
   "./assets/icon-192.svg","./assets/icon-512.svg"
 ];
 self.addEventListener("install",event=>{

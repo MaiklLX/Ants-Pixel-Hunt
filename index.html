@@ -70,20 +70,20 @@
     </section>
 
     <section class="slots-section">
-      <div class="section-line"><h3>СТАРТОВЫЕ ОТСЕКИ</h3><span>ЗАПОЛНЯЮТСЯ ПО ПОРЯДКУ →</span></div>
+      <div class="section-line"><h3>НАША КОЛОНИЯ</h3><span>5 РАБОЧИХ ОТСЕКОВ</span></div>
       <div id="slots" class="slots" aria-label="Пять стартовых отсеков"></div>
     </section>
 
-    <section class="conveyor-section" aria-label="Сортировочная лента">
-      <div class="section-line"><h3>СОРТИРОВОЧНАЯ ЛЕНТА</h3><span id="sorted-count">Отгружено боксов: 0</span></div>
+    <section class="conveyor-section" aria-label="Конвейер доставки">
+      <div class="section-line"><h3>КОНВЕЙЕР</h3><span id="sorted-count">0 доставлено</span></div>
       <div id="conveyor" class="conveyor">
         <span class="conveyor-in">ПРИЁМ</span><div class="belt"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span class="conveyor-out">СКЛАД ↗</span>
       </div>
     </section>
     <section class="choices-section">
-      <div class="section-line"><h3>ВЫБЕРИ БОКС · СЕТКА 3×3</h3><span id="queue-count">8 в очереди</span></div>
-      <p id="choice-status" class="choice-status">Выбирай только верхний ряд · колонка сдвигается вверх</p>
-      <div id="choices" class="choices" aria-label="Девять боксов; доступен только верхний ряд"></div>
+      <div class="section-line"><h3>ВЫБЕРИ БОКС</h3><span id="queue-count">8 в запасе</span></div>
+      <p id="choice-status" class="choice-status">Три колонки · следующие боксы показаны ниже</p>
+      <div id="choices" class="choices" aria-label="Три доступных бокса и превью следующих в каждой колонке"></div>
     </section>
 
     <p id="message" class="message" role="status" aria-live="polite">Выбери бокс с муравьями — они отправятся на поиски пикселей</p>
@@ -101,7 +101,7 @@
       <button id="restart" class="restart-button" type="button"><span aria-hidden="true">↻</span> Начать заново</button>
       <span id="save-status" class="save-status">Сохранение на устройстве</span>
     </div>
-    <footer>Муравьишки · автономная игра <span>v0.7 · конвейерная подача боксов</span></footer>
+    <footer>Муравьишки · маленькие лапки, большие открытия</footer>
     <canvas id="ant-layer" class="ant-layer" aria-hidden="true"></canvas>
   </main>
   <script type="module" src="./src/app.js"></script>

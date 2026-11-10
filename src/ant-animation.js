@@ -7,3 +7,10 @@ export function getAntTripFrame(elapsed,delay,outbound,returning){
  const progress=raw*raw*(3-2*raw);
  return{waiting:false,picked:tripElapsed>=outbound,returningNow,progress,finished:tripElapsed>=outbound+returning};
 }
+
+/** Keep launch staggering bounded; lifetime worker IDs must not create longer waits. */
+export function getAntLaunchDelay(sequence,seed=0){
+ const order=Math.max(0,Math.floor(Number(sequence)||0))%14;
+ const jitter=Math.max(0,Math.min(1,Number(seed)||0))*70;
+ return order*88+jitter;
+}

@@ -1,6 +1,6 @@
 import {COLORS,INCOMING,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,createGame,canChoose,chooseTopColumn,findAntWave,applyAntMove,completeBoxDeparture,serializeGame,restoreGame,isDefeat} from "./game.js";
 import {loadLocal,saveLocal,clearLocal} from "./storage.js";
-import {getAntTripFrame} from "./ant-animation.js";
+import {getAntTripFrame,getAntLaunchDelay} from "./ant-animation.js";
 const $=id=>document.getElementById(id);
 const shell=$("app-shell"),boardEl=$("board"),slotsEl=$("slots"),choicesEl=$("choices"),antLayer=$("ant-layer"),conveyorEl=$("conveyor");
 const boardCtx=boardEl.getContext("2d"),antCtx=antLayer.getContext("2d");
@@ -50,35 +50,33 @@ function renderConveyor(){
 }
 function renderChoices(){
  const oldPositions=new Map();
- for(const node of choicesEl.querySelectorAll("[data-box-index]")){
-  const rect=node.getBoundingClientRect();oldPositions.set(node.dataset.boxIndex,{left:rect.left,top:rect.top});
- }
+ for(const node of choicesEl.querySelectorAll(".choice-card[data-box-index]")){const r=node.getBoundingClientRect();oldPositions.set(node.dataset.boxIndex,{left:r.left,top:r.top});}
  choicesEl.replaceChildren();
- for(let row=0;row<TRAY_SIZE;row++)for(let col=0;col<TRAY_SIZE;col++){
-  const index=state.tray[row][col],box=index===null?null:INCOMING[index],button=document.createElement("button");
-  button.type="button";button.className="choice-card"+(row===0?" selectable":" locked");
+ for(let col=0;col<TRAY_SIZE;col++){
+  const lane=document.createElement("div");lane.className="queue-lane";
+  const index=state.tray[0][col],box=index===null||index===undefined?null:INCOMING[index];
+  const button=document.createElement("button");button.type="button";button.className="choice-card"+(box?" selectable":" empty-box");
   if(index!==null&&index!==undefined)button.dataset.boxIndex=String(index);
-  button.disabled=row!==0||!box||resetting||state.won||state.lost||!canChoose(state);
-  if(box){
-   button.style.setProperty("--ant-color",COLORS[box.color].hex);
-   const pos=document.createElement("span");pos.className="choice-number";pos.textContent=`РЯД ${row+1} · КОЛОНКА ${col+1}`;
-   const dots=document.createElement("span");dots.className="ant-dots";dots.textContent=Array.from({length:Math.min(box.ants,8)},()=>"●").join(" ");
+  button.disabled=!box||resetting||state.won||state.lost||!canChoose(state);
+  if(box){button.style.setProperty("--ant-color",COLORS[box.color].hex);
+   const crate=document.createElement("span");crate.className="choice-crate";crate.textContent="◆";
    const name=document.createElement("strong");name.textContent=COLORS[box.color].name;
-   const count=document.createElement("small");count.textContent=`${box.ants.toLocaleString("ru-RU")} блоков`;
-   button.append(pos,dots,name,count);
-   button.setAttribute("aria-label",row===0?`Выбрать бокс: ${COLORS[box.color].name}, ${box.ants} крупных блоков`:`Закрытый бокс ряда ${row+1}: ${COLORS[box.color].name}, ${box.ants} крупных блоков`);
-  }else{button.classList.add("empty-box");button.textContent="Очередь пуста";}
-  if(row===0)button.addEventListener("click",()=>onChoose(col));
-  choicesEl.append(button);
-  const previous=oldPositions.get(button.dataset.boxIndex);
-  if(previous&&button.dataset.boxIndex!==undefined){
-   const rect=button.getBoundingClientRect(),dx=previous.left-rect.left,dy=previous.top-rect.top;
-   if((dx||dy)&&!window.matchMedia("(prefers-reduced-motion: reduce)").matches)
-    button.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:"translate(0,0)"}],{duration:360,easing:"cubic-bezier(.2,.75,.25,1)"});
+   const count=document.createElement("small");count.textContent=`${box.ants.toLocaleString("ru-RU")} кубиков`;
+   button.append(crate,name,count);button.setAttribute("aria-label",`Выбрать бокс: ${COLORS[box.color].name}, ${box.ants} кубиков`);
+  }else{button.textContent="Очередь закончилась";button.setAttribute("aria-label","В этой колонке больше нет боксов");}
+  button.addEventListener("click",()=>onChoose(col));lane.append(button);
+  const preview=document.createElement("div");preview.className="queue-preview";preview.setAttribute("aria-label","Следующие боксы в колонке");
+  for(let row=1;row<TRAY_SIZE;row++){const nextIndex=state.tray[row][col],nextBox=nextIndex===null||nextIndex===undefined?null:INCOMING[nextIndex];
+   const peek=document.createElement("span");peek.className="queue-peek"+(nextBox?"":" empty");
+   if(nextBox){peek.style.setProperty("--peek-color",COLORS[nextBox.color].hex);peek.title=`Далее: ${COLORS[nextBox.color].name}, ${nextBox.ants} кубиков`;}else peek.title="Очередь закончилась";
+   preview.append(peek);
   }
+  lane.append(preview);choicesEl.append(lane);
+  const old=oldPositions.get(button.dataset.boxIndex);
+  if(old&&button.dataset.boxIndex!==undefined){const r=button.getBoundingClientRect(),dx=old.left-r.left,dy=old.top-r.top;if((dx||dy)&&!window.matchMedia("(prefers-reduced-motion: reduce)").matches)button.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:"translate(0,0)"}],{duration:320,easing:"cubic-bezier(.2,.75,.25,1)"});}
  }
- $("choice-status").textContent="Выбирай верхний ряд · боксы едут по колонкам";
- $("queue-count").textContent=`${Math.max(0,INCOMING.length-state.nextContainer)} в очереди`;
+ $("choice-status").textContent="Выбери один из трёх боксов — дальше муравьишки всё сделают сами";
+ $("queue-count").textContent=`${Math.max(0,INCOMING.length-state.nextContainer)} в запасе`;
 }
 function render(){
  renderBoard();renderSlots();renderChoices();renderConveyor();
@@ -213,7 +211,7 @@ function animateAntTrip(move,index,onPickup=()=>{}){
  const seed=(index*9301+move.target.x*49297+move.target.y*233)%9973/9973;
  const outboundTrail=makeAntTrail(start,end,seed,1),returnTrail=makeAntTrail(end,start,(seed+.371)%1,.72);
  const distance=Math.hypot(end.x-start.x,end.y-start.y);
- const delay=index*175+seed*95,outbound=2050+distance*.82,returning=1800+distance*.68;
+ const delay=getAntLaunchDelay(index,seed),outbound=2050+distance*.82,returning=1800+distance*.68;
  return new Promise(resolve=>{
   activeAnts.set(index,{move,onPickup,resolve,startTime:performance.now(),delay,outbound,returning,outboundTrail,returnTrail});
   if(!antFrame)antFrame=requestAnimationFrame(renderAntFrame);

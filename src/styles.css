@@ -341,3 +341,22 @@ body{background:radial-gradient(ellipse at 50% 0%,#f8fffb 0%,#e9f4eb 54%,#dcebe2
 .result-card .menu-primary,.result-card .menu-secondary{width:100%;min-height:46px}
 .result-card .menu-secondary{background:#fff;color:#718b72}
 @media(prefers-reduced-motion:reduce){.level-progress span{transition:none}}
+
+
+/* KT-036 — simplified friendly mobile HUD. */
+.app-shell{gap:9px;background:linear-gradient(180deg,#f8fffc,#f0f8ed 52%,#eaf4e7)}
+.board-wrap{width:min(100%,min(430px,43dvh));max-height:43dvh;border-radius:24px;padding:8px;background:linear-gradient(145deg,#fff,#dff1e5 65%,#cce7d5);border:1px solid #fff;box-shadow:0 5px 0 #bfdcc6,0 10px 22px #4e80602b}
+.board{border-radius:15px;background:#e7f0df}.board-corners{display:none}
+.slots-section,.choices-section,.conveyor-section{gap:5px}.section-line h3{font-size:10px;letter-spacing:1px;color:#64866b}
+.slots{gap:6px;padding:4px 3px 6px;border-radius:15px;background:linear-gradient(180deg,#e3f0e3,#d2e5d5)}
+.slot{height:54px;border:1px solid #fff;border-bottom:3px solid color-mix(in srgb,var(--box-color,#b9d3b3) 48%,#9db69c);border-radius:12px}.slot .slot-number{font-size:8px;color:#a0b39d}.slot .ant-count{font-size:15px;color:#3f634a}
+.conveyor{height:27px;padding:3px 7px;border-radius:10px;background:linear-gradient(180deg,#eaf5e9,#d5e8d7);border:1px solid #c9dfcd}.conveyor-in,.conveyor-out{font-size:7px;color:#77957b}.belt{height:17px;border-radius:6px}.belt i{width:7px;height:7px;flex-basis:7px}
+.choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:auto;gap:9px;height:auto;max-height:none;min-height:0}
+.queue-lane{min-width:0;display:flex;flex-direction:column;gap:5px}
+.choice-card{width:100%;height:auto;min-height:76px;padding:7px 3px 6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:1px solid #fff;border-bottom:3px solid color-mix(in srgb,var(--ant-color,#c9dfcd) 50%,#a9c5ad);border-radius:14px;background:linear-gradient(150deg,#fff 0%,color-mix(in srgb,var(--ant-color,#eaf5ed) 12%,#fff) 60%,color-mix(in srgb,var(--ant-color,#eaf5ed) 23%,#fff) 100%);box-shadow:0 3px 0 #c6d9c5,0 5px 10px #58745b16}
+.choice-card .choice-crate{display:grid;place-items:center;width:25px;height:25px;border-radius:8px;background:linear-gradient(145deg,#fff,color-mix(in srgb,var(--ant-color) 25%,#fff));color:var(--ant-color);font-size:18px}
+.choice-card strong{font-size:11px;color:color-mix(in srgb,var(--ant-color,#64886b) 82%,#294c38)}.choice-card small{font-size:8px;color:#829889}
+.queue-preview{display:flex;justify-content:center;gap:5px;min-height:12px}.queue-peek{width:24px;height:9px;border-radius:4px;background:color-mix(in srgb,var(--peek-color) 70%,#fff);border:1px solid color-mix(in srgb,var(--peek-color) 45%,#fff)}.queue-peek.empty{background:#edf2e9;border:1px dashed #d3dfd0}
+.choice-status{font-size:9px;color:#8ba08e;margin:0 2px}.message{background:transparent;border:0;box-shadow:none;padding:2px 0;font-size:10px}footer{display:none}
+@media(max-width:599px){.app-shell{gap:7px;padding-left:12px;padding-right:12px}.board-wrap{width:min(100%,40dvh,370px);max-height:40dvh;padding:6px;border-radius:19px}.slots{gap:5px;padding:3px 2px 5px}.slot{height:clamp(43px,6.4dvh,52px);border-radius:10px}.slot .ant-count{font-size:13px}.choices{height:auto;max-height:none;grid-template-rows:auto;gap:7px}.choice-card{min-height:70px;padding:5px 2px;gap:2px}.choice-card .choice-crate{width:22px;height:22px;font-size:16px}.choice-card strong{font-size:10px}.choice-card small{font-size:7px}.queue-peek{width:20px;height:8px}.choice-status{font-size:8px}}
+@media(max-height:720px) and (max-width:599px){.app-shell{gap:5px}.board-wrap{width:min(100%,34dvh,310px);max-height:34dvh}.slot{height:42px}.choice-card{min-height:61px}.conveyor{height:23px}}
