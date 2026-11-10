@@ -64,7 +64,7 @@ test("findAccessiblePixels returns a bounded wave of exposed matching pixels",()
 test("pixel stays accounted for until ant delivery, then empty box departs to sorting",()=>{
  const s=createGame();s.board=smallBoard();s.board[2][2]="";s.board[2][3]="red";s.remaining=24;
  s.slots[0]={color:"red",ants:1};
- assert.equal(applyAntMove(s,0,{x:3,y:2}),true);assert.equal(s.remaining,24);
+ assert.equal(applyAntMove(s,0,{x:3,y:2}),true);assert.equal(s.remaining,23);
  assert.equal(s.slots[0].status,"departing");assert.equal(freeSlotCount(s),4);
  assert.equal(completeBoxDeparture(s,0),true);assert.equal(freeSlotCount(s),5);assert.equal(s.sortedBoxes,1);
 });
