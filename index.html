@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#101a16">
+  <meta name="theme-color" content="#f3f8ed">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Муравьишки">
   <link rel="apple-touch-icon" href="./assets/icon-192.svg">
-  <meta name="description" content="Муравьишки: Пиксельная охота — цветная пиксельная головоломка">
+  <meta name="description" content="Муравьишки: Пиксельная охота — добрая цветная пиксельная головоломка">
   <link rel="manifest" href="%BASE_URL%manifest.webmanifest">
   <link rel="stylesheet" href="./src/styles.css">
   <title>Муравьишки: Пиксельная охота</title>
@@ -22,8 +22,8 @@
     </header>
 
     <section class="level-heading">
-      <span class="level-kicker">ПОЛЕВАЯ ОПЕРАЦИЯ</span>
-      <h2>Уровень 1</h2>
+      <span class="level-kicker">ПОЛЯНКА № 1</span>
+      <h2>Цветочная поляна</h2>
       <p id="board-status" class="board-status">Пикселей осталось: 49</p>
     </section>
 
@@ -34,22 +34,22 @@
     </section>
 
     <section class="slots-section">
-      <div class="section-line"><h3>ПУСКОВЫЕ ЯЧЕЙКИ</h3><span>ПРИОРИТЕТ 1 → 5</span></div>
-      <div id="slots" class="slots" aria-label="Пять пусковых ячеек"></div>
+      <div class="section-line"><h3>СТАРТОВЫЕ ОТСЕКИ</h3><span>ЗАПОЛНЯЮТСЯ ПО ПОРЯДКУ →</span></div>
+      <div id="slots" class="slots" aria-label="Пять стартовых отсеков"></div>
     </section>
 
-    <section class="incoming-panel">
-      <div class="incoming-icon" aria-hidden="true">📦</div>
-      <div class="incoming-copy"><span class="section-label">СЛЕДУЮЩИЙ КОНТЕЙНЕР</span><strong id="queue-status">Жёлтые · 3 муравья</strong></div>
-      <div id="queue-count" class="queue-count">1 / 17</div>
+    <section class="choices-section">
+      <div class="section-line"><h3>КОГО ОТПРАВИМ НА ОХОТУ?</h3><span id="queue-count">3 / 17</span></div>
+      <p id="choice-status" class="choice-status">Выбери один из трёх боксов</p>
+      <div id="choices" class="choices" aria-label="Три доступных бокса с муравьями"></div>
     </section>
 
-    <p id="message" class="message" role="status" aria-live="polite">Свободных пусковых ячеек: 5 из 5</p>
+    <p id="message" class="message" role="status" aria-live="polite">Выбери бокс с муравьями — они отправятся на поиски пикселей</p>
     <div class="bottom-actions">
       <button id="restart" class="restart-button" type="button"><span aria-hidden="true">↻</span> Начать заново</button>
       <span id="save-status" class="save-status">Сохранение на устройстве</span>
     </div>
-    <footer>Муравьишки · автономная игра <span>v0.1 · браузерная сборка</span></footer>
+    <footer>Муравьишки · автономная игра <span>v0.2 · выбор боксов</span></footer>
   </main>
   <script type="module" src="./src/app.js"></script>
 </body>
