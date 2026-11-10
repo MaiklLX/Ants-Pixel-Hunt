@@ -40,9 +40,9 @@
 - DOM/CSS и Web Animations API используются для интерфейсных переходов.
 
 ## Сохранение
-- src/storage.js: IndexedDB database ants-pixel-hunt, store saves, key level-1.
-- Fallback — localStorage.
-- Любая смена схемы должна иметь обратную миграцию/совместимость; не очищать сохранения при обычном обновлении.
+- Незавершённая партия намеренно не сохраняется.
+- В localStorage хранится только список завершённых полянок кампании (ants-campaign-progress).
+- src/storage.js и сериализация состояния в src/game.js — legacy-код; текущий src/app.js их не использует.
 
 ## PWA и CI
 - public/manifest.webmanifest — манифест.
