@@ -29,6 +29,13 @@ test("each column advances independently and exhausted columns show empty cells"
 test("tray choices remain available while ants are resolving",()=>{
  const s=createGame();s.resolving=true;assert.equal(canChoose(s),true);assert.equal(chooseTopColumn(s,0),true);
 });
+test("findAccessiblePixels returns a bounded wave of matching exposed pixels",()=>{
+ const board=Array.from({length:SIZE},()=>Array(SIZE).fill("green"));
+ board[2][2]="";board[2][3]="red";board[3][3]="red";board[4][4]="blue";
+ assert.deepEqual(findAccessiblePixels(board,"red",1),[{x:3,y:2}]);
+ assert.deepEqual(findAccessiblePixels(board,"red",5),[{x:3,y:2},{x:3,y:3}]);
+ assert.deepEqual(findAccessiblePixels(board,"blue",5),[]);
+});
 test("pixels are accessible at the edge or beside an empty orthogonal neighbour",()=>{
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill("green"));board[0][0]="red";board[3][3]="purple";
  assert.equal(isAccessible(board,0,0),true);assert.equal(isAccessible(board,3,3),false);
