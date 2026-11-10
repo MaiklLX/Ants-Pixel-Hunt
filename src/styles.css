@@ -93,9 +93,9 @@ footer span{color:#a6b5a2}
 .topbar{order:0}
 .level-heading{order:1}
 .board-wrap{order:2}
-.slots-section{order:3}
-.choices-section{order:4}
-.conveyor-section{order:5}
+.choices-section{order:3}
+.conveyor-section{order:4}
+.slots-section{order:5}
 .message{order:6}
 .bottom-actions{order:7}
 footer{order:8}
