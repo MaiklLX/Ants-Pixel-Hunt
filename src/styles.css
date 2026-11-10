@@ -723,3 +723,7 @@ body{background:radial-gradient(ellipse at 50% 0%,#fffdf2 0%,#f1faee 42%,#e4f2e7
  .sealed-crate{font-size:18px}.sealed-progress{font-size:9px!important}
  .peek-lock{width:17px;height:17px;font-size:10px}
 }
+
+@keyframes sealed-crate-reveal{0%{transform:scale(.82) rotate(-4deg);filter:brightness(1.25)}55%{transform:scale(1.07) rotate(2deg)}100%{transform:scale(1);filter:none}}
+.choice-card.sealed-reveal,.queue-peek.sealed-reveal{animation:sealed-crate-reveal .48s cubic-bezier(.2,.8,.25,1) both}
+@media(prefers-reduced-motion:reduce){.choice-card.sealed-reveal,.queue-peek.sealed-reveal{animation:none}}
