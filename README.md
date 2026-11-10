@@ -63,6 +63,7 @@ npx cap open android
 - [Установка PWA](docs/WEB_INSTALL.md)
 - [KT-021/022 — большое поле и работа колонии](docs/KT-021_LARGE_ARTWORK_AND_FACTORY_LOOP.md)
 - [KT-024 — крупные пиксельные блоки](docs/KT-024_LARGE_PIXEL_BLOCKS.md)
+- [KT-025 — сетка 50×50 и детализация](docs/KT-025_PIXEL_GRID_50.md)
 - [Исходная игровая спецификация](docs/GAMEPLAY_SPEC.md)
 
 ## Принципы
