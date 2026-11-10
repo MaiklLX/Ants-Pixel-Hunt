@@ -89,6 +89,9 @@ function curveControl(a,b,bend){
  const dx=b.x-a.x,dy=b.y-a.y,len=Math.max(1,Math.hypot(dx,dy));
  return{x:(a.x+b.x)/2-(dy/len)*bend,y:(a.y+b.y)/2+(dx/len)*bend};
 }
+function quadTangent(a,c,b,t){
+ return{x:2*((1-t)*(c.x-a.x)+t*(b.x-c.x)),y:2*((1-t)*(c.y-a.y)+t*(b.y-c.y))};
+}
 const antSpriteCache=new Map();
 function createAntSprite(color,carrying,gait){
  const key=color+":"+Number(carrying)+":"+gait;
@@ -115,10 +118,11 @@ function createAntSprite(color,carrying,gait){
  if(carrying){ctx.fillStyle="#f6d36e";ctx.strokeStyle="#8e6c2d";ctx.lineWidth=.7;ctx.beginPath();ctx.arc(-6.3,2.2,1.8,0,Math.PI*2);ctx.fill();ctx.stroke();}
  antSpriteCache.set(key,sprite);return sprite;
 }
-function drawAnt(ctx,point,color,carrying,index){
+function drawAnt(ctx,point,color,carrying,index,direction=0){
  const phase=performance.now()*.012+index*1.73;
  const gait=Math.floor(phase/2)%4;
- ctx.save();ctx.translate(point.x,point.y);ctx.rotate(Math.sin(phase*.31+index)*.12);
+ ctx.save();ctx.translate(point.x,point.y);
+ ctx.rotate(direction+Math.sin(phase*.31+index)*.045);
  ctx.drawImage(createAntSprite(color,carrying,gait),-13,-12);
  ctx.restore();
 }
@@ -151,15 +155,19 @@ async function animateAntWave(moves){
      }
      finished++;return;
     }
-    let point,carrying=false;
+    let point,carrying=false,direction=0;
     if(elapsed<outboundEnd){
      const t=Math.min(1,elapsed/outboundEnd);point=quadPoint(runner.start,runner.control,runner.end,t);
-    }else if(elapsed<returnStart){point=runner.end;carrying=true;}
-    else{
+     const tangent=quadTangent(runner.start,runner.control,runner.end,t);direction=Math.atan2(tangent.y,tangent.x);
+    }else if(elapsed<returnStart){
+     point=runner.end;carrying=true;
+     const tangent=quadTangent(runner.start,runner.control,runner.end,1);direction=Math.atan2(tangent.y,tangent.x);
+    }else{
      carrying=true;const t=Math.min(1,(elapsed-returnStart)/runner.returning);
      point=quadPoint(runner.end,runner.returnControl,runner.start,t);
+     const tangent=quadTangent(runner.end,runner.returnControl,runner.start,t);direction=Math.atan2(tangent.y,tangent.x);
     }
-    drawAnt(antCtx,point,runner.move.color,carrying,index);
+    drawAnt(antCtx,point,runner.move.color,carrying,index,direction);
    });
    if(finished===runners.length){antCtx.clearRect(0,0,rect.width,rect.height);resolve();return;}
    antFrame=requestAnimationFrame(draw);
