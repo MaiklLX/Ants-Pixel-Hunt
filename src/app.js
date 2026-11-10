@@ -26,10 +26,18 @@ function renderSlots(){
  });
 }
 function renderChoices(){
+ // Keep old card positions so the three rows visibly cascade upward after a pick.
+ const oldPositions=new Map();
+ for(const node of choicesEl.querySelectorAll("[data-box-index]")){
+  const rect=node.getBoundingClientRect();oldPositions.set(node.dataset.boxIndex,{left:rect.left,top:rect.top});
+ }
  choicesEl.replaceChildren();
  for(let row=0;row<TRAY_SIZE;row++)for(let col=0;col<TRAY_SIZE;col++){
   const index=state.tray[row][col],box=index===null?null:INCOMING[index],button=document.createElement("button");
   button.type="button";button.className="choice-card"+(row===0?" selectable":" locked");
+  if(index!==null&&index!==undefined)button.dataset.boxIndex=String(index);
+  // Deliberately do not disable the rack while an ant is travelling: the player can
+  // fill all remaining start compartments during the same animation.
   button.disabled=row!==0||!box||resetting||state.won||state.lost||!canChoose(state);
   if(box){
    button.style.setProperty("--ant-color",COLORS[box.color].hex);
@@ -38,12 +46,19 @@ function renderChoices(){
    const name=document.createElement("strong");name.textContent=COLORS[box.color].name;
    const count=document.createElement("small");count.textContent=`${box.ants} ${box.ants===1?"муравей":box.ants<5?"муравья":"муравьёв"}`;
    button.append(pos,dots,name,count);
-   button.setAttribute("aria-label",row===0?`Выбрать верхний бокс: ${COLORS[box.color].name}, ${box.ants} муравьёв`:`Закрытый бокс второго ряда: ${COLORS[box.color].name}, ${box.ants} муравьёв`);
+   button.setAttribute("aria-label",row===0?`Выбрать верхний бокс: ${COLORS[box.color].name}, ${box.ants} муравьёв`:`Закрытый бокс ряда ${row+1}: ${COLORS[box.color].name}, ${box.ants} муравьёв`);
   }else{button.classList.add("empty-box");button.textContent="Очередь пуста";}
   if(row===0)button.addEventListener("click",()=>onChoose(col));
   choicesEl.append(button);
+  const previous=oldPositions.get(button.dataset.boxIndex);
+  if(previous&&button.dataset.boxIndex!==undefined){
+   const rect=button.getBoundingClientRect(),dx=previous.left-rect.left,dy=previous.top-rect.top;
+   if((dx||dy)&&!window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+    button.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:"translate(0,0)"}],{duration:210,easing:"cubic-bezier(.2,.75,.25,1)"});
+   }
+  }
  }
- $("choice-status").textContent="Выбирай только верхний ряд · колонка сдвигается вверх";
+ $("choice-status").textContent="Выбирай верхний ряд · каждый столбец сдвигается вверх";
  $("queue-count").textContent=`${Math.max(0,INCOMING.length-state.nextContainer)} в очереди`;
 }
 function render(){
@@ -84,6 +99,8 @@ async function runResolver(){
  if(resolverRunning||state.won||state.lost)return;
  resolverRunning=true;
  try{
+  // Selection remains live during each trip. After the ant returns, the next move
+  // is recalculated from the current board and all newly filled slots.
   while(!resetting&&state.remaining>0){
    const move=findNextMove(state);
    if(!move)break;
@@ -104,16 +121,17 @@ async function runResolver(){
    else if(isDefeat(state)){state.lost=true;state.message="Поражение: пять отсеков заняты, доступных ходов нет.";}
    else state.message=`Можно выбрать следующий бокс · свободно отсеков: ${state.slots.filter(box=>!box).length}`;
    render();await save();
-   // A choice may have arrived as the resolver was finishing.
    if(findNextMove(state)&&!state.lost)queueMicrotask(runResolver);
   }
  }
 }
 function onChoose(column){
- if(resetting||!chooseTopColumn(state,column))return;
+ if(resetting||!canChoose(state)||!chooseTopColumn(state,column))return;
  render();
- save();
- runResolver();
+ void save();
+ // If an animation is active, its resolver loop will pick up this new box on
+ // the next turn. Otherwise start the resolver immediately.
+ if(!resolverRunning)void runResolver();
 }
 async function restart(){
  if(resetting||resolverRunning)return;
