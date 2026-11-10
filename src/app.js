@@ -101,8 +101,9 @@ function renderChoices(){
  for(let col=0;col<TRAY_SIZE;col++){
   const lane=document.createElement("div");lane.className="queue-lane";
   const index=state.tray[0][col],box=index===null||index===undefined?null:getIncoming(state.levelId)[index];
-  const sealed=box&&isLockedBox(state,index);
-  const button=document.createElement("button");button.type="button";button.className="choice-card"+(sealed?" sealed-box":box?" selectable":" empty-box");
+  const sealed=box&&isLockedBox(state,index),reveal=box&&state.lockedBoxOpen&&!state.lockedBoxRevealPlayed&&index===8;
+  const button=document.createElement("button");button.type="button";button.className="choice-card"+(sealed?" sealed-box":box?" selectable":" empty-box")+(reveal?" sealed-reveal":"");
+  if(reveal)state.lockedBoxRevealPlayed=true;
   if(index!==null&&index!==undefined)button.dataset.boxIndex=String(index);
   button.disabled=!box||sealed||resetting||resetAfterMenu||state.won||state.lost||!canChoose(state);
   if(sealed){
@@ -121,7 +122,8 @@ function renderChoices(){
   for(let row=1;row<TRAY_SIZE;row++){const nextIndex=state.tray[row][col],nextBox=nextIndex===null||nextIndex===undefined?null:getIncoming(state.levelId)[nextIndex];
    const peek=document.createElement("span");peek.className="queue-peek"+(nextBox?"":" empty");peek.dataset.queueStep=String(row);
    const order=document.createElement("span");order.className="peek-order";order.textContent=String(row);peek.append(order);
-   const sealedPreview=nextBox&&isLockedBox(state,nextIndex);
+   const sealedPreview=nextBox&&isLockedBox(state,nextIndex),revealPreview=nextBox&&state.lockedBoxOpen&&!state.lockedBoxRevealPlayed&&nextIndex===8;
+   if(revealPreview){peek.classList.add("sealed-reveal");state.lockedBoxRevealPlayed=true;}
    if(sealedPreview){
     peek.classList.add("sealed-peek");const lock=document.createElement("span");lock.className="peek-lock";lock.textContent="🔒";
     const progress=document.createElement("small");progress.className="peek-count";progress.textContent=`${(state.lockProgressColumns||[]).length}/2`;
