@@ -77,6 +77,9 @@ function slotCenter(index){
 function makeAnt(color){
  const ant=document.createElement("span");ant.className="ant-runner";
  ant.style.setProperty("--ant-color",COLORS[color].hex);
+ const cellSize=boardEl.getBoundingClientRect().width/SIZE;
+ const dotSize=Math.max(2,Math.min(7,cellSize*.52));
+ ant.style.width=dotSize+"px";ant.style.height=dotSize+"px";
  return ant;
 }
 function curveFrames(start,end,offset,from,to){
