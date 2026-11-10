@@ -93,11 +93,11 @@ test("legacy save with three candidates can be upgraded to a 3x3 tray",()=>{
 });
 
 test("each color layer can expose new pixels without duplicate reservations",()=>{
- const board=Array.from({length:7},()=>Array(7).fill(""));
- // A compact nested-color test: outer green ring, blue middle ring, purple core.
- for(let y=1;y<=5;y++)for(let x=1;x<=5;x++){
-  const d=Math.min(x-1,y-1,5-x,5-y);
-  board[y][x]=d===0?"green":d===1?"blue":"purple";
+ const board=Array.from({length:9},()=>Array(9).fill(""));
+ // Nested layers: two green rings, then blue, then a purple core.
+ for(let y=1;y<=7;y++)for(let x=1;x<=7;x++){
+  const d=Math.min(x-1,y-1,7-x,7-y);
+  board[y][x]=d<=1?"green":d===2?"blue":"purple";
  }
  const removed=new Set();
  const takeWave=(color,limit)=>{
@@ -110,7 +110,7 @@ test("each color layer can expose new pixels without duplicate reservations",()=
  assert.equal(findAccessiblePixels(board,"purple",900).length,0);
  assert.ok(takeWave("blue",900)>0);
  assert.ok(takeWave("purple",900)>0);
- assert.equal(removed.size,25);
+ assert.equal(removed.size,49);
 });
 test("a full wave never assigns the same board cell to two ants",()=>{
  const s=createGame();s.board=Array.from({length:9},()=>Array(9).fill(""));
