@@ -40,7 +40,7 @@ export function isAccessible(board,x,y){
  });
 }
 export function findAccessiblePixel(board,color){
- for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)if(board[y][x]===color&&isAccessible(board,x,y))return{x,y};
+ for(let y=0;y<board.length;y++)for(let x=0;x<board[y].length;x++)if(board[y][x]===color&&isAccessible(board,x,y))return{x,y};
  return null;
 }
 export function findAccessiblePixels(board,color,limit=Infinity){
