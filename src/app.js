@@ -159,7 +159,7 @@ async function animateBoxDepartures(slotIndices){
     const lift=quadPoint(item.start,{x:item.start.x-22,y:(item.start.y+belt.y)/2},{x:item.start.x,y:belt.y},Math.min(1,t*2.2));
     const progress=Math.max(0,(t-.42)/.58);
     const point={x:lift.x+(shellRect.width+35-lift.x)*progress,y:lift.y+(belt.y-lift.y)*progress};
-    drawTransportBox(antCtx,point,item.color);
+    drawTransportBox(point,item.color);
    });
    if(finished===starts.length){antCtx.clearRect(0,0,shellRect.width,shellRect.height);resolve();return;}
    antFrame=requestAnimationFrame(frame);
