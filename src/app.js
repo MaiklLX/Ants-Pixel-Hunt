@@ -389,7 +389,8 @@ async function runSlotWorker(slot,target,workerId){
  const key=target.x+","+target.y;
  try{
   await animateAntTrip({slot,color:state.slots[slot]?.color,target},workerId,()=>{
-   const worker=workerPromises.get(workerId);if(worker)worker.phase="returning";\n   colony=collectCube(colony);updateEconomy();
+   const worker=workerPromises.get(workerId);if(worker)worker.phase="returning";
+   colony=collectCube(colony);updateEconomy();
    reservedTargets.delete(key);
   });
  }catch(error){console.error("Ant worker interrupted",slot,error);}
@@ -525,7 +526,8 @@ async function boot(){
    if(registration.waiting)registration.waiting.postMessage({type:"SKIP_WAITING"});
   }catch(error){console.warn("PWA update check failed",error);}
  }
- $("save-status").textContent="Партия не сохраняется · прогресс колонии сохраняется";\n updateEconomy();
+ $("save-status").textContent="Партия не сохраняется · прогресс колонии сохраняется";
+ updateEconomy();
 }
 $("menu-toggle").addEventListener("click",showMainMenu);
 $("start-game").addEventListener("click",startGame);
@@ -533,7 +535,10 @@ $("new-game").addEventListener("click",()=>startFreshGame(state.levelId));
 $("result-retry").addEventListener("click",()=>startFreshGame(state.levelId));
 $("result-next").addEventListener("click",()=>{const index=LEVELS.findIndex(level=>level.id===state.levelId),next=LEVELS[index+1];if(next&&isLevelUnlocked(next))void startFreshGame(next.id);});
 $("result-menu").addEventListener("click",showMainMenu);
-$("nest-open").addEventListener("click",openNest);\n$("nest-close").addEventListener("click",closeNest);\n$("nest-overlay").addEventListener("click",event=>{if(event.target===$("nest-overlay"))closeNest();});\n$("how-to-play").addEventListener("click",()=>{
+$("nest-open").addEventListener("click",openNest);
+$("nest-close").addEventListener("click",closeNest);
+$("nest-overlay").addEventListener("click",event=>{if(event.target===$("nest-overlay"))closeNest();});
+$("how-to-play").addEventListener("click",()=>{
  const panel=$("how-panel");panel.hidden=!panel.hidden;
  $("how-to-play").textContent=panel.hidden?"Как играть?":"Свернуть правила";
 });
