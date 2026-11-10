@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {createGame,INITIAL_BOARD,INCOMING,isAccessible,findAccessiblePixel,chooseTopColumn,findNextMove,applyAntMove,resolveAll,freeSlotCount,isDefeat,SIZE,SLOT_COUNT,TRAY_SIZE,canChoose,restoreGame,serializeGame} from "../src/game.js";
+import {createGame,INITIAL_BOARD,INCOMING,isAccessible,findAccessiblePixel,findAccessiblePixels,findAntWave,chooseTopColumn,findNextMove,applyAntMove,resolveAll,freeSlotCount,isDefeat,SIZE,SLOT_COUNT,TRAY_SIZE,canChoose,restoreGame,serializeGame} from "../src/game.js";
 test("level has a 7x7 board, five launch slots and a 3x3 box rack",()=>{
  const s=createGame();assert.equal(INITIAL_BOARD.length,SIZE);assert.ok(INITIAL_BOARD.every(r=>r.length===SIZE));
  assert.equal(s.slots.length,SLOT_COUNT);assert.equal(s.tray.length,TRAY_SIZE);assert.ok(s.tray.every(r=>r.length===TRAY_SIZE));
@@ -28,6 +28,38 @@ test("each column advances independently and exhausted columns show empty cells"
 });
 test("tray choices remain available while ants are resolving",()=>{
  const s=createGame();s.resolving=true;assert.equal(canChoose(s),true);assert.equal(chooseTopColumn(s,0),true);
+});
+test("accessibility checks use the actual board dimensions, including a 250x250 field",()=>{
+ const board=Array.from({length:250},()=>Array(250).fill("green"));
+ board[125][125]="red";board[0][249]="red";
+ assert.equal(isAccessible(board,125,125),false);
+ assert.equal(isAccessible(board,249,0),true);
+ board[125][124]="";
+ assert.equal(isAccessible(board,125,125),true);
+});
+test("250x250 board survives save restoration without falling back to the demo field",()=>{
+ const board=Array.from({length:250},()=>Array(250).fill("green"));
+ board[0][0]="red";
+ const saved={board,slots:Array(5).fill(null),tray:[[0,1,2],[3,4,5],[6,7,8]],nextContainer:9,remaining:62500};
+ const restored=restoreGame(saved);
+ assert.equal(restored.board.length,250);
+ assert.equal(restored.board[249].length,250);
+ assert.deepEqual(findAccessiblePixel(restored.board,"red"),{x:0,y:0});
+});
+test("swarm planner sends eligible ants together and reserves targets left-to-right",()=>{
+ const s=createGame();s.board=Array.from({length:SIZE},()=>Array(SIZE).fill("green"));
+ s.board[0][0]="red";s.board[0][1]="red";s.board[0][2]="red";s.remaining=49;
+ s.slots[0]={color:"red",ants:2};s.slots[3]={color:"red",ants:2};
+ const wave=findAntWave(s);
+ assert.deepEqual(wave.map(move=>[move.slot,move.target.x,move.target.y]),[[0,0,0],[0,1,0],[3,2,0]]);
+ assert.equal(new Set(wave.map(move=>move.target.x+","+move.target.y)).size,wave.length);
+});
+test("findAccessiblePixels returns a bounded wave of matching exposed pixels",()=>{
+ const board=Array.from({length:SIZE},()=>Array(SIZE).fill("green"));
+ board[2][2]="";board[2][3]="red";board[3][3]="red";board[3][4]="";
+ assert.deepEqual(findAccessiblePixels(board,"red",1),[{x:3,y:2}]);
+ assert.deepEqual(findAccessiblePixels(board,"red",5),[{x:3,y:2},{x:3,y:3}]);
+ assert.deepEqual(findAccessiblePixels(board,"blue",5),[]);
 });
 test("pixels are accessible at the edge or beside an empty orthogonal neighbour",()=>{
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill("green"));board[0][0]="red";board[3][3]="purple";
