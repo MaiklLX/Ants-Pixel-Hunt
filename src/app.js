@@ -224,7 +224,7 @@ function renderAntFrame(timestamp){
   if(phase.picked&&!ant.picked){
    ant.picked=true;
    if(applyAntMove(state,ant.move.slot,ant.move.target))ant.onPickup();
-   renderBoardAfterPickup(ant.move.target);renderSlots();
+   renderBoardAfterPickup(ant.move.target);
    $("message").textContent="Муравьишки собирают кубики по извилистым тропинкам";
    kickColony();
   }
