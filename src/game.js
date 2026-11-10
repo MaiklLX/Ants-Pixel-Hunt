@@ -14,9 +14,10 @@ function inWing(x,y){
  return ellipse(x,y,86,88,48,43)||ellipse(x,y,164,88,48,43)||
   ellipse(x,y,94,137,36,43)||ellipse(x,y,156,137,36,43);
 }
-function inFlowerPetal(x,y,cx,cy,angle){
- const px=cx+Math.cos(angle)*23,py=cy+Math.sin(angle)*23;
- return ellipse(x,y,px,py,10,16);
+const flowerPetals=Array.from({length:8},(_,p)=>({x:125+Math.cos(p*Math.PI/4)*23,y:211+Math.sin(p*Math.PI/4)*23}));
+function lineDistance(px,py,x1,y1,x2,y2){
+ const dx=x2-x1,dy=y2-y1,t=Math.max(0,Math.min(1,((px-x1)*dx+(py-y1)*dy)/(dx*dx+dy*dy)));
+ return Math.hypot(px-(x1+t*dx),py-(y1+t*dy));
 }
 export function createArtworkBoard(){
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill("green"));
@@ -34,13 +35,9 @@ export function createArtworkBoard(){
   }
   // Body, head and antennae.
   if(ellipse(x,y,125,111,6,57)||circle(x,y,125,52,9))board[y][x]="red";
-  const lineDistance=(px,py,x1,y1,x2,y2)=>{
-   const dx=x2-x1,dy=y2-y1,t=Math.max(0,Math.min(1,((px-x1)*dx+(py-y1)*dy)/(dx*dx+dy*dy)));
-   return Math.hypot(px-(x1+t*dx),py-(y1+t*dy));
-  };
   if(lineDistance(x,y,122,47,109,31)<1.7||lineDistance(x,y,128,47,141,31)<1.7)board[y][x]="red";
   // A bright flower under the butterfly makes the level read as one scene.
-  for(let p=0;p<8;p++)if(inFlowerPetal(x,y,125,211,p*Math.PI/4))board[y][x]="yellow";
+  if(flowerPetals.some(p=>ellipse(x,y,p.x,p.y,10,16)))board[y][x]="yellow";
   if(circle(x,y,125,211,12))board[y][x]="red";
   // Two leaves on the stem.
   if(ellipse(x,y,105,233,17,7)&&x<112)board[y][x]="blue";
