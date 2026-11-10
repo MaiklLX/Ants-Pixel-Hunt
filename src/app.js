@@ -1,11 +1,28 @@
 import {COLORS,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,LEVELS,getLevel,getIncoming,createGame,canChoose,chooseTopColumn,findAntWave,applyAntMove,completeBoxDeparture,isDefeat,getExposedPixels,countOutboundBySlot,countSlotWorkers,canDepartSlot} from "./game.js";
 import {getAntTripFrame,getAntLaunchDelay} from "./ant-animation.js";
 import {isCampaignLevelUnlocked,getNextCampaignLevel} from "./campaign.js";
+import {BUILDINGS,createEconomy,normalizeEconomy,collectCube,completeMeadow,purchaseBuilding,buildingCost} from "./economy.js";
 const $=id=>document.getElementById(id);
 const shell=$("app-shell"),boardEl=$("board"),slotsEl=$("slots"),choicesEl=$("choices"),antLayer=$("ant-layer"),conveyorEl=$("conveyor");
 const boardCtx=boardEl.getContext("2d"),antCtx=antLayer.getContext("2d");
 let state=createGame(),resolverRunning=false,resetting=false,resetAfterMenu=false,antFrame=0,antCanvasWidth=0,antCanvasHeight=0,gameStarted=false,totalBlocks=state.remaining;
 const CAMPAIGN_KEY="ants-campaign-progress";
+const ECONOMY_STORAGE_KEY="ants-colony-economy-v1";
+function loadEconomy(){try{return normalizeEconomy(JSON.parse(localStorage.getItem(ECONOMY_STORAGE_KEY)||"null"));}catch{return createEconomy();}}
+let colony=loadEconomy();
+function updateEconomy(){try{localStorage.setItem(ECONOMY_STORAGE_KEY,JSON.stringify(colony));}catch{}const pill=$("nest-nectar");if(pill)pill.textContent=String(colony.nectar);if(!$("nest-overlay")?.hidden)renderNest();}
+function renderNest(){
+ const balance=$("nest-balance");if(balance)balance.textContent=colony.nectar.toLocaleString("ru-RU");
+ const progress=$("nest-progress");if(progress)progress.textContent=`${colony.progress}/10 кубиков до следующего нектара · собрано ${colony.lifetime.toLocaleString("ru-RU")}`;
+ const list=$("nest-buildings");if(!list)return;list.replaceChildren();
+ for(const building of BUILDINGS){const level=colony.buildings[building.id],cost=buildingCost(building,level),card=document.createElement("article");card.className="nest-building";
+  const icon=document.createElement("span");icon.className="nest-building-icon";icon.textContent=building.icon;
+  const copy=document.createElement("div");copy.className="nest-building-copy";const title=document.createElement("strong");title.textContent=building.name;const desc=document.createElement("small");desc.textContent=building.description;const rank=document.createElement("span");rank.textContent=level>=3?"Максимум · 3/3":`Уровень ${level}/3`;copy.append(title,desc,rank);
+  const buy=document.createElement("button");buy.type="button";buy.className="nest-buy";buy.disabled=level>=3||colony.nectar<cost;buy.textContent=level>=3?"Готово":`🌼 ${cost}`;buy.addEventListener("click",()=>{const result=purchaseBuilding(colony,building.id);if(result.ok){colony=result.economy;updateEconomy();}else renderNest();});card.append(icon,copy,buy);list.append(card);
+ }
+}
+function openNest(){renderNest();$("nest-overlay").hidden=false;}
+function closeNest(){$("nest-overlay").hidden=true;}
 function completedLevels(){try{return new Set(JSON.parse(localStorage.getItem(CAMPAIGN_KEY)||"[]"));}catch{return new Set();}}
 function markLevelComplete(levelId){const done=completedLevels();done.add(levelId);try{localStorage.setItem(CAMPAIGN_KEY,JSON.stringify([...done]));}catch{}}
 function isLevelUnlocked(level){return isCampaignLevelUnlocked(LEVELS,completedLevels(),level.id);}
@@ -372,7 +389,7 @@ async function runSlotWorker(slot,target,workerId){
  const key=target.x+","+target.y;
  try{
   await animateAntTrip({slot,color:state.slots[slot]?.color,target},workerId,()=>{
-   const worker=workerPromises.get(workerId);if(worker)worker.phase="returning";
+   const worker=workerPromises.get(workerId);if(worker)worker.phase="returning";\n   colony=collectCube(colony);updateEconomy();
    reservedTargets.delete(key);
   });
  }catch(error){console.error("Ant worker interrupted",slot,error);}
@@ -412,7 +429,7 @@ function updateResultOverlay(){
 }
 function settleColony(){
  if(resolverRunning||workerPromises.size||loadingSlots.size||resetting)return;
- if(state.remaining===0){if(!state.won)markLevelComplete(state.levelId);state.won=true;state.message="Победа! Портрет собран ✨";}
+ if(state.remaining===0){if(!state.won){markLevelComplete(state.levelId);colony=completeMeadow(colony);updateEconomy();}state.won=true;state.message="Победа! Портрет собран ✨";}
  else if(isDefeat(state)){state.lost=true;state.message="Поражение: все пять стартовых отсеков заняты, доступных пикселей нет.";}
  else state.message=`Колония ждёт подходящий цвет · свободно отсеков: ${state.slots.filter(box=>!box).length}`;
  render();
@@ -508,7 +525,7 @@ async function boot(){
    if(registration.waiting)registration.waiting.postMessage({type:"SKIP_WAITING"});
   }catch(error){console.warn("PWA update check failed",error);}
  }
- $("save-status").textContent="Партия не сохраняется · открытые полянки сохраняются";
+ $("save-status").textContent="Партия не сохраняется · прогресс колонии сохраняется";\n updateEconomy();
 }
 $("menu-toggle").addEventListener("click",showMainMenu);
 $("start-game").addEventListener("click",startGame);
@@ -516,7 +533,7 @@ $("new-game").addEventListener("click",()=>startFreshGame(state.levelId));
 $("result-retry").addEventListener("click",()=>startFreshGame(state.levelId));
 $("result-next").addEventListener("click",()=>{const index=LEVELS.findIndex(level=>level.id===state.levelId),next=LEVELS[index+1];if(next&&isLevelUnlocked(next))void startFreshGame(next.id);});
 $("result-menu").addEventListener("click",showMainMenu);
-$("how-to-play").addEventListener("click",()=>{
+$("nest-open").addEventListener("click",openNest);\n$("nest-close").addEventListener("click",closeNest);\n$("nest-overlay").addEventListener("click",event=>{if(event.target===$("nest-overlay"))closeNest();});\n$("how-to-play").addEventListener("click",()=>{
  const panel=$("how-panel");panel.hidden=!panel.hidden;
  $("how-to-play").textContent=panel.hidden?"Как играть?":"Свернуть правила";
 });
