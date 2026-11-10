@@ -19,6 +19,13 @@
 
 Контейнер, которому пока нечего унести, ждёт в своей ячейке. Проигрыш наступает только когда все пять ячеек заняты, ни один контейнер не может сделать ход и на поле остались пиксели.
 
+## Посмотреть и попробовать
+
+- Предполагаемый адрес браузерной версии: https://maikllx.github.io/Ants-Pixel-Hunt/
+- [Сборка Android APK в GitHub Actions](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/42774288834) — откройте Artifacts и скачайте `ants-pixel-hunt-debug-apk`.
+
+Если страница ещё не опубликована, включите GitHub Pages: Settings → Pages → Build and deployment → Source → GitHub Actions. Затем откройте Actions → Publish browser game to GitHub Pages и запустите workflow вручную.
+
 ## Целевая архитектура
 
 - HTML5 / CSS / JavaScript — браузерная игра.
