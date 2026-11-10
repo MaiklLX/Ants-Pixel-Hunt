@@ -106,7 +106,7 @@ function renderChoices(){
   if(reveal)state.lockedBoxRevealPlayed=true;
   if(index!==null&&index!==undefined)button.dataset.boxIndex=String(index);
   const linked=box?.special==="linked",partner=linked?getLinkedPartner(state.levelId,index):null;
-  const waitingForPartner=linked&&!state.tray[0].includes(partner),needsPairSlots=linked&&(state.pendingLinkedIndex===null||state.pendingLinkedIndex===undefined)&&state.slots.filter(slot=>slot===null).length<2;
+  const waitingForPartner=linked&&state.pendingLinkedIndex!==index&&!state.tray[0].includes(partner),needsPairSlots=linked&&(state.pendingLinkedIndex===null||state.pendingLinkedIndex===undefined)&&state.slots.filter(slot=>slot===null).length<2;
   const blockedByPair=state.pendingLinkedIndex!==null&&state.pendingLinkedIndex!==undefined&&index!==state.pendingLinkedIndex;
   button.disabled=!box||sealed||resetting||resetAfterMenu||state.won||state.lost||!canChoose(state)||blockedByPair||waitingForPartner||needsPairSlots;
   if(sealed){
