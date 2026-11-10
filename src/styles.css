@@ -360,3 +360,19 @@ body{background:radial-gradient(ellipse at 50% 0%,#f8fffb 0%,#e9f4eb 54%,#dcebe2
 .choice-status{font-size:9px;color:#8ba08e;margin:0 2px}.message{background:transparent;border:0;box-shadow:none;padding:2px 0;font-size:10px}footer{display:none}
 @media(max-width:599px){.app-shell{gap:7px;padding-left:12px;padding-right:12px}.board-wrap{width:min(100%,40dvh,370px);max-height:40dvh;padding:6px;border-radius:19px}.slots{gap:5px;padding:3px 2px 5px}.slot{height:clamp(43px,6.4dvh,52px);border-radius:10px}.slot .ant-count{font-size:13px}.choices{height:auto;max-height:none;grid-template-rows:auto;gap:7px}.choice-card{min-height:70px;padding:5px 2px;gap:2px}.choice-card .choice-crate{width:22px;height:22px;font-size:16px}.choice-card strong{font-size:10px}.choice-card small{font-size:7px}.queue-peek{width:20px;height:8px}.choice-status{font-size:8px}}
 @media(max-height:720px) and (max-width:599px){.app-shell{gap:5px}.board-wrap{width:min(100%,34dvh,310px);max-height:34dvh}.slot{height:42px}.choice-card{min-height:61px}.conveyor{height:23px}}
+
+/* KT-039 — compact campaign map and level progression */
+.campaign-picker{width:100%;display:flex;flex-direction:column;gap:7px;margin:2px 0 4px}
+.campaign-heading{display:flex;justify-content:space-between;align-items:center;color:#789477;font-size:9px;letter-spacing:1px;font-weight:900}
+.campaign-heading span{letter-spacing:0;font-weight:700;color:#9aab95}
+.campaign-levels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.campaign-level{min-width:0;min-height:76px;border:1px solid #d6e5cf;border-radius:13px;background:linear-gradient(155deg,#fff,#f0f7eb);color:#42664a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px 4px;box-shadow:0 2px 5px #456b3810}
+.campaign-level.current{border:2px solid #c4d9a8;background:linear-gradient(155deg,#fffef4,#eaf5df);box-shadow:0 0 0 2px #d9e8c766}
+.campaign-level.locked{opacity:.55;background:#edf1e9;border-style:dashed}
+.campaign-emoji{font-size:20px;line-height:1.1}
+.campaign-copy{min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center}
+.campaign-copy small{font-size:7px;color:#91a48d;white-space:nowrap}
+.campaign-copy strong{font-size:9px;line-height:1.15}
+.campaign-state{font-size:11px;font-weight:900;color:#79a16f;line-height:1}
+#result-next{margin-top:7px}
+@media(max-width:599px){.campaign-picker{gap:5px}.campaign-level{min-height:64px;padding:4px 2px}.campaign-emoji{font-size:18px}.campaign-copy strong{font-size:8px}}
