@@ -13,8 +13,8 @@ function renderBoard(){
   for(let by=0;by<BLOCK_SIZE;by++)for(let bx=0;bx<BLOCK_SIZE;bx++){
    const index=((y*BLOCK_SIZE+by)*GRID_SIZE+x*BLOCK_SIZE+bx)*4;
    let tileColor=empty;
-   if(color&&bx<BLOCK_SIZE-1&&by<BLOCK_SIZE-1){
-    const shade=(bx===0&&by===0)?1.38:by===0?1.24:bx===0?1.15:(bx===BLOCK_SIZE-2||by===BLOCK_SIZE-2)?.58:(bx===1&&by===1)?1.08:1;
+   if(color){
+    const shade=(bx===BLOCK_SIZE-1||by===BLOCK_SIZE-1)?.62:(bx===0&&by===0)?1.38:by===0?1.24:bx===0?1.15:(bx===1&&by===1)?1.08:1;
     tileColor=rgb.map(channel=>Math.max(0,Math.min(255,Math.round(channel*shade))));
    }
    image.data[index]=tileColor[0];image.data[index+1]=tileColor[1];image.data[index+2]=tileColor[2];image.data[index+3]=255;
