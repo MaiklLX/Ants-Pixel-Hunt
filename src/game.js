@@ -134,6 +134,7 @@ export function applyAntMove(state,slot,target){
  if(!box||box.ants<=0||box.status==="departing"||state.board[target.y]?.[target.x]!==box.color)return false;
  state.board[target.y][target.x]="";box.ants--;state.remaining--;
  state.resolutionLog.push({slot,color:box.color,x:target.x,y:target.y});
+ if(state.resolutionLog.length>300)state.resolutionLog.splice(0,100);
  if(box.ants<=0)box.status="departing";
  return true;
 }
@@ -159,11 +160,11 @@ export function resolveAll(state){
 }
 export function serializeGame(state){
  return {board:state.board,slots:state.slots,tray:state.tray,nextContainer:state.nextContainer,
-  remaining:state.remaining,won:state.won,lost:state.lost,sortedBoxes:state.sortedBoxes||0,resolutionLog:state.resolutionLog};
+  remaining:state.remaining,won:state.won,lost:state.lost,sortedBoxes:state.sortedBoxes||0,resolutionLog:state.resolutionLog.slice(-300)};
 }
 export function restoreGame(saved){
  const fresh=createGame();
- if(!saved||!Array.isArray(saved.board)||saved.board.length<1||!saved.board.every(row=>Array.isArray(row)&&row.length===saved.board.length)||!Array.isArray(saved.slots)||saved.slots.length!==SLOT_COUNT)return fresh;
+ if(!saved||!Array.isArray(saved.board)||saved.board.length!==SIZE||!saved.board.every(row=>Array.isArray(row)&&row.length===SIZE)||!Array.isArray(saved.slots)||saved.slots.length!==SLOT_COUNT)return fresh;
  let tray=saved.tray;
  if(!Array.isArray(tray)||tray.length!==TRAY_SIZE||!tray.every(row=>Array.isArray(row)&&row.length===TRAY_SIZE)){
   const legacy=Array.isArray(saved.candidates)?saved.candidates:[];
