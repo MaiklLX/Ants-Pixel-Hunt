@@ -472,22 +472,30 @@ function kickColony(){
 }
 async function onChoose(column){
  if(resetting||resetAfterMenu||!canChoose(state))return;
- const selectedIndex=state.tray[0][column],sourceNode=choicesEl.querySelector('[data-box-index="'+selectedIndex+'"]');
- if(!sourceNode)return;
- const sourceRect=sourceNode.getBoundingClientRect(),shellRect=shell.getBoundingClientRect();
- const source={x:sourceRect.left+sourceRect.width/2-shellRect.left,y:sourceRect.top+sourceRect.height/2-shellRect.top};
- const freeSlot=state.slots.findIndex(box=>box===null),box=getIncoming(state.levelId)[selectedIndex];
- if(freeSlot<0||!box||isLockedBox(state,selectedIndex)||!chooseTopColumn(state,column))return;
- loadingSlots.add(freeSlot);
- state.message="Бокс направляется прямо в стартовый отсек "+(freeSlot+1);
- render();
- // Logical placement happens immediately; ants launch while the decorative flight continues.
- kickColony();
- try{await animateBoxLoading(source,slotCenter(freeSlot),box.color);}
+ const selectedIndex=state.tray[0][column],incoming=getIncoming(state.levelId),box=incoming[selectedIndex];
+ if(selectedIndex===null||selectedIndex===undefined||!box||isLockedBox(state,selectedIndex))return;
+ const placements=[{index:selectedIndex,column,crate:box}];
+ if(box.special==="linked"){
+  const partnerIndex=getLinkedPartner(state.levelId,selectedIndex),partnerColumn=state.tray[0].findIndex(index=>index===partnerIndex);
+  if(partnerColumn<0||partnerColumn===column)return;
+  placements.push({index:partnerIndex,column:partnerColumn,crate:incoming[partnerIndex]});
+ }
+ const freeSlots=state.slots.map((slot,index)=>slot===null?index:-1).filter(index=>index>=0).slice(0,placements.length);
+ if(freeSlots.length!==placements.length)return;
+ const shellRect=shell.getBoundingClientRect();
+ const flights=placements.map((placement,index)=>{
+  const node=choicesEl.querySelector('[data-box-index="'+placement.index+'"]');if(!node)return null;
+  const rect=node.getBoundingClientRect();
+  return {source:{x:rect.left+rect.width/2-shellRect.left,y:rect.top+rect.height/2-shellRect.top},slot:freeSlots[index],color:placement.crate.color};
+ });
+ if(flights.some(flight=>!flight)||!chooseTopColumn(state,column))return;
+ for(const flight of flights)loadingSlots.add(flight.slot);
+ state.message=placements.length===2?"Связанная пара направляется вместе в два стартовых отсека":"Бокс направляется прямо в стартовый отсек "+(freeSlots[0]+1);
+ render();kickColony();
+ try{await Promise.all(flights.map(flight=>animateBoxLoading(flight.source,slotCenter(flight.slot),flight.color)));}
  finally{
-  loadingSlots.delete(freeSlot);renderSlots();
-  if(resetting||resetAfterMenu)maybeFinalizeMenuExit();
-  else{kickColony();settleColony();}
+  for(const flight of flights)loadingSlots.delete(flight.slot);renderSlots();
+  if(resetting||resetAfterMenu)maybeFinalizeMenuExit();else{kickColony();settleColony();}
  }
 }
 function updateMainMenu(){
