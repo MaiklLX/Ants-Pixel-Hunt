@@ -55,8 +55,7 @@ function buildIncoming(board){
   while(left>0){const ants=Math.min(900,left);queues[color].push({color,ants});left-=ants;}
  }
  const deck=[];
- for(let round=0;colors.some(color=>queues[color].length);round++)
-  for(const color of colors)if(queues[color][round])deck.push(queues[color][round]);
+ for(const color of colors)deck.push(...queues[color]);
  return deck;
 }
 export const INCOMING=buildIncoming(INITIAL_BOARD);
