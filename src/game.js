@@ -92,11 +92,11 @@ export function findAccessiblePixels(board,color,limit=Infinity){
  }
  return found;
 }
-export function findAntWave(state){
+export function findAntWave(state,reservedTargets=new Set(),pendingBySlot=new Map()){
  const byColor=new Map(),wave=[],cursor=new Map();
  for(let y=0;y<state.board.length;y++)for(let x=0;x<state.board[y].length;x++){
   const color=state.board[y][x];
-  if(color&&isAccessible(state.board,x,y)){
+  if(color&&isAccessible(state.board,x,y)&&!reservedTargets.has(x+","+y)){
    if(!byColor.has(color))byColor.set(color,[]);
    byColor.get(color).push({x,y});
   }
@@ -105,7 +105,7 @@ export function findAntWave(state){
   const box=state.slots[slot];if(!box||box.ants<=0||box.status==="departing")continue;
   const targets=byColor.get(box.color)||[];
   let index=cursor.get(box.color)||0,assigned=0;
-  while(index<targets.length&&assigned<box.ants){wave.push({slot,color:box.color,target:targets[index++]});assigned++;}
+  while(index<targets.length&&assigned<Math.max(0,box.ants-(pendingBySlot.get(slot)||0))){wave.push({slot,color:box.color,target:targets[index++]});assigned++;}
   cursor.set(box.color,index);
  }
  return wave;
