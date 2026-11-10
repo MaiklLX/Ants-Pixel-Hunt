@@ -281,8 +281,18 @@ function drawTransportBox(ctx,point,color,scale=1,tilt=0){
  ctx.strokeStyle="#fff8";ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(-17,-6);ctx.lineTo(-11,-12);ctx.lineTo(10,-12);ctx.stroke();
  ctx.restore();
 }
+function drawBoxSparkles(ctx,point,color,progress){
+ ctx.save();ctx.fillStyle="#fff8d9";ctx.shadowColor=COLORS[color].hex;ctx.shadowBlur=7;
+ for(let i=0;i<3;i++){
+  const phase=progress* Math.PI*5+i*Math.PI*2/3,reach=17+Math.sin(phase*1.4)*4;
+  const x=point.x+Math.cos(phase)*reach,y=point.y+Math.sin(phase)*reach*.58;
+  const alpha=.25+.55*(.5+.5*Math.sin(phase*1.7));ctx.globalAlpha=alpha;
+  const size=1.1+(i%2)*.7;ctx.beginPath();ctx.moveTo(x,y-size*2);ctx.lineTo(x+size*.6,y);ctx.lineTo(x,y+size*2);ctx.lineTo(x-size*.6,y);ctx.closePath();ctx.fill();
+ }
+ ctx.restore();
+}
 async function animateBoxLoading(source,slot,color){
- const shellRect=shell.getBoundingClientRect(),dpr=Math.min(2,window.devicePixelRatio||1);
+ const shellRect=shell.getBoundingClientRect(),dpr=Math.min(1.5,window.devicePixelRatio||1);
  const flightLayer=document.createElement("canvas");
  flightLayer.className="flight-layer";flightLayer.width=Math.max(1,Math.round(shellRect.width*dpr));flightLayer.height=Math.max(1,Math.round(shellRect.height*dpr));
  flightLayer.style.width=shellRect.width+"px";flightLayer.style.height=shellRect.height+"px";shell.append(flightLayer);
@@ -292,9 +302,10 @@ async function animateBoxLoading(source,slot,color){
  const exit={x:belt.left+belt.width*.88-shellRect.left,y:belt.top+belt.height/2-shellRect.top};
  const finish=slot,p1=curveControl(source,entry,Math.min(28,Math.max(12,Math.abs(entry.x-source.x)*.08)));
  const p3=curveControl(exit,finish,-Math.min(30,Math.max(14,Math.abs(finish.y-exit.y)*.16)));
- const duration=1250,startTime=performance.now();
+ const duration=1250,startTime=performance.now();let lastFrame=0;
  return new Promise(resolve=>{
   const frame=timestamp=>{
+   if(timestamp-lastFrame<1000/30){requestAnimationFrame(frame);return;}lastFrame=timestamp;
    const t=Math.min(1,(timestamp-startTime)/duration);
    let point;
    if(t<.36){point=quadPoint(source,p1,entry,t/.36);}
@@ -302,7 +313,9 @@ async function animateBoxLoading(source,slot,color){
    else{point=quadPoint(exit,p3,finish,(t-.78)/.22);}
    ctx.clearRect(0,0,shellRect.width,shellRect.height);
    const beltTilt=t<.36?-.06*(1-t/.36):t<.78?Math.sin((t-.36)/.42*Math.PI)*.025:.07*(1-(t-.78)/.22);
-   drawTransportBox(ctx,{x:point.x,y:point.y-Math.sin(t*Math.PI)*3},color,1+Math.sin(t*Math.PI)*.08,beltTilt);
+   const animatedPoint={x:point.x,y:point.y-Math.sin(t*Math.PI)*3};
+   drawTransportBox(ctx,animatedPoint,color,1+Math.sin(t*Math.PI)*.08,beltTilt);
+   drawBoxSparkles(ctx,animatedPoint,color,t);
    if(t>=1){ctx.clearRect(0,0,shellRect.width,shellRect.height);flightLayer.remove();resolve();return;}
    requestAnimationFrame(frame);
   };
@@ -310,15 +323,16 @@ async function animateBoxLoading(source,slot,color){
  });
 }
 async function animateBoxDepartures(slotIndices){
- const shellRect=shell.getBoundingClientRect(),dpr=Math.min(2,window.devicePixelRatio||1);
+ const shellRect=shell.getBoundingClientRect(),dpr=Math.min(1.5,window.devicePixelRatio||1);
  const layer=document.createElement("canvas");layer.className="flight-layer";
  layer.width=Math.max(1,Math.round(shellRect.width*dpr));layer.height=Math.max(1,Math.round(shellRect.height*dpr));
  layer.style.width=shellRect.width+"px";layer.style.height=shellRect.height+"px";shell.append(layer);
  const ctx=layer.getContext("2d");ctx.setTransform(dpr,0,0,dpr,0,0);
  const starts=slotIndices.map(slot=>({slot,start:slotCenter(slot),color:state.slots[slot]?.color||"yellow"}));
- const belt=pointFor(conveyorEl),startTime=performance.now(),duration=1750;
+ const belt=pointFor(conveyorEl),startTime=performance.now(),duration=1750;let lastFrame=0;
  return new Promise(resolve=>{
   const frame=timestamp=>{
+   if(timestamp-lastFrame<1000/30){requestAnimationFrame(frame);return;}lastFrame=timestamp;
    const elapsed=timestamp-startTime;ctx.clearRect(0,0,shellRect.width,shellRect.height);
    let finished=0;
    starts.forEach((item,index)=>{
