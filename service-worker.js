@@ -1,22 +1,44 @@
-const CACHE = "ants-pixel-hunt-shell-v14";
-const APP_FILES = [
-  "./","./index.html","./manifest.webmanifest","./src/styles.css",
-  "./src/app.js","./src/game.js","./src/ant-animation.js","./src/storage.js",
-  "./assets/icon-192.svg","./assets/icon-512.svg"
-];
+const CACHE="ants-pixel-hunt-shell-v8-kt038";
+const STATIC_FILES=["./manifest.webmanifest","./assets/icon-192.svg","./assets/icon-512.svg"];
 self.addEventListener("install",event=>{
-  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(APP_FILES)).then(()=>self.skipWaiting()));
+ event.waitUntil((async()=>{
+  const cache=await caches.open(CACHE);
+  const response=await fetch("./",{cache:"reload"});
+  if(!response.ok)throw new Error("Could not fetch latest app shell");
+  const html=await response.clone().text();
+  await cache.put("./",response);
+  await cache.addAll(STATIC_FILES);
+  const bundles=[...html.matchAll(new RegExp('(?:src|href)="([^"]+\\.(?:js|css))"',"g"))].map(match=>match[1]);
+  if(bundles.length)await cache.addAll(bundles);
+  await self.skipWaiting();
+ })());
 });
-self.addEventListener("activate",event=>{
-  event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));
-});
+self.addEventListener("message",event=>{if(event.data?.type==="SKIP_WAITING")self.skipWaiting();});
+self.addEventListener("activate",event=>event.waitUntil((async()=>{
+ const keys=await caches.keys();
+ await Promise.all(keys.filter(key=>key.startsWith("ants-pixel-hunt-shell-")&&key!==CACHE).map(key=>caches.delete(key)));
+ await self.clients.claim();
+})()));
 self.addEventListener("fetch",event=>{
-  if(event.request.method!=="GET" || new URL(event.request.url).origin!==self.location.origin)return;
-  event.respondWith(caches.match(event.request).then(cached=>{
-    const network=fetch(event.request).then(response=>{
-      if(response.ok){const copy=response.clone();caches.open(CACHE).then(cache=>cache.put(event.request,copy));}
-      return response;
-    }).catch(()=>cached);
-    return cached||network;
-  }));
+ const request=event.request;
+ if(request.method!=="GET"||new URL(request.url).origin!==self.location.origin)return;
+ if(request.mode==="navigate"){
+  event.respondWith((async()=>{
+   try{
+    const fresh=await fetch(request,{cache:"no-store"});
+    if(fresh.ok){const cache=await caches.open(CACHE);await cache.put("./",fresh.clone());await cache.put(request,fresh.clone());}
+    return fresh;
+   }catch(error){return await caches.match(request)||await caches.match("./")||Response.error();}
+  })());
+  return;
+ }
+ event.respondWith((async()=>{
+  const cached=await caches.match(request);
+  if(cached)return cached;
+  try{
+   const response=await fetch(request);
+   if(response.ok){const cache=await caches.open(CACHE);await cache.put(request,response.clone());}
+   return response;
+  }catch(error){return Response.error();}
+ })());
 });

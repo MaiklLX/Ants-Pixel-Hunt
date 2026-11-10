@@ -405,7 +405,16 @@ async function startFreshGame(){
 async function boot(){
  const saved=await loadLocal();hasSavedGame=Boolean(saved);if(saved)state=restoreGame(saved);
  render();resizeAntLayer();updateMainMenu();
- if("serviceWorker"in navigator){try{await navigator.serviceWorker.register("./service-worker.js");}catch(error){console.warn("PWA offline registration failed",error);}}
+ if("serviceWorker"in navigator){
+  try{
+   navigator.serviceWorker.addEventListener("controllerchange",()=>{
+    if(!window.__antsWorkerReloading){window.__antsWorkerReloading=true;window.location.reload();}
+   });
+   const registration=await navigator.serviceWorker.register("./service-worker.js",{updateViaCache:"none"});
+   await registration.update();
+   if(registration.waiting)registration.waiting.postMessage({type:"SKIP_WAITING"});
+  }catch(error){console.warn("PWA update check failed",error);}
+ }
  $("save-status").textContent=saved?"Сохранённый прогресс":"Сохранение на устройстве";
 }
 $("restart").addEventListener("click",restart);

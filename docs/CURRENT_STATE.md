@@ -75,3 +75,11 @@
 - Бокс разрешено отправить на конвейер только когда в worker registry больше нет ни одного муравья его отсека.
 - Визуальный счётчик показывает число муравьёв, которые ещё в пути, пока бокс ожидает возврата.
 - Задержка между стартами сокращена до короткой волны; анимация загрузки бокса ускорена без изменения маршрутов муравьёв.
+
+
+## KT-038 — синхронное обновление Web/PWA и Android
+- Фактический production worker расположен в public/service-worker.js; корневой service-worker.js не копируется Vite в dist.
+- Новый worker использует cache v8, устанавливает свежий HTML и извлекает реальные production JS/CSS bundles.
+- Навигация network-first с offline fallback; PWA при старте проверяет обновление worker без HTTP-кэша и перезагружает страницу после controllerchange.
+- Android debug APK workflow запускается также на push в main.
+- iPhone/iPad используют тот же web/PWA build через Safari; подписанный App Store IPA требует Apple signing и macOS build.
