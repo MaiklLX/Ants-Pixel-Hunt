@@ -14,11 +14,47 @@
   <title>Муравьишки: Пиксельная охота</title>
 </head>
 <body>
-  <main id="app-shell" class="app-shell">
+  <main id="app-shell" class="app-shell menu-open">
+    <section id="main-menu" class="main-menu" aria-label="Главное меню">
+      <div class="menu-sparkles" aria-hidden="true"><i>✦</i><i>·</i><i>✧</i><i>·</i><i>✦</i></div>
+      <header class="menu-brand">
+        <div class="menu-brand-bug" aria-hidden="true">🐜</div>
+        <div><p class="eyebrow">МАЛЕНЬКИЕ ГЕРОИ · БОЛЬШАЯ ОХОТА</p><h1>МУРАВЬИШКИ</h1><p class="subtitle">ПИКСЕЛЬНАЯ ОХОТА</p></div>
+      </header>
+      <div class="menu-garden" aria-hidden="true">
+        <span class="garden-cloud cloud-one"></span><span class="garden-cloud cloud-two"></span>
+        <span class="garden-flower flower-one">✿</span><span class="garden-flower flower-two">✿</span>
+        <span class="garden-grass grass-one"></span><span class="garden-grass grass-two"></span>
+        <div class="garden-ant">🐜</div>
+        <div class="garden-pixels"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      </div>
+      <div class="menu-copy">
+        <span class="menu-kicker">ТВОЁ ПЕРВОЕ ПРИКЛЮЧЕНИЕ</span>
+        <h2>На полянке ждут<br>цветные сокровища!</h2>
+        <p>Отправляй муравьишек за большими пикселями и постепенно открывай милую картинку.</p>
+      </div>
+      <div class="menu-level-card">
+        <div class="level-thumb" aria-hidden="true"><span>🐸</span><i>✦</i></div>
+        <div class="level-card-copy"><span>ПОЛЯНКА 01</span><strong>Портрет лягушонка</strong><small id="menu-progress">Готов к сборке · 325 блоков</small></div>
+        <span class="level-play-mark" aria-hidden="true">›</span>
+      </div>
+      <div class="menu-actions">
+        <button id="start-game" class="menu-primary" type="button">Начать охоту <span aria-hidden="true">→</span></button>
+        <button id="new-game" class="menu-secondary" type="button" hidden>Начать заново</button>
+        <button id="how-to-play" class="menu-link" type="button">Как играть?</button>
+      </div>
+      <div id="how-panel" class="how-panel" hidden>
+        <strong>Три простых шага</strong>
+        <p><b>1.</b> Выбирай бокс только из верхнего ряда.</p>
+        <p><b>2.</b> Муравьишки сами доставят цветные блоки на полянку.</p>
+        <p><b>3.</b> Освобождай отсеки и открывай всю картинку!</p>
+      </div>
+      <p class="menu-footnote">Маленькие лапки · большие открытия <span>✦</span></p>
+    </section>
     <header class="topbar">
       <div class="brand-mark" aria-hidden="true">🐜</div>
       <div><p class="eyebrow">МАЛЕНЬКИЕ ГЕРОИ · БОЛЬШАЯ ОХОТА</p><h1>МУРАВЬИШКИ</h1><p class="subtitle">ПИКСЕЛЬНАЯ ОХОТА</p></div>
-      <button id="sound-toggle" class="icon-button" type="button" aria-label="Звук выключен" title="Звук">♫</button>
+      <button id="menu-toggle" class="icon-button" type="button" aria-label="Открыть меню" title="Меню">☰</button>
     </header>
 
     <section class="level-heading">
