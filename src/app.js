@@ -88,9 +88,8 @@ function renderChoices(){
   if(box){button.style.setProperty("--ant-color",COLORS[box.color].hex);
    const crate=document.createElement("span");crate.className="choice-crate";crate.setAttribute("aria-hidden","true");
    const gem=document.createElement("i");gem.style.setProperty("--gem-color",COLORS[box.color].hex);crate.append(gem);
-   const name=document.createElement("strong");name.textContent=COLORS[box.color].name;
    const count=document.createElement("small");count.textContent=`${box.ants.toLocaleString("ru-RU")} 🐜`;
-   button.append(crate,name,count);button.setAttribute("aria-label",`Выбрать бокс: ${COLORS[box.color].name}, ${box.ants} муравьёв`);
+   button.append(crate,count);button.setAttribute("aria-label",`Выбрать бокс: ${box.ants} муравьёв`);
   }else{button.textContent="Очередь закончилась";button.setAttribute("aria-label","В этой колонке больше нет боксов");}
   button.addEventListener("click",()=>onChoose(col));lane.append(button);
   const preview=document.createElement("div");preview.className="queue-preview";preview.setAttribute("aria-label","Следующие боксы в колонке");
@@ -100,11 +99,9 @@ function renderChoices(){
     const color=COLORS[nextBox.color];peek.style.setProperty("--peek-color",color.hex);
     const chip=document.createElement("i");chip.className="peek-color-chip";chip.setAttribute("aria-hidden","true");
     const meta=document.createElement("span");meta.className="peek-meta";
-    const name=document.createElement("strong");name.className="peek-color-name";name.textContent=color.name;
     const count=document.createElement("small");count.className="peek-count";count.textContent=String(nextBox.ants)+" 🐜";
-    const crate=document.createElement("span");crate.className="peek-crate-mark";crate.setAttribute("aria-hidden","true");
-    meta.append(name,count);peek.append(chip,meta,crate);
-    peek.title=`${color.name}: ${nextBox.ants} муравьёв`;peek.setAttribute("aria-label",peek.title);
+    meta.append(count);peek.append(chip,meta);
+    peek.title=`${nextBox.ants} муравьёв`;peek.setAttribute("aria-label",`${color.name}, ${nextBox.ants} муравьёв`);
    }else{peek.textContent="·";peek.title="Очередь закончилась";}preview.append(peek);
   }
   lane.append(preview);choicesEl.append(lane);
@@ -326,20 +323,18 @@ async function animateBoxLoading(source,slot,color){
  flightLayer.className="flight-layer";flightLayer.width=Math.max(1,Math.round(shellRect.width*dpr));flightLayer.height=Math.max(1,Math.round(shellRect.height*dpr));
  flightLayer.style.width=shellRect.width+"px";flightLayer.style.height=shellRect.height+"px";shell.append(flightLayer);
  const ctx=flightLayer.getContext("2d");ctx.setTransform(dpr,0,0,dpr,0,0);
- const belt=conveyorEl.querySelector(".belt").getBoundingClientRect();
- const entry={x:belt.left+belt.width*.12-shellRect.left,y:belt.top+belt.height/2-shellRect.top};
- const exit={x:belt.left+belt.width*.88-shellRect.left,y:belt.top+belt.height/2-shellRect.top};
- const finish=slot,p1=curveControl(source,entry,Math.min(28,Math.max(12,Math.abs(entry.x-source.x)*.08)));
- const p3=curveControl(exit,finish,-Math.min(30,Math.max(14,Math.abs(finish.y-exit.y)*.16)));
- const duration=1580,startTime=performance.now();let lastFrame=0;const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+ const control=curveControl(source,slot,Math.min(46,Math.max(24,Math.abs(slot.y-source.y)*.16)));
+ const duration=1120,startTime=performance.now();let lastFrame=0;
+ const ease=t=>t*t*(3-2*t);
  return new Promise(resolve=>{const frame=timestamp=>{
   if(timestamp-lastFrame<1000/30){requestAnimationFrame(frame);return;}lastFrame=timestamp;
-  const t=Math.min(1,(timestamp-startTime)/duration),a=ease(Math.min(1,t/.3)),b=ease(Math.max(0,Math.min(1,(t-.3)/.44))),c=ease(Math.max(0,(t-.74)/.26));
-  let point;if(t<.3)point=quadPoint(source,p1,entry,a);else if(t<.74)point={x:entry.x+(exit.x-entry.x)*b,y:entry.y-Math.sin(b*Math.PI)*3};else point=quadPoint(exit,p3,finish,c);
+  const t=Math.min(1,(timestamp-startTime)/duration),progress=ease(t),point=quadPoint(source,control,slot,progress);
   ctx.clearRect(0,0,shellRect.width,shellRect.height);
-  const beltTilt=t<.3?-.085*(1-a):t<.74?Math.sin(b*Math.PI)*.018:.085*(1-c),bob=Math.sin(timestamp*.009)*1.15,stretch=1+Math.sin(t*Math.PI)*.055;
-  const animatedPoint={x:point.x,y:point.y-Math.sin(t*Math.PI)*3+bob};const beltRock=t>.3&&t<.74?Math.sin((t-.3)/.44*Math.PI)*.025:0;drawTransportBox(ctx,animatedPoint,color,stretch,beltTilt+beltRock);drawBoxSparkles(ctx,animatedPoint,color,t);
-  if(t>=1){ctx.clearRect(0,0,shellRect.width,shellRect.height);flightLayer.remove();resolve();return;}requestAnimationFrame(frame);
+  const tilt=(1-progress)*-.055+Math.sin(progress*Math.PI)*.012,lift=Math.sin(progress*Math.PI)*5,scale=1+Math.sin(progress*Math.PI)*.035;
+  const animatedPoint={x:point.x,y:point.y-lift};
+  drawTransportBox(ctx,animatedPoint,color,scale,tilt);drawBoxSparkles(ctx,animatedPoint,color,t);
+  if(t>=1){ctx.clearRect(0,0,shellRect.width,shellRect.height);flightLayer.remove();resolve();return;}
+  requestAnimationFrame(frame);
  };requestAnimationFrame(frame);});
 }
 async function animateBoxDepartures(slotIndices){
@@ -441,19 +436,14 @@ async function onChoose(column){
  const freeSlot=state.slots.findIndex(box=>box===null),box=getIncoming(state.levelId)[selectedIndex];
  if(freeSlot<0||!box||!chooseTopColumn(state,column))return;
  loadingSlots.add(freeSlot);
- state.message="Бокс "+COLORS[box.color].name.toLowerCase()+" подан на ленту и едет в отсек "+(freeSlot+1);
+ state.message="Бокс направляется прямо в стартовый отсек "+(freeSlot+1);
  render();
+ // Logical placement happens immediately; ants launch while the decorative flight continues.
+ kickColony();
  try{await animateBoxLoading(source,slotCenter(freeSlot),box.color);}
  finally{
   loadingSlots.delete(freeSlot);renderSlots();
-  const landedSlot=slotsEl.children[freeSlot];
-  if(landedSlot&&!window.matchMedia("(prefers-reduced-motion: reduce)").matches){
-   landedSlot.animate(
-    [{transform:"translateY(-5px) scale(.94)",filter:"brightness(1.08)"},{transform:"translateY(2px) scale(1.035)",filter:"brightness(1.03)"},{transform:"translateY(0) scale(1)",filter:"brightness(1)"}],
-    {duration:430,easing:"cubic-bezier(.2,.8,.25,1)"}
-   );
-  }
-  if(!resetting&&loadingSlots.size===0){if(resetAfterMenu)maybeFinalizeMenuExit();else kickColony();}
+  if(resetting||resetAfterMenu)maybeFinalizeMenuExit();
  }
 }
 function updateMainMenu(){
