@@ -4,6 +4,7 @@ const $=id=>document.getElementById(id);
 const shell=$("app-shell"),boardEl=$("board"),slotsEl=$("slots"),choicesEl=$("choices"),antLayer=$("ant-layer"),conveyorEl=$("conveyor");
 const boardCtx=boardEl.getContext("2d"),antCtx=antLayer.getContext("2d");
 let state=createGame(),resolverRunning=false,resetting=false,antFrame=0;
+const loadingSlots=new Set();
 const colorRGB=Object.fromEntries(Object.entries(COLORS).map(([key,value])=>[key,value.hex.match(/[\da-f]{2}/gi).map(v=>parseInt(v,16))]));
 function renderBoard(){
  const image=boardCtx.createImageData(GRID_SIZE,GRID_SIZE),empty=[231,240,228];
@@ -23,7 +24,7 @@ function renderSlots(){
  state.slots.forEach((box,index)=>{
   const slot=document.createElement("div");
   slot.style.setProperty("--box-color",box?COLORS[box.color].hex:"#d8e5d2");
-  slot.className="slot"+(box?" filled":"")+(box?.status==="departing"?" departing":"")+((state.activeSlots?.includes(index))?" active":"");
+  slot.className="slot"+(box?" filled":"")+(box?.status==="departing"?" departing":"")+(loadingSlots.has(index)?" loading":"")+((state.activeSlots?.includes(index))?" active":"");
   const number=document.createElement("span");number.className="slot-number";number.textContent=`ОТСЕК ${index+1}`;slot.append(number);
   if(box){
    const stripe=document.createElement("span");stripe.className="slot-color";stripe.style.background=COLORS[box.color].hex;
@@ -46,7 +47,7 @@ function renderChoices(){
   const index=state.tray[row][col],box=index===null?null:INCOMING[index],button=document.createElement("button");
   button.type="button";button.className="choice-card"+(row===0?" selectable":" locked");
   if(index!==null&&index!==undefined)button.dataset.boxIndex=String(index);
-  button.disabled=row!==0||!box||resetting||state.won||state.lost||!canChoose(state);
+  button.disabled=row!==0||!box||resetting||loadingSlots.size>0||state.won||state.lost||!canChoose(state);
   if(box){
    button.style.setProperty("--ant-color",COLORS[box.color].hex);
    const pos=document.createElement("span");pos.className="choice-number";pos.textContent=`РЯД ${row+1} · КОЛОНКА ${col+1}`;
@@ -179,13 +180,44 @@ async function animateAntWave(moves){
   antFrame=requestAnimationFrame(draw);
  });
 }
-function drawTransportBox(point,color){
- antCtx.save();antCtx.translate(point.x,point.y);
- antCtx.shadowColor="#54724c55";antCtx.shadowBlur=8;antCtx.fillStyle="#f7f0dc";
- antCtx.strokeStyle="#947342";antCtx.lineWidth=1.5;antCtx.beginPath();antCtx.roundRect(-15,-10,30,20,4);antCtx.fill();antCtx.stroke();
- antCtx.shadowBlur=0;antCtx.fillStyle=COLORS[color].hex;antCtx.fillRect(-11,-6,22,12);
- antCtx.strokeStyle="#fff8";antCtx.beginPath();antCtx.moveTo(-5,-6);antCtx.lineTo(-5,6);antCtx.moveTo(5,-6);antCtx.lineTo(5,6);antCtx.stroke();
+function drawTransportBox(point,color,scale=1){
+ antCtx.save();antCtx.translate(point.x,point.y);antCtx.scale(scale,scale);
+ // A readable cardboard crate with folded lid, colored contents and a shipping label.
+ antCtx.shadowColor="#435d3d55";antCtx.shadowBlur=9;antCtx.shadowOffsetY=3;
+ antCtx.fillStyle="#d9c69b";antCtx.strokeStyle="#806744";antCtx.lineWidth=1.25;
+ antCtx.beginPath();antCtx.moveTo(-17,-8);antCtx.lineTo(-12,-13);antCtx.lineTo(13,-13);antCtx.lineTo(18,-8);antCtx.lineTo(18,9);antCtx.lineTo(13,13);antCtx.lineTo(-13,13);antCtx.lineTo(-18,9);antCtx.lineTo(-18,-8);antCtx.closePath();antCtx.fill();antCtx.stroke();
+ antCtx.shadowBlur=0;antCtx.shadowOffsetY=0;
+ antCtx.fillStyle="#f6ebd0";antCtx.beginPath();antCtx.moveTo(-17,-8);antCtx.lineTo(-11,-12);antCtx.lineTo(0,-7);antCtx.lineTo(0,-2);antCtx.closePath();antCtx.fill();
+ antCtx.beginPath();antCtx.moveTo(17,-8);antCtx.lineTo(11,-12);antCtx.lineTo(0,-7);antCtx.lineTo(0,-2);antCtx.closePath();antCtx.fill();
+ antCtx.fillStyle=COLORS[color].hex;antCtx.fillRect(-11,-3,22,11);
+ antCtx.strokeStyle="#fff9";antCtx.lineWidth=1;antCtx.beginPath();antCtx.moveTo(-4,-3);antCtx.lineTo(-4,8);antCtx.moveTo(4,-3);antCtx.lineTo(4,8);antCtx.stroke();
+ antCtx.fillStyle="#fff9e9";antCtx.fillRect(-6,-1,12,5);
+ antCtx.fillStyle="#7b765e";antCtx.fillRect(-4,0,8,1);antCtx.fillRect(-4,2,5,1);
+ antCtx.strokeStyle="#8a7047";antCtx.lineWidth=.8;antCtx.beginPath();antCtx.moveTo(0,-7);antCtx.lineTo(0,-2);antCtx.stroke();
  antCtx.restore();
+}
+async function animateBoxLoading(source,slot,color){
+ resizeAntLayer();
+ const belt=conveyorEl.querySelector(".belt").getBoundingClientRect(),shellRect=shell.getBoundingClientRect();
+ const entry={x:belt.left+belt.width*.12-shellRect.left,y:belt.top+belt.height/2-shellRect.top};
+ const exit={x:belt.left+belt.width*.88-shellRect.left,y:belt.top+belt.height/2-shellRect.top};
+ const finish=slot,p1=curveControl(source,entry,Math.min(28,Math.max(12,Math.abs(entry.x-source.x)*.08)));
+ const p3=curveControl(exit,finish,-Math.min(30,Math.max(14,Math.abs(finish.y-exit.y)*.16)));
+ const duration=1750,startTime=performance.now();
+ return new Promise(resolve=>{
+  const frame=timestamp=>{
+   const t=Math.min(1,(timestamp-startTime)/duration);
+   let point;
+   if(t<.36){point=quadPoint(source,p1,entry,t/.36);}
+   else if(t<.78){const u=(t-.36)/.42;point={x:entry.x+(exit.x-entry.x)*u,y:entry.y-Math.sin(u*Math.PI)*2};}
+   else{point=quadPoint(exit,p3,finish,(t-.78)/.22);}
+   antCtx.clearRect(0,0,shellRect.width,shellRect.height);
+   drawTransportBox({x:point.x,y:point.y-Math.sin(t*Math.PI)*3},color,1+Math.sin(t*Math.PI)*.08);
+   if(t>=1){antCtx.clearRect(0,0,shellRect.width,shellRect.height);resolve();return;}
+   antFrame=requestAnimationFrame(frame);
+  };
+  antFrame=requestAnimationFrame(frame);
+ });
 }
 async function animateBoxDepartures(slotIndices){
  resizeAntLayer();
@@ -249,10 +281,22 @@ async function runResolver(){
   }
  }
 }
-function onChoose(column){
- if(resetting||!canChoose(state)||!chooseTopColumn(state,column))return;
+async function onChoose(column){
+ if(resetting||loadingSlots.size>0||!canChoose(state))return;
+ const selectedIndex=state.tray[0][column],sourceNode=choicesEl.querySelector('[data-box-index="'+selectedIndex+'"]');
+ if(!sourceNode)return;
+ const sourceRect=sourceNode.getBoundingClientRect(),shellRect=shell.getBoundingClientRect();
+ const source={x:sourceRect.left+sourceRect.width/2-shellRect.left,y:sourceRect.top+sourceRect.height/2-shellRect.top};
+ const freeSlot=state.slots.findIndex(box=>box===null),box=INCOMING[selectedIndex];
+ if(freeSlot<0||!box||!chooseTopColumn(state,column))return;
+ loadingSlots.add(freeSlot);
+ state.message="Бокс "+COLORS[box.color].name.toLowerCase()+" подан на ленту и едет в отсек "+(freeSlot+1);
  render();void save();
- if(!resolverRunning)void runResolver();
+ try{await animateBoxLoading(source,slotCenter(freeSlot),box.color);}
+ finally{
+  loadingSlots.delete(freeSlot);renderSlots();
+  if(!resetting&&!resolverRunning)void runResolver();
+ }
 }
 async function restart(){
  if(resetting||resolverRunning)return;
