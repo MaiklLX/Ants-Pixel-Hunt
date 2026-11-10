@@ -89,29 +89,37 @@ function curveControl(a,b,bend){
  const dx=b.x-a.x,dy=b.y-a.y,len=Math.max(1,Math.hypot(dx,dy));
  return{x:(a.x+b.x)/2-(dy/len)*bend,y:(a.y+b.y)/2+(dx/len)*bend};
 }
-function drawAnt(ctx,point,color,carrying,index){
- const phase=performance.now()*.012+index*1.73,step=Math.sin(phase)*1.35;
+const antSpriteCache=new Map();
+function createAntSprite(color,carrying,gait){
+ const key=color+":"+Number(carrying)+":"+gait;
+ if(antSpriteCache.has(key))return antSpriteCache.get(key);
+ const sprite=document.createElement("canvas");sprite.width=28;sprite.height=24;
+ const ctx=sprite.getContext("2d"),step=[-1.2,0,1.2,0][gait];
  const body=COLORS[color].hex;
- ctx.save();ctx.translate(point.x,point.y);ctx.rotate(Math.sin(phase*.31+index)*.12);
- ctx.lineCap="round";ctx.lineJoin="round";
- // Six articulated legs, animated out of phase so the colony feels alive.
+ ctx.translate(13,12);ctx.lineCap="round";ctx.lineJoin="round";
+ // Six legs are baked into four gait poses; the animation loop only blits sprites.
  ctx.strokeStyle="#24352c";ctx.lineWidth=1.15;
- for(let side of [-1,1])for(let leg=0;leg<3;leg++){
+ for(const side of [-1,1])for(let leg=0;leg<3;leg++){
   const x=-1.2+leg*1.35,y=side*1.2;
   ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+(leg-1)*1.5+step*side,y+side*(2.3+Math.abs(step)*.3));ctx.lineTo(x+(leg-1)*2.2+step*side,y+side*4.1);ctx.stroke();
  }
- // Abdomen, thorax and head with dark pixel-art style outlines.
  ctx.fillStyle="#26372d";ctx.beginPath();ctx.ellipse(-3.1,0,3.15,2.55,0,0,Math.PI*2);ctx.fill();
  ctx.fillStyle=body;ctx.beginPath();ctx.ellipse(-3.1,-.25,2.45,1.9,0,0,Math.PI*2);ctx.fill();
  ctx.fillStyle="#26372d";ctx.beginPath();ctx.arc(.15,0,1.8,0,Math.PI*2);ctx.fill();
  ctx.fillStyle=body;ctx.beginPath();ctx.arc(.15,-.2,1.25,0,Math.PI*2);ctx.fill();
  ctx.fillStyle="#26372d";ctx.beginPath();ctx.arc(3.1,-.1,2.25,0,Math.PI*2);ctx.fill();
  ctx.fillStyle=body;ctx.beginPath();ctx.arc(3.1,-.35,1.7,0,Math.PI*2);ctx.fill();
- // Antennae and tiny eyes.
  ctx.strokeStyle="#26372d";ctx.lineWidth=.85;
  ctx.beginPath();ctx.moveTo(3.7,-1.6);ctx.quadraticCurveTo(4.2,-4.3,6.3,-4.1);ctx.moveTo(2.4,-1.8);ctx.quadraticCurveTo(1.8,-4.4,3.4,-5);ctx.stroke();
  ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(3.8,-.8,.55,0,Math.PI*2);ctx.fill();
  if(carrying){ctx.fillStyle="#f6d36e";ctx.strokeStyle="#8e6c2d";ctx.lineWidth=.7;ctx.beginPath();ctx.arc(-6.3,2.2,1.8,0,Math.PI*2);ctx.fill();ctx.stroke();}
+ antSpriteCache.set(key,sprite);return sprite;
+}
+function drawAnt(ctx,point,color,carrying,index){
+ const phase=performance.now()*.012+index*1.73;
+ const gait=Math.floor(phase/2)%4;
+ ctx.save();ctx.translate(point.x,point.y);ctx.rotate(Math.sin(phase*.31+index)*.12);
+ ctx.drawImage(createAntSprite(color,carrying,gait),-13,-12);
  ctx.restore();
 }
 async function animateAntWave(moves){
