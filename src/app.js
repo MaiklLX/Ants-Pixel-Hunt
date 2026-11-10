@@ -444,6 +444,7 @@ async function onChoose(column){
  finally{
   loadingSlots.delete(freeSlot);renderSlots();
   if(resetting||resetAfterMenu)maybeFinalizeMenuExit();
+  else{kickColony();settleColony();}
  }
 }
 function updateMainMenu(){
