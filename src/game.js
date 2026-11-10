@@ -1,5 +1,5 @@
-export const SIZE=50;
-export const GRID_SIZE=250;
+export const SIZE=35;
+export const GRID_SIZE=350;
 export const BLOCK_SIZE=GRID_SIZE/SIZE;
 export const BOX_CAPACITY=100;
 export const SLOT_COUNT=5;
@@ -27,7 +27,7 @@ export function createArtworkBoard(){
  // occupies a crisp 5×5 group of those squares, so one ant carries one large pixel.
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
  for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){
-  const px=(x+.5)*BLOCK_SIZE,py=(y+.5)*BLOCK_SIZE;
+  const px=(x+.5)*250/SIZE,py=(y+.5)*250/SIZE;
   const head=ellipse(px,py,125,126,87,91);
   const headRim=ellipse(px,py,125,126,94,98);
   if(headRim)board[y][x]="purple";
