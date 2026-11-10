@@ -107,7 +107,7 @@ export function serializeGame(state){
 }
 export function restoreGame(saved){
  const fresh=createGame();
- if(!saved||!Array.isArray(saved.board)||saved.board.length!==SIZE||!Array.isArray(saved.slots)||saved.slots.length!==SLOT_COUNT)return fresh;
+ if(!saved||!Array.isArray(saved.board)||saved.board.length<1||!saved.board.every(row=>Array.isArray(row)&&row.length===saved.board.length)||!Array.isArray(saved.slots)||saved.slots.length!==SLOT_COUNT)return fresh;
  let tray=saved.tray;
  if(!Array.isArray(tray)||tray.length!==TRAY_SIZE||!tray.every(row=>Array.isArray(row)&&row.length===TRAY_SIZE)){
   const legacy=Array.isArray(saved.candidates)?saved.candidates:[];
