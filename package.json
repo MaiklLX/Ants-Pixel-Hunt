@@ -1,0 +1,22 @@
+{
+  "name": "ants-pixel-hunt",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Муравьишки: Пиксельная охота — HTML5/PWA",
+  "scripts": {
+    "test": "node --test",
+    "serve": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "cap:sync": "cap sync",
+    "android": "cap open android"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.4.3",
+    "vite": "^6.4.1"
+  },
+  "dependencies": {
+    "@capacitor/core": "^7.4.3",
+    "@capacitor/android": "^7.4.3"
+  }
+}
