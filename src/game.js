@@ -183,7 +183,7 @@ export function createGame(levelId="meadow-01"){
   tray:Array.from({length:TRAY_SIZE},(_,row)=>Array.from({length:TRAY_SIZE},(_,col)=>row*TRAY_SIZE+col)),
   nextContainer:TRAY_SIZE*TRAY_SIZE,remaining:board.reduce((sum,row)=>sum+row.filter(Boolean).length,0),won:false,lost:false,resolving:false,
   activeSlot:-1,activeTarget:null,activeSlots:[],sortedBoxes:0,
-  message:"Выбери бокс — каждый муравей унесёт один крупный цветной блок",resolutionLog:[]};
+  message:"Собирай рисунок снаружи внутрь — внутренние блоки откроются следом",resolutionLog:[]};
 }
 export function getExposedPixels(board){
  const height=board.length,width=Math.max(0,...board.map(row=>row.length));
