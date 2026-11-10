@@ -85,6 +85,7 @@ function render(){
  const level=getLevel(state.levelId);
  $("level-number").textContent=`ПОЛЯНКА № ${level.number}`;
  $("level-title").textContent=level.name;
+ $("board").setAttribute("aria-label",`${level.name}: цветная пиксельная картина на сетке 35 на 35`);
  renderBoard();renderSlots();renderChoices();renderConveyor();
  $("message").textContent=state.message;$("restart").disabled=resetting||resolverRunning||loadingSlots.size>0;
  updateResultOverlay();
