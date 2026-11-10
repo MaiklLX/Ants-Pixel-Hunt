@@ -1,4 +1,4 @@
-import {COLORS,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,LEVELS,getLevel,getIncoming,createGame,canChoose,chooseTopColumn,findAntWave,applyAntMove,completeBoxDeparture,isDefeat,countOutboundBySlot,countSlotWorkers,canDepartSlot} from "./game.js";
+import {COLORS,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,LEVELS,getLevel,getIncoming,createGame,canChoose,chooseTopColumn,findAntWave,applyAntMove,completeBoxDeparture,isDefeat,getExposedPixels,countOutboundBySlot,countSlotWorkers,canDepartSlot} from "./game.js";
 import {getAntTripFrame,getAntLaunchDelay} from "./ant-animation.js";
 import {isCampaignLevelUnlocked,getNextCampaignLevel} from "./campaign.js";
 const $=id=>document.getElementById(id);
@@ -14,20 +14,32 @@ const loadingSlots=new Set(),workerPromises=new Map(),reservedTargets=new Set(),
 let workerSequence=0;
 const colorRGB=Object.fromEntries(Object.entries(COLORS).map(([key,value])=>[key,value.hex.match(/[\da-f]{2}/gi).map(v=>parseInt(v,16))]));
 function renderBoard(){
- const image=boardCtx.createImageData(GRID_SIZE,GRID_SIZE),empty=[231,240,228];
+ const width=boardEl.width,height=boardEl.height,cell=width/SIZE;
+ boardCtx.clearRect(0,0,width,height);
+ const exposed=new Set(getExposedPixels(state.board).map(point=>point.x+","+point.y));
+ const empty=boardCtx.createLinearGradient(0,0,width,height);
+ empty.addColorStop(0,"#f5f2df");empty.addColorStop(1,"#dcebdc");
+ boardCtx.fillStyle=empty;boardCtx.fillRect(0,0,width,height);
  for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){
-  const color=state.board[y][x],rgb=color?colorRGB[color]:empty;
-  for(let by=0;by<BLOCK_SIZE;by++)for(let bx=0;bx<BLOCK_SIZE;bx++){
-   const index=((y*BLOCK_SIZE+by)*GRID_SIZE+x*BLOCK_SIZE+bx)*4;
-   let tileColor=empty;
-   if(color){
-    const shade=(bx===BLOCK_SIZE-1||by===BLOCK_SIZE-1)?.62:(bx===0&&by===0)?1.38:by===0?1.24:bx===0?1.15:(bx===1&&by===1)?1.08:1;
-    tileColor=rgb.map(channel=>Math.max(0,Math.min(255,Math.round(channel*shade))));
-   }
-   image.data[index]=tileColor[0];image.data[index+1]=tileColor[1];image.data[index+2]=tileColor[2];image.data[index+3]=255;
+  const color=state.board[y][x];if(!color)continue;
+  const rgb=COLORS[color].hex,px=x*cell,py=y*cell,size=cell-1.25;
+  boardCtx.save();
+  boardCtx.shadowColor="#35513b38";boardCtx.shadowBlur=2.1;boardCtx.shadowOffsetY=1.7;
+  const face=boardCtx.createLinearGradient(px,py,px+size,py+size);
+  face.addColorStop(0,"#ffffff");face.addColorStop(.12,rgb);face.addColorStop(.72,rgb);face.addColorStop(1,"#456b4a");
+  boardCtx.fillStyle=face;
+  boardCtx.beginPath();boardCtx.roundRect(px+.7,py+.5,size,size,1.9);boardCtx.fill();
+  boardCtx.shadowColor="transparent";boardCtx.shadowBlur=0;boardCtx.shadowOffsetY=0;
+  boardCtx.strokeStyle="#ffffffa8";boardCtx.lineWidth=.65;boardCtx.stroke();
+  boardCtx.strokeStyle="#35513b35";boardCtx.lineWidth=.7;
+  boardCtx.beginPath();boardCtx.moveTo(px+2,py+size-1);boardCtx.lineTo(px+size-1,py+size-1);boardCtx.lineTo(px+size-1,py+2);boardCtx.stroke();
+  boardCtx.fillStyle="#ffffff55";boardCtx.beginPath();boardCtx.roundRect(px+2,py+1.6,size-4,1.15,.7);boardCtx.fill();
+  if(exposed.has(x+","+y)){
+   boardCtx.strokeStyle="#fff3c9cc";boardCtx.lineWidth=.85;
+   boardCtx.beginPath();boardCtx.roundRect(px+1.25,py+1.1,size-2.3,size-2.3,1.5);boardCtx.stroke();
   }
+  boardCtx.restore();
  }
- boardCtx.putImageData(image,0,0);
  $("board-status").textContent=`Осталось кубиков: ${state.remaining.toLocaleString("ru-RU")}`;
  const collected=totalBlocks-state.remaining,percent=Math.round(collected/totalBlocks*100);
  const progress=$("progress-fill"),track=progress?.parentElement;
