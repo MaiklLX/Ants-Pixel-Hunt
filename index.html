@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#f3f8ed">
-  <meta name="app-version" content="KT-038">
+  <meta name="app-version" content="KT-039">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Муравьишки">
@@ -35,10 +35,11 @@
         <p>Отправляй муравьишек за большими пикселями и постепенно открывай милую картинку.</p>
       </div>
       <div class="menu-level-card">
-        <div class="level-thumb" aria-hidden="true"><span>🐸</span><i>✦</i></div>
-        <div class="level-card-copy"><span>ПОЛЯНКА 01</span><strong>Портрет лягушонка</strong><small id="menu-progress">Готов к сборке · 325 блоков</small></div>
+        <div class="level-thumb" aria-hidden="true"><span id="menu-level-emoji">🐸</span><i>✦</i></div>
+        <div class="level-card-copy"><span id="menu-level-number">ПОЛЯНКА 01</span><strong id="menu-level-name">Портрет лягушонка</strong><small id="menu-progress">Готов к сборке · первая полянка</small></div>
         <span class="level-play-mark" aria-hidden="true">›</span>
       </div>
+      <section class="campaign-picker" aria-label="Карта приключения"><div class="campaign-heading"><strong>КАРТА ПРИКЛЮЧЕНИЯ</strong><span>3 полянки</span></div><div id="campaign-levels" class="campaign-levels"></div></section>
       <div class="menu-actions">
         <button id="start-game" class="menu-primary" type="button">Начать охоту <span aria-hidden="true">→</span></button>
         <button id="new-game" class="menu-secondary" type="button" hidden>Начать заново</button>
@@ -59,8 +60,8 @@
     </header>
 
     <section class="level-heading">
-      <span class="level-kicker">ПОЛЯНКА № 1</span>
-      <h2>Портрет лягушонка</h2>
+      <span id="level-number" class="level-kicker">ПОЛЯНКА № 1</span>
+      <h2 id="level-title">Портрет лягушонка</h2>
       <p id="board-status" class="board-status">Крупных блоков осталось: 35×35</p>
       <div class="level-progress" role="progressbar" aria-label="Сбор пиксельного портрета" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="progress-fill"></span></div>
     </section>
@@ -95,6 +96,7 @@
         <h2 id="result-title">Портрет собран!</h2>
         <p id="result-copy">Все цветные кубики нашли своё место. Отличная работа, команда!</p>
         <button id="result-retry" class="menu-primary" type="button">Сыграть ещё раз <span aria-hidden="true">↻</span></button>
+        <button id="result-next" class="menu-secondary" type="button" hidden>Следующая полянка →</button>
         <button id="result-menu" class="menu-secondary" type="button">В главное меню</button>
       </div>
     </section>
