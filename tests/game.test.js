@@ -39,7 +39,8 @@ test("accessibility checks use actual board dimensions",()=>{
  board[12][12]="red";board[0][SIZE-1]="red";
  assert.equal(isAccessible(board,12,12),false);assert.equal(isAccessible(board,SIZE-1,0),true);
  board[12][11]="";assert.equal(isAccessible(board,12,12),false,"an enclosed pocket must not expose an inner block");
- board[12][10]="";assert.equal(isAccessible(board,12,12),true,"opening a corridor to the outside exposes the next layer");
+ for(let x=0;x<11;x++)board[12][x]="";
+ assert.equal(isAccessible(board,12,12),true,"opening a corridor to the outside exposes the next layer");
 });
 test("legacy 7x7 save starts the new authored level instead of stretching old pixels",()=>{
  const old=Array.from({length:7},()=>Array(7).fill("green"));
