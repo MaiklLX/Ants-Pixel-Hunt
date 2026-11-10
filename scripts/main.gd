@@ -460,11 +460,43 @@ func _animate_pixel_pickup(target: Vector2i) -> void:
 	if tile == null:
 		return
 	tile.pivot_offset = tile.size * 0.5
+	var center_global := tile.get_global_rect().get_center()
+	var center_local := _global_to_fx_local(center_global)
 	var tween := create_tween()
 	tween.set_parallel(true)
 	tween.tween_property(tile, "scale", Vector2(0.12, 0.12), 0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
 	tween.tween_property(tile, "modulate:a", 0.0, 0.12).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
 	await tween.finished
+	await _animate_pickup_sparkles(center_local)
+
+
+func _animate_pickup_sparkles(center: Vector2) -> void:
+	if not is_instance_valid(fx_layer):
+		return
+	var offsets: Array[Vector2] = [
+		Vector2(-13, -11), Vector2(13, -11),
+		Vector2(-13, 11), Vector2(13, 11)
+	]
+	var sparks: Array[ColorRect] = []
+	var tween := create_tween()
+	tween.set_parallel(true)
+	for offset in offsets:
+		var spark := ColorRect.new()
+		spark.color = Color("#ffe08a")
+		spark.size = Vector2(4, 4)
+		spark.pivot_offset = spark.size * 0.5
+		spark.rotation = PI * 0.25
+		spark.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		fx_layer.add_child(spark)
+		spark.position = center - spark.size * 0.5
+		sparks.append(spark)
+		tween.tween_property(spark, "position", center + offset - spark.size * 0.5, 0.18).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		tween.tween_property(spark, "scale", Vector2(0.25, 0.25), 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+		tween.tween_property(spark, "modulate:a", 0.0, 0.18).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	await tween.finished
+	for spark in sparks:
+		if is_instance_valid(spark):
+			spark.queue_free()
 
 func _is_defeat() -> bool:
 	if _free_slot_count() > 0:
