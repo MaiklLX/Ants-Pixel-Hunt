@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {createGame,INITIAL_BOARD,INCOMING,isAccessible,findAccessiblePixel,chooseTopColumn,findNextMove,applyAntMove,resolveAll,freeSlotCount,isDefeat,SIZE,SLOT_COUNT,TRAY_SIZE,canChoose,restoreGame,serializeGame} from "../src/game.js";
+import {createGame,INITIAL_BOARD,INCOMING,isAccessible,findAccessiblePixel,findAccessiblePixels,chooseTopColumn,findNextMove,applyAntMove,resolveAll,freeSlotCount,isDefeat,SIZE,SLOT_COUNT,TRAY_SIZE,canChoose,restoreGame,serializeGame} from "../src/game.js";
 test("level has a 7x7 board, five launch slots and a 3x3 box rack",()=>{
  const s=createGame();assert.equal(INITIAL_BOARD.length,SIZE);assert.ok(INITIAL_BOARD.every(r=>r.length===SIZE));
  assert.equal(s.slots.length,SLOT_COUNT);assert.equal(s.tray.length,TRAY_SIZE);assert.ok(s.tray.every(r=>r.length===TRAY_SIZE));
