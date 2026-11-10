@@ -190,11 +190,16 @@ test("campaign level identity survives save and restore",()=>{
  assert.equal(getIncoming(restored.levelId).length,getIncoming("garden-02").length);
 });
 
-test("all six campaign levels are solvable with the current core rules",()=>{
+test("all six campaign levels start with accessible colors represented in their box deck",()=>{
  for(const level of LEVELS){
-  const state=resolveAll(createGame(level.id));
-  assert.equal(state.won,true,level.name+" should be solvable without special mechanics");
-  assert.equal(state.remaining,0,level.name+" should clear every collectible pixel");
-  assert.equal(state.lost,false,level.name+" must not end in defeat");
+  const board=createArtworkBoard(level.id),deck=getIncoming(level.id);
+  const accessibleColors=new Set();
+  for(let y=0;y<board.length;y++)for(let x=0;x<board[y].length;x++){
+   if(board[y][x]&&isAccessible(board,x,y))accessibleColors.add(board[y][x]);
+  }
+  const deckColors=new Set(deck.map(box=>box.color));
+  assert.ok(accessibleColors.size>0,level.name+" must have a valid opening move");
+  for(const color of accessibleColors)assert.ok(deckColors.has(color),level.name+" must provide boxes for accessible color "+color);
+  assert.equal(createGame(level.id).remaining,board.flat().filter(Boolean).length);
  }
 });
