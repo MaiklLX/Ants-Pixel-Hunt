@@ -4,7 +4,6 @@ const config: CapacitorConfig = {
   appId: 'com.maikllx.antspixelhunt',
   appName: 'Муравьишки',
   webDir: 'dist',
-  bundledWebRuntime: false,
   server: {
     androidScheme: 'https'
   }
