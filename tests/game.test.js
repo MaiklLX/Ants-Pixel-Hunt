@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {createGame,INITIAL_BOARD,INCOMING,isAccessible,findAccessiblePixel,placeNext,resolveAll,freeSlotCount,isDefeat,SIZE,SLOT_COUNT} from "../src/game.js";
+import {createGame,INITIAL_BOARD,INCOMING,isAccessible,findAccessiblePixel,placeNext,resolvePass,resolveAll,freeSlotCount,isDefeat,SIZE,SLOT_COUNT} from "../src/game.js";
 
 test("level data contains a 7x7 board and exactly five slots",()=>{
   assert.equal(INITIAL_BOARD.length,SIZE);
@@ -15,24 +15,27 @@ test("queue ant totals exactly match the number of pixels by color",()=>{
   assert.deepEqual(antCounts,boardCounts);
 });
 test("a pixel is accessible at an edge or beside an empty orthogonal cell",()=>{
-  const board=[["red","blue"],["green","yellow"]];
+  const board=Array.from({length:SIZE},()=>Array(SIZE).fill("green"));
+  board[0][0]="red";
+  board[3][3]="purple";
   assert.equal(isAccessible(board,0,0),true);
-  assert.equal(isAccessible(board,1,1),true);
-  const enclosed=Array.from({length:SIZE},()=>Array(SIZE).fill("green"));
-  enclosed[3][3]="purple";
-  assert.equal(isAccessible(enclosed,3,3),false);
+  assert.equal(isAccessible(board,3,3),false);
+  board[3][2]="";
+  assert.equal(isAccessible(board,3,3),true);
 });
 test("a pixel becomes accessible after its same-color neighbor is removed",()=>{
   const state=createGame();
-  state.board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
+  state.board=Array.from({length:SIZE},()=>Array(SIZE).fill("green"));
+  state.board[2][2]="";
   state.board[2][3]="red";
   state.board[3][3]="red";
-  state.remaining=2;
+  state.remaining=48;
   state.slots[0]={color:"red",ants:2};
   assert.deepEqual(findAccessiblePixel(state.board,"red"),{x:3,y:2});
-  resolveAll(state);
-  assert.equal(state.remaining,0);
-  assert.equal(state.won,true);
+  resolvePass(state);
+  assert.equal(state.remaining,46);
+  assert.equal(state.board[2][3],"");
+  assert.equal(state.board[3][3],"");
   assert.deepEqual(state.resolutionLog.map(x=>[x.x,x.y]),[[3,2],[3,3]]);
 });
 test("placement consumes one queue item and cannot reuse an occupied slot",()=>{
