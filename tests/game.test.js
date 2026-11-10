@@ -13,7 +13,7 @@ test("the authored level is a 250x250 frog portrait illustration with five slots
 });
 test("the box deck contains exactly enough ants to collect every pixel by color",()=>{
  const totals={red:0,blue:0,yellow:0,green:0,purple:0};
- for(const row of INITIAL_BOARD)for(const color of row)totals[color]++;
+ for(const row of INITIAL_BOARD)for(const color of row)if(color)totals[color]++;
  const deckTotals={red:0,blue:0,yellow:0,green:0,purple:0};
  for(const box of INCOMING)deckTotals[box.color]+=box.ants;
  assert.deepEqual(deckTotals,totals);assert.ok(INCOMING.length>9);assert.equal(INCOMING[0].color,"green");assert.ok(INCOMING.slice(0,9).every(box=>box.color==="green"));
