@@ -272,3 +272,20 @@ test("ant wave planner can cap simultaneous workers without reserving extra targ
  assert.equal(new Set(wave.map(move=>move.target.x+","+move.target.y)).size,7);
  assert.deepEqual(findAntWave(s,new Set(),new Map(),0),[]);
 });
+
+test("a poor five-box choice sequence can genuinely defeat the butterfly run",()=>{
+ const initial=createGame("garden-02");
+ const explore=(state,depth)=>{
+  if(state.lost)return true;
+  if(state.won||depth===5)return false;
+  for(let column=0;column<TRAY_SIZE;column++){
+   if(state.tray[0][column]===null)continue;
+   const next=restoreGame(JSON.parse(JSON.stringify(serializeGame(state))));
+   if(!chooseTopColumn(next,column))continue;
+   resolveAll(next);
+   if(next.lost||explore(next,depth+1))return true;
+  }
+  return false;
+ };
+ assert.equal(explore(initial,0),true,"the butterfly level must punish at least one poor box order");
+});
