@@ -1,14 +1,14 @@
 import {COLORS,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,LEVELS,getLevel,getIncoming,createGame,canChoose,chooseTopColumn,findAntWave,applyAntMove,completeBoxDeparture,serializeGame,restoreGame,isDefeat,countOutboundBySlot,countSlotWorkers,canDepartSlot} from "./game.js";
-import {loadLocal,saveLocal,clearLocal} from "./storage.js";
 import {getAntTripFrame,getAntLaunchDelay} from "./ant-animation.js";
 const $=id=>document.getElementById(id);
 const shell=$("app-shell"),boardEl=$("board"),slotsEl=$("slots"),choicesEl=$("choices"),antLayer=$("ant-layer"),conveyorEl=$("conveyor");
 const boardCtx=boardEl.getContext("2d"),antCtx=antLayer.getContext("2d");
-let state=createGame(),resolverRunning=false,resetting=false,antFrame=0,antCanvasWidth=0,antCanvasHeight=0,hasSavedGame=false,gameStarted=false,totalBlocks=state.remaining;
+let state=createGame(),resolverRunning=false,resetting=false,resetAfterMenu=false,antFrame=0,antCanvasWidth=0,antCanvasHeight=0,gameStarted=false,totalBlocks=state.remaining;
 const CAMPAIGN_KEY="ants-campaign-progress";
 function completedLevels(){try{return new Set(JSON.parse(localStorage.getItem(CAMPAIGN_KEY)||"[]"));}catch{return new Set();}}
 function markLevelComplete(levelId){const done=completedLevels();done.add(levelId);try{localStorage.setItem(CAMPAIGN_KEY,JSON.stringify([...done]));}catch{}}
 function isLevelUnlocked(level){const index=LEVELS.findIndex(item=>item.id===level.id);return index<=0||completedLevels().has(LEVELS[index-1].id);}
+function nextLevel(){const index=LEVELS.findIndex(item=>item.id===state.levelId);return LEVELS[index+1]||null;}
 const loadingSlots=new Set(),workerPromises=new Map(),reservedTargets=new Set(),activeAnts=new Map();
 let workerSequence=0;
 const colorRGB=Object.fromEntries(Object.entries(COLORS).map(([key,value])=>[key,value.hex.match(/[\da-f]{2}/gi).map(v=>parseInt(v,16))]));
@@ -303,11 +303,6 @@ async function animateBoxDepartures(slotIndices){
   requestAnimationFrame(frame);
  });
 }
-async function save(){
- const ok=await saveLocal(serializeGame(state));
- if(ok){hasSavedGame=true;updateMainMenu();}
- $("save-status").textContent=ok?"Прогресс сохранён на устройстве":"Не удалось сохранить прогресс";
-}
 async function runSlotWorker(slot,target,workerId){
  const key=target.x+","+target.y;
  try{
@@ -320,18 +315,22 @@ async function runSlotWorker(slot,target,workerId){
   reservedTargets.delete(key);workerPromises.delete(workerId);
   if(!resetting&&canDepartSlot(workerPromises,slot)&&state.slots[slot]?.status==="departing"){
    await animateBoxDepartures([slot]);completeBoxDeparture(state,slot);
-   renderSlots();renderConveyor();await save();
+   renderSlots();renderConveyor();
   }
   resolverRunning=workerPromises.size>0;
   state.activeSlots=[...new Set([...workerPromises.values()].map(worker=>worker.slot))];
   renderSlots();
-  if(!resetting){kickColony();settleColony();}
+  if(!resetting&&!resetAfterMenu){kickColony();settleColony();}
+  maybeFinalizeMenuExit();
  }
 }
 function updateResultOverlay(){
  const overlay=$("result-overlay");
  if(!overlay)return;
  const complete=state.won,failed=state.lost;
+ const next=nextLevel();
+ $("result-next").hidden=!complete||!next||!isLevelUnlocked(next);
+ if(next)$("result-next").textContent=`Следующая полянка: ${next.name} →`;
  overlay.hidden=!(complete||failed);
  if(!complete&&!failed)return;
  $("result-emoji").textContent=complete?"🏆":"🐜";
@@ -343,13 +342,13 @@ function updateResultOverlay(){
 }
 function settleColony(){
  if(resolverRunning||workerPromises.size||loadingSlots.size||resetting)return;
- if(state.remaining===0){state.won=true;state.message="Победа! Портрет собран ✨";}
+ if(state.remaining===0){if(!state.won)markLevelComplete(state.levelId);state.won=true;state.message="Победа! Портрет собран ✨";}
  else if(isDefeat(state)){state.lost=true;state.message="Поражение: все пять стартовых отсеков заняты, доступных пикселей нет.";}
  else state.message=`Колония ждёт подходящий цвет · свободно отсеков: ${state.slots.filter(box=>!box).length}`;
- render();void save();
+ render();
 }
 function kickColony(){
- if(resetting||state.won||state.lost)return;
+ if(resetting||resetAfterMenu||state.won||state.lost)return;
  const pendingBySlot=countOutboundBySlot(workerPromises);
  const wave=findAntWave(state,reservedTargets,pendingBySlot);
  for(const move of wave){
@@ -372,7 +371,7 @@ async function onChoose(column){
  if(freeSlot<0||!box||!chooseTopColumn(state,column))return;
  loadingSlots.add(freeSlot);
  state.message="Бокс "+COLORS[box.color].name.toLowerCase()+" подан на ленту и едет в отсек "+(freeSlot+1);
- render();void save();
+ render();
  try{await animateBoxLoading(source,slotCenter(freeSlot),box.color);}
  finally{
   loadingSlots.delete(freeSlot);renderSlots();
@@ -383,13 +382,13 @@ async function onChoose(column){
     {duration:430,easing:"cubic-bezier(.2,.8,.25,1)"}
    );
   }
-  if(!resetting&&loadingSlots.size===0)kickColony();
+  if(!resetting&&loadingSlots.size===0){if(resetAfterMenu)maybeFinalizeMenuExit();else kickColony();}
  }
 }
 async function restart(){
  if(resetting||workerPromises.size>0||loadingSlots.size>0)return;
- resetting=true;renderChoices();state=createGame(state.levelId);totalBlocks=state.remaining;await clearLocal(state.levelId);resetting=false;render();await save();
- $("save-status").textContent="Новая игра";
+ resetting=true;renderChoices();state=createGame(state.levelId);totalBlocks=state.remaining;resetting=false;render();
+ $("save-status").textContent="Новая партия · прогресс уровня не сохраняется";
 }
 function updateMainMenu(){
  const primary=$("start-game"),fresh=$("new-game"),progress=$("menu-progress"),level=getLevel(state.levelId);
@@ -397,24 +396,35 @@ function updateMainMenu(){
  const list=$("campaign-levels");
  if(list){list.replaceChildren();for(const item of LEVELS){const unlocked=isLevelUnlocked(item),button=document.createElement("button");button.type="button";button.className="campaign-level"+(item.id===state.levelId?" current":"")+(unlocked?"":" locked");button.disabled=!unlocked;button.innerHTML=`<span class="campaign-emoji">${item.emoji}</span><span class="campaign-copy"><small>${item.chapter} · ${String(item.number).padStart(2,"0")}</small><strong>${item.name}</strong></span><span class="campaign-state">${completedLevels().has(item.id)?"✓":unlocked?"›":"🔒"}</span>`;button.addEventListener("click",()=>{if(unlocked)void startFreshGame(item.id);});list.append(button);}}
 
- primary.textContent=gameStarted?"Вернуться на полянку":hasSavedGame?"Продолжить охоту":"Начать охоту";
+ primary.textContent=gameStarted?"Вернуться на полянку":"Начать охоту";
+ primary.disabled=resetAfterMenu;
  primary.querySelector("span")?.remove();
  const arrow=document.createElement("span");arrow.setAttribute("aria-hidden","true");arrow.textContent="→";primary.append(arrow);
- fresh.hidden=!hasSavedGame&&!gameStarted;
- progress.textContent=hasSavedGame?(`Сохранено · осталось блоков: ${state.remaining.toLocaleString("ru-RU")}`):`${level.chapter} · ${level.hint}`;
+ fresh.hidden=true;
+ progress.textContent=`${level.chapter} · ${level.hint}`;
 }
-function showMainMenu(){shell.classList.add("menu-open");updateMainMenu();}
+function showMainMenu(){
+ shell.classList.add("menu-open");
+ if(gameStarted){resetAfterMenu=true;maybeFinalizeMenuExit();}
+ updateMainMenu();
+}
+function maybeFinalizeMenuExit(){
+ if(!resetAfterMenu||workerPromises.size||loadingSlots.size||resetting)return;
+ resetting=true;cancelAnimationFrame(antFrame);antFrame=0;activeAnts.clear();reservedTargets.clear();
+ state=createGame(state.levelId);totalBlocks=state.remaining;gameStarted=false;resetAfterMenu=false;resetting=false;
+ render();$("save-status").textContent="Партия сброшена · открытые полянки сохранены";updateMainMenu();
+}
 function startGame(){
  shell.classList.remove("menu-open");gameStarted=true;updateMainMenu();
  kickColony();
 }
 async function startFreshGame(levelId=state.levelId){
- if(workerPromises.size>0||loadingSlots.size>0)return;
- resetting=true;cancelAnimationFrame(antFrame);state=createGame(levelId);totalBlocks=state.remaining;await clearLocal(state.levelId);resetting=false;
- hasSavedGame=false;gameStarted=true;render();await save();$("save-status").textContent="Новая игра";shell.classList.remove("menu-open");updateMainMenu();kickColony();
+ if(workerPromises.size>0||loadingSlots.size>0||resetAfterMenu)return;
+ resetting=true;cancelAnimationFrame(antFrame);activeAnts.clear();reservedTargets.clear();state=createGame(levelId);totalBlocks=state.remaining;resetting=false;
+ gameStarted=true;render();$("save-status").textContent="Новая партия · прогресс уровня не сохраняется";shell.classList.remove("menu-open");updateMainMenu();kickColony();
 }
 async function boot(){
- const saved=await loadLocal();hasSavedGame=Boolean(saved);if(saved)state=restoreGame(saved);totalBlocks=createGame(state.levelId).remaining;
+ totalBlocks=state.remaining;
  render();resizeAntLayer();updateMainMenu();
  if("serviceWorker"in navigator){
   try{
@@ -426,7 +436,7 @@ async function boot(){
    if(registration.waiting)registration.waiting.postMessage({type:"SKIP_WAITING"});
   }catch(error){console.warn("PWA update check failed",error);}
  }
- $("save-status").textContent=saved?"Сохранённый прогресс":"Сохранение на устройстве";
+ $("save-status").textContent="Партия не сохраняется · открытые полянки сохраняются";
 }
 $("restart").addEventListener("click",restart);
 $("menu-toggle").addEventListener("click",showMainMenu);
@@ -440,5 +450,4 @@ $("how-to-play").addEventListener("click",()=>{
  $("how-to-play").textContent=panel.hidden?"Как играть?":"Свернуть правила";
 });
 window.addEventListener("resize",()=>{resizeAntLayer();renderBoard();});
-window.addEventListener("pagehide",()=>{if(!resetting)saveLocal(serializeGame(state));});
 boot();
