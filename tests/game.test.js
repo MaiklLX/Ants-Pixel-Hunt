@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {createGame,LEVELS,getLevel,getIncoming,createArtworkBoard,resolveAll,INITIAL_BOARD,INCOMING,isAccessible,findAccessiblePixel,findAccessiblePixels,findAntWave,chooseTopColumn,findNextMove,applyAntMove,completeBoxDeparture,freeSlotCount,isDefeat,SIZE,GRID_SIZE,BLOCK_SIZE,BOX_CAPACITY,SLOT_COUNT,TRAY_SIZE,canChoose,restoreGame,serializeGame,countOutboundBySlot,countSlotWorkers,canDepartSlot} from "../src/game.js";
+import {createGame,LEVELS,getLevel,getIncoming,createArtworkBoard,resolveAll,INITIAL_BOARD,INCOMING,isAccessible,getExposedPixels,findAccessiblePixel,findAccessiblePixels,findAntWave,chooseTopColumn,findNextMove,applyAntMove,completeBoxDeparture,freeSlotCount,isDefeat,SIZE,GRID_SIZE,BLOCK_SIZE,BOX_CAPACITY,SLOT_COUNT,TRAY_SIZE,canChoose,restoreGame,serializeGame,countOutboundBySlot,countSlotWorkers,canDepartSlot} from "../src/game.js";
 const smallBoard=()=>Array.from({length:5},()=>Array(5).fill("green"));
 
 test("the authored frog is built from large collectible blocks on a 350x350 display grid",()=>{
@@ -238,10 +238,7 @@ test("all six campaign drawings remain solvable when only the true outer layer i
    if(remaining===0)break;
    for(let slot=0;slot<active.length;slot++){
     if(active[slot])continue;
-    const available=new Set();
-    for(let y=0;y<board.length;y++)for(let x=0;x<board[y].length;x++){
-     const color=board[y][x];if(color&&isAccessible(board,x,y))available.add(color);
-    }
+    const available=new Set(getExposedPixels(board).map(({x,y})=>board[y][x]).filter(Boolean));
     const index=deck.findIndex(box=>available.has(box.color)&&!active.some(other=>other?.color===box.color));
     if(index>=0)active[slot]=deck.splice(index,1)[0];
    }
