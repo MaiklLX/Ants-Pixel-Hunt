@@ -1,7 +1,7 @@
-export const SIZE=25;
+export const SIZE=50;
 export const GRID_SIZE=250;
 export const BLOCK_SIZE=GRID_SIZE/SIZE;
-export const BOX_CAPACITY=20;
+export const BOX_CAPACITY=100;
 export const SLOT_COUNT=5;
 export const TRAY_SIZE=3;
 export const COLORS={
@@ -24,7 +24,7 @@ function lineDistance(px,py,x1,y1,x2,y2){
 }
 export function createArtworkBoard(){
  // The visible field is 250×250 tiny squares. Each collectible artwork block
- // occupies a crisp 10×10 group of those squares, so one ant carries one large pixel.
+ // occupies a crisp 5×5 group of those squares, so one ant carries one large pixel.
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
  for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){
   const px=(x+.5)*BLOCK_SIZE,py=(y+.5)*BLOCK_SIZE;
