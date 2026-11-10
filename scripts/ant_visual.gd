@@ -22,7 +22,7 @@ func _draw() -> void:
 	var body := Color("#c96b3d")
 
 	# Тень и шесть лапок: передняя/средняя/задняя пары работают попеременно.
-	draw_ellipse(c + Vector2(0, 7), Vector2(13, 4), Color(0, 0, 0, 0.2))
+	draw_circle(c + Vector2(0, 7), 7.0, Color(0, 0, 0, 0.2))
 	draw_line(c + Vector2(-4, 1), c + Vector2(-11, -8 + gait), outline, 3.0, true)
 	draw_line(c + Vector2(-4, 1), c + Vector2(-11, 8 - gait), outline, 3.0, true)
 	draw_line(c + Vector2(1, 1), c + Vector2(0, -10 - counter_gait), outline, 2.6, true)
