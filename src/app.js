@@ -11,40 +11,53 @@ function markLevelComplete(levelId){const done=completedLevels();done.add(levelI
 function isLevelUnlocked(level){return isCampaignLevelUnlocked(LEVELS,completedLevels(),level.id);}
 function nextLevel(){return getNextCampaignLevel(LEVELS,state.levelId);}
 const loadingSlots=new Set(),workerPromises=new Map(),reservedTargets=new Set(),activeAnts=new Map();
-let workerSequence=0;
+let workerSequence=0,lastAntFrameAt=0,lastExposedPixels=new Set();
+const MAX_ACTIVE_ANTS=36,ANT_FRAME_INTERVAL=1000/30;
 const colorRGB=Object.fromEntries(Object.entries(COLORS).map(([key,value])=>[key,value.hex.match(/[\da-f]{2}/gi).map(v=>parseInt(v,16))]));
-function renderBoard(){
- const width=boardEl.width,height=boardEl.height,cell=width/SIZE;
- boardCtx.clearRect(0,0,width,height);
- const exposed=new Set(getExposedPixels(state.board).map(point=>point.x+","+point.y));
- const empty=boardCtx.createLinearGradient(0,0,width,height);
- empty.addColorStop(0,"#f5f2df");empty.addColorStop(1,"#dcebdc");
- boardCtx.fillStyle=empty;boardCtx.fillRect(0,0,width,height);
- for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){
-  const color=state.board[y][x];if(!color)continue;
-  const rgb=COLORS[color].hex,px=x*cell,py=y*cell,size=cell-1.25;
-  boardCtx.save();
-  boardCtx.shadowColor="#35513b38";boardCtx.shadowBlur=2.1;boardCtx.shadowOffsetY=1.7;
-  const face=boardCtx.createLinearGradient(px,py,px+size,py+size);
-  face.addColorStop(0,"#ffffff");face.addColorStop(.12,rgb);face.addColorStop(.72,rgb);face.addColorStop(1,"#456b4a");
-  boardCtx.fillStyle=face;
-  boardCtx.beginPath();boardCtx.roundRect(px+.7,py+.5,size,size,1.9);boardCtx.fill();
-  boardCtx.shadowColor="transparent";boardCtx.shadowBlur=0;boardCtx.shadowOffsetY=0;
-  boardCtx.strokeStyle="#ffffffa8";boardCtx.lineWidth=.65;boardCtx.stroke();
-  boardCtx.strokeStyle="#35513b35";boardCtx.lineWidth=.7;
-  boardCtx.beginPath();boardCtx.moveTo(px+2,py+size-1);boardCtx.lineTo(px+size-1,py+size-1);boardCtx.lineTo(px+size-1,py+2);boardCtx.stroke();
-  boardCtx.fillStyle="#ffffff55";boardCtx.beginPath();boardCtx.roundRect(px+2,py+1.6,size-4,1.15,.7);boardCtx.fill();
-  if(exposed.has(x+","+y)){
-   boardCtx.strokeStyle="#fff3c9cc";boardCtx.lineWidth=.85;
-   boardCtx.beginPath();boardCtx.roundRect(px+1.25,py+1.1,size-2.3,size-2.3,1.5);boardCtx.stroke();
-  }
-  boardCtx.restore();
- }
+let boardEmptyGradient=null;
+function updateBoardProgress(){
  $("board-status").textContent=`Осталось кубиков: ${state.remaining.toLocaleString("ru-RU")}`;
  const collected=totalBlocks-state.remaining,percent=Math.round(collected/totalBlocks*100);
  const progress=$("progress-fill"),track=progress?.parentElement;
  if(progress)progress.style.width=percent+"%";
  if(track)track.setAttribute("aria-valuenow",String(percent));
+}
+function drawBoardTile(x,y,exposed,cell){
+ const color=state.board[y][x];if(!color)return;
+ const px=x*cell,py=y*cell,size=cell-1.25,rgb=COLORS[color].hex;
+ boardCtx.save();
+ boardCtx.shadowColor="#35513b38";boardCtx.shadowBlur=2.1;boardCtx.shadowOffsetY=1.7;
+ const face=boardCtx.createLinearGradient(px,py,px+size,py+size);
+ face.addColorStop(0,"#ffffff");face.addColorStop(.12,rgb);face.addColorStop(.72,rgb);face.addColorStop(1,"#456b4a");
+ boardCtx.fillStyle=face;boardCtx.beginPath();boardCtx.roundRect(px+.7,py+.5,size,size,1.9);boardCtx.fill();
+ boardCtx.shadowColor="transparent";boardCtx.shadowBlur=0;boardCtx.shadowOffsetY=0;
+ boardCtx.strokeStyle="#ffffffa8";boardCtx.lineWidth=.65;boardCtx.stroke();
+ boardCtx.strokeStyle="#35513b35";boardCtx.lineWidth=.7;
+ boardCtx.beginPath();boardCtx.moveTo(px+2,py+size-1);boardCtx.lineTo(px+size-1,py+size-1);boardCtx.lineTo(px+size-1,py+2);boardCtx.stroke();
+ boardCtx.fillStyle="#ffffff55";boardCtx.beginPath();boardCtx.roundRect(px+2,py+1.6,size-4,1.15,.7);boardCtx.fill();
+ if(exposed){boardCtx.strokeStyle="#fff3c9cc";boardCtx.lineWidth=.85;boardCtx.beginPath();boardCtx.roundRect(px+1.25,py+1.1,size-2.3,size-2.3,1.5);boardCtx.stroke();}
+ boardCtx.restore();
+}
+function renderBoard(){
+ const width=boardEl.width,height=boardEl.height,cell=width/SIZE;
+ boardCtx.clearRect(0,0,width,height);
+ boardEmptyGradient=boardCtx.createLinearGradient(0,0,width,height);
+ boardEmptyGradient.addColorStop(0,"#f5f2df");boardEmptyGradient.addColorStop(1,"#dcebdc");
+ boardCtx.fillStyle=boardEmptyGradient;boardCtx.fillRect(0,0,width,height);
+ lastExposedPixels=new Set(getExposedPixels(state.board).map(point=>point.x+","+point.y));
+ for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)drawBoardTile(x,y,lastExposedPixels.has(x+","+y),cell);
+ updateBoardProgress();
+}
+function renderBoardAfterPickup(target){
+ const cell=boardEl.width/SIZE,px=target.x*cell,py=target.y*cell;
+ boardCtx.save();boardCtx.beginPath();boardCtx.rect(px-2,py-2,cell+4,cell+4);boardCtx.clip();
+ boardCtx.fillStyle=boardEmptyGradient||"#e8eddd";boardCtx.fillRect(px-2,py-2,cell+4,cell+4);boardCtx.restore();
+ const nextExposed=new Set(getExposedPixels(state.board).map(point=>point.x+","+point.y));
+ for(const key of nextExposed){
+  if(lastExposedPixels.has(key))continue;
+  const [x,y]=key.split(",").map(Number);drawBoardTile(x,y,true,cell);
+ }
+ lastExposedPixels=nextExposed;updateBoardProgress();
 }
 function renderSlots(){
  slotsEl.replaceChildren();
@@ -55,7 +68,7 @@ function renderSlots(){
   const number=document.createElement("span");number.className="slot-number";number.textContent=`ОТСЕК ${index+1}`;slot.append(number);
   if(box){
    const stripe=document.createElement("span");stripe.className="slot-color";stripe.style.background=COLORS[box.color].hex;
-   const count=document.createElement("strong");count.className="ant-count";count.textContent=box.status==="departing"?(countSlotWorkers(workerPromises,index)?`↩ ${countSlotWorkers(workerPromises,index)} в пути`:"ГОТОВ К ОТГРУЗКЕ"):`● ${box.ants.toLocaleString("ru-RU")}`;
+   const count=document.createElement("strong");count.className="ant-count";count.textContent=box.status==="departing"?(countSlotWorkers(workerPromises,index)?`↩ ${countSlotWorkers(workerPromises,index)} в пути`:"ГОТОВ К ОТГРУЗКЕ"):`🐜 ${box.ants.toLocaleString("ru-RU")}`;
    slot.append(stripe,count);
   }else{const plus=document.createElement("span");plus.className="slot-plus";plus.textContent="＋";slot.append(plus);}
   slotsEl.append(slot);
@@ -75,10 +88,11 @@ function renderChoices(){
   if(index!==null&&index!==undefined)button.dataset.boxIndex=String(index);
   button.disabled=!box||resetting||resetAfterMenu||state.won||state.lost||!canChoose(state);
   if(box){button.style.setProperty("--ant-color",COLORS[box.color].hex);
-   const crate=document.createElement("span");crate.className="choice-crate";crate.textContent="📦";
+   const crate=document.createElement("span");crate.className="choice-crate";crate.setAttribute("aria-hidden","true");
+   const gem=document.createElement("i");gem.style.setProperty("--gem-color",COLORS[box.color].hex);crate.append(gem);
    const name=document.createElement("strong");name.textContent=COLORS[box.color].name;
-   const count=document.createElement("small");count.textContent=`${box.ants.toLocaleString("ru-RU")} кубиков`;
-   button.append(crate,name,count);button.setAttribute("aria-label",`Выбрать бокс: ${COLORS[box.color].name}, ${box.ants} кубиков`);
+   const count=document.createElement("small");count.textContent=`${box.ants.toLocaleString("ru-RU")} муравьёв`;
+   button.append(crate,name,count);button.setAttribute("aria-label",`Выбрать бокс: ${COLORS[box.color].name}, ${box.ants} муравьёв`);
   }else{button.textContent="Очередь закончилась";button.setAttribute("aria-label","В этой колонке больше нет боксов");}
   button.addEventListener("click",()=>onChoose(col));lane.append(button);
   const preview=document.createElement("div");preview.className="queue-preview";preview.setAttribute("aria-label","Следующие боксы в колонке");
@@ -104,7 +118,7 @@ function render(){
  updateResultOverlay();
 }
 function resizeAntLayer(){
- const rect=shell.getBoundingClientRect(),dpr=Math.min(2,window.devicePixelRatio||1);
+ const rect=shell.getBoundingClientRect(),dpr=Math.min(1.5,window.devicePixelRatio||1);
  antCanvasWidth=rect.width;antCanvasHeight=rect.height;
  antLayer.width=Math.max(1,Math.round(rect.width*dpr));antLayer.height=Math.max(1,Math.round(rect.height*dpr));
  antCtx.setTransform(dpr,0,0,dpr,0,0);
@@ -163,11 +177,13 @@ function createAntSprite(color,carrying,gait){
  antSpriteCache.set(key,sprite);return sprite;
 }
 function drawAnt(ctx,point,color,carrying,index,direction=0){
- const phase=performance.now()*.012+index*1.73;
- const gait=Math.floor(phase/2)%4;
- ctx.save();ctx.translate(point.x,point.y);
- ctx.rotate(direction+Math.sin(phase*.31+index)*.045);
+ const phase=performance.now()*.008+index*1.73,gait=Math.floor(phase/1.7)%4;
+ const bob=Math.sin(phase*1.7+index*.31)*.8;
+ ctx.save();ctx.translate(point.x,point.y+bob);
+ ctx.fillStyle="#36523d26";ctx.beginPath();ctx.ellipse(0,7,8,2.6,0,0,Math.PI*2);ctx.fill();
+ ctx.rotate(direction+Math.sin(phase*.31+index)*.055);
  ctx.drawImage(createAntSprite(color,carrying,gait),-13,-12);
+ if(carrying){ctx.globalAlpha=.32+.18*Math.sin(phase*2);ctx.fillStyle=COLORS[color].hex;ctx.beginPath();ctx.arc(-8,-7,4.2,0,Math.PI*2);ctx.fill();}
  ctx.restore();
 }
 function makeAntTrail(start,end,seed,spread=1){
@@ -199,6 +215,8 @@ function trailPoint(points,t){
  return{x:calc(p0.x,p1.x,p2.x,p3.x),y:calc(p0.y,p1.y,p2.y,p3.y)};
 }
 function renderAntFrame(timestamp){
+ if(timestamp-lastAntFrameAt<ANT_FRAME_INTERVAL){antFrame=requestAnimationFrame(renderAntFrame);return;}
+ lastAntFrameAt=timestamp;
  antCtx.clearRect(0,0,antCanvasWidth,antCanvasHeight);
  for(const [workerId,ant] of activeAnts){
   const phase=getAntTripFrame(timestamp-ant.startTime,ant.delay,ant.outbound,ant.returning);
@@ -206,7 +224,7 @@ function renderAntFrame(timestamp){
   if(phase.picked&&!ant.picked){
    ant.picked=true;
    if(applyAntMove(state,ant.move.slot,ant.move.target))ant.onPickup();
-   renderBoard();renderSlots();renderChoices();
+   renderBoardAfterPickup(ant.move.target);renderSlots();
    $("message").textContent="Муравьишки собирают кубики по извилистым тропинкам";
    kickColony();
   }
@@ -363,7 +381,8 @@ function settleColony(){
 function kickColony(){
  if(resetting||resetAfterMenu||state.won||state.lost)return;
  const pendingBySlot=countOutboundBySlot(workerPromises);
- const wave=findAntWave(state,reservedTargets,pendingBySlot);
+ const dispatchCapacity=Math.max(0,MAX_ACTIVE_ANTS-workerPromises.size);
+ const wave=findAntWave(state,reservedTargets,pendingBySlot,dispatchCapacity);
  for(const move of wave){
   const workerId=++workerSequence,key=move.target.x+","+move.target.y;
   reservedTargets.add(key);
