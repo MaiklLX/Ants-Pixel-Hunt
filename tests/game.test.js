@@ -57,6 +57,8 @@ test("swarm planner sends eligible ants together and reserves targets left-to-ri
  const wave=findAntWave(s);
  assert.deepEqual(wave.map(m=>[m.slot,m.target.x,m.target.y]),[[0,0,0],[0,1,0],[3,2,0]]);
  assert.equal(new Set(wave.map(m=>m.target.x+","+m.target.y)).size,wave.length);
+ const pending=findAntWave(s,new Set(["0,0"]),new Map([[0,1]]));
+ assert.deepEqual(pending.map(m=>[m.slot,m.target.x,m.target.y]),[[0,1,0],[3,2,0]]);
 });
 test("findAccessiblePixels returns a bounded wave of exposed matching pixels",()=>{
  const board=smallBoard();board[2][2]="";board[2][3]="red";board[3][3]="red";board[3][4]="";
