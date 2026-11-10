@@ -707,3 +707,6 @@ body{background:radial-gradient(ellipse at 50% 0%,#fffdf2 0%,#f1faee 42%,#e4f2e7
 
 /* Modal windows remain interactive above the home hub while the game canvas is hidden. */
 .app-shell.menu-open>.nest-overlay{visibility:visible;pointer-events:auto}
+
+/* Keyboard and switch-control focus remains visible in the new hub navigation. */
+.hub-location:focus-visible,.map-levels .campaign-level:focus-visible,.nest-close:focus-visible{outline:3px solid #d2a94f;outline-offset:3px}
