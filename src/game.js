@@ -32,10 +32,11 @@ export function createGame(){
   activeSlot:-1,activeTarget:null,message:"Выбери бокс в верхнем ряду — остальные в колонке сдвинутся вверх",resolutionLog:[]};
 }
 export function isAccessible(board,x,y){
+ const size=board.length;
  if(!board[y]?.[x])return false;
  return [[-1,0],[1,0],[0,-1],[0,1]].some(([dx,dy])=>{
   const nx=x+dx,ny=y+dy;
-  return nx<0||nx>=SIZE||ny<0||ny>=SIZE||board[ny][nx]==="";
+  return nx<0||nx>=size||ny<0||ny>=size||board[ny][nx]==="";
  });
 }
 export function findAccessiblePixel(board,color){
