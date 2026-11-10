@@ -144,6 +144,27 @@ function drawAnt(ctx,point,color,carrying,index,direction=0){
  ctx.drawImage(createAntSprite(color,carrying,gait),-13,-12);
  ctx.restore();
 }
+function makeAntTrail(start,end,seed,spread=1){
+ const dx=end.x-start.x,dy=end.y-start.y,len=Math.max(1,Math.hypot(dx,dy));
+ const nx=-dy/len,ny=dx/len;
+ let value=Math.floor(seed*2147483647)%2147483647;
+ const random=()=>{value=(value*48271)%2147483647;return value/2147483647;};
+ const count=Math.max(4,Math.min(7,Math.round(len/105)+3));
+ const points=[start];
+ for(let i=1;i<count;i++){
+  const t=i/count,side=(random()-.5)*2;
+  const wave=Math.sin(t*Math.PI)*(13+random()*22)*spread;
+  const along=(random()-.5)*Math.min(20,len*.045);
+  points.push({x:start.x+dx*t+nx*(side*wave)+dx/len*along,y:start.y+dy*t+ny*(side*wave)+dy/len*along});
+ }
+ points.push(end);return points;
+}
+function trailPoint(points,t){
+ const scaled=Math.max(0,Math.min(.999999,t))*(points.length-1),i=Math.floor(scaled),u=scaled-i;
+ const p0=points[Math.max(0,i-1)],p1=points[i],p2=points[i+1],p3=points[Math.min(points.length-1,i+2)];
+ const calc=(a,b,c,d)=>.5*((2*b)+(-a+c)*u+(2*a-5*b+4*c-d)*u*u+(-a+3*b-3*c+d)*u*u*u);
+ return{x:calc(p0.x,p1.x,p2.x,p3.x),y:calc(p0.y,p1.y,p2.y,p3.y)};
+}
 async function animateAntTrip(move,index,onPickup=()=>{}){
  const shellRect=shell.getBoundingClientRect(),dpr=Math.min(2,window.devicePixelRatio||1);
  const layer=document.createElement("canvas");layer.className="ant-worker-layer";
@@ -151,28 +172,34 @@ async function animateAntTrip(move,index,onPickup=()=>{}){
  layer.style.width=shellRect.width+"px";layer.style.height=shellRect.height+"px";shell.append(layer);
  const ctx=layer.getContext("2d");ctx.setTransform(dpr,0,0,dpr,0,0);
  const start=slotCenter(move.slot),end=cellCenter(move.target.x,move.target.y);
- const distance=Math.hypot(end.x-start.x,end.y-start.y),seed=(index*9301+move.target.x*49297+move.target.y*233)%9973/9973;
- const bend=(seed-.5)*Math.min(72,Math.max(18,distance*.18));
- const control=curveControl(start,end,bend),returnControl=curveControl(end,start,-bend*.72);
- const outbound=850+distance*.78+(seed-.5)*120,returning=720+distance*.62+(seed-.5)*100,startTime=performance.now();
- let picked=false;
+ const seed=(index*9301+move.target.x*49297+move.target.y*233)%9973/9973;
+ const outboundTrail=makeAntTrail(start,end,seed,1),returnTrail=makeAntTrail(end,start,(seed+.371)%1,.72);
+ const distance=Math.hypot(end.x-start.x,end.y-start.y);
+ const delay=(index%8)*105+seed*55,outbound=1150+distance*.52,returning=950+distance*.42;
+ const startTime=performance.now();let picked=false;
  return new Promise(resolve=>{
   const frame=timestamp=>{
    const elapsed=timestamp-startTime;
-   if(elapsed>=outbound&&!picked){
+   if(elapsed<delay){requestAnimationFrame(frame);return;}
+   const tripElapsed=elapsed-delay;
+   if(tripElapsed>=outbound&&!picked){
     picked=true;
     if(applyAntMove(state,move.slot,move.target))onPickup();
     renderBoard();renderSlots();renderChoices();
-    $("message").textContent="Муравьишки отправились за доступными кубиками";
+    $("message").textContent="Муравьишки собирают кубики по извилистым тропинкам";
     kickColony();
    }
-   const returningNow=elapsed>=outbound;
-   const t=returningNow?Math.min(1,(elapsed-outbound)/returning):Math.min(1,elapsed/outbound);
-   const point=returningNow?quadPoint(end,returnControl,start,t):quadPoint(start,control,end,t);
-   const tangent=returningNow?quadTangent(end,returnControl,start,t):quadTangent(start,control,end,t);
+   const returningNow=tripElapsed>=outbound;
+   const duration=returningNow?returning:outbound;
+   const raw=Math.min(1,Math.max(0,(tripElapsed-(returningNow?outbound:0))/duration));
+   const eased=raw*raw*(3-2*raw);
+   const trail=returningNow?returnTrail:outboundTrail;
+   const point=trailPoint(trail,eased);
+   const before=trailPoint(trail,Math.max(0,eased-.012)),after=trailPoint(trail,Math.min(1,eased+.012));
+   const tangent={x:after.x-before.x,y:after.y-before.y};
    ctx.clearRect(0,0,shellRect.width,shellRect.height);
    drawAnt(ctx,point,move.color,returningNow,index,Math.atan2(tangent.y,tangent.x));
-   if(elapsed>=outbound+returning){layer.remove();resolve();return;}
+   if(tripElapsed>=outbound+returning){layer.remove();resolve();return;}
    requestAnimationFrame(frame);
   };
   requestAnimationFrame(frame);
