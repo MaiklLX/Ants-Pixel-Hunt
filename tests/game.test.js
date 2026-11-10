@@ -36,10 +36,10 @@ test("player can fill every remaining start slot with rapid choices during an ac
  assert.equal(freeSlotCount(s),0);assert.deepEqual(s.slots.map(box=>box.sourceIndex),[0,1,2,3,4]);assert.equal(canChoose(s),false);
 });
 test("accessibility checks use actual board dimensions",()=>{
- const board=Array.from({length:250},()=>Array(250).fill("green"));
- board[125][125]="red";board[0][249]="red";
- assert.equal(isAccessible(board,125,125),false);assert.equal(isAccessible(board,249,0),true);
- board[125][124]="";assert.equal(isAccessible(board,125,125),true);
+ const board=Array.from({length:SIZE},()=>Array(SIZE).fill("green"));
+ board[12][12]="red";board[0][SIZE-1]="red";
+ assert.equal(isAccessible(board,12,12),false);assert.equal(isAccessible(board,SIZE-1,0),true);
+ board[12][11]="";assert.equal(isAccessible(board,12,12),true);
 });
 test("legacy 7x7 save starts the new authored level instead of stretching old pixels",()=>{
  const old=Array.from({length:7},()=>Array(7).fill("green"));
