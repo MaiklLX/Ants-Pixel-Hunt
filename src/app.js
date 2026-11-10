@@ -413,7 +413,7 @@ async function startFreshGame(levelId=state.levelId){
  hasSavedGame=false;gameStarted=true;render();$("save-status").textContent="Новая игра";shell.classList.remove("menu-open");updateMainMenu();kickColony();
 }
 async function boot(){
- const saved=await loadLocal();hasSavedGame=Boolean(saved);if(saved)state=restoreGame(saved);totalBlocks=state.board.flat().filter(Boolean).length;
+ const saved=await loadLocal();hasSavedGame=Boolean(saved);if(saved)state=restoreGame(saved);totalBlocks=createGame(state.levelId).remaining;
  render();resizeAntLayer();updateMainMenu();
  if("serviceWorker"in navigator){
   try{
