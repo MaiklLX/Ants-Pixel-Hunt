@@ -6,10 +6,13 @@ const boardCtx=boardEl.getContext("2d"),antCtx=antLayer.getContext("2d");
 let state=createGame(),resolverRunning=false,resetting=false,antFrame=0;
 const colorRGB=Object.fromEntries(Object.entries(COLORS).map(([key,value])=>[key,value.hex.match(/[\da-f]{2}/gi).map(v=>parseInt(v,16))]));
 function renderBoard(){
- const image=boardCtx.createImageData(SIZE,SIZE),empty=[231,240,228];
+ const image=boardCtx.createImageData(GRID_SIZE,GRID_SIZE),empty=[231,240,228];
  for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){
-  const color=state.board[y][x],rgb=color?colorRGB[color]:empty,index=(y*SIZE+x)*4;
-  image.data[index]=rgb[0];image.data[index+1]=rgb[1];image.data[index+2]=rgb[2];image.data[index+3]=255;
+  const color=state.board[y][x],rgb=color?colorRGB[color]:empty;
+  for(let by=0;by<BLOCK_SIZE;by++)for(let bx=0;bx<BLOCK_SIZE;bx++){
+   const index=((y*BLOCK_SIZE+by)*GRID_SIZE+x*BLOCK_SIZE+bx)*4;
+   image.data[index]=rgb[0];image.data[index+1]=rgb[1];image.data[index+2]=rgb[2];image.data[index+3]=255;
+  }
  }
  boardCtx.putImageData(image,0,0);
  $("board-status").textContent=`Крупных блоков осталось: ${state.remaining.toLocaleString("ru-RU")}`;
