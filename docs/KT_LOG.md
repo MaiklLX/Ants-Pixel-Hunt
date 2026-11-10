@@ -54,8 +54,10 @@
 - Результат: вместо отдельного полноразмерного canvas и RAF loop на каждого муравья используется общий #ant-layer и единый requestAnimationFrame renderer.
 - Индивидуальные задержки старта, траектории, момент подбора блока и обратный путь сохранены.
 - Добавлены src/ant-animation.js и tests/ant-animation.test.js.
-- Code commit: 55ceef019522ba123880e940361024f751a5aaa7.
-- Pages run 42832133901 и Godot check run 42832133637 ожидали выполнения на момент фиксации.
+- Code/test commit: 08791e0a2cc76752f435940b64f89edb00ec0c61.
+- Первый CI прогон выявил неверное ожидание теста на точной границе pickup; исправлено в отдельном тестовом коммите, без изменения игровой механики.
+- Pages run 42832771920 — completed / success: тесты, build и deploy.
+- Godot run 42832771779 — completed / success: import, gameplay rules tests и smoke test.
 - Реальный FPS/CPU на мобильном устройстве не измерялся; физическое устройство не тестировалось.
 - Подробности: [KT-035](KT-035_SHARED_ANT_RENDERER.md).
 
