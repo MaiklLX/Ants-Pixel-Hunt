@@ -6,8 +6,9 @@ self.addEventListener("install",event=>{
   const response=await fetch("./");
   const html=await response.clone().text();
   await cache.put("./",response);
-  const bundles=[...html.matchAll(/(?:src|href)="([^"]+\\.(?:js|css))"/g)].map(match=>match[1]);
-  await cache.addAll([...STATIC_FILES.slice(1),...bundles]);
+  const bundles=[...html.matchAll(/(?:src|href)="([^"]+\.(?:js|css))"/g)].map(match=>match[1]);
+  await cache.addAll(STATIC_FILES.slice(1));
+  if(bundles.length)await cache.addAll(bundles);
   await self.skipWaiting();
  })());
 });
