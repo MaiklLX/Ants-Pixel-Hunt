@@ -10,7 +10,7 @@ function completedLevels(){try{return new Set(JSON.parse(localStorage.getItem(CA
 function markLevelComplete(levelId){const done=completedLevels();done.add(levelId);try{localStorage.setItem(CAMPAIGN_KEY,JSON.stringify([...done]));}catch{}}
 function isLevelUnlocked(level){return isCampaignLevelUnlocked(LEVELS,completedLevels(),level.id);}
 function nextLevel(){return getNextCampaignLevel(LEVELS,state.levelId);}
-const loadingSlots=new Set(),workerPromises=new Map(),reservedTargets=new Set(),activeAnts=new Map();
+const loadingSlots=new Set(),workerPromises=new Map(),reservedTargets=new Set(),activeAnts=new Map(),pickupEffects=[];
 let workerSequence=0,lastAntFrameAt=0,lastExposedPixels=new Set();
 const MAX_ACTIVE_ANTS=36,ANT_FRAME_INTERVAL=1000/30;
 const colorRGB=Object.fromEntries(Object.entries(COLORS).map(([key,value])=>[key,value.hex.match(/[\da-f]{2}/gi).map(v=>parseInt(v,16))]));
@@ -214,6 +214,24 @@ function trailPoint(points,t){
  const calc=(a,b,c,d)=>.5*((2*b)+(-a+c)*u+(2*a-5*b+4*c-d)*u*u+(-a+3*b-3*c+d)*u*u*u);
  return{x:calc(p0.x,p1.x,p2.x,p3.x),y:calc(p0.y,p1.y,p2.y,p3.y)};
 }
+function drawPickupEffects(timestamp){
+ for(let i=pickupEffects.length-1;i>=0;i--){
+  const effect=pickupEffects[i],t=(timestamp-effect.startedAt)/460;
+  if(t>=1){pickupEffects.splice(i,1);continue;}
+  const alpha=1-t,radius=4+t*13;
+  antCtx.save();antCtx.globalAlpha=alpha;
+  antCtx.strokeStyle=COLORS[effect.color].hex;antCtx.lineWidth=1.8*(1-t);
+  antCtx.beginPath();antCtx.arc(effect.x,effect.y,radius,0,Math.PI*2);antCtx.stroke();
+  antCtx.fillStyle="#fff4c9";antCtx.shadowColor=COLORS[effect.color].hex;antCtx.shadowBlur=5;
+  for(let n=0;n<5;n++){
+   const angle=n*Math.PI*2/5+effect.seed,reach=radius*.78;
+   const x=effect.x+Math.cos(angle)*reach,y=effect.y+Math.sin(angle)*reach;
+   const size=(1.2+(n%2)*.6)*(1-t);
+   antCtx.beginPath();antCtx.moveTo(x,y-size*2);antCtx.lineTo(x+size,y);antCtx.lineTo(x,y+size*2);antCtx.lineTo(x-size,y);antCtx.closePath();antCtx.fill();
+  }
+  antCtx.restore();
+ }
+}
 function renderAntFrame(timestamp){
  if(timestamp-lastAntFrameAt<ANT_FRAME_INTERVAL){antFrame=requestAnimationFrame(renderAntFrame);return;}
  lastAntFrameAt=timestamp;
@@ -223,7 +241,11 @@ function renderAntFrame(timestamp){
   if(phase.waiting)continue;
   if(phase.picked&&!ant.picked){
    ant.picked=true;
-   if(applyAntMove(state,ant.move.slot,ant.move.target))ant.onPickup();
+   if(applyAntMove(state,ant.move.slot,ant.move.target)){
+    ant.onPickup();
+    const pickupPoint=cellCenter(ant.move.target.x,ant.move.target.y);
+    pickupEffects.push({x:pickupPoint.x,y:pickupPoint.y,color:ant.move.color,startedAt:timestamp,seed:workerId*.618});
+   }
    renderBoardAfterPickup(ant.move.target);
    $("message").textContent="Муравьишки собирают кубики по извилистым тропинкам";
    kickColony();
@@ -240,7 +262,8 @@ function renderAntFrame(timestamp){
   const tangent={x:after.x-before.x,y:after.y-before.y};
   drawAnt(antCtx,point,ant.move.color,phase.returningNow,workerId,Math.atan2(tangent.y,tangent.x));
  }
- if(activeAnts.size)antFrame=requestAnimationFrame(renderAntFrame);
+ drawPickupEffects(timestamp);
+ if(activeAnts.size||pickupEffects.length)antFrame=requestAnimationFrame(renderAntFrame);
  else antFrame=0;
 }
 function animateAntTrip(move,index,onPickup=()=>{}){
@@ -456,7 +479,7 @@ function showMainMenu(){
 }
 function maybeFinalizeMenuExit(){
  if(!resetAfterMenu||workerPromises.size||loadingSlots.size||resetting)return;
- resetting=true;cancelAnimationFrame(antFrame);antFrame=0;activeAnts.clear();reservedTargets.clear();
+ resetting=true;cancelAnimationFrame(antFrame);antFrame=0;activeAnts.clear();pickupEffects.length=0;reservedTargets.clear();
  state=createGame(state.levelId);totalBlocks=state.remaining;gameStarted=false;resetAfterMenu=false;resetting=false;
  render();$("save-status").textContent="Партия сброшена · открытые полянки сохранены";updateMainMenu();
 }
