@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {createGame,LEVELS,getLevel,getIncoming,createArtworkBoard,INITIAL_BOARD,INCOMING,isAccessible,findAccessiblePixel,findAccessiblePixels,findAntWave,chooseTopColumn,findNextMove,applyAntMove,completeBoxDeparture,resolveAll,freeSlotCount,isDefeat,SIZE,GRID_SIZE,BLOCK_SIZE,BOX_CAPACITY,SLOT_COUNT,TRAY_SIZE,canChoose,restoreGame,serializeGame,countOutboundBySlot,countSlotWorkers,canDepartSlot} from "../src/game.js";
+import {createGame,LEVELS,getLevel,getIncoming,createArtworkBoard,resolveAll,INITIAL_BOARD,INCOMING,isAccessible,findAccessiblePixel,findAccessiblePixels,findAntWave,chooseTopColumn,findNextMove,applyAntMove,completeBoxDeparture,resolveAll,freeSlotCount,isDefeat,SIZE,GRID_SIZE,BLOCK_SIZE,BOX_CAPACITY,SLOT_COUNT,TRAY_SIZE,canChoose,restoreGame,serializeGame,countOutboundBySlot,countSlotWorkers,canDepartSlot} from "../src/game.js";
 const smallBoard=()=>Array.from({length:5},()=>Array(5).fill("green"));
 
 test("the authored frog is built from large collectible blocks on a 350x350 display grid",()=>{
@@ -188,4 +188,13 @@ test("campaign level identity survives save and restore",()=>{
  assert.equal(restored.levelId,"garden-02");
  assert.deepEqual(restored.tray,s.tray);
  assert.equal(getIncoming(restored.levelId).length,getIncoming("garden-02").length);
+});
+
+test("all six campaign levels are solvable with the current core rules",()=>{
+ for(const level of LEVELS){
+  const state=resolveAll(createGame(level.id));
+  assert.equal(state.won,true,level.name+" should be solvable without special mechanics");
+  assert.equal(state.remaining,0,level.name+" should clear every collectible pixel");
+  assert.equal(state.lost,false,level.name+" must not end in defeat");
+ }
 });
