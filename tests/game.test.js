@@ -8,7 +8,8 @@ test("the authored level is a 250x250 frog portrait illustration with five slots
  assert.equal(INITIAL_BOARD.length,250);assert.ok(INITIAL_BOARD.every(r=>r.length===250));
  assert.equal(s.board.length,SIZE);assert.equal(s.slots.length,SLOT_COUNT);
  assert.equal(s.tray.length,TRAY_SIZE);assert.ok(s.tray.every(r=>r.length===TRAY_SIZE));
- const colors=new Set(INITIAL_BOARD.flat().filter(Boolean));assert.deepEqual([...colors].sort(),["blue","green","purple","red","yellow"]);\n assert.ok(s.remaining>0&&s.remaining<SIZE*SIZE);assert.ok(INITIAL_BOARD.some(row=>row.includes("")));
+ const colors=new Set(INITIAL_BOARD.flat().filter(Boolean));assert.deepEqual([...colors].sort(),["blue","green","purple","red","yellow"]);
+ assert.ok(s.remaining>0&&s.remaining<SIZE*SIZE);assert.ok(INITIAL_BOARD.some(row=>row.includes("")));
 });
 test("the box deck contains exactly enough ants to collect every pixel by color",()=>{
  const totals={red:0,blue:0,yellow:0,green:0,purple:0};
