@@ -19,7 +19,7 @@ test("the box deck contains exactly enough ants to collect every pixel by color"
  for(const box of INCOMING)deckTotals[box.color]+=box.ants;
  assert.deepEqual(deckTotals,totals);assert.ok(INCOMING.length>9);assert.equal(BOX_CAPACITY,20);
  assert.deepEqual(INCOMING.slice(0,5).map(box=>box.color),["green","blue","purple","yellow","red"]);
- assert.ok(INCOMING.slice(0,15).every((box,index)=>box.color===["green","blue","purple","yellow","red"][index%5]));
+ assert.deepEqual(INCOMING.slice(0,5).map(box=>box.color),["green","blue","purple","yellow","red"]);
 });
 test("only top-row boxes can be selected; chosen column shifts upward and refills at bottom",()=>{
  const s=createGame();assert.deepEqual(s.tray,[[0,1,2],[3,4,5],[6,7,8]]);
@@ -44,7 +44,7 @@ test("accessibility checks use actual board dimensions",()=>{
 test("legacy 7x7 save starts the new authored level instead of stretching old pixels",()=>{
  const old=Array.from({length:7},()=>Array(7).fill("green"));
  const restored=restoreGame({board:old,slots:Array(5).fill(null),remaining:49});
- assert.equal(restored.board.length,250);assert.equal(restored.remaining,createGame().remaining);
+ assert.equal(restored.board.length,SIZE);assert.equal(restored.remaining,createGame().remaining);
 });
 test("25x25 collectible block board survives save restoration for the 250x250 display grid",()=>{
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill("green"));board[0][0]="red";
@@ -90,7 +90,7 @@ test("saved tray, selected slots and sorting counter survive restore",()=>{
  assert.equal(restored.slots[0].sourceIndex,1);assert.equal(restored.sortedBoxes,7);
 });
 test("legacy save with three candidates can be upgraded to a 3x3 tray",()=>{
- const restored=restoreGame({board:INITIAL_BOARD,slots:Array(5).fill(null),candidates:[2,1,0],nextContainer:3,remaining:62500});
+ const restored=restoreGame({board:INITIAL_BOARD,slots:Array(5).fill(null),candidates:[2,1,0],nextContainer:3,remaining:createGame().remaining});
  assert.deepEqual(restored.tray,[[2,1,0],[3,4,5],[6,7,8]]);
 });
 
