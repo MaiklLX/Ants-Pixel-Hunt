@@ -1,5 +1,9 @@
 # Установка браузерной версии
 
+Адрес игры после публикации: https://maikllx.github.io/Ants-Pixel-Hunt/
+
+Если адрес не открывается, откройте Settings → Pages в репозитории и установите Source: GitHub Actions. После этого в Actions запустите workflow «Publish browser game to GitHub Pages».
+
 ## iPhone / iPad
 1. Откройте опубликованную HTTPS-страницу игры в Safari.
 2. Нажмите «Поделиться».
