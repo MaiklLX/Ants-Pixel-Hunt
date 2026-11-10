@@ -777,3 +777,86 @@ body{background:radial-gradient(ellipse at 50% -14%,#fff 0%,#f5faef 43%,#e7f1e4 
  .slot,.choice-card,.hub-location,.nest-building{transition:none}
  .hub-location:hover,.choice-card:not(:disabled):hover,.nest-building:hover{transform:none}
 }
+
+
+/* KT-055 — remove duplicated menu copy and give the hub a calmer hierarchy. */
+.main-menu{
+ gap:clamp(8px,1.45dvh,13px);
+ padding:calc(env(safe-area-inset-top) + 16px) 18px calc(env(safe-area-inset-bottom) + 13px);
+ background:radial-gradient(ellipse at 50% 4%,#fffef9 0%,#f5faef 48%,#e8f2e5 100%);
+}
+.main-menu::before{opacity:.12;background-size:32px 32px}
+.menu-sparkles{display:none}
+.menu-brand{width:min(100%,390px);min-height:42px;justify-content:center;text-align:center}
+.menu-brand-bug,.menu-brand .eyebrow{display:none}
+.menu-brand h1{margin:0;color:#47734e;font-size:clamp(23px,6vw,29px);line-height:1;letter-spacing:2.5px}
+.menu-brand .subtitle{margin:5px 0 0;color:#9aa991;font-size:8px;letter-spacing:2.6px;font-weight:850}
+.menu-garden{
+ height:clamp(132px,22dvh,178px);
+ border:1px solid #ffffffd9;
+ border-radius:25px;
+ box-shadow:0 4px 0 #c9dfc9,0 9px 19px #577e5d16,inset 0 1px 4px #fff;
+}
+.menu-scene-caption{position:relative;z-index:1;margin:-3px 0 0;color:#8a9e85;font-size:9px;font-weight:750;letter-spacing:.35px}
+.menu-copy{display:none}
+.menu-level-card{
+ width:min(100%,390px);
+ min-height:62px;
+ padding:7px 11px;
+ gap:10px;
+ border:1px solid #dce9d7;
+ border-radius:15px;
+ background:#ffffffd9;
+ box-shadow:0 2px 0 #d6e5d1,0 4px 9px #557b5b0c,inset 0 1px #fff;
+}
+.level-thumb{flex-basis:44px;height:44px;border-radius:12px;font-size:25px}
+.level-thumb i{display:none}
+.level-card-copy{gap:2px}
+.level-card-copy>span{font-size:8px;letter-spacing:1px}
+.level-card-copy strong{font-size:11px}
+.level-card-copy small{font-size:9px}
+.level-play-mark{font-size:20px}
+.hub-locations{
+ grid-template-columns:repeat(2,minmax(0,1fr));
+ gap:8px;
+ margin:0;
+}
+.hub-location{
+ grid-template-columns:34px minmax(0,1fr) auto;
+ min-height:58px;
+ gap:7px;
+ padding:7px 8px;
+ border-radius:14px;
+ box-shadow:0 2px 0 #d4e4cf,0 4px 8px #527b5b0c,inset 0 1px #fff;
+}
+.hub-location-icon{width:32px;height:32px;border-radius:10px;font-size:18px;box-shadow:none}
+.hub-location-copy{gap:2px}
+.hub-location-copy strong{font-size:10px}
+.hub-location-copy small{font-size:8px;line-height:1.15}
+.hub-location-arrow{font-size:19px}
+.hub-location-resource{padding:4px 5px;border-radius:8px;font-size:9px}
+.nest-location{background:linear-gradient(145deg,#fffef9,#faf4e5)}
+.menu-actions{gap:5px;margin-top:0}
+.menu-primary{min-height:47px;border-radius:14px;font-size:14px;box-shadow:0 3px 0 #55946a,0 6px 12px #4c815a18,inset 0 1px #ffffffc9}
+.menu-link{min-height:27px;padding:3px 10px;font-size:10px;text-decoration:none}
+.menu-footnote{display:none}
+.how-panel{margin-top:2px}
+@media(max-width:380px){
+ .main-menu{gap:8px;padding-left:13px;padding-right:13px}
+ .menu-garden{height:clamp(120px,19dvh,148px);border-radius:21px}
+ .menu-level-card{min-height:56px;padding:6px 8px}
+ .level-thumb{flex-basis:39px;height:39px}
+ .hub-location{grid-template-columns:29px minmax(0,1fr) auto;min-height:54px;gap:5px;padding:6px}
+ .hub-location-icon{width:28px;height:28px;font-size:16px}
+ .hub-location-copy strong{font-size:9px}
+ .hub-location-copy small{font-size:7px}
+}
+@media(max-height:700px){
+ .main-menu{gap:7px;padding-top:calc(env(safe-area-inset-top) + 8px);padding-bottom:calc(env(safe-area-inset-bottom) + 7px)}
+ .menu-garden{height:clamp(105px,17dvh,132px)}
+ .menu-level-card{min-height:52px}
+ .level-thumb{height:37px;flex-basis:37px}
+ .hub-location{min-height:49px}
+ .menu-primary{min-height:42px}
+}
+@media(prefers-reduced-motion:reduce){.hub-location{transition:none}.hub-location:hover{transform:none}}
