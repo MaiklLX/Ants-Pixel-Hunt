@@ -96,11 +96,15 @@ function renderChoices(){
   const preview=document.createElement("div");preview.className="queue-preview";preview.setAttribute("aria-label","Следующие боксы в колонке");
   for(let row=1;row<TRAY_SIZE;row++){const nextIndex=state.tray[row][col],nextBox=nextIndex===null||nextIndex===undefined?null:getIncoming(state.levelId)[nextIndex];
    const peek=document.createElement("span");peek.className="queue-peek"+(nextBox?"":" empty");
-   if(nextBox){peek.style.setProperty("--peek-color",COLORS[nextBox.color].hex);
-    const crate=document.createElement("i");crate.className="peek-crate";crate.setAttribute("aria-hidden","true");
-    const count=document.createElement("strong");count.textContent=String(nextBox.ants);
-    const ant=document.createElement("small");ant.textContent="🐜";peek.append(crate,count,ant);
-    peek.title=`${COLORS[nextBox.color].name}: ${nextBox.ants} муравьёв`;peek.setAttribute("aria-label",peek.title);
+   if(nextBox){
+    const color=COLORS[nextBox.color];peek.style.setProperty("--peek-color",color.hex);
+    const chip=document.createElement("i");chip.className="peek-color-chip";chip.setAttribute("aria-hidden","true");
+    const meta=document.createElement("span");meta.className="peek-meta";
+    const name=document.createElement("strong");name.className="peek-color-name";name.textContent=color.name;
+    const count=document.createElement("small");count.className="peek-count";count.textContent=String(nextBox.ants)+" 🐜";
+    const crate=document.createElement("span");crate.className="peek-crate-mark";crate.setAttribute("aria-hidden","true");
+    meta.append(name,count);peek.append(chip,meta,crate);
+    peek.title=`${color.name}: ${nextBox.ants} муравьёв`;peek.setAttribute("aria-label",peek.title);
    }else{peek.textContent="·";peek.title="Очередь закончилась";}preview.append(peek);
   }
   lane.append(preview);choicesEl.append(lane);
@@ -334,7 +338,7 @@ async function animateBoxLoading(source,slot,color){
   let point;if(t<.3)point=quadPoint(source,p1,entry,a);else if(t<.74)point={x:entry.x+(exit.x-entry.x)*b,y:entry.y-Math.sin(b*Math.PI)*3};else point=quadPoint(exit,p3,finish,c);
   ctx.clearRect(0,0,shellRect.width,shellRect.height);
   const beltTilt=t<.3?-.085*(1-a):t<.74?Math.sin(b*Math.PI)*.018:.085*(1-c),bob=Math.sin(timestamp*.009)*1.15,stretch=1+Math.sin(t*Math.PI)*.055;
-  const animatedPoint={x:point.x,y:point.y-Math.sin(t*Math.PI)*3+bob};drawTransportBox(ctx,animatedPoint,color,stretch,beltTilt);drawBoxSparkles(ctx,animatedPoint,color,t);
+  const animatedPoint={x:point.x,y:point.y-Math.sin(t*Math.PI)*3+bob};const beltRock=t>.3&&t<.74?Math.sin((t-.3)/.44*Math.PI)*.025:0;drawTransportBox(ctx,animatedPoint,color,stretch,beltTilt+beltRock);drawBoxSparkles(ctx,animatedPoint,color,t);
   if(t>=1){ctx.clearRect(0,0,shellRect.width,shellRect.height);flightLayer.remove();resolve();return;}requestAnimationFrame(frame);
  };requestAnimationFrame(frame);});
 }
@@ -356,7 +360,7 @@ async function animateBoxDepartures(slotIndices){
     if(elapsed<delay){finished++;return;}if(t>=1){finished++;return;}
     const lift=quadPoint(item.start,{x:item.start.x-24,y:(item.start.y+belt.y)/2},{x:item.start.x,y:belt.y},ease(Math.min(1,t*2.1)));
     const progress=ease(Math.max(0,(t-.38)/.62));
-    drawTransportBox(ctx,{x:lift.x+(shellRect.width+35-lift.x)*progress,y:lift.y+(belt.y-lift.y)*progress},item.color);
+    const travelX=lift.x+(shellRect.width+35-lift.x)*progress,travelY=lift.y+(belt.y-lift.y)*progress,rock=Math.sin(progress*Math.PI*5+index*.7)*.018*(1-progress);drawTransportBox(ctx,{x:travelX,y:travelY},item.color,1+Math.sin(progress*Math.PI)*.035,rock);
    });
    if(finished===starts.length){layer.remove();resolve();return;}
    requestAnimationFrame(frame);
