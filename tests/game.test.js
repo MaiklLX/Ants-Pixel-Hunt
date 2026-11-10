@@ -3,14 +3,14 @@ import assert from "node:assert/strict";
 import {createGame,INITIAL_BOARD,INCOMING,isAccessible,findAccessiblePixel,findAccessiblePixels,findAntWave,chooseTopColumn,findNextMove,applyAntMove,completeBoxDeparture,resolveAll,freeSlotCount,isDefeat,SIZE,GRID_SIZE,BLOCK_SIZE,BOX_CAPACITY,SLOT_COUNT,TRAY_SIZE,canChoose,restoreGame,serializeGame} from "../src/game.js";
 const smallBoard=()=>Array.from({length:5},()=>Array(5).fill("green"));
 
-test("the authored frog is built from large collectible blocks on a 250x250 visible grid",()=>{
+test("the authored frog is built from large collectible blocks on a 350x350 display grid",()=>{
  const s=createGame();
- assert.equal(GRID_SIZE,250);assert.equal(BLOCK_SIZE,5);assert.equal(SIZE,50);
+ assert.equal(GRID_SIZE,350);assert.equal(BLOCK_SIZE,10);assert.equal(SIZE,35);
  assert.equal(INITIAL_BOARD.length,SIZE);assert.ok(INITIAL_BOARD.every(r=>r.length===SIZE));
  assert.equal(s.board.length,SIZE);assert.equal(s.slots.length,SLOT_COUNT);
  assert.equal(s.tray.length,TRAY_SIZE);assert.ok(s.tray.every(r=>r.length===TRAY_SIZE));
  const colors=new Set(INITIAL_BOARD.flat().filter(Boolean));assert.deepEqual([...colors].sort(),["blue","green","purple","red","yellow"]);
- assert.ok(s.remaining>1000&&s.remaining<2000);assert.ok(INITIAL_BOARD.some(row=>row.includes("")));
+ assert.ok(s.remaining>400&&s.remaining<900);assert.ok(INITIAL_BOARD.some(row=>row.includes("")));
 });
 test("the box deck contains exactly enough ants to collect every pixel by color",()=>{
  const totals={red:0,blue:0,yellow:0,green:0,purple:0};
@@ -45,7 +45,7 @@ test("legacy 7x7 save starts the new authored level instead of stretching old pi
  const restored=restoreGame({board:old,slots:Array(5).fill(null),remaining:49});
  assert.equal(restored.board.length,SIZE);assert.equal(restored.remaining,createGame().remaining);
 });
-test("50x50 collectible block board survives save restoration for the 250x250 display grid",()=>{
+test("35x35 collectible block board survives save restoration for the 350x350 display grid",()=>{
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill("green"));board[0][0]="red";
  const saved={board,slots:Array(5).fill(null),tray:[[0,1,2],[3,4,5],[6,7,8]],nextContainer:9,remaining:SIZE*SIZE};
  const restored=restoreGame(saved);assert.equal(restored.board.length,SIZE);assert.equal(restored.board[SIZE-1].length,SIZE);
@@ -123,7 +123,7 @@ test("a full wave never assigns the same board cell to two ants",()=>{
  assert.ok(wave.every(m=>s.board[m.target.y][m.target.x]===m.color));
 });
 
-test("the 50x50 artwork produces a complete deterministic deck with bounded box sizes",()=>{
+test("the 35x35 artwork produces a complete deterministic deck with bounded box sizes",()=>{
  const totals={red:0,blue:0,yellow:0,green:0,purple:0};
  for(const row of INITIAL_BOARD)for(const color of row)if(color)totals[color]++;
  const deckTotals={red:0,blue:0,yellow:0,green:0,purple:0};
