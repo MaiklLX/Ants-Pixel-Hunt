@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#f3f8ed">
-  <meta name="app-version" content="KT-043">
+  <meta name="app-version" content="KT-044">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Муравьишки">
@@ -62,7 +62,7 @@
     <section class="level-heading">
       <span id="level-number" class="level-kicker">ПОЛЯНКА № 1</span>
       <h2 id="level-title">Портрет лягушонка</h2>
-      <p id="board-status" class="board-status">Крупных блоков осталось: 35×35</p>
+      <p id="board-status" class="board-status">Осталось: —</p>
       <div class="level-progress" role="progressbar" aria-label="Сбор пиксельного портрета" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="progress-fill"></span></div>
     </section>
 
@@ -72,19 +72,15 @@
     </section>
 
     <section class="slots-section">
-      <div class="section-line"><h3>НАША КОЛОНИЯ</h3><span>5 РАБОЧИХ ОТСЕКОВ</span></div>
+      <div class="section-line"><h3>СТАРТОВЫЕ БОКСЫ</h3></div>
       <div id="slots" class="slots" aria-label="Пять стартовых отсеков"></div>
     </section>
 
-    <section class="conveyor-section" aria-label="Конвейер доставки">
-      <div class="section-line"><h3>КОНВЕЙЕР</h3><span id="sorted-count">0 доставлено</span></div>
-      <div id="conveyor" class="conveyor">
-        <span class="conveyor-in">ПРИЁМ</span><div class="belt"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span class="conveyor-out">СКЛАД ↗</span>
-      </div>
+    <section class="conveyor-section" aria-label="Конвейер">
+      <div id="conveyor" class="conveyor"><div class="belt"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
     </section>
     <section class="choices-section">
-      <div class="section-line"><h3>ВЫБЕРИ БОКС</h3><span id="queue-count">8 в запасе</span></div>
-      <p id="choice-status" class="choice-status">Три колонки · следующие боксы показаны ниже</p>
+      <div class="section-line"><h3>СЛЕДУЮЩИЕ БОКСЫ</h3><span id="queue-count">—</span></div>
       <div id="choices" class="choices" aria-label="Три доступных бокса и превью следующих в каждой колонке"></div>
     </section>
 
@@ -102,7 +98,7 @@
     </section>
     <div class="bottom-actions">
       <button id="restart" class="restart-button" type="button"><span aria-hidden="true">↻</span> Начать заново</button>
-      <span id="save-status" class="save-status">Партия не сохраняется · открытые полянки сохраняются</span>
+      <span id="save-status" class="save-status" aria-hidden="true"></span>
     </div>
     <footer>Муравьишки · маленькие лапки, большие открытия</footer>
     <canvas id="ant-layer" class="ant-layer" aria-hidden="true"></canvas>
