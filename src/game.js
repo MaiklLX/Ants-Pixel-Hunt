@@ -42,6 +42,13 @@ export function findAccessiblePixel(board,color){
  for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)if(board[y][x]===color&&isAccessible(board,x,y))return{x,y};
  return null;
 }
+export function findAccessiblePixels(board,color,limit=Infinity){
+ const found=[];
+ for(let y=0;y<board.length;y++)for(let x=0;x<board[y].length;x++){
+  if(board[y][x]===color&&isAccessible(board,x,y)){found.push({x,y});if(found.length>=limit)return found;}
+ }
+ return found;
+}
 export function freeSlotCount(state){return state.slots.filter(slot=>slot===null).length;}
 export function canChoose(state){
  return !state.won&&!state.lost&&freeSlotCount(state)>0&&state.tray[0].some(index=>index!==null);
