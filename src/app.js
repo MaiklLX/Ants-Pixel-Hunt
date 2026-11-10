@@ -163,6 +163,7 @@ async function animateAntTrip(move,index){
     picked=true;applyAntMove(state,move.slot,move.target);
     renderBoard();renderSlots();renderChoices();
     $("message").textContent="Муравьишка забрал кубик и несёт его в свой бокс";
+    kickColony();
    }
    const returningNow=elapsed>=outbound;
    const t=returningNow?Math.min(1,(elapsed-outbound)/returning):Math.min(1,elapsed/outbound);
