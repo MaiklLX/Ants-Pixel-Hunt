@@ -11,7 +11,8 @@ function renderBoard(){
   const color=state.board[y][x],rgb=color?colorRGB[color]:empty;
   for(let by=0;by<BLOCK_SIZE;by++)for(let bx=0;bx<BLOCK_SIZE;bx++){
    const index=((y*BLOCK_SIZE+by)*GRID_SIZE+x*BLOCK_SIZE+bx)*4;
-   image.data[index]=rgb[0];image.data[index+1]=rgb[1];image.data[index+2]=rgb[2];image.data[index+3]=255;
+   const tileColor=color&&bx<BLOCK_SIZE-1&&by<BLOCK_SIZE-1?rgb:empty;
+   image.data[index]=tileColor[0];image.data[index+1]=tileColor[1];image.data[index+2]=tileColor[2];image.data[index+3]=255;
   }
  }
  boardCtx.putImageData(image,0,0);
