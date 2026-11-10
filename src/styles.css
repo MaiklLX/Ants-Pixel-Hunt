@@ -178,3 +178,10 @@ footer{order:8}
   .restart-button{font-size:10px;padding:4px 8px}
   footer{font-size:7px}
 }
+
+@media(max-width:599px){
+  .choices{height:22dvh;max-height:22dvh;flex:0 0 auto}
+}
+@media(max-width:599px) and (max-height:700px){
+  .choices{height:19dvh;max-height:19dvh}
+}
