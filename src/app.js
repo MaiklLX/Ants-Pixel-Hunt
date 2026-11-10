@@ -14,7 +14,7 @@ function renderBoard(){
    const index=((y*BLOCK_SIZE+by)*GRID_SIZE+x*BLOCK_SIZE+bx)*4;
    let tileColor=empty;
    if(color&&bx<BLOCK_SIZE-1&&by<BLOCK_SIZE-1){
-    const shade=(bx===0||by===0)?1.22:(bx===BLOCK_SIZE-2||by===BLOCK_SIZE-2)?.68:1;
+    const shade=(bx===0&&by===0)?1.28:(bx===0||by===0)?1.18:(bx===BLOCK_SIZE-2||by===BLOCK_SIZE-2)?.62:1;
     tileColor=rgb.map(channel=>Math.max(0,Math.min(255,Math.round(channel*shade))));
    }
    image.data[index]=tileColor[0];image.data[index+1]=tileColor[1];image.data[index+2]=tileColor[2];image.data[index+3]=255;
