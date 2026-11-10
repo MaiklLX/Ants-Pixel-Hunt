@@ -86,3 +86,15 @@ footer span{color:#a6b5a2}
 .level-heading h2{font-size:17px}
 @media(max-height:760px){.board-wrap{width:min(100%,min(370px,40dvh))}.slot{height:56px}.choices{grid-template-rows:repeat(3,minmax(64px,auto))}.choice-card{min-height:64px}}
 @media(min-width:600px){.board-wrap{width:min(470px,48dvh)}}
+
+/* KT-023: stable reference-like vertical composition (board → five live slots → 3×3 reserve). */
+.topbar{order:0}
+.level-heading{order:1}
+.board-wrap{order:2}
+.slots-section{order:3}
+.choices-section{order:4}
+.conveyor-section{order:5}
+.message{order:6}
+.bottom-actions{order:7}
+footer{order:8}
+.ant-layer{order:9}
