@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {createGame,INITIAL_BOARD,INCOMING,isAccessible,findAccessiblePixel,findAccessiblePixels,findAntWave,chooseTopColumn,findNextMove,applyAntMove,completeBoxDeparture,resolveAll,freeSlotCount,isDefeat,SIZE,GRID_SIZE,BLOCK_SIZE,BOX_CAPACITY,SLOT_COUNT,TRAY_SIZE,canChoose,restoreGame,serializeGame,countOutboundBySlot,countSlotWorkers,canDepartSlot} from "../src/game.js";
+import {createGame,LEVELS,getLevel,getIncoming,createArtworkBoard,INITIAL_BOARD,INCOMING,isAccessible,findAccessiblePixel,findAccessiblePixels,findAntWave,chooseTopColumn,findNextMove,applyAntMove,completeBoxDeparture,resolveAll,freeSlotCount,isDefeat,SIZE,GRID_SIZE,BLOCK_SIZE,BOX_CAPACITY,SLOT_COUNT,TRAY_SIZE,canChoose,restoreGame,serializeGame,countOutboundBySlot,countSlotWorkers,canDepartSlot} from "../src/game.js";
 const smallBoard=()=>Array.from({length:5},()=>Array(5).fill("green"));
 
 test("the authored frog is built from large collectible blocks on a 350x350 display grid",()=>{
@@ -161,4 +161,31 @@ test("a box cannot depart while any ant assigned to its slot is still travelling
  workers.delete(1);assert.equal(canDepartSlot(workers,2),false);
  workers.delete(2);assert.equal(canDepartSlot(workers,2),true);
  assert.equal(countOutboundBySlot(workers).get(1),1);
+});
+
+test("campaign levels have distinct deterministic artwork and exact matching box decks",()=>{
+ assert.equal(LEVELS.length,3);
+ const signatures=new Set();
+ for(const level of LEVELS){
+  const board=createArtworkBoard(level.id),deck=getIncoming(level.id);
+  assert.equal(board.length,35);
+  assert.ok(board.every(row=>row.length===35));
+  const totals={red:0,blue:0,yellow:0,green:0,purple:0};
+  for(const row of board)for(const color of row)if(color)totals[color]++;
+  const deckTotals={red:0,blue:0,yellow:0,green:0,purple:0};
+  for(const box of deck){assert.ok(box.ants>0&&box.ants<=BOX_CAPACITY);deckTotals[box.color]+=box.ants;}
+  assert.deepEqual(deckTotals,totals);
+  assert.equal(deck.reduce((sum,box)=>sum+box.ants,0),createGame(level.id).remaining);
+  signatures.add(board.map(row=>row.join(",")).join(";"));
+ }
+ assert.equal(signatures.size,3,"each campaign level must have its own pixel artwork");
+ assert.equal(getLevel("unknown").id,"meadow-01");
+});
+test("campaign level identity survives save and restore",()=>{
+ const s=createGame("garden-02");
+ chooseTopColumn(s,0);
+ const restored=restoreGame(serializeGame(s));
+ assert.equal(restored.levelId,"garden-02");
+ assert.deepEqual(restored.tray,s.tray);
+ assert.equal(getIncoming(restored.levelId).length,getIncoming("garden-02").length);
 });
