@@ -22,7 +22,7 @@ h1{font-size:23px;line-height:1;margin:0;letter-spacing:2px;color:#56835e;font-w
 .board-corners i:nth-child(2){top:0;right:0;border-width:2px 2px 0 0;border-radius:0 5px 0 0}
 .board-corners i:nth-child(3){bottom:0;left:0;border-width:0 0 2px 2px;border-radius:0 0 0 5px}
 .board-corners i:nth-child(4){bottom:0;right:0;border-width:0 2px 2px 0;border-radius:0 0 5px}
-.ant-layer{position:absolute;inset:0;width:100%;height:100%;z-index:20;pointer-events:none}
+.ant-layer{position:absolute;inset:0;width:100%;height:100%;z-index:21;pointer-events:none}
 .conveyor-section{display:flex;flex-direction:column;gap:7px}
 .conveyor{height:42px;display:grid;grid-template-columns:48px minmax(0,1fr) 58px;align-items:center;gap:6px;padding:5px 8px;border:1px solid #d4e3cd;border-radius:12px;background:linear-gradient(180deg,#f9fcf4,#e7f0e1);box-shadow:inset 0 1px #fff}
 .conveyor-in,.conveyor-out{font-size:8px;font-weight:900;letter-spacing:.6px;color:#789278;text-align:center}
