@@ -22,26 +22,34 @@ function lineDistance(px,py,x1,y1,x2,y2){
 export function createArtworkBoard(){
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill("green"));
  for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){
-  // Butterfly: four broad wings with a dark-blue rim and warm spots.
-  if(inWing(x,y)){
-   const wingEdge=
-    (ellipse(x,y,86,88,48,43)&&!ellipse(x,y,86,88,42,37))||
-    (ellipse(x,y,164,88,48,43)&&!ellipse(x,y,164,88,42,37))||
-    (ellipse(x,y,94,137,36,43)&&!ellipse(x,y,94,137,30,37))||
-    (ellipse(x,y,156,137,36,43)&&!ellipse(x,y,156,137,30,37));
-   board[y][x]=wingEdge?"blue":"purple";
-   if(circle(x,y,73,82,8)||circle(x,y,99,108,7)||circle(x,y,177,82,8)||circle(x,y,151,108,7))board[y][x]="yellow";
-   if(circle(x,y,86,137,5)||circle(x,y,164,137,5))board[y][x]="blue";
-  }
-  // Body, head and antennae.
-  if(ellipse(x,y,125,111,6,57)||circle(x,y,125,52,9))board[y][x]="red";
-  if(lineDistance(x,y,122,47,109,31)<1.7||lineDistance(x,y,128,47,141,31)<1.7)board[y][x]="red";
-  // A bright flower under the butterfly makes the level read as one scene.
-  if(flowerPetals.some(p=>ellipse(x,y,p.x,p.y,10,16)))board[y][x]="yellow";
-  if(circle(x,y,125,211,12))board[y][x]="red";
-  // Two leaves on the stem.
-  if(ellipse(x,y,105,233,17,7)&&x<112)board[y][x]="blue";
-  if(ellipse(x,y,145,232,17,7)&&x>138)board[y][x]="blue";
+  // A large, front-facing frog portrait, composed as crisp colored pixel cells.
+  const head=ellipse(x,y,125,126,87,91);
+  const headRim=ellipse(x,y,125,126,94,98);
+  if(headRim)board[y][x]="purple";
+  if(head)board[y][x]="green";
+  // Raised eye sockets and golden eyes.
+  const leftSocket=ellipse(x,y,83,65,35,38),rightSocket=ellipse(x,y,167,65,35,38);
+  if(leftSocket||rightSocket)board[y][x]="purple";
+  if(ellipse(x,y,83,65,29,31)||ellipse(x,y,167,65,29,31))board[y][x]="green";
+  if(ellipse(x,y,83,63,20,21)||ellipse(x,y,167,63,20,21))board[y][x]="yellow";
+  if(ellipse(x,y,88,65,9,13)||ellipse(x,y,162,65,9,13))board[y][x]="purple";
+  if(circle(x,y,88,60,3)||circle(x,y,162,60,3))board[y][x]="blue";
+  if(circle(x,y,91,57,2)||circle(x,y,165,57,2))board[y][x]="yellow";
+  // Bright cheek patches and small spots add the layered, hand-built look.
+  if(ellipse(x,y,62,119,17,12)||ellipse(x,y,188,119,17,12))board[y][x]="blue";
+  if(circle(x,y,55,92,5)||circle(x,y,195,92,5)||circle(x,y,70,151,4)||circle(x,y,180,151,4))board[y][x]="purple";
+  if(circle(x,y,63,99,3)||circle(x,y,187,99,3)||circle(x,y,76,143,2)||circle(x,y,174,143,2))board[y][x]="yellow";
+  // Wide smiling mouth with a pink-red lower lip / tongue.
+  const mouth=ellipse(x,y,125,158,59,25);
+  if(mouth)board[y][x]="purple";
+  if(ellipse(x,y,125,154,52,17))board[y][x]="red";
+  if(ellipse(x,y,125,165,33,8))board[y][x]="yellow";
+  // Nose highlights and a few darker pixel accents.
+  if(circle(x,y,112,128,3)||circle(x,y,138,128,3))board[y][x]="purple";
+  if(circle(x,y,111,127,1)||circle(x,y,137,127,1))board[y][x]="yellow";
+  // Lower neck and a pair of simple shoulder shapes complete the portrait.
+  if(ellipse(x,y,125,220,54,23))board[y][x]="blue";
+  if(ellipse(x,y,125,216,43,15))board[y][x]="green";
  }
  return board;
 }
