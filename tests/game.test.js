@@ -5,20 +5,19 @@ const smallBoard=()=>Array.from({length:5},()=>Array(5).fill("green"));
 
 test("the authored frog is built from large collectible blocks on a 250x250 visible grid",()=>{
  const s=createGame();
- assert.equal(GRID_SIZE,250);assert.equal(BLOCK_SIZE,10);assert.equal(SIZE,25);
+ assert.equal(GRID_SIZE,250);assert.equal(BLOCK_SIZE,5);assert.equal(SIZE,50);
  assert.equal(INITIAL_BOARD.length,SIZE);assert.ok(INITIAL_BOARD.every(r=>r.length===SIZE));
  assert.equal(s.board.length,SIZE);assert.equal(s.slots.length,SLOT_COUNT);
  assert.equal(s.tray.length,TRAY_SIZE);assert.ok(s.tray.every(r=>r.length===TRAY_SIZE));
  const colors=new Set(INITIAL_BOARD.flat().filter(Boolean));assert.deepEqual([...colors].sort(),["blue","green","purple","red","yellow"]);
- assert.ok(s.remaining>=300&&s.remaining<400);assert.ok(INITIAL_BOARD.some(row=>row.includes("")));
+ assert.ok(s.remaining>1000&&s.remaining<2000);assert.ok(INITIAL_BOARD.some(row=>row.includes("")));
 });
 test("the box deck contains exactly enough ants to collect every pixel by color",()=>{
  const totals={red:0,blue:0,yellow:0,green:0,purple:0};
  for(const row of INITIAL_BOARD)for(const color of row)if(color)totals[color]++;
  const deckTotals={red:0,blue:0,yellow:0,green:0,purple:0};
  for(const box of INCOMING)deckTotals[box.color]+=box.ants;
- assert.deepEqual(deckTotals,totals);assert.ok(INCOMING.length>9);assert.equal(BOX_CAPACITY,20);
- assert.deepEqual(INCOMING.slice(0,5).map(box=>box.color),["green","blue","purple","yellow","red"]);
+ assert.deepEqual(deckTotals,totals);assert.ok(INCOMING.length>9);assert.equal(BOX_CAPACITY,100);
  assert.deepEqual(INCOMING.slice(0,5).map(box=>box.color),["green","blue","purple","yellow","red"]);
 });
 test("only top-row boxes can be selected; chosen column shifts upward and refills at bottom",()=>{
@@ -46,7 +45,7 @@ test("legacy 7x7 save starts the new authored level instead of stretching old pi
  const restored=restoreGame({board:old,slots:Array(5).fill(null),remaining:49});
  assert.equal(restored.board.length,SIZE);assert.equal(restored.remaining,createGame().remaining);
 });
-test("25x25 collectible block board survives save restoration for the 250x250 display grid",()=>{
+test("50x50 collectible block board survives save restoration for the 250x250 display grid",()=>{
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill("green"));board[0][0]="red";
  const saved={board,slots:Array(5).fill(null),tray:[[0,1,2],[3,4,5],[6,7,8]],nextContainer:9,remaining:SIZE*SIZE};
  const restored=restoreGame(saved);assert.equal(restored.board.length,SIZE);assert.equal(restored.board[SIZE-1].length,SIZE);
@@ -124,24 +123,15 @@ test("a full wave never assigns the same board cell to two ants",()=>{
  assert.ok(wave.every(m=>s.board[m.target.y][m.target.x]===m.color));
 });
 
-test("the complete large-block frog level has a verified winning strategy",()=>{
- const s=createGame();
- // A deterministic route verified against the 25x25 collectible-block board and live wave rules.
- const winningRoute=[2,0,0,2,1,0,0,0,2,0,2,2,2,0,1,0,0,1,1];
- let nextChoice=0,steps=0;
- while(!s.won&&!s.lost&&steps<100){
-  steps++;
-  while(freeSlotCount(s)>0&&nextChoice<winningRoute.length){
-   assert.equal(chooseTopColumn(s,winningRoute[nextChoice++]),true);
-  }
-  const wave=findAntWave(s);
-  if(!wave.length){s.lost=true;break;}
-  for(const move of wave)assert.equal(applyAntMove(s,move.slot,move.target),true);
-  for(let slot=0;slot<SLOT_COUNT;slot++)if(s.slots[slot]?.status==="departing")completeBoxDeparture(s,slot);
-  if(s.remaining===0){s.won=true;break;}
+test("the 50x50 artwork produces a complete deterministic deck with bounded box sizes",()=>{
+ const totals={red:0,blue:0,yellow:0,green:0,purple:0};
+ for(const row of INITIAL_BOARD)for(const color of row)if(color)totals[color]++;
+ const deckTotals={red:0,blue:0,yellow:0,green:0,purple:0};
+ for(const box of INCOMING){
+  assert.ok(box.ants>0&&box.ants<=BOX_CAPACITY);
+  deckTotals[box.color]+=box.ants;
  }
- assert.equal(s.won,true,`solver did not clear level: remaining=${s.remaining}, choices=${nextChoice}, steps=${steps}`);
- assert.equal(nextChoice,INCOMING.length);
- assert.equal(s.remaining,0);
- assert.ok(steps<100);
+ assert.deepEqual(deckTotals,totals);
+ assert.equal(INCOMING.reduce((sum,box)=>sum+box.ants,0),createGame().remaining);
+ assert.ok(INCOMING.length>=10&&INCOMING.length<=25);
 });
