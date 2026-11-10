@@ -15,3 +15,10 @@ exports/
 *.apk
 *.aab
 *.ipa
+
+# Browser and Capacitor build outputs
+node_modules/
+dist/
+android/
+ios/
+*.log
