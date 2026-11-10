@@ -29,6 +29,14 @@ test("each column advances independently and exhausted columns show empty cells"
 test("tray choices remain available while ants are resolving",()=>{
  const s=createGame();s.resolving=true;assert.equal(canChoose(s),true);assert.equal(chooseTopColumn(s,0),true);
 });
+test("accessibility checks use the actual board dimensions, including a 250x250 field",()=>{
+ const board=Array.from({length:250},()=>Array(250).fill("green"));
+ board[125][125]="red";board[0][249]="red";
+ assert.equal(isAccessible(board,125,125),false);
+ assert.equal(isAccessible(board,249,0),true);
+ board[125][124]="";
+ assert.equal(isAccessible(board,125,125),true);
+});
 test("findAccessiblePixels returns a bounded wave of matching exposed pixels",()=>{
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill("green"));
  board[2][2]="";board[2][3]="red";board[3][3]="red";board[4][4]="blue";
