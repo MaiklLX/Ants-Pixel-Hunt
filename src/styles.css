@@ -253,8 +253,9 @@ body{background:radial-gradient(ellipse at 50% 0%,#f8fffb 0%,#e9f4eb 54%,#dcebe2
 
 /* KT-029 — friendly illustrated start screen; the compact game layout remains untouched beneath it. */
 .app-shell.menu-open{overflow:visible}
+.app-shell.menu-open .main-menu{display:flex}
 .app-shell.menu-open>:not(.main-menu){visibility:hidden;pointer-events:none}
-.main-menu{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:clamp(10px,2.1dvh,18px);overflow-y:auto;overscroll-behavior:contain;padding:calc(env(safe-area-inset-top) + 22px) 22px calc(env(safe-area-inset-bottom) + 18px);background:radial-gradient(ellipse at 50% 12%,#fffef7 0%,#f2faef 43%,#e1f0e8 100%);color:#42664d}
+.main-menu{display:none;position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:clamp(10px,2.1dvh,18px);overflow-y:auto;overscroll-behavior:contain;padding:calc(env(safe-area-inset-top) + 22px) 22px calc(env(safe-area-inset-bottom) + 18px);background:radial-gradient(ellipse at 50% 12%,#fffef7 0%,#f2faef 43%,#e1f0e8 100%);color:#42664d}
 .main-menu::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.34;background-image:radial-gradient(#a8c9ad 1px,transparent 1px);background-size:22px 22px;mask-image:linear-gradient(#000,transparent 80%)}
 .menu-brand{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:12px;text-align:left}
 .menu-brand h1{font-size:clamp(24px,6vw,31px);letter-spacing:2px}
@@ -316,3 +317,6 @@ body{background:radial-gradient(ellipse at 50% 0%,#f8fffb 0%,#e9f4eb 54%,#dcebe2
  .menu-primary{min-height:45px}
 }
 @media(prefers-reduced-motion:reduce){.garden-ant{animation:none}}
+
+/* KT-029.1 — hide the fixed menu after the player enters the game. */
+.app-shell:not(.menu-open) .main-menu{display:none}
