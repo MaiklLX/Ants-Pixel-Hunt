@@ -89,7 +89,7 @@ function curveControl(a,b,bend){
  return{x:(a.x+b.x)/2-(dy/len)*bend,y:(a.y+b.y)/2+(dx/len)*bend};
 }
 function drawAnt(ctx,point,color,carrying,index){
- const rgb=colorRGB[color],pulse=.8+Math.sin(index*.7+performance.now()*.002)*.12;
+ const pulse=.8+Math.sin(index*.7+performance.now()*.002)*.12;
  ctx.save();ctx.translate(point.x,point.y);
  ctx.shadowColor=COLORS[color].hex;ctx.shadowBlur=carrying?9:4;
  ctx.fillStyle=COLORS[color].hex;ctx.beginPath();ctx.arc(0,0,2.45*pulse,0,Math.PI*2);ctx.fill();
@@ -111,12 +111,12 @@ async function animateAntWave(moves){
  });
  return new Promise(resolve=>{
   const draw=timestamp=>{
-   const rect=shell.getBoundingClientRect(),dpr=Math.min(2,window.devicePixelRatio||1);
+   const rect=shell.getBoundingClientRect();
    antCtx.clearRect(0,0,rect.width,rect.height);
    let finished=0;
    runners.forEach((runner,index)=>{
     const elapsed=timestamp-now-runner.delay;
-    if(elapsed<0){finished++;return;}
+    if(elapsed<0)return;
     const outboundEnd=runner.outbound,returnStart=outboundEnd+runner.pause,total=returnStart+runner.returning;
     if(elapsed>=total){finished++;return;}
     let point,carrying=false;
