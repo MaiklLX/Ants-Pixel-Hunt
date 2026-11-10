@@ -37,6 +37,15 @@ test("accessibility checks use the actual board dimensions, including a 250x250 
  board[125][124]="";
  assert.equal(isAccessible(board,125,125),true);
 });
+test("250x250 board survives save restoration without falling back to the demo field",()=>{
+ const board=Array.from({length:250},()=>Array(250).fill("green"));
+ board[0][0]="red";
+ const saved={board,slots:Array(5).fill(null),tray:[[0,1,2],[3,4,5],[6,7,8]],nextContainer:9,remaining:62500};
+ const restored=restoreGame(saved);
+ assert.equal(restored.board.length,250);
+ assert.equal(restored.board[249].length,250);
+ assert.deepEqual(findAccessiblePixel(restored.board,"red"),{x:0,y:0});
+});
 test("findAccessiblePixels returns a bounded wave of matching exposed pixels",()=>{
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill("green"));
  board[2][2]="";board[2][3]="red";board[3][3]="red";board[4][4]="blue";
