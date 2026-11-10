@@ -143,18 +143,25 @@ function drawTransportBox(point,color){
  antCtx.strokeStyle="#fff8";antCtx.beginPath();antCtx.moveTo(-5,-6);antCtx.lineTo(-5,6);antCtx.moveTo(5,-6);antCtx.lineTo(5,6);antCtx.stroke();
  antCtx.restore();
 }
-async function animateBoxDeparture(slotIndex){
+async function animateBoxDepartures(slotIndices){
  resizeAntLayer();
- const start=slotCenter(slotIndex),belt=pointFor(conveyorEl),s=shell.getBoundingClientRect();
- const end={x:s.width+34,y:belt.y};
- const bend={x:start.x-20,y:(start.y+belt.y)/2};
- const startTime=performance.now(),duration=2500;
+ const starts=slotIndices.map(slot=>({slot,start:slotCenter(slot),color:state.slots[slot]?.color||"yellow"}));
+ const belt=pointFor(conveyorEl),shellRect=shell.getBoundingClientRect(),startTime=performance.now(),duration=2600;
  return new Promise(resolve=>{
   const frame=timestamp=>{
-   const elapsed=timestamp-startTime,t=Math.min(1,elapsed/duration),p=t<.48?quadPoint(start,bend,{x:start.x,y:belt.y},t/.48):{x:start.x+(end.x-start.x)*((t-.48)/.52),y:belt.y};
-   antCtx.clearRect(0,0,shell.getBoundingClientRect().width,shell.getBoundingClientRect().height);
-   drawTransportBox(p,state.slots[slotIndex]?.color||"yellow");
-   if(t>=1){antCtx.clearRect(0,0,shell.getBoundingClientRect().width,shell.getBoundingClientRect().height);resolve();return;}
+   const elapsed=timestamp-startTime;
+   antCtx.clearRect(0,0,shellRect.width,shellRect.height);
+   let finished=0;
+   starts.forEach((item,index)=>{
+    const delay=index*260,t=Math.max(0,Math.min(1,(elapsed-delay)/duration));
+    if(elapsed<delay){finished++;return;}
+    if(t>=1){finished++;return;}
+    const lift=quadPoint(item.start,{x:item.start.x-22,y:(item.start.y+belt.y)/2},{x:item.start.x,y:belt.y},Math.min(1,t*2.2));
+    const progress=Math.max(0,(t-.42)/.58);
+    const point={x:lift.x+(shellRect.width+35-lift.x)*progress,y:lift.y+(belt.y-lift.y)*progress};
+    drawTransportBox(antCtx,point,item.color);
+   });
+   if(finished===starts.length){antCtx.clearRect(0,0,shellRect.width,shellRect.height);resolve();return;}
    antFrame=requestAnimationFrame(frame);
   };
   antFrame=requestAnimationFrame(frame);
@@ -171,7 +178,7 @@ async function runResolver(){
   while(!resetting&&state.remaining>0){
    const departing=state.slots.map((box,index)=>box?.status==="departing"?index:-1).filter(index=>index>=0);
    if(departing.length){
-    await Promise.all(departing.map(animateBoxDeparture));
+    await animateBoxDepartures(departing);
     for(const slot of departing)completeBoxDeparture(state,slot);
     renderSlots();renderConveyor();await save();
    }
