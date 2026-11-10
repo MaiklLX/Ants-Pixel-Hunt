@@ -167,16 +167,18 @@ function buildIncoming(board){
  }
  const colors=["green","blue","purple","yellow","red"],queues={};
  for(const color of colors){
-  const total=totals[color],count=Math.max(1,Math.ceil(total/36)),base=Math.floor(total/count);
+  const total=totals[color];
+  if(!total){queues[color]=[];continue;}
+  const count=Math.max(1,Math.ceil(total/36)),base=Math.floor(total/count),minimum=Math.min(10,total);
   let seed=(boardSeed^color.charCodeAt(0)*2654435761)>>>0;
   const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
   const spread=Math.max(3,Math.min(11,Math.round(base*.28)));
-  const sizes=Array.from({length:count},()=>Math.max(10,Math.min(BOX_CAPACITY,base+Math.round((random()*2-1)*spread))));
+  const sizes=Array.from({length:count},()=>Math.max(minimum,Math.min(BOX_CAPACITY,base+Math.round((random()*2-1)*spread))));
   let difference=total-sizes.reduce((sum,value)=>sum+value,0),cursor=Math.floor(random()*count);
   while(difference!==0){
    const index=cursor++%count;
    if(difference>0&&sizes[index]<BOX_CAPACITY){sizes[index]++;difference--;}
-   else if(difference<0&&sizes[index]>10){sizes[index]--;difference++;}
+   else if(difference<0&&sizes[index]>minimum){sizes[index]--;difference++;}
   }
   queues[color]=sizes.map(ants=>({color,ants}));
  }
