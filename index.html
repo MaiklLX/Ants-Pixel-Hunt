@@ -14,7 +14,7 @@
   <title>Муравьишки: Пиксельная охота</title>
 </head>
 <body>
-  <main class="app-shell">
+  <main id="app-shell" class="app-shell">
     <header class="topbar">
       <div class="brand-mark" aria-hidden="true">🐜</div>
       <div><p class="eyebrow">МАЛЕНЬКИЕ ГЕРОИ · БОЛЬШАЯ ОХОТА</p><h1>МУРАВЬИШКИ</h1><p class="subtitle">ПИКСЕЛЬНАЯ ОХОТА</p></div>
@@ -23,13 +23,12 @@
 
     <section class="level-heading">
       <span class="level-kicker">ПОЛЯНКА № 1</span>
-      <h2>Цветочная поляна</h2>
-      <p id="board-status" class="board-status">Пикселей осталось: 49</p>
+      <h2>Портрет лягушонка</h2>
+      <p id="board-status" class="board-status">Крупных блоков осталось: 325</p>
     </section>
 
     <section class="board-wrap" aria-label="Игровое поле">
-      <div id="board" class="board" role="grid" aria-label="Поле из цветных пикселей"></div>
-      <div id="ant-layer" class="ant-layer" aria-hidden="true"></div>
+      <canvas id="board" class="board" width="250" height="250" role="img" aria-label="Портрет лягушонка из крупных цветных блоков на сетке 250 на 250"></canvas>
       <div class="board-corners" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
     </section>
 
@@ -38,6 +37,12 @@
       <div id="slots" class="slots" aria-label="Пять стартовых отсеков"></div>
     </section>
 
+    <section class="conveyor-section" aria-label="Сортировочная лента">
+      <div class="section-line"><h3>СОРТИРОВОЧНАЯ ЛЕНТА</h3><span id="sorted-count">Отгружено боксов: 0</span></div>
+      <div id="conveyor" class="conveyor">
+        <span class="conveyor-in">ПРИЁМ</span><div class="belt"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span class="conveyor-out">СКЛАД ↗</span>
+      </div>
+    </section>
     <section class="choices-section">
       <div class="section-line"><h3>ВЫБЕРИ БОКС · СЕТКА 3×3</h3><span id="queue-count">8 в очереди</span></div>
       <p id="choice-status" class="choice-status">Выбирай только верхний ряд · колонка сдвигается вверх</p>
@@ -49,7 +54,8 @@
       <button id="restart" class="restart-button" type="button"><span aria-hidden="true">↻</span> Начать заново</button>
       <span id="save-status" class="save-status">Сохранение на устройстве</span>
     </div>
-    <footer>Муравьишки · автономная игра <span>v0.3 · стратегическая очередь</span></footer>
+    <footer>Муравьишки · автономная игра <span>v0.6 · детальная сетка 50×50</span></footer>
+    <canvas id="ant-layer" class="ant-layer" aria-hidden="true"></canvas>
   </main>
   <script type="module" src="./src/app.js"></script>
 </body>
