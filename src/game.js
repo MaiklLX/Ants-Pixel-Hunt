@@ -22,7 +22,7 @@ function lineDistance(px,py,x1,y1,x2,y2){
  const dx=x2-x1,dy=y2-y1,t=Math.max(0,Math.min(1,((px-x1)*dx+(py-y1)*dy)/(dx*dx+dy*dy)));
  return Math.hypot(px-(x1+t*dx),py-(y1+t*dy));
 }
-export function createArtworkBoard(){
+function createFrogBoard(){
  // The visible field is 250×250 tiny squares. Each collectible artwork block
  // occupies a crisp 5×5 group of those squares, so one ant carries one large pixel.
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
@@ -53,6 +53,54 @@ export function createArtworkBoard(){
  }
  return board;
 }
+
+function createButterflyBoard(){
+ const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
+ const e=(x,y,cx,cy,rx,ry)=>((x-cx)/rx)**2+((y-cy)/ry)**2<=1;
+ for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){
+  const left=e(x,y,9.5,11,8.2,8.4)||e(x,y,10,23,7.2,7.1);
+  const right=e(x,y,25.5,11,8.2,8.4)||e(x,y,25,23,7.2,7.1);
+  if(left||right)board[y][x]="purple";
+  if(e(x,y,9.5,11,6.8,7)||e(x,y,25.5,11,6.8,7))board[y][x]="blue";
+  if(e(x,y,10,23,5.8,5.7)||e(x,y,25,23,5.8,5.7))board[y][x]="red";
+  if(e(x,y,9,10,3,3)||e(x,y,26,10,3,3)||e(x,y,10,23,2.5,2.5)||e(x,y,25,23,2.5,2.5))board[y][x]="yellow";
+  if(Math.abs(x-17)<=1&&y>=8&&y<=27)board[y][x]="green";
+  if((x-17)**2+(y-7)**2<=5)board[y][x]="yellow";
+  if(y>=4&&y<=8&&Math.abs(x-17)<=1)board[y][x]="purple";
+  if(y>=27&&y<=30&&Math.abs(x-17)<=1)board[y][x]="purple";
+ }
+ return board;
+}
+function createFlowerBoard(){
+ const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
+ const e=(x,y,cx,cy,rx,ry)=>((x-cx)/rx)**2+((y-cy)/ry)**2<=1;
+ for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){
+  const petalCenters=[[17,6],[24,10],[27,17],[24,24],[17,27],[10,24],[7,17],[10,10]];
+  if(petalCenters.some(([cx,cy])=>e(x,y,cx,cy,4.8,4.8)))board[y][x]="red";
+  if(petalCenters.some(([cx,cy])=>e(x,y,cx,cy,3.2,3.2)))board[y][x]="yellow";
+  if((x-17)**2+(y-17)**2<=5.8**2)board[y][x]="yellow";
+  if((x-17)**2+(y-17)**2<=3.4**2)board[y][x]="purple";
+  if(Math.abs(x-17)<=1&&y>=22&&y<=32)board[y][x]="green";
+  if(e(x,y,12,27,5,2.5)||e(x,y,22,29,5,2.5))board[y][x]="blue";
+  if(e(x,y,12,27,3.4,1.5)||e(x,y,22,29,3.4,1.5))board[y][x]="green";
+ }
+ return board;
+}
+export const LEVELS=[
+ {id:"meadow-01",number:1,chapter:"Зелёная поляна",name:"Портрет лягушонка",emoji:"🐸",hint:"Знакомство с цветными боксами и пятью отсеками"},
+ {id:"garden-02",number:2,chapter:"Цветочный сад",name:"Бабочка на ветру",emoji:"🦋",hint:"Новые сочетания цветов и более длинная очередь"},
+ {id:"garden-03",number:3,chapter:"Цветочный сад",name:"Солнечный цветок",emoji:"🌻",hint:"Учимся открывать центральные блоки постепенно"}
+];
+export function getLevel(levelId="meadow-01"){
+ return LEVELS.find(level=>level.id===levelId)||LEVELS[0];
+}
+export function createArtworkBoard(levelId="meadow-01"){
+ const id=getLevel(levelId).id;
+ if(id==="garden-02")return createButterflyBoard();
+ if(id==="garden-03")return createFlowerBoard();
+ return createFrogBoard();
+}
+
 export const INITIAL_BOARD=createArtworkBoard();
 function buildIncoming(board){
  const totals={red:0,blue:0,yellow:0,green:0,purple:0};
@@ -67,11 +115,13 @@ function buildIncoming(board){
  while(pending){pending=false;for(const color of colors){const box=queues[color].shift();if(box){deck.push(box);pending=true;}}}
  return deck;
 }
-export const INCOMING=buildIncoming(INITIAL_BOARD);
-export function createGame(){
- return {board:INITIAL_BOARD.map(row=>[...row]),slots:Array(SLOT_COUNT).fill(null),
+export function getIncoming(levelId="meadow-01"){return buildIncoming(createArtworkBoard(levelId));}
+export const INCOMING=getIncoming();
+export function createGame(levelId="meadow-01"){
+ const board=createArtworkBoard(levelId),incoming=getIncoming(levelId);
+ return {levelId:getLevel(levelId).id,board,slots:Array(SLOT_COUNT).fill(null),
   tray:Array.from({length:TRAY_SIZE},(_,row)=>Array.from({length:TRAY_SIZE},(_,col)=>row*TRAY_SIZE+col)),
-  nextContainer:TRAY_SIZE*TRAY_SIZE,remaining:INITIAL_BOARD.reduce((sum,row)=>sum+row.filter(Boolean).length,0),won:false,lost:false,resolving:false,
+  nextContainer:TRAY_SIZE*TRAY_SIZE,remaining:board.reduce((sum,row)=>sum+row.filter(Boolean).length,0),won:false,lost:false,resolving:false,
   activeSlot:-1,activeTarget:null,activeSlots:[],sortedBoxes:0,
   message:"Выбери бокс — каждый муравей унесёт один крупный цветной блок",resolutionLog:[]};
 }
@@ -128,7 +178,7 @@ export function chooseTopColumn(state,column){
  if(!canChoose(state)||!Number.isInteger(column)||column<0||column>=TRAY_SIZE)return false;
  const selectedIndex=state.tray[0][column];
  if(selectedIndex===null||selectedIndex===undefined)return false;
- const freeSlot=state.slots.findIndex(slot=>slot===null),box=INCOMING[selectedIndex];
+ const freeSlot=state.slots.findIndex(slot=>slot===null),box=getIncoming(state.levelId)[selectedIndex];
  if(freeSlot<0||!box)return false;
  state.slots[freeSlot]={...box,sourceIndex:selectedIndex};
  state.tray[0][column]=state.tray[1][column];state.tray[1][column]=state.tray[2][column];
@@ -177,11 +227,11 @@ export function resolveAll(state){
  return state;
 }
 export function serializeGame(state){
- return {board:state.board,slots:state.slots,tray:state.tray,nextContainer:state.nextContainer,
+ return {levelId:state.levelId||"meadow-01",board:state.board,slots:state.slots,tray:state.tray,nextContainer:state.nextContainer,
   remaining:state.remaining,won:state.won,lost:state.lost,sortedBoxes:state.sortedBoxes||0,resolutionLog:state.resolutionLog.slice(-300)};
 }
 export function restoreGame(saved){
- const fresh=createGame();
+ const fresh=createGame(saved?.levelId||"meadow-01"),incoming=getIncoming(fresh.levelId);
  if(!saved||!Array.isArray(saved.board)||saved.board.length!==SIZE||!saved.board.every(row=>Array.isArray(row)&&row.length===SIZE)||!Array.isArray(saved.slots)||saved.slots.length!==SLOT_COUNT)return fresh;
  let tray=saved.tray;
  if(!Array.isArray(tray)||tray.length!==TRAY_SIZE||!tray.every(row=>Array.isArray(row)&&row.length===TRAY_SIZE)){
@@ -189,7 +239,7 @@ export function restoreGame(saved){
   let next=saved.nextContainer??0;
   tray=Array.from({length:TRAY_SIZE},(_,r)=>Array.from({length:TRAY_SIZE},(_,c)=>{
    const old=legacy[r*TRAY_SIZE+c];if(old!==undefined)return old;
-   return next<INCOMING.length?next++:null;
+   return next<incoming.length?next++:null;
   }));
  }
  return {...fresh,...saved,tray,sortedBoxes:saved.sortedBoxes||0,
