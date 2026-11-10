@@ -1,4 +1,4 @@
-import {COLORS,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,LEVELS,getLevel,getIncoming,createGame,canChoose,chooseTopColumn,isLockedBox,findAntWave,applyAntMove,completeBoxDeparture,isDefeat,getExposedPixels,countOutboundBySlot,countSlotWorkers,canDepartSlot} from "./game.js";
+import {COLORS,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,LEVELS,getLevel,getIncoming,createGame,canChoose,chooseTopColumn,isLockedBox,getLinkedPartner,findAntWave,applyAntMove,completeBoxDeparture,isDefeat,getExposedPixels,countOutboundBySlot,countSlotWorkers,canDepartSlot} from "./game.js";
 import {getAntTripFrame,getAntLaunchDelay} from "./ant-animation.js";
 import {isCampaignLevelUnlocked,getNextCampaignLevel} from "./campaign.js";
 import {BUILDINGS,createEconomy,normalizeEconomy,collectCube,completeMeadow,purchaseBuilding,buildingCost} from "./economy.js";
@@ -105,17 +105,21 @@ function renderChoices(){
   const button=document.createElement("button");button.type="button";button.className="choice-card"+(sealed?" sealed-box":box?" selectable":" empty-box")+(reveal?" sealed-reveal":"");
   if(reveal)state.lockedBoxRevealPlayed=true;
   if(index!==null&&index!==undefined)button.dataset.boxIndex=String(index);
-  button.disabled=!box||sealed||resetting||resetAfterMenu||state.won||state.lost||!canChoose(state);
+  const linked=box?.special==="linked",partner=linked?getLinkedPartner(state.levelId,index):null;
+  const waitingForPartner=linked&&!state.tray[0].includes(partner),needsPairSlots=linked&&(state.pendingLinkedIndex===null||state.pendingLinkedIndex===undefined)&&state.slots.filter(slot=>slot===null).length<2;
+  const blockedByPair=state.pendingLinkedIndex!==null&&state.pendingLinkedIndex!==undefined&&index!==state.pendingLinkedIndex;
+  button.disabled=!box||sealed||resetting||resetAfterMenu||state.won||state.lost||!canChoose(state)||blockedByPair||waitingForPartner||needsPairSlots;
   if(sealed){
    const crate=document.createElement("span");crate.className="choice-crate sealed-crate";crate.textContent="🔒";
    const count=document.createElement("small");count.className="sealed-progress";count.textContent=`${(state.lockProgressColumns||[]).length}/2`;
    button.append(crate,count);button.title="Закрытый бокс откроется после размещения обычных боксов из двух других колонок";
    button.setAttribute("aria-label",`Закрытый бокс, прогресс открытия ${(state.lockProgressColumns||[]).length} из 2`);
   }else if(box){button.style.setProperty("--ant-color",COLORS[box.color].hex);
+   if(linked){button.classList.add("linked-box");const chain=document.createElement("span");chain.className="linked-mark";chain.textContent="↔";button.append(chain);button.title=blockedByPair?"Сначала выбери первый связанный бокс":waitingForPartner?"Связанный бокс появится в верхнем ряду позже":needsPairSlots?"Для пары нужны два свободных отсека":"Связанная пара: после этого бокса выбери второй";}
    const crate=document.createElement("span");crate.className="choice-crate";crate.setAttribute("aria-hidden","true");
    const gem=document.createElement("i");gem.style.setProperty("--gem-color",COLORS[box.color].hex);crate.append(gem);
    const count=document.createElement("small");count.textContent=`${box.ants.toLocaleString("ru-RU")} 🐜`;
-   button.append(crate,count);button.setAttribute("aria-label",`Выбрать бокс: ${box.ants} муравьёв`);
+   button.append(crate,count);button.setAttribute("aria-label",`${linked?"Связанный бокс. ":""}Выбрать бокс: ${box.ants} муравьёв`);
   }else{button.textContent="Очередь закончилась";button.setAttribute("aria-label","В этой колонке больше нет боксов");}
   button.addEventListener("click",()=>onChoose(col));lane.append(button);
   const preview=document.createElement("div");preview.className="queue-preview";preview.setAttribute("aria-label","Следующие боксы в колонке");
@@ -129,6 +133,7 @@ function renderChoices(){
     const progress=document.createElement("small");progress.className="peek-count";progress.textContent=`${(state.lockProgressColumns||[]).length}/2`;
     peek.append(lock,progress);peek.title="Закрытый бокс";peek.setAttribute("aria-label",`Закрытый бокс, прогресс ${(state.lockProgressColumns||[]).length} из 2`);
    }else if(nextBox){
+    if(nextBox.special==="linked")peek.classList.add("linked-peek");
     const color=COLORS[nextBox.color];peek.style.setProperty("--peek-color",color.hex);
     const chip=document.createElement("i");chip.className="peek-color-chip";chip.setAttribute("aria-hidden","true");
     const meta=document.createElement("span");meta.className="peek-meta";
@@ -487,7 +492,7 @@ async function onChoose(column){
 }
 function updateMainMenu(){
  const primary=$("start-game"),fresh=$("new-game"),progress=$("menu-progress"),level=getLevel(state.levelId);
- $("menu-level-name").textContent="Полянка готова к исследованию";$("menu-level-number").textContent=`ПОЛЯНКА ${String(level.number).padStart(2,"0")}`;$("menu-level-emoji").textContent="📦";
+ $("menu-level-name").textContent=level.name;$("menu-level-number").textContent=`ПОЛЯНКА ${String(level.number).padStart(2,"0")}`;$("menu-level-emoji").textContent=level.emoji;
  const list=$("campaign-levels");
  if(list){list.replaceChildren();for(const item of LEVELS){
   const unlocked=isLevelUnlocked(item),done=completedLevels().has(item.id),button=document.createElement("button");button.type="button";
@@ -505,7 +510,7 @@ function updateMainMenu(){
  primary.querySelector("span")?.remove();
  const arrow=document.createElement("span");arrow.setAttribute("aria-hidden","true");arrow.textContent="→";primary.append(arrow);
  fresh.hidden=true;
- progress.textContent=isLevelUnlocked(level)?"Открыта · можно отправляться":"Полянка пока закрыта";
+ progress.textContent=completedLevels().has(level.id)?"Пройдена · можно повторить":isLevelUnlocked(level)?"Открыта · можно отправляться":"Полянка пока закрыта";
 }
 function showMainMenu(){
  shell.classList.add("menu-open");
