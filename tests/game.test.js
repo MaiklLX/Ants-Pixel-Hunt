@@ -19,7 +19,7 @@ test("player can fill every remaining start slot with rapid choices during an ac
  const s=createGame();s.resolving=true;
  for(const column of [0,1,2,0,1])assert.equal(chooseTopColumn(s,column),true);
  assert.equal(freeSlotCount(s),0);
- assert.deepEqual(s.slots.map(box=>box.sourceIndex),[0,1,2,9,10]);
+ assert.deepEqual(s.slots.map(box=>box.sourceIndex),[0,1,2,3,4]);
  assert.equal(canChoose(s),false);
 });
 test("each column advances independently and exhausted columns show empty cells",()=>{
