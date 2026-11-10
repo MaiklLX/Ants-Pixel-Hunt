@@ -50,6 +50,19 @@ export function findAccessiblePixels(board,color,limit=Infinity){
  }
  return found;
 }
+export function findAntWave(state){
+ const wave=[],reserved=new Set();
+ for(let slot=0;slot<state.slots.length;slot++){
+  const box=state.slots[slot];if(!box||box.ants<=0)continue;
+  let assigned=0;
+  for(const target of findAccessiblePixels(state.board,box.color)){
+   const key=target.x+","+target.y;if(reserved.has(key))continue;
+   reserved.add(key);wave.push({slot,color:box.color,target});assigned++;
+   if(assigned>=box.ants)break;
+  }
+ }
+ return wave;
+}
 export function freeSlotCount(state){return state.slots.filter(slot=>slot===null).length;}
 export function canChoose(state){
  return !state.won&&!state.lost&&freeSlotCount(state)>0&&state.tray[0].some(index=>index!==null);
