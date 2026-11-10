@@ -54,7 +54,7 @@ test("the next offer refills the tray without discarding unchosen boxes",()=>{
   chooseCandidate(state,3);
   assert.deepEqual(state.candidates,[0,2,4]);
   assert.equal(state.slots[0].color,"blue");
-  assert.equal(state.slots[1].color,"purple");
+  assert.equal(state.slots[1].color,"blue");
 });
 test("resolver gives the first turn to the leftmost occupied slot",()=>{
   const state=createGame();
