@@ -612,3 +612,21 @@ body{background:radial-gradient(ellipse at 50% 0%,#fffdf2 0%,#f1faee 42%,#e4f2e7
 .belt i{flex:0 0 10px;width:10px;height:10px;border-radius:50%;background:radial-gradient(circle at 30% 25%,#fff 0 15%,#d9e7ce 38%,#8aa783 100%);border:1px solid #789477;box-shadow:0 1px 2px #36553c66,inset 0 1px #fff;animation-duration:.9s}
 @media(max-width:599px){.queue-preview{min-height:42px;gap:4px}.queue-peek{height:40px;grid-template-columns:15px minmax(0,1fr) 9px;gap:3px;padding:2px 3px;border-radius:8px}.queue-peek .peek-color-chip{width:14px;height:28px}.queue-peek .peek-color-name{font-size:7.5px}.queue-peek .peek-count{font-size:10px}.queue-peek .peek-crate-mark{width:8px;height:7px}.queue-peek.empty{height:31px}.conveyor{height:44px}.belt{height:25px;margin:0 7px}}
 @media(prefers-reduced-motion:reduce){.belt{animation:none}.belt i{animation:none}}
+
+
+/* KT-048 — calmer conveyor, stable queue cards and color-first previews. */
+.queue-peek{grid-template-columns:18px minmax(0,1fr);justify-items:stretch;gap:5px}
+.queue-peek .peek-meta{align-items:flex-start}
+.queue-peek .peek-count{font-size:12px;line-height:1;font-weight:950;white-space:nowrap}
+.queue-peek .peek-color-name,.queue-peek .peek-crate-mark{display:none!important}
+.choice-card .choice-crate,.choice-card.selectable .choice-crate{animation:none!important}
+.choice-card.selectable:not(:disabled){animation:none!important}
+.conveyor .belt{animation-duration:1.55s}
+.conveyor .belt i{animation-duration:1.8s}
+@media(max-width:599px){
+ .queue-peek{grid-template-columns:15px minmax(0,1fr);gap:3px}
+ .queue-peek .peek-count{font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){
+ .conveyor .belt,.conveyor .belt i{animation:none!important}
+}
