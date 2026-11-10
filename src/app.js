@@ -4,7 +4,7 @@ import {getAntTripFrame} from "./ant-animation.js";
 const $=id=>document.getElementById(id);
 const shell=$("app-shell"),boardEl=$("board"),slotsEl=$("slots"),choicesEl=$("choices"),antLayer=$("ant-layer"),conveyorEl=$("conveyor");
 const boardCtx=boardEl.getContext("2d"),antCtx=antLayer.getContext("2d");
-let state=createGame(),resolverRunning=false,resetting=false,antFrame=0,hasSavedGame=false,gameStarted=false;
+let state=createGame(),resolverRunning=false,resetting=false,antFrame=0,antCanvasWidth=0,antCanvasHeight=0,hasSavedGame=false,gameStarted=false;
 const TOTAL_BLOCKS=state.remaining;
 const loadingSlots=new Set(),workerPromises=new Map(),reservedTargets=new Set(),activeAnts=new Map();
 let workerSequence=0;
@@ -87,6 +87,7 @@ function render(){
 }
 function resizeAntLayer(){
  const rect=shell.getBoundingClientRect(),dpr=Math.min(2,window.devicePixelRatio||1);
+ antCanvasWidth=rect.width;antCanvasHeight=rect.height;
  antLayer.width=Math.max(1,Math.round(rect.width*dpr));antLayer.height=Math.max(1,Math.round(rect.height*dpr));
  antCtx.setTransform(dpr,0,0,dpr,0,0);
 }
@@ -180,7 +181,7 @@ function trailPoint(points,t){
  return{x:calc(p0.x,p1.x,p2.x,p3.x),y:calc(p0.y,p1.y,p2.y,p3.y)};
 }
 function renderAntFrame(timestamp){
- antCtx.clearRect(0,0,antLayer.width,antLayer.height);
+ antCtx.clearRect(0,0,antCanvasWidth,antCanvasHeight);
  for(const [workerId,ant] of activeAnts){
   const phase=getAntTripFrame(timestamp-ant.startTime,ant.delay,ant.outbound,ant.returning);
   if(phase.waiting)continue;
