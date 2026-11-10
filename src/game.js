@@ -110,6 +110,16 @@ export function findAntWave(state,reservedTargets=new Set(),pendingBySlot=new Ma
  }
  return wave;
 }
+export function countOutboundBySlot(workers){
+ const pending=new Map();
+ for(const worker of workers.values())if(worker.phase==="outbound")pending.set(worker.slot,(pending.get(worker.slot)||0)+1);
+ return pending;
+}
+export function countSlotWorkers(workers,slot){
+ let count=0;for(const worker of workers.values())if(worker.slot===slot)count++;
+ return count;
+}
+export function canDepartSlot(workers,slot){return countSlotWorkers(workers,slot)===0;}
 export function freeSlotCount(state){return state.slots.filter(slot=>slot===null).length;}
 export function canChoose(state){
  return !state.won&&!state.lost&&freeSlotCount(state)>0&&state.tray[0].some(index=>index!==null);

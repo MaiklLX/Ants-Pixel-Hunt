@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {createGame,INITIAL_BOARD,INCOMING,isAccessible,findAccessiblePixel,findAccessiblePixels,findAntWave,chooseTopColumn,findNextMove,applyAntMove,completeBoxDeparture,resolveAll,freeSlotCount,isDefeat,SIZE,GRID_SIZE,BLOCK_SIZE,BOX_CAPACITY,SLOT_COUNT,TRAY_SIZE,canChoose,restoreGame,serializeGame} from "../src/game.js";
+import {createGame,INITIAL_BOARD,INCOMING,isAccessible,findAccessiblePixel,findAccessiblePixels,findAntWave,chooseTopColumn,findNextMove,applyAntMove,completeBoxDeparture,resolveAll,freeSlotCount,isDefeat,SIZE,GRID_SIZE,BLOCK_SIZE,BOX_CAPACITY,SLOT_COUNT,TRAY_SIZE,canChoose,restoreGame,serializeGame,countOutboundBySlot,countSlotWorkers,canDepartSlot} from "../src/game.js";
 const smallBoard=()=>Array.from({length:5},()=>Array(5).fill("green"));
 
 test("the authored frog is built from large collectible blocks on a 350x350 display grid",()=>{
@@ -136,4 +136,29 @@ test("the 35x35 artwork produces a complete deterministic deck with bounded box 
  assert.deepEqual(deckTotals,totals);
  assert.equal(INCOMING.reduce((sum,box)=>sum+box.ants,0),createGame().remaining);
  assert.ok(INCOMING.length>=10&&INCOMING.length<=25);
+});
+
+test("a returning ant does not block the next dispatch after its pickup opens a new pixel",()=>{
+ const s=createGame();s.board=Array.from({length:5},()=>Array(5).fill("green"));
+ s.board[2][0]="red";s.board[2][1]="red";s.remaining=25;
+ s.slots[0]={color:"red",ants:2};
+ const first=findAntWave(s);
+ assert.deepEqual(first.map(m=>m.target),[{x:0,y:2}]);
+ const workers=new Map([[1,{slot:0,phase:"outbound"}]]);
+ const reserved=new Set(["0,2"]);
+ assert.equal(applyAntMove(s,0,first[0].target),true);
+ workers.get(1).phase="returning";reserved.delete("0,2");
+ const pending=countOutboundBySlot(workers);
+ assert.equal(pending.has(0),false);
+ const next=findAntWave(s,reserved,pending);
+ assert.deepEqual(next.map(m=>m.target),[{x:1,y:2}]);
+ assert.equal(workers.size,1,"the first ant is still returning while the next one can be dispatched");
+});
+test("a box cannot depart while any ant assigned to its slot is still travelling back",()=>{
+ const workers=new Map([[1,{slot:2,phase:"returning"}],[2,{slot:2,phase:"returning"}],[3,{slot:1,phase:"outbound"}]]);
+ assert.equal(countSlotWorkers(workers,2),2);
+ assert.equal(canDepartSlot(workers,2),false);
+ workers.delete(1);assert.equal(canDepartSlot(workers,2),false);
+ workers.delete(2);assert.equal(canDepartSlot(workers,2),true);
+ assert.equal(countOutboundBySlot(workers).get(1),1);
 });

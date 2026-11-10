@@ -1,4 +1,4 @@
-import {COLORS,INCOMING,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,createGame,canChoose,chooseTopColumn,findAntWave,applyAntMove,completeBoxDeparture,serializeGame,restoreGame,isDefeat} from "./game.js";
+import {COLORS,INCOMING,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,createGame,canChoose,chooseTopColumn,findAntWave,applyAntMove,completeBoxDeparture,serializeGame,restoreGame,isDefeat,countOutboundBySlot,countSlotWorkers,canDepartSlot} from "./game.js";
 import {loadLocal,saveLocal,clearLocal} from "./storage.js";
 import {getAntTripFrame,getAntLaunchDelay} from "./ant-animation.js";
 const $=id=>document.getElementById(id);
@@ -39,7 +39,7 @@ function renderSlots(){
   const number=document.createElement("span");number.className="slot-number";number.textContent=`ОТСЕК ${index+1}`;slot.append(number);
   if(box){
    const stripe=document.createElement("span");stripe.className="slot-color";stripe.style.background=COLORS[box.color].hex;
-   const count=document.createElement("strong");count.className="ant-count";count.textContent=box.status==="departing"?"ГОТОВ К ОТГРУЗКЕ":`● ${box.ants.toLocaleString("ru-RU")}`;
+   const count=document.createElement("strong");count.className="ant-count";count.textContent=box.status==="departing"?(countSlotWorkers(workerPromises,index)?`↩ ${countSlotWorkers(workerPromises,index)} в пути`:"ГОТОВ К ОТГРУЗКЕ"):`● ${box.ants.toLocaleString("ru-RU")}`;
    slot.append(stripe,count);
   }else{const plus=document.createElement("span");plus.className="slot-plus";plus.textContent="＋";slot.append(plus);}
   slotsEl.append(slot);
@@ -254,7 +254,7 @@ async function animateBoxLoading(source,slot,color){
  const exit={x:belt.left+belt.width*.88-shellRect.left,y:belt.top+belt.height/2-shellRect.top};
  const finish=slot,p1=curveControl(source,entry,Math.min(28,Math.max(12,Math.abs(entry.x-source.x)*.08)));
  const p3=curveControl(exit,finish,-Math.min(30,Math.max(14,Math.abs(finish.y-exit.y)*.16)));
- const duration=1750,startTime=performance.now();
+ const duration=1250,startTime=performance.now();
  return new Promise(resolve=>{
   const frame=timestamp=>{
    const t=Math.min(1,(timestamp-startTime)/duration);
@@ -305,14 +305,13 @@ async function runSlotWorker(slot,target,workerId){
  const key=target.x+","+target.y;
  try{
   await animateAntTrip({slot,color:state.slots[slot]?.color,target},workerId,()=>{
-   const worker=workerPromises.get(workerId);if(worker)worker.picked=true;
+   const worker=workerPromises.get(workerId);if(worker)worker.phase="returning";
    reservedTargets.delete(key);
   });
  }catch(error){console.error("Ant worker interrupted",slot,error);}
  finally{
   reservedTargets.delete(key);workerPromises.delete(workerId);
-  const otherWorkers=[...workerPromises.values()].some(worker=>worker.slot===slot);
-  if(!resetting&&!otherWorkers&&state.slots[slot]?.status==="departing"){
+  if(!resetting&&canDepartSlot(workerPromises,slot)&&state.slots[slot]?.status==="departing"){
    await animateBoxDepartures([slot]);completeBoxDeparture(state,slot);
    renderSlots();renderConveyor();await save();
   }
@@ -344,13 +343,12 @@ function settleColony(){
 }
 function kickColony(){
  if(resetting||state.won||state.lost)return;
- const pendingBySlot=new Map();
- for(const worker of workerPromises.values())if(!worker.picked)pendingBySlot.set(worker.slot,(pendingBySlot.get(worker.slot)||0)+1);
+ const pendingBySlot=countOutboundBySlot(workerPromises);
  const wave=findAntWave(state,reservedTargets,pendingBySlot);
  for(const move of wave){
   const workerId=++workerSequence,key=move.target.x+","+move.target.y;
   reservedTargets.add(key);
-  workerPromises.set(workerId,{slot:move.slot,picked:false});
+  workerPromises.set(workerId,{slot:move.slot,phase:"outbound"});
   void runSlotWorker(move.slot,move.target,workerId);
  }
  resolverRunning=workerPromises.size>0;

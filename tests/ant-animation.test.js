@@ -33,8 +33,8 @@ test("ant trip returns along its own route and completes only after return durat
 
 import {getAntLaunchDelay} from "../src/ant-animation.js";
 test("ant launch stagger repeats in short bounded waves instead of growing for the whole level",()=>{
- assert.equal(getAntLaunchDelay(0,0),0);assert.equal(getAntLaunchDelay(1,0),88);
- assert.equal(getAntLaunchDelay(13,0),1144);assert.equal(getAntLaunchDelay(14,0),0);
+ assert.equal(getAntLaunchDelay(0,0),0);assert.equal(getAntLaunchDelay(1,0),48);
+ assert.equal(getAntLaunchDelay(7,0),336);assert.equal(getAntLaunchDelay(8,0),0);
  assert.equal(getAntLaunchDelay(500,0),getAntLaunchDelay(500%14,0));
- assert.ok(getAntLaunchDelay(987654,1)<=1214);
+ assert.ok(getAntLaunchDelay(987654,1)<=364);
 });
