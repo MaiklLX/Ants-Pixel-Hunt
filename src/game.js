@@ -86,10 +86,62 @@ function createFlowerBoard(){
  }
  return board;
 }
+
+function createMushroomBoard(){
+ const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
+ for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){
+  const cap=((x-17)/14)**2+((y-13)/9)**2<=1&&y<=16;
+  const stem=((x-17)/6)**2+((y-23)/10)**2<=1&&y>=13;
+  if(cap)board[y][x]="red";
+  if(cap&&(((x-11)**2+(y-12)**2<=7)||((x-22)**2+(y-9)**2<=6)||((x-17)**2+(y-15)**2<=5)))board[y][x]="yellow";
+  if(stem)board[y][x]="yellow";
+  if(stem&&y>=24)board[y][x]="blue";
+  if(y>=30&&y<=32&&Math.abs(x-17)<=10)board[y][x]="green";
+  if(((x-6)**2+(y-29)**2<=9)||((x-28)**2+(y-30)**2<=8))board[y][x]="green";
+ }
+ return board;
+}
+function createAcornBoard(){
+ const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
+ for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){
+  const body=((x-17)/11)**2+((y-20)/13)**2<=1&&y>=10;
+  const cap=((x-17)/12)**2+((y-10)/5.5)**2<=1&&y<=14;
+  if(body)board[y][x]="yellow";
+  if(body&&y>=17&&y<=25)board[y][x]="red";
+  if(cap)board[y][x]="green";
+  if(cap&&((x+y)%5===0))board[y][x]="blue";
+  if(Math.abs(x-17)<=1&&y>=2&&y<=7)board[y][x]="green";
+  if(((x-20)**2+(y-4)**2<=8))board[y][x]="green";
+  if(y>=32&&Math.abs(x-17)<=7)board[y][x]="blue";
+ }
+ return board;
+}
+function createSnailBoard(){
+ const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
+ for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){
+  const shell=((x-17)/11)**2+((y-17)/11)**2<=1;
+  const inner=((x-17)/6.8)**2+((y-17)/6.8)**2<=1;
+  const body=((x-19)/14)**2+((y-28)/4.8)**2<=1;
+  if(shell)board[y][x]="purple";
+  if(inner)board[y][x]="yellow";
+  if(((x-17)**2+(y-17)**2<=3.5**2))board[y][x]="red";
+  if(body)board[y][x]="blue";
+  if(body&&x>=19)board[y][x]="green";
+  if((x===25&&y>=10&&y<=15)||(x===29&&y>=10&&y<=15))board[y][x]="green";
+  if((x===24&&y===9)||(x===28&&y===9))board[y][x]="yellow";
+  if((x-24)**2+(y-8)**2<=2||(x-28)**2+(y-8)**2<=2)board[y][x]="purple";
+  if(y>=33&&x>=5&&x<=29)board[y][x]="green";
+ }
+ return board;
+}
+
 export const LEVELS=[
  {id:"meadow-01",number:1,chapter:"Зелёная поляна",name:"Портрет лягушонка",emoji:"🐸",hint:"Знакомство с цветными боксами и пятью отсеками"},
  {id:"garden-02",number:2,chapter:"Цветочный сад",name:"Бабочка на ветру",emoji:"🦋",hint:"Новые сочетания цветов и более длинная очередь"},
- {id:"garden-03",number:3,chapter:"Цветочный сад",name:"Солнечный цветок",emoji:"🌻",hint:"Учимся открывать центральные блоки постепенно"}
+ {id:"garden-03",number:3,chapter:"Цветочный сад",name:"Солнечный цветок",emoji:"🌻",hint:"Учимся открывать центральные блоки постепенно"},
+ {id:"forest-04",number:4,chapter:"Грибной лес",name:"Красная шляпка",emoji:"🍄",hint:"Новый силуэт и более плотные цветовые группы"},
+ {id:"forest-05",number:5,chapter:"Грибной лес",name:"Жёлудь для запаса",emoji:"🌰",hint:"Собираем осеннюю находку из пяти цветов"},
+ {id:"forest-06",number:6,chapter:"Грибной лес",name:"Улитка-путешественница",emoji:"🐌",hint:"Финальная картинка первой маленькой главы"}
 ];
 export function getLevel(levelId="meadow-01"){
  return LEVELS.find(level=>level.id===levelId)||LEVELS[0];
@@ -98,6 +150,9 @@ export function createArtworkBoard(levelId="meadow-01"){
  const id=getLevel(levelId).id;
  if(id==="garden-02")return createButterflyBoard();
  if(id==="garden-03")return createFlowerBoard();
+ if(id==="forest-04")return createMushroomBoard();
+ if(id==="forest-05")return createAcornBoard();
+ if(id==="forest-06")return createSnailBoard();
  return createFrogBoard();
 }
 
