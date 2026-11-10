@@ -91,3 +91,33 @@ test("legacy save with three candidates can be upgraded to a 3x3 tray",()=>{
  const restored=restoreGame({board:INITIAL_BOARD,slots:Array(5).fill(null),candidates:[2,1,0],nextContainer:3,remaining:62500});
  assert.deepEqual(restored.tray,[[2,1,0],[3,4,5],[6,7,8]]);
 });
+
+test("each color layer can expose new pixels without duplicate reservations",()=>{
+ const board=Array.from({length:7},()=>Array(7).fill(""));
+ // A compact nested-color test: outer green ring, blue middle ring, purple core.
+ for(let y=1;y<=5;y++)for(let x=1;x<=5;x++){
+  const d=Math.min(x-1,y-1,5-x,5-y);
+  board[y][x]=d===0?"green":d===1?"blue":"purple";
+ }
+ const removed=new Set();
+ const takeWave=(color,limit)=>{
+  const found=findAccessiblePixels(board,color,limit);
+  for(const p of found){const key=p.x+","+p.y;assert.equal(removed.has(key),false);removed.add(key);board[p.y][p.x]="";}
+  return found.length;
+ };
+ assert.ok(takeWave("green",900)>0);
+ assert.ok(takeWave("green",900)>0);
+ assert.equal(findAccessiblePixels(board,"purple",900).length,0);
+ assert.ok(takeWave("blue",900)>0);
+ assert.ok(takeWave("purple",900)>0);
+ assert.equal(removed.size,25);
+});
+test("a full wave never assigns the same board cell to two ants",()=>{
+ const s=createGame();s.board=Array.from({length:9},()=>Array(9).fill(""));
+ for(let x=0;x<9;x++){s.board[0][x]="red";s.board[8][x]="blue";}
+ for(let y=1;y<8;y++){s.board[y][0]="red";s.board[y][8]="blue";}
+ s.remaining=32;s.slots[0]={color:"red",ants:20};s.slots[1]={color:"blue",ants:20};
+ const wave=findAntWave(s),keys=wave.map(m=>m.target.x+","+m.target.y);
+ assert.equal(new Set(keys).size,keys.length);
+ assert.ok(wave.every(m=>s.board[m.target.y][m.target.x]===m.color));
+});
