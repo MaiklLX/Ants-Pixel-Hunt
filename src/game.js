@@ -346,11 +346,31 @@ export function applyAntMove(state,slot,target){
  state.board[target.y][target.x]="";box.ants--;state.remaining--;
  state.resolutionLog.push({slot,color:box.color,x:target.x,y:target.y});
  if(state.resolutionLog.length>300)state.resolutionLog.splice(0,100);
- if(box.ants<=0)box.status="departing";
+ if(box.ants<=0){
+  if(box.pairId){
+   const partner=state.slots.find((other,index)=>index!==slot&&other?.pairId===box.pairId);
+   if(partner&&partner.ants>0)box.status="waiting-linked";
+   else{
+    box.status="departing";
+    if(partner&&partner.ants<=0)partner.status="departing";
+   }
+  }else box.status="departing";
+ }
+ // A linked pair leaves only after both crates have collected every ant's cube.
+ if(box.pairId&&box.ants<=0){
+  const partner=state.slots.find((other,index)=>index!==slot&&other?.pairId===box.pairId);
+  if(partner&&partner.ants<=0){box.status="departing";partner.status="departing";}
+ }
  return true;
 }
 export function completeBoxDeparture(state,slot){
  const box=state.slots[slot];if(!box||box.status!=="departing")return false;
+ if(box.pairId){
+  const partnerSlot=state.slots.findIndex((other,index)=>index!==slot&&other?.pairId===box.pairId);
+  if(partnerSlot<0||state.slots[partnerSlot]?.status!=="departing")return false;
+  state.slots[slot]=null;state.slots[partnerSlot]=null;state.sortedBoxes=(state.sortedBoxes||0)+2;
+  return true;
+ }
  state.slots[slot]=null;state.sortedBoxes=(state.sortedBoxes||0)+1;return true;
 }
 export function isDefeat(state){
@@ -389,7 +409,7 @@ export function restoreGame(saved){
  return {...fresh,...saved,tray,sortedBoxes:saved.sortedBoxes||0,
   lockedBoxOpen:!!saved.lockedBoxOpen,lockProgressColumns:[...new Set((saved.lockProgressColumns||[]).filter(column=>column===0||column===1))],
   pendingLinkedIndex:null,
-  slots:saved.slots.map(box=>box&&box.ants<=0?{...box,status:"departing"}:box),
+  slots:(()=>{const restored=saved.slots.map(box=>box?{...box}:null);for(let i=0;i<restored.length;i++){const box=restored[i];if(!box||box.ants>0)continue;if(box.pairId){const partner=restored.find((other,index)=>index!==i&&other?.pairId===box.pairId);if(partner&&partner.ants>0)box.status="waiting-linked";else{box.status="departing";if(partner&&partner.ants<=0)partner.status="departing";}}else box.status="departing";}return restored;})(),
   resolving:false,activeSlot:-1,activeTarget:null,activeSlots:[],
   message:saved.won?"Победа! Полянка собрана ✨":saved.lost?"Поражение: пять стартовых отсеков заняты, ходов больше нет.":"Выбери бокс — каждый муравей унесёт один крупный цветной блок"};
 }
