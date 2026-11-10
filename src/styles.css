@@ -326,3 +326,18 @@ body{background:radial-gradient(ellipse at 50% 0%,#f8fffb 0%,#e9f4eb 54%,#dcebe2
 .ant-worker-layer{position:absolute;inset:0;z-index:21;pointer-events:none}
 @media(max-width:599px){.board-wrap{width:min(100%,34dvh,330px);max-height:34dvh}.board{image-rendering:pixelated}}
 @media(max-width:599px) and (max-height:700px){.board-wrap{width:min(100%,30dvh,290px);max-height:30dvh}}
+
+
+/* KT-034 — clear level progress and a friendly end-of-round moment. */
+.level-progress{height:7px;width:min(100%,250px);margin:5px auto 0;padding:1px;overflow:hidden;border-radius:99px;background:#dcebd8;box-shadow:inset 0 1px 2px #547b4a22}
+.level-progress span{display:block;width:0;height:100%;border-radius:99px;background:linear-gradient(90deg,#8fcf9c,#5cae7a);box-shadow:0 0 8px #78bd8b66;transition:width .55s cubic-bezier(.2,.75,.25,1)}
+.result-overlay[hidden]{display:none}
+.result-overlay{position:fixed;inset:0;z-index:55;display:grid;place-items:center;padding:22px;background:#263d2e88;backdrop-filter:blur(5px)}
+.result-card{width:min(100%,360px);display:flex;flex-direction:column;align-items:center;gap:11px;padding:25px 22px 21px;border:1px solid #fff;border-radius:25px;background:linear-gradient(155deg,#fffef8,#edf7e9);box-shadow:0 18px 50px #20372955;text-align:center;color:#496b4e}
+.result-emoji{display:grid;place-items:center;width:76px;height:76px;border-radius:24px;background:linear-gradient(145deg,#fff,#dcefe0);box-shadow:0 5px 0 #c6dfc8;font-size:42px}
+.result-kicker{margin:5px 0 0;color:#b28b4d;font-size:9px;font-weight:900;letter-spacing:1.8px}
+.result-card h2{margin:0;color:#477653;font-size:24px;line-height:1.15}
+.result-card>p:not(.result-kicker){margin:0 0 5px;color:#718a72;font-size:13px;line-height:1.5}
+.result-card .menu-primary,.result-card .menu-secondary{width:100%;min-height:46px}
+.result-card .menu-secondary{background:#fff;color:#718b72}
+@media(prefers-reduced-motion:reduce){.level-progress span{transition:none}}
