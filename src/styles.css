@@ -135,3 +135,46 @@ footer{order:8}
  .choice-card{min-height:53px}
  .conveyor{height:30px}
 }
+
+
+/* KT-026: the complete mobile game must fit inside one device viewport. */
+@media(max-width:599px){
+  html,body{height:100%;min-height:0;overflow:hidden;overscroll-behavior:none}
+  .app-shell{
+    height:100svh;min-height:0;max-height:100svh;overflow:hidden;
+    gap:clamp(3px,0.8dvh,7px);
+    padding-top:calc(env(safe-area-inset-top) + 5px);
+    padding-bottom:calc(env(safe-area-inset-bottom) + 5px);
+  }
+  @supports(height:100dvh){.app-shell{height:100dvh;max-height:100dvh}}
+  .topbar{flex:0 0 auto;min-height:29px}
+  .level-heading{flex:0 0 auto}
+  .board-wrap{
+    flex:0 1 auto;min-height:0;min-width:0;
+    width:min(100%,25dvh,250px);max-height:25dvh;aspect-ratio:1;
+  }
+  .slots-section,.choices-section,.conveyor-section{flex:0 0 auto;min-height:0}
+  .slot{height:clamp(37px,6.5dvh,50px)}
+  .choices{grid-template-rows:repeat(3,minmax(0,1fr));gap:clamp(3px,0.7dvh,6px);min-height:0}
+  .choice-card{height:100%;min-height:0;padding:2px;gap:1px}
+  .choice-number{font-size:clamp(5px,1.05dvh,7px)}
+  .choice-card strong{font-size:clamp(9px,1.7dvh,12px)}
+  .choice-card small{font-size:clamp(7px,1.25dvh,9px)}
+  .ant-dots{font-size:clamp(8px,1.5dvh,10px)}
+  .conveyor{height:clamp(25px,4.4dvh,32px)}
+  .message{flex:0 0 auto;min-height:0;line-height:1.2;max-height:2.4em;overflow:hidden}
+  .bottom-actions{flex:0 0 auto;min-height:0}
+  .restart-button{padding:5px 9px}
+  footer{flex:0 0 auto;padding-top:3px;min-height:0}
+}
+@media(max-width:599px) and (max-height:700px){
+  .app-shell{gap:3px}
+  .board-wrap{width:min(100%,22dvh,210px);max-height:22dvh}
+  .slot{height:clamp(34px,5.7dvh,42px)}
+  .section-line h3{font-size:8px}
+  .choice-status{font-size:8px;line-height:1.1}
+  .conveyor{height:24px}
+  .message{font-size:9px}
+  .restart-button{font-size:10px;padding:4px 8px}
+  footer{font-size:7px}
+}
