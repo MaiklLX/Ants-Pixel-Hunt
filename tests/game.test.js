@@ -223,3 +223,30 @@ test("choosing a butterfly box refills from the butterfly deck, not the frog dec
  assert.ok(s.nextContainer<=deck.length);
  assert.ok(s.tray.flat().every(index=>index===null||(index>=0&&index<deck.length)));
 });
+
+test("all six campaign drawings remain solvable when only the true outer layer is collectible",()=>{
+ for(const level of LEVELS){
+  const board=createArtworkBoard(level.id),deck=getIncoming(level.id).map(box=>({...box}));
+  const active=Array(SLOT_COUNT).fill(null);let remaining=board.flat().filter(Boolean).length,steps=0;
+  while(remaining>0&&steps++<20000){
+   let progressed=false;
+   for(let slot=0;slot<active.length;slot++){
+    const box=active[slot];if(!box)continue;
+    const target=findAccessiblePixel(board,box.color);
+    if(target){board[target.y][target.x]="";box.ants--;remaining--;progressed=true;if(box.ants<=0)active[slot]=null;}
+   }
+   if(remaining===0)break;
+   for(let slot=0;slot<active.length;slot++){
+    if(active[slot])continue;
+    const available=new Set();
+    for(let y=0;y<board.length;y++)for(let x=0;x<board[y].length;x++){
+     const color=board[y][x];if(color&&isAccessible(board,x,y))available.add(color);
+    }
+    const index=deck.findIndex(box=>available.has(box.color)&&!active.some(other=>other?.color===box.color));
+    if(index>=0)active[slot]=deck.splice(index,1)[0];
+   }
+   if(!progressed&&!active.some(Boolean))break;
+  }
+  assert.equal(remaining,0,level.name+" must be solvable with its authored color deck");
+ }
+});
