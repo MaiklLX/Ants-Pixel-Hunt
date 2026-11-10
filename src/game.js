@@ -1,11 +1,12 @@
 export const SIZE = 7;
 export const SLOT_COUNT = 5;
+export const CHOICE_COUNT = 3;
 export const COLORS = {
-  red: { hex: "#ef665f", name: "Красные", short: "КР" },
-  blue: { hex: "#5da8ed", name: "Синие", short: "СН" },
-  yellow: { hex: "#f2c85b", name: "Жёлтые", short: "ЖЛ" },
-  green: { hex: "#65c58b", name: "Зелёные", short: "ЗЛ" },
-  purple: { hex: "#b18ae8", name: "Фиолетовые", short: "ФЛ" }
+  red: { hex: "#ef756e", name: "Коралловые", short: "КР" },
+  blue: { hex: "#72b9ef", name: "Голубые", short: "ГЛ" },
+  yellow: { hex: "#f5d36e", name: "Жёлтые", short: "ЖЛ" },
+  green: { hex: "#83cf9b", name: "Зелёные", short: "ЗЛ" },
+  purple: { hex: "#b99be8", name: "Сиреневые", short: "СР" }
 };
 
 export const INITIAL_BOARD = [
@@ -34,14 +35,12 @@ export function createGame() {
   return {
     board: INITIAL_BOARD.map(row => [...row]),
     slots: Array(SLOT_COUNT).fill(null),
-    nextContainer: 0,
+    candidates: [0, 1, 2],
+    nextContainer: 3,
     remaining: SIZE * SIZE,
-    won: false,
-    lost: false,
-    resolving: false,
-    activeSlot: -1,
-    activeTarget: null,
-    message: "Свободных пусковых ячеек: 5 из 5",
+    won: false, lost: false, resolving: false,
+    activeSlot: -1, activeTarget: null,
+    message: "Выбери бокс с муравьями — они отправятся на поиски пикселей",
     resolutionLog: []
   };
 }
@@ -67,19 +66,33 @@ export function freeSlotCount(state) {
   return state.slots.filter(slot => slot === null).length;
 }
 
-export function canPlace(state) {
+export function canChoose(state) {
   return !state.won && !state.lost && !state.resolving &&
-    state.nextContainer < INCOMING.length && freeSlotCount(state) > 0;
+    state.candidates.length > 0 && freeSlotCount(state) > 0;
 }
 
-export function placeNext(state, slotIndex) {
-  if (!canPlace(state) || slotIndex < 0 || slotIndex >= SLOT_COUNT || state.slots[slotIndex]) return false;
-  const next = INCOMING[state.nextContainer];
-  if (!next) return false;
-  state.slots[slotIndex] = {...next};
-  state.nextContainer += 1;
-  state.message = "Контейнер установлен — муравьи отправились за пикселями!";
+/** Choose a visible box; the game assigns it to the first free launch slot. */
+export function chooseCandidate(state, candidateIndex) {
+  if (!canChoose(state) || !state.candidates.includes(candidateIndex)) return false;
+  const freeSlot = state.slots.findIndex(slot => slot === null);
+  const next = INCOMING[candidateIndex];
+  if (freeSlot < 0 || !next) return false;
+
+  state.slots[freeSlot] = {...next, sourceIndex:candidateIndex};
+  state.candidates = state.candidates.filter(index => index !== candidateIndex);
+  if (state.nextContainer < INCOMING.length) {
+    state.candidates.push(state.nextContainer);
+    state.nextContainer += 1;
+  }
+  state.message = `${COLORS[next.color].name}: бокс отправлен в ячейку ${freeSlot + 1}`;
   return true;
+}
+
+/** Kept as a narrow compatibility helper for older tests/tools. */
+export function placeNext(state, slotIndex) {
+  if (slotIndex !== freeSlotCount(state) || slotIndex < 0 || slotIndex >= SLOT_COUNT) return false;
+  const first = state.candidates[0];
+  return first !== undefined && chooseCandidate(state, first);
 }
 
 /** Pure one-turn resolver: strictly left-to-right, recalculating access after every pixel. */
@@ -131,9 +144,9 @@ export function resolveAll(state) {
 
 export function serializeGame(state) {
   return {
-    board: state.board, slots: state.slots, nextContainer: state.nextContainer,
-    remaining: state.remaining, won: state.won, lost: state.lost,
-    resolutionLog: state.resolutionLog
+    board: state.board, slots: state.slots, candidates:state.candidates,
+    nextContainer: state.nextContainer, remaining: state.remaining,
+    won: state.won, lost: state.lost, resolutionLog: state.resolutionLog
   };
 }
 
@@ -141,8 +154,11 @@ export function restoreGame(saved) {
   const fresh = createGame();
   if (!saved || !Array.isArray(saved.board) || saved.board.length !== SIZE ||
       !Array.isArray(saved.slots) || saved.slots.length !== SLOT_COUNT) return fresh;
-  return {...fresh, ...saved, resolving:false, activeSlot:-1, activeTarget:null,
+  const candidates = Array.isArray(saved.candidates) ? saved.candidates :
+    [saved.nextContainer ?? 0, (saved.nextContainer ?? 0)+1, (saved.nextContainer ?? 0)+2]
+      .filter(index => index < INCOMING.length);
+  return {...fresh, ...saved, candidates, resolving:false, activeSlot:-1, activeTarget:null,
     message: saved.won ? "Победа! Поле полностью очищено ✨" :
       saved.lost ? "Поражение: все пять ячеек заняты, доступных ходов нет." :
-      `Свободных пусковых ячеек: ${saved.slots.filter(x=>x===null).length} из ${SLOT_COUNT}`};
+      "Выбери бокс с муравьями — они отправятся на поиски пикселей"};
 }
