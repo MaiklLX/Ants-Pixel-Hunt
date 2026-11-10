@@ -159,15 +159,35 @@ export function createArtworkBoard(levelId="meadow-01"){
 export const INITIAL_BOARD=createArtworkBoard();
 function buildIncoming(board){
  const totals={red:0,blue:0,yellow:0,green:0,purple:0};
- for(const row of board)for(const color of row)if(color)totals[color]++;
+ let boardSeed=2166136261;
+ for(const row of board)for(const color of row){
+  const code=color?({red:1,blue:2,yellow:3,green:4,purple:5}[color]):0;
+  boardSeed=Math.imul(boardSeed^code,16777619)>>>0;
+  if(color)totals[color]++;
+ }
  const colors=["green","blue","purple","yellow","red"],queues={};
  for(const color of colors){
-  queues[color]=[];let left=totals[color];
-  while(left>0){const blocks=Math.min(BOX_CAPACITY,left);queues[color].push({color,ants:blocks});left-=blocks;}
+  const total=totals[color],count=Math.max(1,Math.ceil(total/36)),base=Math.floor(total/count);
+  let seed=(boardSeed^color.charCodeAt(0)*2654435761)>>>0;
+  const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
+  const spread=Math.max(3,Math.min(11,Math.round(base*.28)));
+  const sizes=Array.from({length:count},()=>Math.max(10,Math.min(BOX_CAPACITY,base+Math.round((random()*2-1)*spread))));
+  let difference=total-sizes.reduce((sum,value)=>sum+value,0),cursor=Math.floor(random()*count);
+  while(difference!==0){
+   const index=cursor++%count;
+   if(difference>0&&sizes[index]<BOX_CAPACITY){sizes[index]++;difference--;}
+   else if(difference<0&&sizes[index]>10){sizes[index]--;difference++;}
+  }
+  queues[color]=sizes.map(ants=>({color,ants}));
  }
  const deck=[];
- let pending=true;
- while(pending){pending=false;for(const color of colors){const box=queues[color].shift();if(box){deck.push(box);pending=true;}}}
+ let pending=true,round=0;
+ while(pending){
+  pending=false;
+  const order=round%2?colors.slice().reverse():colors;
+  for(const color of order){const box=queues[color].shift();if(box){deck.push(box);pending=true;}}
+  round++;
+ }
  return deck;
 }
 const incomingCache=new Map();
