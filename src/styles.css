@@ -671,3 +671,36 @@ body{background:radial-gradient(ellipse at 50% 0%,#fffdf2 0%,#f1faee 42%,#e4f2e7
 .nest-buy:disabled{opacity:.45}
 .nest-footnote{margin:12px 2px 0;color:#91a08e;font-size:9px;line-height:1.4}
 @media(max-width:599px){.nest-card{padding:14px;border-radius:18px}.nest-header h2{font-size:21px}.nest-building{grid-template-columns:34px minmax(0,1fr) auto;padding:8px;gap:7px}.nest-building-icon{width:32px;height:32px;font-size:18px}.nest-building-copy strong{font-size:10px}.nest-building-copy small{font-size:8px}.nest-buy{min-width:54px;padding:7px 5px}}
+
+
+/* KT-052 — the colony hub separates places from the active puzzle. */
+.hub-locations{position:relative;z-index:1;display:grid;gap:9px;width:min(100%,390px);margin:1px 0 2px}
+.hub-location{display:grid;grid-template-columns:42px minmax(0,1fr) auto;align-items:center;gap:11px;width:100%;min-height:65px;padding:9px 12px;border:1px solid #d8e8d5;border-radius:17px;background:linear-gradient(145deg,#fffefa,#f2f8eb);box-shadow:0 3px 0 #d4e4cf,0 6px 12px #527b5b12,inset 0 1px #fff;text-align:left;color:#496f50}
+.hub-location:active{transform:translateY(1px);box-shadow:0 2px 0 #d4e4cf,0 3px 7px #527b5b12}
+.hub-location-icon{display:grid;place-items:center;width:40px;height:40px;border-radius:13px;background:linear-gradient(145deg,#fff,#e5f1df);font-size:22px;box-shadow:inset 0 1px #fff,0 2px 4px #55734b16}
+.hub-location-copy{display:grid;gap:3px;min-width:0}
+.hub-location-copy strong{font-size:12px;font-weight:950;color:#456d4d}
+.hub-location-copy small{font-size:9px;line-height:1.25;color:#879b82}
+.hub-location-arrow{font-size:25px;color:#a3bd99}
+.hub-location-resource{padding:6px 9px;border:1px solid #ead9ae;border-radius:11px;background:#fff8e6;color:#99753a;font-size:11px;font-weight:900;white-space:nowrap}
+.nest-location{background:linear-gradient(145deg,#fffef8,#f8f1dc);border-color:#e9dfc1;box-shadow:0 3px 0 #e8dfc8,0 6px 12px #806c3c10,inset 0 1px #fff}
+.nest-location .hub-location-icon{background:linear-gradient(145deg,#fffdf0,#f4e8c8)}
+.map-card{width:min(100%,460px)}
+.map-intro{margin:-3px 2px 15px;color:#849681;font-size:11px;line-height:1.45}
+.map-chapter-label{display:flex;align-items:center;gap:7px;margin:0 1px 9px;color:#82977a;font-size:9px;font-weight:950;letter-spacing:1px}
+.map-chapter-label small{margin-left:auto;color:#a1b09a;font-size:9px;font-weight:650;letter-spacing:0}
+.map-levels{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.map-levels .campaign-level{min-height:82px;display:grid;grid-template-columns:38px minmax(0,1fr) 16px;grid-template-rows:auto;justify-items:stretch;gap:7px;padding:9px;text-align:left}
+.map-levels .campaign-emoji{width:36px;height:36px;display:grid;place-items:center;border-radius:11px;font-size:19px}
+.map-levels .campaign-copy{align-items:flex-start;text-align:left;gap:4px}
+.map-levels .campaign-copy small{font-size:8px}
+.map-levels .campaign-copy strong{font-size:10px}
+.map-levels .campaign-state{align-self:center;justify-self:end}
+@media(max-width:360px){
+ .hub-location{grid-template-columns:36px minmax(0,1fr) auto;min-height:59px;padding:7px 9px;gap:8px}
+ .hub-location-icon{width:35px;height:35px;font-size:19px}
+ .hub-location-copy strong{font-size:11px}.hub-location-copy small{font-size:8px}
+ .map-levels{gap:6px}.map-levels .campaign-level{grid-template-columns:31px minmax(0,1fr) 12px;gap:5px;padding:7px;min-height:72px}
+ .map-levels .campaign-emoji{width:30px;height:30px;font-size:16px}
+ .map-levels .campaign-copy strong{font-size:9px}
+}
