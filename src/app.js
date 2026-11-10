@@ -17,7 +17,7 @@ function renderBoard(){
 function renderSlots(){
  slotsEl.replaceChildren();
  state.slots.forEach((box,index)=>{
-  const slot=document.createElement("div");slot.className="slot"+(box?" filled":"")+(state.activeSlot===index?" active":"");
+  const slot=document.createElement("div");slot.className="slot"+(box?" filled":"")+((state.activeSlot===index||state.activeSlots?.includes(index))?" active":"");
   const number=document.createElement("span");number.className="slot-number";number.textContent=`СТАРТ ${index+1}`;slot.append(number);
   if(box){const stripe=document.createElement("span");stripe.className="slot-color";stripe.style.background=COLORS[box.color].hex;
    const count=document.createElement("strong");count.className="ant-count";count.textContent=`● ${box.ants}`;slot.append(stripe,count);
@@ -125,16 +125,19 @@ async function runResolver(){
   while(!resetting&&state.remaining>0){
    const wave=findAntWave(state);
    if(!wave.length)break;
-   state.activeSlot=-1;state.activeTarget=null;renderBoard();renderSlots();
+   state.activeSlot=-1;state.activeSlots=[...new Set(wave.map(move=>move.slot))];state.activeTarget=null;
+   state.message=`В путь отправились ${wave.length} муравьишек!`;
+   renderBoard();renderSlots();$("message").textContent=state.message;
    await animateAntWave(wave);
    if(resetting)break;
    for(const move of wave)applyAntMove(state,move.slot,move.target);
+   state.activeSlots=[];
    if(state.remaining%3===0||state.remaining===0)await save();
    renderBoard();renderSlots();renderChoices();
   }
  }catch(error){console.error("Ant swarm animation interrupted",error);}
  finally{
-  resolverRunning=false;state.activeTarget=null;state.activeSlot=-1;
+  resolverRunning=false;state.activeTarget=null;state.activeSlot=-1;state.activeSlots=[];
   if(!resetting){
    if(state.remaining===0){state.won=true;state.message="Победа! Поле полностью очищено ✨";}
    else if(isDefeat(state)){state.lost=true;state.message="Поражение: пять отсеков заняты, доступных ходов нет.";}
