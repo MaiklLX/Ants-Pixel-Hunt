@@ -37,6 +37,11 @@ test("accessibility checks use actual board dimensions",()=>{
  assert.equal(isAccessible(board,125,125),false);assert.equal(isAccessible(board,249,0),true);
  board[125][124]="";assert.equal(isAccessible(board,125,125),true);
 });
+test("legacy 7x7 save starts the new authored level instead of stretching old pixels",()=>{
+ const old=Array.from({length:7},()=>Array(7).fill("green"));
+ const restored=restoreGame({board:old,slots:Array(5).fill(null),remaining:49});
+ assert.equal(restored.board.length,250);assert.equal(restored.remaining,62500);
+});
 test("250x250 board survives save restoration",()=>{
  const board=Array.from({length:250},()=>Array(250).fill("green"));board[0][0]="red";
  const saved={board,slots:Array(5).fill(null),tray:[[0,1,2],[3,4,5],[6,7,8]],nextContainer:9,remaining:62500};
