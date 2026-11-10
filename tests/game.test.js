@@ -360,6 +360,29 @@ test("linked-pair placement is fully represented after save and restore",()=>{
  assert.equal(chooseTopColumn(s,0),true);const restored=restoreGame(serializeGame(s));
  assert.equal(restored.pendingLinkedIndex,null);assert.deepEqual(restored.slots.slice(0,2).map(box=>box?.sourceIndex),pair);
 });
+test("a linked crate stays in its slot after filling until its partner is also full",()=>{
+ const s=createGame(),pair=getLinkedPair(s.levelId),pairId="test-linked";
+ s.slots[0]={...getIncoming(s.levelId)[pair[0]],pairId,ants:1};
+ s.slots[1]={...getIncoming(s.levelId)[pair[1]],pairId,ants:1};
+ s.board[0][0]=s.slots[0].color;s.board[0][1]=s.slots[1].color;
+ assert.equal(applyAntMove(s,0,{x:0,y:0}),true);
+ assert.equal(s.slots[0].ants,0);assert.equal(s.slots[0].status,"waiting-linked");
+ assert.ok(s.slots[1]);assert.equal(s.slots[1].status,undefined);
+ assert.equal(completeBoxDeparture(s,0),false,"one filled crate cannot depart alone");
+ assert.ok(s.slots[0]&&s.slots[1],"both cells remain occupied while the partner collects");
+ assert.equal(applyAntMove(s,1,{x:1,y:0}),true);
+ assert.equal(s.slots[0].status,"departing");assert.equal(s.slots[1].status,"departing");
+ assert.equal(completeBoxDeparture(s,1),true,"the pair departs as a single unit");
+ assert.equal(s.slots[0],null);assert.equal(s.slots[1],null);assert.equal(s.sortedBoxes,2);
+});
+test("restoring a half-filled linked pair keeps the completed crate waiting",()=>{
+ const s=createGame(),pair=getLinkedPair(s.levelId),pairId="restore-linked";
+ s.slots[0]={...getIncoming(s.levelId)[pair[0]],pairId,ants:0};
+ s.slots[1]={...getIncoming(s.levelId)[pair[1]],pairId,ants:2};
+ const restored=restoreGame(serializeGame(s));
+ assert.equal(restored.slots[0].status,"waiting-linked");
+ assert.equal(restored.slots[1].ants,2);
+});
 test("every campaign deck places its linked pair outside the sealed-box position",()=>{
  for(const level of LEVELS){
   const pair=getLinkedPair(level.id);
