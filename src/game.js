@@ -20,7 +20,7 @@ function lineDistance(px,py,x1,y1,x2,y2){
  return Math.hypot(px-(x1+t*dx),py-(y1+t*dy));
 }
 export function createArtworkBoard(){
- const board=Array.from({length:SIZE},()=>Array(SIZE).fill("green"));
+ const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
  for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){
   // A large, front-facing frog portrait, composed as crisp colored pixel cells.
   const head=ellipse(x,y,125,126,87,91);
@@ -56,7 +56,7 @@ export function createArtworkBoard(){
 export const INITIAL_BOARD=createArtworkBoard();
 function buildIncoming(board){
  const totals={red:0,blue:0,yellow:0,green:0,purple:0};
- for(const row of board)for(const color of row)totals[color]++;
+ for(const row of board)for(const color of row)if(color)totals[color]++;
  const colors=["green","blue","purple","yellow","red"],queues={};
  for(const color of colors){
   queues[color]=[];let left=totals[color];
@@ -161,7 +161,7 @@ export function resolveAll(state){
   const box=state.slots[move.slot];if(box?.status==="departing")completeBoxDeparture(state,move.slot);
   move=findNextMove(state);
  }
- if(state.remaining===0){state.won=true;state.message="Победа! Поляна собрана ✨";}
+ if(state.remaining===0){state.won=true;state.message="Победа! Портрет собран ✨";}
  else if(isDefeat(state)){state.lost=true;state.message="Поражение: все пять стартовых отсеков заняты, ходов больше нет.";}
  return state;
 }
