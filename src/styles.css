@@ -569,3 +569,26 @@ body{background:radial-gradient(ellipse at 50% 0%,#fffdf2 0%,#f1faee 42%,#e4f2e7
  .queue-peek::before{left:5px;width:7px;height:7px}
 }
 @media(max-height:720px) and (max-width:599px){.board-wrap{width:min(100%,min(42dvh,370px));max-height:42dvh}}
+
+/* KT-046 — larger queue crates, smoother visual hierarchy and spoiler-free level map. */
+.queue-preview{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;min-height:38px;width:100%;align-items:stretch}
+.queue-peek{position:relative;display:flex;align-items:center;justify-content:center;gap:5px;box-sizing:border-box;width:100%;min-width:0;height:36px;padding:3px 5px;border:1px solid #b8cfae;border-radius:10px;background:linear-gradient(155deg,#fffdf4 0%,#f2f6e9 58%,#e2eddc 100%);color:#365b3e;box-shadow:0 2px 0 #c0d5b9,0 3px 6px #365d3d16,inset 0 1px #fff;text-shadow:none}
+.queue-peek::before{display:none}
+.queue-peek .peek-crate{position:relative;display:block;flex:0 0 17px;width:17px;height:12px;border:1px solid #a47a4a;border-radius:3px 3px 4px 4px;background:linear-gradient(145deg,#fff0d2 0%,#d9b47d 52%,#ae8050 100%);box-shadow:0 2px 0 #987044,inset 0 1px #fff9}
+.queue-peek .peek-crate::before{content:"";position:absolute;left:-2px;right:-2px;top:-3px;height:4px;border:1px solid #b38a59;border-radius:3px;background:linear-gradient(#fff4dc,#d7b27c)}
+.queue-peek .peek-crate::after{content:"";position:absolute;left:5px;top:3px;width:5px;height:5px;border:1px solid #fff9;border-radius:1px;background:var(--peek-color);box-shadow:0 0 4px color-mix(in srgb,var(--peek-color) 55%,transparent)}
+.queue-peek strong{font-size:14px;line-height:1;font-weight:950;letter-spacing:-.3px;color:#294d34;font-variant-numeric:tabular-nums}
+.queue-peek small{font-size:11px;line-height:1}
+.queue-peek.empty{height:30px;min-width:0;width:100%;padding:0;background:#edf3e9;border:1px dashed #c7d8c2;color:#a3b49e;box-shadow:none}
+.choice-card{min-height:84px;padding:8px 5px 7px;gap:4px;border-radius:16px;box-shadow:0 4px 0 #c2d8c0,0 7px 12px #58745b20,inset 0 1px 0 #fff}
+.choice-card .choice-crate{width:43px;height:32px;margin:4px 0 2px;border-radius:8px 8px 10px 10px}
+.choice-card .choice-crate i{width:15px;height:15px}
+.choice-card strong{font-size:12px}.choice-card small{font-size:11px}
+.choice-card.selectable:not(:disabled){animation:choice-arrive .42s cubic-bezier(.2,.85,.25,1) both}
+@keyframes choice-arrive{0%{opacity:.72;transform:translateY(5px) scale(.97)}70%{transform:translateY(-1px) scale(1.012)}100%{opacity:1;transform:translateY(0) scale(1)}}
+.campaign-level .campaign-emoji{width:36px;height:30px;display:grid;place-items:center;border-radius:10px;background:linear-gradient(145deg,#fff8e5,#e9f1dc);box-shadow:inset 0 1px #fff,0 2px 4px #55734b18;font-size:18px}
+.campaign-level.locked .campaign-emoji{background:linear-gradient(145deg,#e8eee4,#dce6d8);color:#91a58e}
+.level-thumb{background:linear-gradient(145deg,#fff5dc,#d9e9d4);font-size:25px}.level-card-copy strong{font-size:12px}
+@media(max-width:599px){.queue-preview{min-height:35px;gap:4px}.queue-peek{height:34px;padding:2px 3px;gap:3px;border-radius:8px}.queue-peek .peek-crate{flex-basis:14px;width:14px;height:10px}.queue-peek .peek-crate::after{left:4px;top:2px;width:4px;height:4px}.queue-peek strong{font-size:12px}.queue-peek small{font-size:10px}.choice-card{min-height:82px;padding:6px 3px}.choice-card .choice-crate{width:37px;height:27px}.choice-card .choice-crate i{width:13px;height:13px}.choice-card small{font-size:10px}}
+@media(max-height:720px) and (max-width:599px){.choice-card{min-height:75px}.queue-preview{min-height:32px}.queue-peek{height:31px}}
+@media(prefers-reduced-motion:reduce){.choice-card.selectable:not(:disabled){animation:none}}
