@@ -83,7 +83,7 @@ function renderSlots(){
  state.slots.forEach((box,index)=>{
   const slot=document.createElement("div");
   slot.style.setProperty("--box-color",box?COLORS[box.color].hex:"#d8e5d2");
-  slot.className="slot"+(box?" filled":"")+(box?.status==="departing"?" departing":"")+(loadingSlots.has(index)?" loading":"")+((state.activeSlots?.includes(index))?" active":"");
+  slot.className="slot"+(box?" filled":"")+(box?.status==="departing"?" departing":"")+(box?.status==="waiting-linked"?" linked-waiting":"")+(box?.special==="linked"?" linked-member":"")+(loadingSlots.has(index)?" loading":"")+((state.activeSlots?.includes(index))?" active":"");
   const number=document.createElement("span");number.className="slot-number";number.textContent=String(index+1);slot.append(number);
   if(box){
    const stripe=document.createElement("span");stripe.className="slot-color";stripe.style.background=COLORS[box.color].hex;
@@ -379,7 +379,7 @@ async function animateBoxLoading(source,slot,color){
   requestAnimationFrame(frame);
  };requestAnimationFrame(frame);});
 }
-async function animateBoxDepartures(slotIndices){
+async function animateBoxDepartures(slotIndices,simultaneous=false){
  const shellRect=shell.getBoundingClientRect(),dpr=Math.min(1.5,window.devicePixelRatio||1);
  const layer=document.createElement("canvas");layer.className="flight-layer";
  layer.width=Math.max(1,Math.round(shellRect.width*dpr));layer.height=Math.max(1,Math.round(shellRect.height*dpr));
@@ -393,7 +393,7 @@ async function animateBoxDepartures(slotIndices){
    const elapsed=timestamp-startTime;ctx.clearRect(0,0,shellRect.width,shellRect.height);
    let finished=0;
    starts.forEach((item,index)=>{
-    const delay=index*170,t=Math.max(0,Math.min(1,(elapsed-delay)/duration));
+    const delay=simultaneous?0:index*170,t=Math.max(0,Math.min(1,(elapsed-delay)/duration));
     if(elapsed<delay){finished++;return;}if(t>=1){finished++;return;}
     const lift=quadPoint(item.start,{x:item.start.x-24,y:(item.start.y+belt.y)/2},{x:item.start.x,y:belt.y},ease(Math.min(1,t*2.1)));
     const progress=ease(Math.max(0,(t-.38)/.62));
@@ -416,14 +416,28 @@ async function runSlotWorker(slot,target,workerId){
  }catch(error){console.error("Ant worker interrupted",slot,error);}
  finally{
   reservedTargets.delete(key);workerPromises.delete(workerId);
-  if(!resetting&&canDepartSlot(workerPromises,slot)&&state.slots[slot]?.status==="departing"){
-   // Snapshot the crate animation, then release the logical slot immediately.
-   const departureAnimation=animateBoxDepartures([slot]);
-   completeBoxDeparture(state,slot);
-   resolverRunning=workerPromises.size>0;
-   state.activeSlots=[...new Set([...workerPromises.values()].map(worker=>worker.slot))];
-   renderSlots();renderChoices();renderConveyor();
-   await departureAnimation;
+  const completedBox=state.slots[slot];
+  if(!resetting&&completedBox?.status==="departing"){
+   if(completedBox.pairId){
+    const partnerSlot=state.slots.findIndex((other,index)=>index!==slot&&other?.pairId===completedBox.pairId);
+    const pairReady=partnerSlot>=0&&state.slots[partnerSlot]?.status==="departing"&&canDepartSlot(workerPromises,slot)&&canDepartSlot(workerPromises,partnerSlot);
+    if(pairReady){
+     // Both crates stay in their cells until both ant teams return, then depart as one unit.
+     const departureAnimation=animateBoxDepartures([slot,partnerSlot],true);
+     completeBoxDeparture(state,slot);
+     resolverRunning=workerPromises.size>0;
+     state.activeSlots=[...new Set([...workerPromises.values()].map(worker=>worker.slot))];
+     renderSlots();renderChoices();renderConveyor();
+     await departureAnimation;
+    }
+   }else if(canDepartSlot(workerPromises,slot)){
+    const departureAnimation=animateBoxDepartures([slot]);
+    completeBoxDeparture(state,slot);
+    resolverRunning=workerPromises.size>0;
+    state.activeSlots=[...new Set([...workerPromises.values()].map(worker=>worker.slot))];
+    renderSlots();renderChoices();renderConveyor();
+    await departureAnimation;
+   }
   }
   resolverRunning=workerPromises.size>0;
   state.activeSlots=[...new Set([...workerPromises.values()].map(worker=>worker.slot))];
