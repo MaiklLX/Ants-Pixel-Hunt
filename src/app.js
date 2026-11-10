@@ -18,6 +18,7 @@ function renderSlots(){
  slotsEl.replaceChildren();
  state.slots.forEach((box,index)=>{
   const slot=document.createElement("div");
+  slot.style.setProperty("--box-color",box?COLORS[box.color].hex:"#d8e5d2");
   slot.className="slot"+(box?" filled":"")+(box?.status==="departing"?" departing":"")+((state.activeSlots?.includes(index))?" active":"");
   const number=document.createElement("span");number.className="slot-number";number.textContent=`ОТСЕК ${index+1}`;slot.append(number);
   if(box){
