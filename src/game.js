@@ -1,4 +1,7 @@
-export const SIZE=250;
+export const SIZE=25;
+export const GRID_SIZE=250;
+export const BLOCK_SIZE=GRID_SIZE/SIZE;
+export const BOX_CAPACITY=20;
 export const SLOT_COUNT=5;
 export const TRAY_SIZE=3;
 export const COLORS={
@@ -20,36 +23,33 @@ function lineDistance(px,py,x1,y1,x2,y2){
  return Math.hypot(px-(x1+t*dx),py-(y1+t*dy));
 }
 export function createArtworkBoard(){
+ // The visible field is 250×250 tiny squares. Each collectible artwork block
+ // occupies a crisp 10×10 group of those squares, so one ant carries one large pixel.
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
  for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){
-  // A large, front-facing frog portrait, composed as crisp colored pixel cells.
-  const head=ellipse(x,y,125,126,87,91);
-  const headRim=ellipse(x,y,125,126,94,98);
+  const px=(x+.5)*BLOCK_SIZE,py=(y+.5)*BLOCK_SIZE;
+  const head=ellipse(px,py,125,126,87,91);
+  const headRim=ellipse(px,py,125,126,94,98);
   if(headRim)board[y][x]="purple";
   if(head)board[y][x]="green";
-  // Raised eye sockets and golden eyes.
-  const leftSocket=ellipse(x,y,83,65,35,38),rightSocket=ellipse(x,y,167,65,35,38);
+  const leftSocket=ellipse(px,py,83,65,35,38),rightSocket=ellipse(px,py,167,65,35,38);
   if(leftSocket||rightSocket)board[y][x]="purple";
-  if(ellipse(x,y,83,65,29,31)||ellipse(x,y,167,65,29,31))board[y][x]="green";
-  if(ellipse(x,y,83,63,20,21)||ellipse(x,y,167,63,20,21))board[y][x]="yellow";
-  if(ellipse(x,y,88,65,9,13)||ellipse(x,y,162,65,9,13))board[y][x]="purple";
-  if(circle(x,y,88,60,3)||circle(x,y,162,60,3))board[y][x]="blue";
-  if(circle(x,y,91,57,2)||circle(x,y,165,57,2))board[y][x]="yellow";
-  // Bright cheek patches and small spots add the layered, hand-built look.
-  if(ellipse(x,y,62,119,17,12)||ellipse(x,y,188,119,17,12))board[y][x]="blue";
-  if(circle(x,y,55,92,5)||circle(x,y,195,92,5)||circle(x,y,70,151,4)||circle(x,y,180,151,4))board[y][x]="purple";
-  if(circle(x,y,63,99,3)||circle(x,y,187,99,3)||circle(x,y,76,143,2)||circle(x,y,174,143,2))board[y][x]="yellow";
-  // Wide smiling mouth with a pink-red lower lip / tongue.
-  const mouth=ellipse(x,y,125,158,59,25);
+  if(ellipse(px,py,83,65,29,31)||ellipse(px,py,167,65,29,31))board[y][x]="green";
+  if(ellipse(px,py,83,63,20,21)||ellipse(px,py,167,63,20,21))board[y][x]="yellow";
+  if(ellipse(px,py,88,65,9,13)||ellipse(px,py,162,65,9,13))board[y][x]="purple";
+  if(circle(px,py,88,60,3)||circle(px,py,162,60,3))board[y][x]="blue";
+  if(circle(px,py,91,57,2)||circle(px,py,165,57,2))board[y][x]="yellow";
+  if(ellipse(px,py,62,119,17,12)||ellipse(px,py,188,119,17,12))board[y][x]="blue";
+  if(circle(px,py,55,92,5)||circle(px,py,195,92,5)||circle(px,py,70,151,4)||circle(px,py,180,151,4))board[y][x]="purple";
+  if(circle(px,py,63,99,3)||circle(px,py,187,99,3)||circle(px,py,76,143,2)||circle(px,py,174,143,2))board[y][x]="yellow";
+  const mouth=ellipse(px,py,125,158,59,25);
   if(mouth)board[y][x]="purple";
-  if(ellipse(x,y,125,154,52,17))board[y][x]="red";
-  if(ellipse(x,y,125,165,33,8))board[y][x]="yellow";
-  // Nose highlights and a few darker pixel accents.
-  if(circle(x,y,112,128,3)||circle(x,y,138,128,3))board[y][x]="purple";
-  if(circle(x,y,111,127,1)||circle(x,y,137,127,1))board[y][x]="yellow";
-  // Lower neck and a pair of simple shoulder shapes complete the portrait.
-  if(ellipse(x,y,125,220,54,23))board[y][x]="blue";
-  if(ellipse(x,y,125,216,43,15))board[y][x]="green";
+  if(ellipse(px,py,125,154,52,17))board[y][x]="red";
+  if(ellipse(px,py,125,165,33,8))board[y][x]="yellow";
+  if(circle(px,py,112,128,3)||circle(px,py,138,128,3))board[y][x]="purple";
+  if(circle(px,py,111,127,1)||circle(px,py,137,127,1))board[y][x]="yellow";
+  if(ellipse(px,py,125,220,54,23))board[y][x]="blue";
+  if(ellipse(px,py,125,216,43,15))board[y][x]="green";
  }
  return board;
 }
@@ -60,11 +60,9 @@ function buildIncoming(board){
  const colors=["green","blue","purple","yellow","red"],queues={};
  for(const color of colors){
   queues[color]=[];let left=totals[color];
-  while(left>0){const ants=Math.min(900,left);queues[color].push({color,ants});left-=ants;}
+  while(left>0){const blocks=Math.min(BOX_CAPACITY,left);queues[color].push({color,ants:blocks});left-=blocks;}
  }
  const deck=[];
- // Interleave colors instead of locking the first nine choices to one color.
- // This lets the player keep several color layers represented in the five live slots.
  let pending=true;
  while(pending){pending=false;for(const color of colors){const box=queues[color].shift();if(box){deck.push(box);pending=true;}}}
  return deck;
@@ -75,7 +73,7 @@ export function createGame(){
   tray:Array.from({length:TRAY_SIZE},(_,row)=>Array.from({length:TRAY_SIZE},(_,col)=>row*TRAY_SIZE+col)),
   nextContainer:TRAY_SIZE*TRAY_SIZE,remaining:INITIAL_BOARD.reduce((sum,row)=>sum+row.filter(Boolean).length,0),won:false,lost:false,resolving:false,
   activeSlot:-1,activeTarget:null,activeSlots:[],sortedBoxes:0,
-  message:"Выбери бокс в верхнем ряду — отправим муравьишек за ресурсами",resolutionLog:[]};
+  message:"Выбери бокс — каждый муравей унесёт один крупный цветной блок",resolutionLog:[]};
 }
 export function isAccessible(board,x,y){
  const size=board.length;
@@ -164,7 +162,7 @@ export function resolveAll(state){
   const box=state.slots[move.slot];if(box?.status==="departing")completeBoxDeparture(state,move.slot);
   move=findNextMove(state);
  }
- if(state.remaining===0){state.won=true;state.message="Победа! Портрет собран ✨";}
+ if(state.remaining===0){state.won=true;state.message="Победа! Большой пиксельный портрет собран ✨";}
  else if(isDefeat(state)){state.lost=true;state.message="Поражение: все пять стартовых отсеков заняты, ходов больше нет.";}
  return state;
 }
@@ -187,5 +185,5 @@ export function restoreGame(saved){
  return {...fresh,...saved,tray,sortedBoxes:saved.sortedBoxes||0,
   slots:saved.slots.map(box=>box&&box.ants<=0?{...box,status:"departing"}:box),
   resolving:false,activeSlot:-1,activeTarget:null,activeSlots:[],
-  message:saved.won?"Победа! Поляна собрана ✨":saved.lost?"Поражение: пять стартовых отсеков заняты, ходов больше нет.":"Выбери бокс в верхнем ряду — отправим муравьишек за ресурсами"};
+  message:saved.won?"Победа! Полянка собрана ✨":saved.lost?"Поражение: пять стартовых отсеков заняты, ходов больше нет.":"Выбери бокс — каждый муравей унесёт один крупный цветной блок"};
 }
