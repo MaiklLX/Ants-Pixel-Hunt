@@ -185,28 +185,44 @@ export function createGame(levelId="meadow-01"){
   activeSlot:-1,activeTarget:null,activeSlots:[],sortedBoxes:0,
   message:"Выбери бокс — каждый муравей унесёт один крупный цветной блок",resolutionLog:[]};
 }
+export function getExposedPixels(board){
+ const height=board.length,width=Math.max(0,...board.map(row=>row.length));
+ const visited=Array.from({length:height},()=>Array(width).fill(false));
+ const queue=[];
+ const addEmpty=(x,y)=>{
+  if(x<0||y<0||x>=width||y>=height||visited[y][x]||board[y]?.[x])return;
+  visited[y][x]=true;queue.push([x,y]);
+ };
+ for(let x=0;x<width;x++){addEmpty(x,0);addEmpty(x,height-1);}
+ for(let y=0;y<height;y++){addEmpty(0,y);addEmpty(width-1,y);}
+ const exposed=new Set();
+ for(let head=0;head<queue.length;head++){
+  const [x,y]=queue[head];
+  for(const [nx,ny] of [[x-1,y],[x+1,y],[x,y-1],[x,y+1]]){
+   if(nx<0||ny<0||nx>=width||ny>=height)continue;
+   if(board[ny]?.[nx])exposed.add(nx+","+ny);else addEmpty(nx,ny);
+  }
+ }
+ for(let y=0;y<height;y++)for(let x=0;x<width;x++)if(board[y]?.[x]&&(x===0||y===0||x===width-1||y===height-1))exposed.add(x+","+y);
+ return [...exposed].map(key=>{const [x,y]=key.split(",").map(Number);return{x,y};});
+}
 export function isAccessible(board,x,y){
- const size=board.length;
  if(!board[y]?.[x])return false;
- return x===0||y===0||x===size-1||y===size-1||
-  board[y][x-1]===""||board[y][x+1]===""||board[y-1]?.[x]===""||board[y+1]?.[x]==="";
+ return getExposedPixels(board).some(point=>point.x===x&&point.y===y);
 }
 export function findAccessiblePixel(board,color){
- for(let y=0;y<board.length;y++)for(let x=0;x<board[y].length;x++)if(board[y][x]===color&&isAccessible(board,x,y))return{x,y};
- return null;
+ return findAccessiblePixels(board,color,1)[0]||null;
 }
 export function findAccessiblePixels(board,color,limit=Infinity){
- const found=[];
- for(let y=0;y<board.length;y++)for(let x=0;x<board[y].length;x++){
-  if(board[y][x]===color&&isAccessible(board,x,y)){found.push({x,y});if(found.length>=limit)return found;}
- }
+ const exposed=getExposedPixels(board),found=[];
+ for(const {x,y} of exposed)if(board[y][x]===color){found.push({x,y});if(found.length>=limit)return found;}
  return found;
 }
 export function findAntWave(state,reservedTargets=new Set(),pendingBySlot=new Map()){
- const byColor=new Map(),wave=[],cursor=new Map();
+ const byColor=new Map(),wave=[],cursor=new Map(),exposed=new Set(getExposedPixels(state.board).map(point=>point.x+","+point.y));
  for(let y=0;y<state.board.length;y++)for(let x=0;x<state.board[y].length;x++){
   const color=state.board[y][x];
-  if(color&&isAccessible(state.board,x,y)&&!reservedTargets.has(x+","+y)){
+  if(color&&exposed.has(x+","+y)&&!reservedTargets.has(x+","+y)){
    if(!byColor.has(color))byColor.set(color,[]);
    byColor.get(color).push({x,y});
   }
@@ -236,14 +252,14 @@ export function canChoose(state){
 }
 export function chooseTopColumn(state,column){
  if(!canChoose(state)||!Number.isInteger(column)||column<0||column>=TRAY_SIZE)return false;
- const selectedIndex=state.tray[0][column];
+ const selectedIndex=state.tray[0][column],incoming=getIncoming(state.levelId);
  if(selectedIndex===null||selectedIndex===undefined)return false;
- const freeSlot=state.slots.findIndex(slot=>slot===null),box=getIncoming(state.levelId)[selectedIndex];
+ const freeSlot=state.slots.findIndex(slot=>slot===null),box=incoming[selectedIndex];
  if(freeSlot<0||!box)return false;
  state.slots[freeSlot]={...box,sourceIndex:selectedIndex};
  state.tray[0][column]=state.tray[1][column];state.tray[1][column]=state.tray[2][column];
- state.tray[2][column]=state.nextContainer<INCOMING.length?state.nextContainer:null;
- if(state.nextContainer<INCOMING.length)state.nextContainer++;
+ state.tray[2][column]=state.nextContainer<incoming.length?state.nextContainer:null;
+ if(state.nextContainer<incoming.length)state.nextContainer++;
  state.message=`${COLORS[box.color].name}: бокс отправлен в стартовый отсек ${freeSlot+1}`;
  return true;
 }
