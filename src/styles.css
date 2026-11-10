@@ -197,3 +197,8 @@ footer{order:8}
 .slot.loading::after{content:"ПРИЁМ";font-size:8px;font-weight:950;letter-spacing:.6px;color:#a17b3f;animation:slot-receive 650ms ease-in-out infinite alternate}
 @keyframes slot-receive{from{opacity:.45;transform:translateY(2px)}to{opacity:1;transform:translateY(-1px)}}
 @media(prefers-reduced-motion:reduce){.slot.loading::after{animation:none;opacity:1}.belt{animation:none}}
+
+/* KT-028: simultaneous box flights use independent transparent layers. */
+.flight-layer{position:absolute;inset:0;z-index:22;pointer-events:none}
+/* Tiny bevels on the 5×5 artwork pixels make the portrait feel like toy blocks. */
+.board{filter:drop-shadow(0 2px 1px #3d654522)}
