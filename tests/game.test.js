@@ -38,7 +38,8 @@ test("accessibility checks use actual board dimensions",()=>{
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill("green"));
  board[12][12]="red";board[0][SIZE-1]="red";
  assert.equal(isAccessible(board,12,12),false);assert.equal(isAccessible(board,SIZE-1,0),true);
- board[12][11]="";assert.equal(isAccessible(board,12,12),true);
+ board[12][11]="";assert.equal(isAccessible(board,12,12),false,"an enclosed pocket must not expose an inner block");
+ board[12][10]="";assert.equal(isAccessible(board,12,12),true,"opening a corridor to the outside exposes the next layer");
 });
 test("legacy 7x7 save starts the new authored level instead of stretching old pixels",()=>{
  const old=Array.from({length:7},()=>Array(7).fill("green"));
@@ -62,8 +63,8 @@ test("swarm planner sends eligible ants together and reserves targets left-to-ri
 });
 test("findAccessiblePixels returns a bounded wave of exposed matching pixels",()=>{
  const board=smallBoard();board[2][2]="";board[2][3]="red";board[3][3]="red";board[3][4]="";
- assert.deepEqual(findAccessiblePixels(board,"red",1),[{x:3,y:2}]);
- assert.deepEqual(findAccessiblePixels(board,"red",5),[{x:3,y:2},{x:3,y:3}]);
+ assert.deepEqual(findAccessiblePixels(board,"red",1),[{x:3,y:3}]);
+ assert.deepEqual(findAccessiblePixels(board,"red",5),[{x:3,y:3}]);
  assert.deepEqual(findAccessiblePixels(board,"blue",5),[]);
 });
 test("pixel stays accounted for until ant delivery, then empty box departs to sorting",()=>{
@@ -202,4 +203,22 @@ test("all six campaign levels start with accessible colors represented in their 
   for(const color of accessibleColors)assert.ok(deckColors.has(color),level.name+" must provide boxes for accessible color "+color);
   assert.equal(createGame(level.id).remaining,board.flat().filter(Boolean).length);
  }
+});
+
+test("only empty space connected to the outside can expose a block",()=>{
+ const board=Array.from({length:7},()=>Array(7).fill("green"));
+ board[3][3]="red";board[3][2]="";
+ assert.equal(isAccessible(board,3,3),false,"a one-sided enclosed cavity is not an outer layer");
+ board[3][1]="";board[3][0]="";
+ assert.equal(isAccessible(board,3,3),true,"a tunnel reaching the outside opens the block");
+});
+test("choosing a butterfly box refills from the butterfly deck, not the frog deck length",()=>{
+ const levelId="garden-02",s=createGame(levelId),deck=getIncoming(levelId);
+ for(let i=0;i<Math.min(deck.length,TRAY_SIZE*TRAY_SIZE+4);i++){
+  const column=s.tray[0].findIndex(index=>index!==null);
+  if(column<0)break;
+  assert.equal(chooseTopColumn(s,column),true);
+ }
+ assert.ok(s.nextContainer<=deck.length);
+ assert.ok(s.tray.flat().every(index=>index===null||(index>=0&&index<deck.length)));
 });
