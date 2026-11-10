@@ -1,11 +1,14 @@
-import {COLORS,INCOMING,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,createGame,canChoose,chooseTopColumn,findAntWave,applyAntMove,completeBoxDeparture,serializeGame,restoreGame,isDefeat,countOutboundBySlot,countSlotWorkers,canDepartSlot} from "./game.js";
+import {COLORS,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,LEVELS,getLevel,getIncoming,createGame,canChoose,chooseTopColumn,findAntWave,applyAntMove,completeBoxDeparture,serializeGame,restoreGame,isDefeat,countOutboundBySlot,countSlotWorkers,canDepartSlot} from "./game.js";
 import {loadLocal,saveLocal,clearLocal} from "./storage.js";
 import {getAntTripFrame,getAntLaunchDelay} from "./ant-animation.js";
 const $=id=>document.getElementById(id);
 const shell=$("app-shell"),boardEl=$("board"),slotsEl=$("slots"),choicesEl=$("choices"),antLayer=$("ant-layer"),conveyorEl=$("conveyor");
 const boardCtx=boardEl.getContext("2d"),antCtx=antLayer.getContext("2d");
-let state=createGame(),resolverRunning=false,resetting=false,antFrame=0,antCanvasWidth=0,antCanvasHeight=0,hasSavedGame=false,gameStarted=false;
-const TOTAL_BLOCKS=state.remaining;
+let state=createGame(),resolverRunning=false,resetting=false,antFrame=0,antCanvasWidth=0,antCanvasHeight=0,hasSavedGame=false,gameStarted=false,totalBlocks=state.remaining;
+const CAMPAIGN_KEY="ants-campaign-progress";
+function completedLevels(){try{return new Set(JSON.parse(localStorage.getItem(CAMPAIGN_KEY)||"[]"));}catch{return new Set();}}
+function markLevelComplete(levelId){const done=completedLevels();done.add(levelId);try{localStorage.setItem(CAMPAIGN_KEY,JSON.stringify([...done]));}catch{}}
+function isLevelUnlocked(level){const index=LEVELS.findIndex(item=>item.id===level.id);return index<=0||completedLevels().has(LEVELS[index-1].id);}
 const loadingSlots=new Set(),workerPromises=new Map(),reservedTargets=new Set(),activeAnts=new Map();
 let workerSequence=0;
 const colorRGB=Object.fromEntries(Object.entries(COLORS).map(([key,value])=>[key,value.hex.match(/[\da-f]{2}/gi).map(v=>parseInt(v,16))]));
@@ -25,7 +28,7 @@ function renderBoard(){
  }
  boardCtx.putImageData(image,0,0);
  $("board-status").textContent=`Осталось кубиков: ${state.remaining.toLocaleString("ru-RU")}`;
- const collected=TOTAL_BLOCKS-state.remaining,percent=Math.round(collected/TOTAL_BLOCKS*100);
+ const collected=totalBlocks-state.remaining,percent=Math.round(collected/totalBlocks*100);
  const progress=$("progress-fill"),track=progress?.parentElement;
  if(progress)progress.style.width=percent+"%";
  if(track)track.setAttribute("aria-valuenow",String(percent));
@@ -54,7 +57,7 @@ function renderChoices(){
  choicesEl.replaceChildren();
  for(let col=0;col<TRAY_SIZE;col++){
   const lane=document.createElement("div");lane.className="queue-lane";
-  const index=state.tray[0][col],box=index===null||index===undefined?null:INCOMING[index];
+  const index=state.tray[0][col],box=index===null||index===undefined?null:getIncoming(state.levelId)[index];
   const button=document.createElement("button");button.type="button";button.className="choice-card"+(box?" selectable":" empty-box");
   if(index!==null&&index!==undefined)button.dataset.boxIndex=String(index);
   button.disabled=!box||resetting||state.won||state.lost||!canChoose(state);
@@ -66,7 +69,7 @@ function renderChoices(){
   }else{button.textContent="Очередь закончилась";button.setAttribute("aria-label","В этой колонке больше нет боксов");}
   button.addEventListener("click",()=>onChoose(col));lane.append(button);
   const preview=document.createElement("div");preview.className="queue-preview";preview.setAttribute("aria-label","Следующие боксы в колонке");
-  for(let row=1;row<TRAY_SIZE;row++){const nextIndex=state.tray[row][col],nextBox=nextIndex===null||nextIndex===undefined?null:INCOMING[nextIndex];
+  for(let row=1;row<TRAY_SIZE;row++){const nextIndex=state.tray[row][col],nextBox=nextIndex===null||nextIndex===undefined?null:getIncoming(state.levelId)[nextIndex];
    const peek=document.createElement("span");peek.className="queue-peek"+(nextBox?"":" empty");
    if(nextBox){peek.style.setProperty("--peek-color",COLORS[nextBox.color].hex);peek.title=`Далее: ${COLORS[nextBox.color].name}, ${nextBox.ants} кубиков`;}else peek.title="Очередь закончилась";
    preview.append(peek);
@@ -76,9 +79,12 @@ function renderChoices(){
   if(old&&button.dataset.boxIndex!==undefined){const r=button.getBoundingClientRect(),dx=old.left-r.left,dy=old.top-r.top;if((dx||dy)&&!window.matchMedia("(prefers-reduced-motion: reduce)").matches)button.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:"translate(0,0)"}],{duration:320,easing:"cubic-bezier(.2,.75,.25,1)"});}
  }
  $("choice-status").textContent="Выбери один из трёх боксов — дальше муравьишки всё сделают сами";
- $("queue-count").textContent=`${Math.max(0,INCOMING.length-state.nextContainer)} в запасе`;
+ $("queue-count").textContent=`${Math.max(0,getIncoming(state.levelId).length-state.nextContainer)} в запасе`;
 }
 function render(){
+ const level=getLevel(state.levelId);
+ $("level-number").textContent=`ПОЛЯНКА № ${level.number}`;
+ $("level-title").textContent=level.name;
  renderBoard();renderSlots();renderChoices();renderConveyor();
  $("message").textContent=state.message;$("restart").disabled=resetting||resolverRunning||loadingSlots.size>0;
  updateResultOverlay();
@@ -361,7 +367,7 @@ async function onChoose(column){
  if(!sourceNode)return;
  const sourceRect=sourceNode.getBoundingClientRect(),shellRect=shell.getBoundingClientRect();
  const source={x:sourceRect.left+sourceRect.width/2-shellRect.left,y:sourceRect.top+sourceRect.height/2-shellRect.top};
- const freeSlot=state.slots.findIndex(box=>box===null),box=INCOMING[selectedIndex];
+ const freeSlot=state.slots.findIndex(box=>box===null),box=getIncoming(state.levelId)[selectedIndex];
  if(freeSlot<0||!box||!chooseTopColumn(state,column))return;
  loadingSlots.add(freeSlot);
  state.message="Бокс "+COLORS[box.color].name.toLowerCase()+" подан на ленту и едет в отсек "+(freeSlot+1);
@@ -381,29 +387,33 @@ async function onChoose(column){
 }
 async function restart(){
  if(resetting||workerPromises.size>0||loadingSlots.size>0)return;
- resetting=true;renderChoices();state=createGame();await clearLocal();resetting=false;render();
+ resetting=true;renderChoices();state=createGame(state.levelId);totalBlocks=state.remaining;await clearLocal();resetting=false;render();
  $("save-status").textContent="Новая игра";
 }
 function updateMainMenu(){
- const primary=$("start-game"),fresh=$("new-game"),progress=$("menu-progress");
+ const primary=$("start-game"),fresh=$("new-game"),progress=$("menu-progress"),level=getLevel(state.levelId);
+ $("menu-level-name").textContent=level.name;$("menu-level-number").textContent=`ПОЛЯНКА ${String(level.number).padStart(2,"0")}`;$("menu-level-emoji").textContent=level.emoji;
+ const list=$("campaign-levels");
+ if(list){list.replaceChildren();for(const item of LEVELS){const unlocked=isLevelUnlocked(item),button=document.createElement("button");button.type="button";button.className="campaign-level"+(item.id===state.levelId?" current":"")+(unlocked?"":" locked");button.disabled=!unlocked;button.innerHTML=`<span class="campaign-emoji">${item.emoji}</span><span class="campaign-copy"><small>${item.chapter} · ${String(item.number).padStart(2,"0")}</small><strong>${item.name}</strong></span><span class="campaign-state">${completedLevels().has(item.id)?"✓":unlocked?"›":"🔒"}</span>`;button.addEventListener("click",()=>{if(unlocked)void startFreshGame(item.id);});list.append(button);}}
+
  primary.textContent=gameStarted?"Вернуться на полянку":hasSavedGame?"Продолжить охоту":"Начать охоту";
  primary.querySelector("span")?.remove();
  const arrow=document.createElement("span");arrow.setAttribute("aria-hidden","true");arrow.textContent="→";primary.append(arrow);
  fresh.hidden=!hasSavedGame&&!gameStarted;
- progress.textContent=hasSavedGame?(`Сохранено · осталось блоков: ${state.remaining.toLocaleString("ru-RU")}`):"Готов к сборке · первая полянка";
+ progress.textContent=hasSavedGame?(`Сохранено · осталось блоков: ${state.remaining.toLocaleString("ru-RU")}`):`${level.chapter} · ${level.hint}`;
 }
 function showMainMenu(){shell.classList.add("menu-open");updateMainMenu();}
 function startGame(){
  shell.classList.remove("menu-open");gameStarted=true;updateMainMenu();
  kickColony();
 }
-async function startFreshGame(){
+async function startFreshGame(levelId=state.levelId){
  if(workerPromises.size>0||loadingSlots.size>0)return;
- resetting=true;cancelAnimationFrame(antFrame);state=createGame();await clearLocal();resetting=false;
+ resetting=true;cancelAnimationFrame(antFrame);state=createGame(levelId);totalBlocks=state.remaining;await clearLocal();resetting=false;
  hasSavedGame=false;gameStarted=true;render();$("save-status").textContent="Новая игра";shell.classList.remove("menu-open");updateMainMenu();kickColony();
 }
 async function boot(){
- const saved=await loadLocal();hasSavedGame=Boolean(saved);if(saved)state=restoreGame(saved);
+ const saved=await loadLocal();hasSavedGame=Boolean(saved);if(saved)state=restoreGame(saved);totalBlocks=state.board.flat().filter(Boolean).length;
  render();resizeAntLayer();updateMainMenu();
  if("serviceWorker"in navigator){
   try{
@@ -421,7 +431,8 @@ $("restart").addEventListener("click",restart);
 $("menu-toggle").addEventListener("click",showMainMenu);
 $("start-game").addEventListener("click",startGame);
 $("new-game").addEventListener("click",startFreshGame);
-$("result-retry").addEventListener("click",startFreshGame);
+$("result-retry").addEventListener("click",()=>startFreshGame(state.levelId));
+$("result-next").addEventListener("click",()=>{const index=LEVELS.findIndex(level=>level.id===state.levelId),next=LEVELS[index+1];if(next&&isLevelUnlocked(next))void startFreshGame(next.id);});
 $("result-menu").addEventListener("click",showMainMenu);
 $("how-to-play").addEventListener("click",()=>{
  const panel=$("how-panel");panel.hidden=!panel.hidden;
