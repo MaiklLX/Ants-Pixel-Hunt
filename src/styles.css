@@ -710,3 +710,16 @@ body{background:radial-gradient(ellipse at 50% 0%,#fffdf2 0%,#f1faee 42%,#e4f2e7
 
 /* Keyboard and switch-control focus remains visible in the new hub navigation. */
 .hub-location:focus-visible,.map-levels .campaign-level:focus-visible,.nest-close:focus-visible{outline:3px solid #d2a94f;outline-offset:3px}
+
+/* KT-053 — sealed crate states stay inside the existing queue cards. */
+.choice-card.sealed-box{--ant-color:#c7a66a;border-color:#ddc99e;background:linear-gradient(150deg,#fffaf0,#f0e4c9);box-shadow:0 3px 0 #dfd0ad,inset 0 1px #fff}
+.choice-card.sealed-box:disabled{opacity:1;filter:none;cursor:default}
+.sealed-crate{display:grid;place-items:center;border:1px solid #e5d4ad!important;background:linear-gradient(145deg,#fff8e7,#ead9b4)!important;color:#9b7840;font-size:20px;box-shadow:inset 0 1px #fff,0 2px 4px #8b70401c}
+.sealed-progress{font-size:10px!important;font-weight:950!important;letter-spacing:.4px;color:#9a7842!important}
+.queue-peek.sealed-peek{border-color:#e4d2a8;background:linear-gradient(145deg,#fff8e8,#f0e4ca)}
+.peek-lock{display:grid;place-items:center;width:19px;height:19px;border-radius:6px;background:#fff9eb;font-size:11px;box-shadow:0 1px 2px #8b70401c}
+.sealed-peek .peek-count{font-size:8px;color:#967746;font-weight:900}
+@media(max-width:360px){
+ .sealed-crate{font-size:18px}.sealed-progress{font-size:9px!important}
+ .peek-lock{width:17px;height:17px;font-size:10px}
+}
