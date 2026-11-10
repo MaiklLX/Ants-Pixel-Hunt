@@ -21,14 +21,12 @@
 - Вынесена чистая функция getAntTripFrame в src/ant-animation.js и добавлены тесты фаз движения.
 
 ## Изменённые файлы
-
 - src/app.js
 - src/styles.css
 - src/ant-animation.js
 - tests/ant-animation.test.js
 
 ## Проверки
-
 - Проверено чтением актуальных файлов после записи: общий рендерер и менеджер активных муравьёв присутствуют; старый ant-worker-layer и per-ant canvas creation удалены.
 - Добавлены unit tests для задержки старта, момента подбора, обратного пути и завершения маршрута.
 - Code commit: 55ceef019522ba123880e940361024f751a5aaa7.
