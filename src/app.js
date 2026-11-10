@@ -3,7 +3,7 @@ import {loadLocal,saveLocal,clearLocal} from "./storage.js";
 const $=id=>document.getElementById(id);
 const shell=$("app-shell"),boardEl=$("board"),slotsEl=$("slots"),choicesEl=$("choices"),antLayer=$("ant-layer"),conveyorEl=$("conveyor");
 const boardCtx=boardEl.getContext("2d"),antCtx=antLayer.getContext("2d");
-let state=createGame(),resolverRunning=false,resetting=false,antFrame=0;
+let state=createGame(),resolverRunning=false,resetting=false,antFrame=0,hasSavedGame=false,gameStarted=false;
 const loadingSlots=new Set();
 const colorRGB=Object.fromEntries(Object.entries(COLORS).map(([key,value])=>[key,value.hex.match(/[\da-f]{2}/gi).map(v=>parseInt(v,16))]));
 function renderBoard(){
@@ -332,15 +332,38 @@ async function restart(){
  resetting=true;renderChoices();state=createGame();await clearLocal();resetting=false;render();
  $("save-status").textContent="Новая игра";
 }
+function updateMainMenu(){
+ const primary=$("start-game"),fresh=$("new-game"),progress=$("menu-progress");
+ primary.textContent=gameStarted?"Вернуться на полянку":hasSavedGame?"Продолжить охоту":"Начать охоту";
+ primary.querySelector("span")?.remove();
+ const arrow=document.createElement("span");arrow.setAttribute("aria-hidden","true");arrow.textContent="→";primary.append(arrow);
+ fresh.hidden=!hasSavedGame&&!gameStarted;
+ progress.textContent=hasSavedGame?(`Сохранено · осталось блоков: ${state.remaining.toLocaleString("ru-RU")}`):"Готов к сборке · первая полянка";
+}
+function showMainMenu(){shell.classList.add("menu-open");updateMainMenu();}
+function startGame(){
+ shell.classList.remove("menu-open");gameStarted=true;updateMainMenu();
+ if(!resolverRunning&&(findNextMove(state)||state.slots.some(box=>box?.status==="departing")))queueMicrotask(runResolver);
+}
+async function startFreshGame(){
+ if(resolverRunning||loadingSlots.size>0)return;
+ resetting=true;cancelAnimationFrame(antFrame);state=createGame();await clearLocal();resetting=false;
+ hasSavedGame=false;gameStarted=true;render();$("save-status").textContent="Новая игра";shell.classList.remove("menu-open");updateMainMenu();
+}
 async function boot(){
- const saved=await loadLocal();if(saved)state=restoreGame(saved);
- render();resizeAntLayer();
+ const saved=await loadLocal();hasSavedGame=Boolean(saved);if(saved)state=restoreGame(saved);
+ render();resizeAntLayer();updateMainMenu();
  if("serviceWorker"in navigator){try{await navigator.serviceWorker.register("./service-worker.js");}catch(error){console.warn("PWA offline registration failed",error);}}
- $("save-status").textContent=saved?"Продолжили сохранённую игру":"Сохранение на устройстве";
- if(findNextMove(state)||state.slots.some(box=>box?.status==="departing"))runResolver();
+ $("save-status").textContent=saved?"Сохранённый прогресс":"Сохранение на устройстве";
 }
 $("restart").addEventListener("click",restart);
-$("sound-toggle").addEventListener("click",()=>{$("sound-toggle").textContent="♫";$("sound-toggle").title="Звук пока не подключён";});
+$("menu-toggle").addEventListener("click",showMainMenu);
+$("start-game").addEventListener("click",startGame);
+$("new-game").addEventListener("click",startFreshGame);
+$("how-to-play").addEventListener("click",()=>{
+ const panel=$("how-panel");panel.hidden=!panel.hidden;
+ $("how-to-play").textContent=panel.hidden?"Как играть?":"Свернуть правила";
+});
 window.addEventListener("resize",()=>{resizeAntLayer();renderBoard();});
 window.addEventListener("pagehide",()=>{if(!resetting)saveLocal(serializeGame(state));});
 boot();
