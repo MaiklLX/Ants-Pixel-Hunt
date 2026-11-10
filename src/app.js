@@ -23,6 +23,8 @@ function renderNest(){
 }
 function openNest(){renderNest();$("nest-overlay").hidden=false;}
 function closeNest(){$("nest-overlay").hidden=true;}
+function openMap(){$("map-overlay").hidden=false;}
+function closeMap(){$("map-overlay").hidden=true;}
 function completedLevels(){try{return new Set(JSON.parse(localStorage.getItem(CAMPAIGN_KEY)||"[]"));}catch{return new Set();}}
 function markLevelComplete(levelId){const done=completedLevels();done.add(levelId);try{localStorage.setItem(CAMPAIGN_KEY,JSON.stringify([...done]));}catch{}}
 function isLevelUnlocked(level){return isCampaignLevelUnlocked(LEVELS,completedLevels(),level.id);}
@@ -482,7 +484,7 @@ function updateMainMenu(){
   const number=document.createElement("small");number.textContent=`${item.chapter} · ${String(item.number).padStart(2,"0")}`;
   const name=document.createElement("strong");name.textContent=unlocked?(done?"Пройдена":"Открыта"):"Ещё не открыта";copy.append(number,name);
   const status=document.createElement("span");status.className="campaign-state";status.textContent=done?"✓":unlocked?"›":"🔒";
-  button.append(icon,copy,status);button.addEventListener("click",()=>{if(unlocked)void startFreshGame(item.id);});list.append(button);
+  button.append(icon,copy,status);button.addEventListener("click",()=>{if(unlocked){closeMap();void startFreshGame(item.id);}});list.append(button);
  }}
 
  primary.textContent=gameStarted?"Вернуться на полянку":"Начать охоту";
@@ -536,6 +538,9 @@ $("result-retry").addEventListener("click",()=>startFreshGame(state.levelId));
 $("result-next").addEventListener("click",()=>{const index=LEVELS.findIndex(level=>level.id===state.levelId),next=LEVELS[index+1];if(next&&isLevelUnlocked(next))void startFreshGame(next.id);});
 $("result-menu").addEventListener("click",showMainMenu);
 $("nest-open").addEventListener("click",openNest);
+$("map-open").addEventListener("click",openMap);
+$("map-close").addEventListener("click",closeMap);
+$("map-overlay").addEventListener("click",event=>{if(event.target===$("map-overlay"))closeMap();});
 $("nest-close").addEventListener("click",closeNest);
 $("nest-overlay").addEventListener("click",event=>{if(event.target===$("nest-overlay"))closeNest();});
 $("how-to-play").addEventListener("click",()=>{
