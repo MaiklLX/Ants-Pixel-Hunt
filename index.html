@@ -39,11 +39,13 @@
         <div class="level-card-copy"><span id="menu-level-number">ПОЛЯНКА 01</span><strong id="menu-level-name">Портрет лягушонка</strong><small id="menu-progress">Готов к сборке · первая полянка</small></div>
         <span class="level-play-mark" aria-hidden="true">›</span>
       </div>
-      <section class="campaign-picker" aria-label="Карта приключения"><div class="campaign-heading"><strong>КАРТА ПРИКЛЮЧЕНИЯ</strong><span>6 полянок</span></div><div id="campaign-levels" class="campaign-levels"></div></section>
+      <section class="hub-locations" aria-label="Места колонии">
+        <button id="map-open" class="hub-location adventure-location" type="button"><span class="hub-location-icon">🗺️</span><span class="hub-location-copy"><strong>Карта приключений</strong><small>Выбирай полянки и открывай новые главы</small></span><span class="hub-location-arrow">›</span></button>
+        <button id="nest-open" class="hub-location nest-location" type="button"><span class="hub-location-icon">🏡</span><span class="hub-location-copy"><strong>Муравейник</strong><small>Развивай колонию и улучшай постройки</small></span><span class="hub-location-resource">🌼 <b id="nest-nectar">0</b></span></button>
+      </section>
       <div class="menu-actions">
         <button id="start-game" class="menu-primary" type="button">Начать охоту <span aria-hidden="true">→</span></button>
         <button id="new-game" class="menu-secondary" type="button" hidden>Начать заново</button>
-        <button id="nest-open" class="menu-secondary nest-entry" type="button">🐜 Муравейник <span>🌼 <b id="nest-nectar">0</b></span></button>
         <button id="how-to-play" class="menu-link" type="button">Как играть?</button>
       </div>
       <div id="how-panel" class="how-panel" hidden>
@@ -86,6 +88,14 @@
     </section>
 
     <p id="message" class="message" role="status" aria-live="polite">Выбери бокс с муравьями — они отправятся на поиски пикселей</p>
+    <section id="map-overlay" class="nest-overlay map-overlay" role="dialog" aria-modal="true" aria-labelledby="map-title" hidden>
+      <div class="nest-card map-card">
+        <header class="nest-header"><div><p class="nest-kicker">ПУТЕШЕСТВИЕ ПО МИРУ</p><h2 id="map-title">Карта приключений</h2></div><button id="map-close" class="nest-close" type="button" aria-label="Закрыть">×</button></header>
+        <p class="map-intro">Каждая полянка — новая картинка, новые задачи и маленькие открытия.</p>
+        <div class="map-chapter-label"><span>🌿</span> ПОЛЯНКИ КОЛОНИИ <small>Открывай по порядку</small></div>
+        <div id="campaign-levels" class="campaign-levels map-levels"></div>
+      </div>
+    </section>
     <section id="nest-overlay" class="nest-overlay" role="dialog" aria-modal="true" aria-labelledby="nest-title" hidden>
       <div class="nest-card">
         <header class="nest-header"><div><p class="nest-kicker">ДОМ НАШЕЙ КОЛОНИИ</p><h2 id="nest-title">Муравейник</h2></div><button id="nest-close" class="nest-close" type="button" aria-label="Закрыть">×</button></header>
