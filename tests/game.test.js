@@ -15,6 +15,13 @@ test("selection fills the first free start compartment, not a player-selected lo
  assert.equal(s.slots[0].sourceIndex,2);assert.equal(s.slots[1].sourceIndex,0);
  assert.equal(s.slots[2],null);
 });
+test("player can fill every remaining start slot with rapid choices during an active ant trip",()=>{
+ const s=createGame();s.resolving=true;
+ for(const column of [0,1,2,0,1])assert.equal(chooseTopColumn(s,column),true);
+ assert.equal(freeSlotCount(s),0);
+ assert.deepEqual(s.slots.map(box=>box.sourceIndex),[0,1,2,9,10]);
+ assert.equal(canChoose(s),false);
+});
 test("each column advances independently and exhausted columns show empty cells",()=>{
  const s=createGame();for(let i=0;i<5;i++)assert.equal(chooseTopColumn(s,0),true);
  assert.deepEqual(s.tray.map(r=>r[0]),[11,12,13]);assert.equal(s.nextContainer,14);
