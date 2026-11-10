@@ -14,7 +14,7 @@ function renderBoard(){
    const index=((y*BLOCK_SIZE+by)*GRID_SIZE+x*BLOCK_SIZE+bx)*4;
    let tileColor=empty;
    if(color&&bx<BLOCK_SIZE-1&&by<BLOCK_SIZE-1){
-    const shade=(bx===0&&by===0)?1.28:(bx===0||by===0)?1.18:(bx===BLOCK_SIZE-2||by===BLOCK_SIZE-2)?.62:1;
+    const shade=(bx===0&&by===0)?1.38:by===0?1.24:bx===0?1.15:(bx===BLOCK_SIZE-2||by===BLOCK_SIZE-2)?.58:(bx===1&&by===1)?1.08:1;
     tileColor=rgb.map(channel=>Math.max(0,Math.min(255,Math.round(channel*shade))));
    }
    image.data[index]=tileColor[0];image.data[index+1]=tileColor[1];image.data[index+2]=tileColor[2];image.data[index+3]=255;
@@ -123,7 +123,7 @@ function createAntSprite(color,carrying,gait){
  ctx.fillStyle=body;ctx.beginPath();ctx.arc(3.1,-.35,1.7,0,Math.PI*2);ctx.fill();
  ctx.strokeStyle="#26372d";ctx.lineWidth=.85;
  ctx.beginPath();ctx.moveTo(3.7,-1.6);ctx.quadraticCurveTo(4.2,-4.3,6.3,-4.1);ctx.moveTo(2.4,-1.8);ctx.quadraticCurveTo(1.8,-4.4,3.4,-5);ctx.stroke();
- ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(3.8,-.8,.55,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(3.8,-.8,.72,0,Math.PI*2);ctx.fill();\n ctx.fillStyle="#24352c";ctx.beginPath();ctx.arc(4.02,-.8,.28,0,Math.PI*2);ctx.fill();\n ctx.fillStyle="#f3a29a";ctx.globalAlpha=.82;ctx.beginPath();ctx.arc(4.45,1.05,.62,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;\n ctx.fillStyle="#ffffff88";ctx.beginPath();ctx.ellipse(-3.8,-1.15,.9,.45,-.25,0,Math.PI*2);ctx.fill();
  if(carrying){ctx.fillStyle="#f6d36e";ctx.strokeStyle="#8e6c2d";ctx.lineWidth=.7;ctx.beginPath();ctx.arc(-6.3,2.2,1.8,0,Math.PI*2);ctx.fill();ctx.stroke();}
  antSpriteCache.set(key,sprite);return sprite;
 }
