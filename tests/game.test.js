@@ -335,39 +335,30 @@ test("every campaign deck has a crate at the sealed-box position",()=>{
 });
 
 
-test("linked crates require two free slots and the paired crate to be visible",()=>{
- const s=createGame(),pair=getLinkedPair(s.levelId);
- assert.equal(pair.length,2);
- s.tray[0][0]=pair[0];
- s.tray[0][1]=null;
- assert.equal(chooseTopColumn(s,0),false,"the first linked crate waits until its partner reaches the top");
- assert.equal(s.pendingLinkedIndex,null);
- s.tray[0][1]=pair[1];
- s.slots[0]={color:"red",ants:1};
- s.slots[1]={color:"blue",ants:1};
- s.slots[2]={color:"green",ants:1};
- s.slots[3]={color:"yellow",ants:1};
- assert.equal(chooseTopColumn(s,0),false,"a linked pair cannot start with fewer than two free slots");
+test("linked crates wait until both partners are at the top and two slots are free",()=>{
+ const s=createGame(),pair=getLinkedPair(s.levelId);assert.equal(pair.length,2);
+ s.tray[0][0]=pair[0];s.tray[0][1]=null;
+ assert.equal(chooseTopColumn(s,0),false,"a lone linked crate cannot be activated");assert.equal(s.pendingLinkedIndex,null);
+ s.tray[0][1]=pair[1];s.slots[0]={color:"red",ants:1};s.slots[1]={color:"blue",ants:1};s.slots[2]={color:"green",ants:1};s.slots[3]={color:"yellow",ants:1};
+ const before=s.tray.map(row=>row.slice());assert.equal(chooseTopColumn(s,0),false,"pair needs two free compartments");
+ assert.deepEqual(s.tray,before,"failed placement must not advance either queue");assert.equal(s.slots.filter(Boolean).length,4);
 });
-test("linked crates are selected consecutively and block every unrelated choice",()=>{
- const s=createGame(),pair=getLinkedPair(s.levelId);
- s.tray[0][0]=pair[0];s.tray[0][1]=pair[1];
- assert.equal(chooseTopColumn(s,0),true);
- assert.equal(s.pendingLinkedIndex,pair[1]);
- assert.equal(chooseTopColumn(s,2),false,"no unrelated crate can interrupt a linked pair");
- assert.equal(chooseTopColumn(s,1),true);
- assert.equal(s.pendingLinkedIndex,null);
- assert.equal(s.slots[0].special,"linked");
- assert.equal(s.slots[1].special,"linked");
+test("linked crates are placed atomically into two start compartments",()=>{
+ const s=createGame(),pair=getLinkedPair(s.levelId);s.tray[0][0]=pair[0];s.tray[0][1]=pair[1];const untouched=s.tray[0][2];
+ assert.equal(chooseTopColumn(s,0),true);assert.equal(s.pendingLinkedIndex,null);
+ assert.deepEqual(s.slots.slice(0,2).map(box=>box.sourceIndex),pair);assert.ok(s.slots.slice(0,2).every(box=>box.special==="linked"));
+ assert.equal(s.tray[0][0],s.tray[1][0]);assert.equal(s.tray[0][1],s.tray[1][1]);assert.equal(s.tray[0][2],untouched);
+ assert.match(s.message,/вместе/);
 });
-test("linked-pair selection state survives save and restore",()=>{
- const s=createGame(),pair=getLinkedPair(s.levelId);
- s.tray[0][0]=pair[0];s.tray[0][1]=pair[1];
- assert.equal(chooseTopColumn(s,0),true);
- const restored=restoreGame(serializeGame(s));
- assert.equal(restored.pendingLinkedIndex,pair[1]);
- assert.equal(chooseTopColumn(restored,1),true);
- assert.equal(restored.pendingLinkedIndex,null);
+test("atomic linked-pair placement uses the first two free compartments",()=>{
+ const s=createGame(),pair=getLinkedPair(s.levelId);s.slots[0]={color:"red",ants:1};s.slots[2]={color:"blue",ants:1};
+ s.tray[0][0]=pair[0];s.tray[0][1]=pair[1];assert.equal(chooseTopColumn(s,1),true);
+ assert.deepEqual([s.slots[1].sourceIndex,s.slots[3].sourceIndex],[pair[1],pair[0]]);
+});
+test("linked-pair placement is fully represented after save and restore",()=>{
+ const s=createGame(),pair=getLinkedPair(s.levelId);s.tray[0][0]=pair[0];s.tray[0][1]=pair[1];
+ assert.equal(chooseTopColumn(s,0),true);const restored=restoreGame(serializeGame(s));
+ assert.equal(restored.pendingLinkedIndex,null);assert.deepEqual(restored.slots.slice(0,2).map(box=>box?.sourceIndex),pair);
 });
 test("every campaign deck places its linked pair outside the sealed-box position",()=>{
  for(const level of LEVELS){
