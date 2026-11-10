@@ -202,3 +202,24 @@ footer{order:8}
 .flight-layer{position:absolute;inset:0;z-index:22;pointer-events:none}
 /* Tiny bevels on the 5×5 artwork pixels make the portrait feel like toy blocks. */
 .board{filter:drop-shadow(0 2px 1px #3d654522)}
+
+/* KT-028 visual polish: a soft toy-workshop arena with tactile pieces. */
+:root{--mint-0:#f5fbf5;--mint-1:#e7f2e7;--mint-2:#cbdcc9;--sky-1:#d9eff7;--ink-soft:#557064}
+body{background:radial-gradient(ellipse at 50% 0%,#f8fffb 0%,#e9f4eb 54%,#dcebe2 100%)}
+.app-shell{background:linear-gradient(155deg,#f9fff9 0%,#eff7ee 48%,#e5f1e9 100%);border:1px solid #fff;box-shadow:0 14px 36px #537b6230,inset 0 1px 0 #fff}
+.topbar .brand-mark{filter:drop-shadow(0 3px 2px #557d5a44)}
+.board-wrap{background:linear-gradient(145deg,#fff,#e5f2e5);border:1px solid #fff;box-shadow:0 7px 0 #c4d9c3,0 11px 20px #52745b25,inset 0 2px 4px #fff}
+.board{image-rendering:pixelated;border-radius:7px;box-shadow:inset 0 1px 5px #294e3822}
+.slot{background:linear-gradient(145deg,#fff,#e8f2e8);border:1px solid #fff;box-shadow:0 3px 0 #c9dac8,0 5px 9px #55745a22,inset 0 1px 0 #fff;border-radius:11px}
+.slot.filled{background:linear-gradient(145deg,#fff,#f0f7ed)}
+.slot.active{transform:translateY(-2px);box-shadow:0 5px 0 #c2d9c3,0 8px 13px #55745a30,inset 0 1px 0 #fff}
+.choice-card{background:linear-gradient(150deg,#fff 0%,#f0f7ee 65%,#e2eee3 100%);border:1px solid #fff;box-shadow:0 4px 0 #c6d9c5,0 6px 10px #58745b20,inset 0 1px 0 #fff;border-radius:12px}
+.choice-card.selectable{transition:transform .16s ease,box-shadow .16s ease}
+.choice-card.selectable:active{transform:translateY(2px);box-shadow:0 1px 0 #c6d9c5,0 2px 5px #58745b20}
+.conveyor{padding:3px;border-radius:12px;background:linear-gradient(180deg,#eaf5e9,#cfdfd0);box-shadow:inset 0 2px 4px #55745a22,0 3px 0 #b8cdb8}
+.belt{border-radius:7px;box-shadow:inset 0 3px 5px #526c4b35,0 2px 0 #fff}
+.section-line h3{color:#537261}
+.message{background:linear-gradient(90deg,#e7f4ed,#e7f2f8);border:1px solid #fff;border-radius:10px;padding:5px 9px;box-shadow:0 2px 5px #55745a14}
+.restart-button{border:1px solid #fff;background:linear-gradient(145deg,#fff,#e4efe6);box-shadow:0 3px 0 #c5d8c7,0 5px 9px #55745a20}
+.flight-layer{position:absolute;inset:0;z-index:22;pointer-events:none}
+@media(prefers-reduced-motion:reduce){.choice-card,.slot{transition:none}}
