@@ -860,3 +860,10 @@ body{background:radial-gradient(ellipse at 50% -14%,#fff 0%,#f5faef 43%,#e7f1e4 
  .menu-primary{min-height:42px}
 }
 @media(prefers-reduced-motion:reduce){.hub-location{transition:none}.hub-location:hover{transform:none}}
+
+
+/* Linked crates remain visibly paired in the start area until both are full. */
+.slot.linked-member{border-color:color-mix(in srgb,var(--box-color,#b9d3b3) 76%,#d5b46f);box-shadow:0 3px 0 color-mix(in srgb,var(--box-color,#9dbb98) 45%,#d7bd80),0 0 0 1px #d9c58b55,0 5px 12px #806c3c18,inset 0 2px #fff}
+.slot .slot-link-mark{position:absolute;right:4px;top:3px;font-size:8px;line-height:1;color:#a98748;opacity:.9;pointer-events:none}
+.slot.linked-waiting{background:linear-gradient(145deg,#fffdf2,#f5edcf);border-color:#d9bd79;box-shadow:0 0 0 2px #e4cb8c55,0 3px 0 #d2b978}
+.slot.linked-waiting .ant-count{color:#987537;font-size:17px}
