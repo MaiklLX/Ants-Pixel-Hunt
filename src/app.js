@@ -74,22 +74,43 @@ function slotCenter(index){
  const slot=slotsEl.children[index],frame=antLayer.getBoundingClientRect(),rect=slot.getBoundingClientRect();
  return{x:rect.left+rect.width/2-frame.left,y:rect.top+rect.height/2-frame.top};
 }
-function makeAnt(){
- const wrap=document.createElement("div");wrap.className="ant-runner";
- wrap.innerHTML='<svg viewBox="0 0 64 48" aria-hidden="true"><g stroke="#263d2d" stroke-width="3.5" stroke-linecap="round" fill="none"><path d="M26 25 17 13 10 10M27 29 15 35 9 42M36 25 43 13 51 10M37 30 48 36 55 42M27 17Q20 5 14 6M38 17Q45 5 51 6"/></g><ellipse cx="17" cy="25" rx="8" ry="7" fill="#b77736" stroke="#263d2d" stroke-width="2"/><ellipse cx="32" cy="25" rx="10" ry="9" fill="#d18a3d" stroke="#263d2d" stroke-width="2"/><circle cx="48" cy="23" r="9" fill="#e3a34e" stroke="#263d2d" stroke-width="2"/><circle cx="51" cy="20" r="2" fill="#fff"/><circle cx="52" cy="20" r="1" fill="#263d2d"/></svg>';
- return wrap;
+function makeAnt(color){
+ const ant=document.createElement("span");ant.className="ant-runner";
+ ant.style.setProperty("--ant-color",COLORS[color].hex);
+ return ant;
 }
-const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
-async function animateAnt(slot,x,y){
- const start=slotCenter(slot),end=cellCenter(x,y),ant=makeAnt();
- antLayer.append(ant);ant.style.left=start.x+"px";ant.style.top=start.y+"px";
- await ant.animate([{left:start.x+"px",top:start.y+"px",transform:"translate(-50%,-50%) scale(.8)"},{left:end.x+"px",top:end.y+"px",transform:"translate(-50%,-50%) scale(1.1)"}],{duration:230,easing:"cubic-bezier(.4,0,.2,1)",fill:"forwards"}).finished;
- await sleep(65);
- const back=slotCenter(slot);
- await ant.animate([{left:end.x+"px",top:end.y+"px"},{left:back.x+"px",top:back.y+"px"}],{duration:190,easing:"cubic-bezier(.4,0,.2,1)",fill:"forwards"}).finished;
- ant.remove();
- const cargo=document.createElement("span");cargo.textContent="✦";cargo.style.cssText=`position:absolute;left:${back.x}px;top:${back.y}px;color:#e4ad4b;font-size:17px;transform:translate(-50%,-50%);animation:cargo-pop .24s ease-out forwards`;
- antLayer.append(cargo);setTimeout(()=>cargo.remove(),260);
+function curveFrames(start,end,offset,from,to){
+ const dx=end.x-start.x,dy=end.y-start.y,length=Math.max(1,Math.hypot(dx,dy));
+ const bend=Math.min(34,length*.16)*offset;
+ const control={x:(start.x+end.x)/2-(dy/length)*bend,y:(start.y+end.y)/2+(dx/length)*bend};
+ const frames=[];
+ for(let i=0;i<=8;i++){
+  const t=i/8,u=1-t;
+  const x=u*u*start.x+2*u*t*control.x+t*t*end.x;
+  const y=u*u*start.y+2*u*t*control.y+t*t*end.y;
+  frames.push({left:x+"px",top:y+"px",offset:from+(to-from)*t,transform:"translate(-50%,-50%) scale("+(0.86+Math.sin(t*Math.PI)*.18)+")"});
+ }
+ return frames;
+}
+async function animateAntWave(moves){
+ const runners=moves.map((move,index)=>{
+  const ant=makeAnt(move.color),start=slotCenter(move.slot),end=cellCenter(move.target.x,move.target.y);
+  antLayer.append(ant);ant.style.left=start.x+"px";ant.style.top=start.y+"px";
+  const bend=index%2===0?1:-1;
+  const outbound=curveFrames(start,end,bend,0,.43);
+  const inbound=curveFrames(end,start,-bend,.57,1);
+  const frames=[...outbound,{...outbound[outbound.length-1],offset:.5},...inbound];
+  const distance=Math.hypot(end.x-start.x,end.y-start.y);
+  const duration=Math.max(520,Math.min(980,430+distance*1.35));
+  return {ant,move,frames,duration,end};
+ });
+ await Promise.all(runners.map(async runner=>{
+  const animation=runner.ant.animate(runner.frames,{duration:runner.duration,easing:"cubic-bezier(.38,.02,.2,1)",fill:"forwards"});
+  await animation.finished;
+  runner.ant.remove();
+  const spark=document.createElement("span");spark.className="pickup-spark";spark.style.left=runner.end.x+"px";spark.style.top=runner.end.y+"px";
+  antLayer.append(spark);setTimeout(()=>spark.remove(),360);
+ }));
 }
 async function save(){
  const ok=await saveLocal(serializeGame(state));
@@ -99,31 +120,37 @@ async function runResolver(){
  if(resolverRunning||state.won||state.lost)return;
  resolverRunning=true;
  try{
-  // Selection remains live during each trip. After the ant returns, the next move
-  // is recalculated from the current board and all newly filled slots.
+  // One wave sends every currently eligible ant at once. Targets are reserved
+  // left-to-right so two boxes can never claim the same pixel.
   while(!resetting&&state.remaining>0){
-   const move=findNextMove(state);
-   if(!move)break;
-   const box=state.slots[move.slot];
-   state.activeSlot=move.slot;state.activeTarget=move.target;renderBoard();renderSlots();
-   await animateAnt(move.slot,move.target.x,move.target.y);
+   const wave=[],reserved=new Set();
+   for(let slot=0;slot<SLOT_COUNT;slot++){
+    const box=state.slots[slot];if(!box||box.ants<=0)continue;
+    const targets=findAccessiblePixels(state.board,box.color,box.ants);
+    for(const target of targets){
+     const key=target.x+","+target.y;if(reserved.has(key))continue;
+     reserved.add(key);wave.push({slot,color:box.color,target});
+    }
+   }
+   if(!wave.length)break;
+   state.activeSlot=-1;state.activeTarget=null;renderBoard();renderSlots();
+   await animateAntWave(wave);
    if(resetting)break;
-   if(state.slots[move.slot]===box)applyAntMove(state,move.slot,move.target);
-   state.activeTarget=null;state.activeSlot=-1;
+   for(const move of wave)applyAntMove(state,move.slot,move.target);
    if(state.remaining%3===0||state.remaining===0)await save();
    renderBoard();renderSlots();renderChoices();
   }
- }catch(error){console.error("Ant animation interrupted",error);}
+ }catch(error){console.error("Ant swarm animation interrupted",error);}
  finally{
   resolverRunning=false;state.activeTarget=null;state.activeSlot=-1;
   if(!resetting){
    if(state.remaining===0){state.won=true;state.message="Победа! Поле полностью очищено ✨";}
    else if(isDefeat(state)){state.lost=true;state.message="Поражение: пять отсеков заняты, доступных ходов нет.";}
-   else state.message=`Можно выбрать следующий бокс · свободно отсеков: ${state.slots.filter(box=>!box).length}`;
+   else state.message=`Муравьишки ждут новые открытые пиксели · свободно отсеков: ${state.slots.filter(box=>!box).length}`;
    render();await save();
    if(findNextMove(state)&&!state.lost)queueMicrotask(runResolver);
   }
- }
+ } 
 }
 function onChoose(column){
  if(resetting||!canChoose(state)||!chooseTopColumn(state,column))return;
