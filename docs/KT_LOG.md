@@ -168,4 +168,5 @@
 - Движение ленты и роликов замедлено.
 - Файлы: src/app.js, src/styles.css, service-worker.js, public/service-worker.js, index.html, docs/CURRENT_STATE.md, docs/KT_LOG.md.
 - PWA cache v18; app-version KT-048.
+- Code commit: a6cbabe1db1dcece3e5a0aa3e94bc2cf5a0b3e0c.
 - Статус автоматических проверок: ожидает CI на итоговом SHA; физическое устройство не тестировалось.
