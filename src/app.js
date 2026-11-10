@@ -221,7 +221,7 @@ async function runResolver(){
   cancelAnimationFrame(antFrame);antCtx.clearRect(0,0,antLayer.width,antLayer.height);
   resolverRunning=false;state.activeSlots=[];
   if(!resetting){
-   if(state.remaining===0){state.won=true;state.message="Победа! Бабочка и цветочная поляна собраны ✨";}
+   if(state.remaining===0){state.won=true;state.message="Победа! Портрет собран ✨";}
    else if(isDefeat(state)){state.lost=true;state.message="Поражение: все пять стартовых отсеков заняты, доступных пикселей нет.";}
    else state.message=`Колония отдыхает и ждёт подходящий бокс · свободно отсеков: ${state.slots.filter(box=>!box).length}`;
    render();await save();
