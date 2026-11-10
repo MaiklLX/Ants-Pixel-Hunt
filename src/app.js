@@ -12,7 +12,11 @@ function renderBoard(){
   const color=state.board[y][x],rgb=color?colorRGB[color]:empty;
   for(let by=0;by<BLOCK_SIZE;by++)for(let bx=0;bx<BLOCK_SIZE;bx++){
    const index=((y*BLOCK_SIZE+by)*GRID_SIZE+x*BLOCK_SIZE+bx)*4;
-   const tileColor=color&&bx<BLOCK_SIZE-1&&by<BLOCK_SIZE-1?rgb:empty;
+   let tileColor=empty;
+   if(color){
+    const shade=(bx===BLOCK_SIZE-1||by===BLOCK_SIZE-1)?.62:(bx===0&&by===0)?1.38:by===0?1.24:bx===0?1.15:(bx===1&&by===1)?1.08:1;
+    tileColor=rgb.map(channel=>Math.max(0,Math.min(255,Math.round(channel*shade))));
+   }
    image.data[index]=tileColor[0];image.data[index+1]=tileColor[1];image.data[index+2]=tileColor[2];image.data[index+3]=255;
   }
  }
@@ -47,7 +51,7 @@ function renderChoices(){
   const index=state.tray[row][col],box=index===null?null:INCOMING[index],button=document.createElement("button");
   button.type="button";button.className="choice-card"+(row===0?" selectable":" locked");
   if(index!==null&&index!==undefined)button.dataset.boxIndex=String(index);
-  button.disabled=row!==0||!box||resetting||loadingSlots.size>0||state.won||state.lost||!canChoose(state);
+  button.disabled=row!==0||!box||resetting||state.won||state.lost||!canChoose(state);
   if(box){
    button.style.setProperty("--ant-color",COLORS[box.color].hex);
    const pos=document.createElement("span");pos.className="choice-number";pos.textContent=`РЯД ${row+1} · КОЛОНКА ${col+1}`;
@@ -71,7 +75,7 @@ function renderChoices(){
 }
 function render(){
  renderBoard();renderSlots();renderChoices();renderConveyor();
- $("message").textContent=state.message;$("restart").disabled=resetting||resolverRunning;
+ $("message").textContent=state.message;$("restart").disabled=resetting||resolverRunning||loadingSlots.size>0;
 }
 function resizeAntLayer(){
  const rect=shell.getBoundingClientRect(),dpr=Math.min(2,window.devicePixelRatio||1);
@@ -119,7 +123,10 @@ function createAntSprite(color,carrying,gait){
  ctx.fillStyle=body;ctx.beginPath();ctx.arc(3.1,-.35,1.7,0,Math.PI*2);ctx.fill();
  ctx.strokeStyle="#26372d";ctx.lineWidth=.85;
  ctx.beginPath();ctx.moveTo(3.7,-1.6);ctx.quadraticCurveTo(4.2,-4.3,6.3,-4.1);ctx.moveTo(2.4,-1.8);ctx.quadraticCurveTo(1.8,-4.4,3.4,-5);ctx.stroke();
- ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(3.8,-.8,.55,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(3.8,-.8,.72,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#24352c";ctx.beginPath();ctx.arc(4.02,-.8,.28,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#f3a29a";ctx.globalAlpha=.82;ctx.beginPath();ctx.arc(4.45,1.05,.62,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+ ctx.fillStyle="#ffffff88";ctx.beginPath();ctx.ellipse(-3.8,-1.15,.9,.45,-.25,0,Math.PI*2);ctx.fill();
  if(carrying){ctx.fillStyle="#f6d36e";ctx.strokeStyle="#8e6c2d";ctx.lineWidth=.7;ctx.beginPath();ctx.arc(-6.3,2.2,1.8,0,Math.PI*2);ctx.fill();ctx.stroke();}
  antSpriteCache.set(key,sprite);return sprite;
 }
@@ -180,25 +187,39 @@ async function animateAntWave(moves){
   antFrame=requestAnimationFrame(draw);
  });
 }
-function drawTransportBox(point,color,scale=1){
- antCtx.save();antCtx.translate(point.x,point.y);antCtx.scale(scale,scale);
- // A readable cardboard crate with folded lid, colored contents and a shipping label.
- antCtx.shadowColor="#435d3d55";antCtx.shadowBlur=9;antCtx.shadowOffsetY=3;
- antCtx.fillStyle="#d9c69b";antCtx.strokeStyle="#806744";antCtx.lineWidth=1.25;
- antCtx.beginPath();antCtx.moveTo(-17,-8);antCtx.lineTo(-12,-13);antCtx.lineTo(13,-13);antCtx.lineTo(18,-8);antCtx.lineTo(18,9);antCtx.lineTo(13,13);antCtx.lineTo(-13,13);antCtx.lineTo(-18,9);antCtx.lineTo(-18,-8);antCtx.closePath();antCtx.fill();antCtx.stroke();
- antCtx.shadowBlur=0;antCtx.shadowOffsetY=0;
- antCtx.fillStyle="#f6ebd0";antCtx.beginPath();antCtx.moveTo(-17,-8);antCtx.lineTo(-11,-12);antCtx.lineTo(0,-7);antCtx.lineTo(0,-2);antCtx.closePath();antCtx.fill();
- antCtx.beginPath();antCtx.moveTo(17,-8);antCtx.lineTo(11,-12);antCtx.lineTo(0,-7);antCtx.lineTo(0,-2);antCtx.closePath();antCtx.fill();
- antCtx.fillStyle=COLORS[color].hex;antCtx.fillRect(-11,-3,22,11);
- antCtx.strokeStyle="#fff9";antCtx.lineWidth=1;antCtx.beginPath();antCtx.moveTo(-4,-3);antCtx.lineTo(-4,8);antCtx.moveTo(4,-3);antCtx.lineTo(4,8);antCtx.stroke();
- antCtx.fillStyle="#fff9e9";antCtx.fillRect(-6,-1,12,5);
- antCtx.fillStyle="#7b765e";antCtx.fillRect(-4,0,8,1);antCtx.fillRect(-4,2,5,1);
- antCtx.strokeStyle="#8a7047";antCtx.lineWidth=.8;antCtx.beginPath();antCtx.moveTo(0,-7);antCtx.lineTo(0,-2);antCtx.stroke();
- antCtx.restore();
+function drawTransportBox(ctx,point,color,scale=1,tilt=0){
+ ctx.save();ctx.translate(point.x,point.y);ctx.rotate(tilt);ctx.scale(scale,scale);
+ // A small open-top delivery crate: raised rim, visible color cargo and three shaded faces.
+ ctx.shadowColor="#38594455";ctx.shadowBlur=10;ctx.shadowOffsetY=4;
+ const front=ctx.createLinearGradient(0,-1,0,15);front.addColorStop(0,"#e6d3ad");front.addColorStop(1,"#b99b6b");
+ const side=ctx.createLinearGradient(0,0,18,12);side.addColorStop(0,"#c6aa7d");side.addColorStop(1,"#96794f");
+ ctx.fillStyle=front;ctx.strokeStyle="#806744";ctx.lineWidth=1.2;
+ ctx.beginPath();ctx.moveTo(-18,-7);ctx.lineTo(0,0);ctx.lineTo(0,15);ctx.lineTo(-18,8);ctx.closePath();ctx.fill();ctx.stroke();
+ ctx.fillStyle=side;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(18,-7);ctx.lineTo(18,8);ctx.lineTo(0,15);ctx.closePath();ctx.fill();ctx.stroke();
+ ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+ // Cargo is inset below the raised wooden rim, so the box reads as a container rather than a flat card.
+ const cargo=ctx.createLinearGradient(-10,-11,10,2);cargo.addColorStop(0,"#fff");cargo.addColorStop(.25,COLORS[color].hex);cargo.addColorStop(1,"#52775a");
+ ctx.fillStyle=cargo;ctx.beginPath();ctx.moveTo(-13,-8);ctx.lineTo(0,-13);ctx.lineTo(13,-8);ctx.lineTo(0,-3);ctx.closePath();ctx.fill();
+ ctx.fillStyle="#ffffff55";ctx.beginPath();ctx.moveTo(-9,-8);ctx.lineTo(0,-11.5);ctx.lineTo(0,-8);ctx.lineTo(-7,-5.5);ctx.closePath();ctx.fill();
+ // Thick rim and two folded lid flaps.
+ ctx.fillStyle="#f4e7ca";ctx.strokeStyle="#9b8056";ctx.lineWidth=1;
+ ctx.beginPath();ctx.moveTo(-18,-7);ctx.lineTo(-11,-14);ctx.lineTo(11,-14);ctx.lineTo(18,-7);ctx.lineTo(12,-3);ctx.lineTo(0,-8);ctx.lineTo(-12,-3);ctx.closePath();ctx.fill();ctx.stroke();
+ ctx.fillStyle="#e7d4ad";ctx.beginPath();ctx.moveTo(-18,-7);ctx.lineTo(-11,-14);ctx.lineTo(0,-9);ctx.lineTo(-7,-3);ctx.closePath();ctx.fill();ctx.stroke();
+ ctx.fillStyle="#fff4d9";ctx.beginPath();ctx.moveTo(18,-7);ctx.lineTo(11,-14);ctx.lineTo(0,-9);ctx.lineTo(7,-3);ctx.closePath();ctx.fill();ctx.stroke();
+ // A colored side badge, reinforced corners and tiny brass rivets.
+ ctx.fillStyle=COLORS[color].hex;ctx.fillRect(-11,1,8,5);ctx.fillStyle="#ffffff66";ctx.fillRect(-10,1,6,1);
+ ctx.fillStyle="#f7e9c9";ctx.fillRect(3,3,9,5);ctx.fillStyle="#8a7047";ctx.fillRect(5,4,5,1);ctx.fillRect(5,6,3,1);
+ ctx.fillStyle="#f8e8c6";for(const [x,y] of [[-15,-4],[-15,5],[15,-4],[15,5]]){ctx.beginPath();ctx.arc(x,y,1,0,Math.PI*2);ctx.fill();}
+ ctx.strokeStyle="#fff8";ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(-17,-6);ctx.lineTo(-11,-12);ctx.lineTo(10,-12);ctx.stroke();
+ ctx.restore();
 }
 async function animateBoxLoading(source,slot,color){
- resizeAntLayer();
- const belt=conveyorEl.querySelector(".belt").getBoundingClientRect(),shellRect=shell.getBoundingClientRect();
+ const shellRect=shell.getBoundingClientRect(),dpr=Math.min(2,window.devicePixelRatio||1);
+ const flightLayer=document.createElement("canvas");
+ flightLayer.className="flight-layer";flightLayer.width=Math.max(1,Math.round(shellRect.width*dpr));flightLayer.height=Math.max(1,Math.round(shellRect.height*dpr));
+ flightLayer.style.width=shellRect.width+"px";flightLayer.style.height=shellRect.height+"px";shell.append(flightLayer);
+ const ctx=flightLayer.getContext("2d");ctx.setTransform(dpr,0,0,dpr,0,0);
+ const belt=conveyorEl.querySelector(".belt").getBoundingClientRect();
  const entry={x:belt.left+belt.width*.12-shellRect.left,y:belt.top+belt.height/2-shellRect.top};
  const exit={x:belt.left+belt.width*.88-shellRect.left,y:belt.top+belt.height/2-shellRect.top};
  const finish=slot,p1=curveControl(source,entry,Math.min(28,Math.max(12,Math.abs(entry.x-source.x)*.08)));
@@ -211,12 +232,13 @@ async function animateBoxLoading(source,slot,color){
    if(t<.36){point=quadPoint(source,p1,entry,t/.36);}
    else if(t<.78){const u=(t-.36)/.42;point={x:entry.x+(exit.x-entry.x)*u,y:entry.y-Math.sin(u*Math.PI)*2};}
    else{point=quadPoint(exit,p3,finish,(t-.78)/.22);}
-   antCtx.clearRect(0,0,shellRect.width,shellRect.height);
-   drawTransportBox({x:point.x,y:point.y-Math.sin(t*Math.PI)*3},color,1+Math.sin(t*Math.PI)*.08);
-   if(t>=1){antCtx.clearRect(0,0,shellRect.width,shellRect.height);resolve();return;}
-   antFrame=requestAnimationFrame(frame);
+   ctx.clearRect(0,0,shellRect.width,shellRect.height);
+   const beltTilt=t<.36?-.06*(1-t/.36):t<.78?Math.sin((t-.36)/.42*Math.PI)*.025:.07*(1-(t-.78)/.22);
+   drawTransportBox(ctx,{x:point.x,y:point.y-Math.sin(t*Math.PI)*3},color,1+Math.sin(t*Math.PI)*.08,beltTilt);
+   if(t>=1){ctx.clearRect(0,0,shellRect.width,shellRect.height);flightLayer.remove();resolve();return;}
+   requestAnimationFrame(frame);
   };
-  antFrame=requestAnimationFrame(frame);
+  requestAnimationFrame(frame);
  });
 }
 async function animateBoxDepartures(slotIndices){
@@ -235,7 +257,7 @@ async function animateBoxDepartures(slotIndices){
     const lift=quadPoint(item.start,{x:item.start.x-22,y:(item.start.y+belt.y)/2},{x:item.start.x,y:belt.y},Math.min(1,t*2.2));
     const progress=Math.max(0,(t-.42)/.58);
     const point={x:lift.x+(shellRect.width+35-lift.x)*progress,y:lift.y+(belt.y-lift.y)*progress};
-    drawTransportBox(point,item.color);
+    drawTransportBox(antCtx,point,item.color);
    });
    if(finished===starts.length){antCtx.clearRect(0,0,shellRect.width,shellRect.height);resolve();return;}
    antFrame=requestAnimationFrame(frame);
@@ -282,7 +304,7 @@ async function runResolver(){
  }
 }
 async function onChoose(column){
- if(resetting||loadingSlots.size>0||!canChoose(state))return;
+ if(resetting||!canChoose(state))return;
  const selectedIndex=state.tray[0][column],sourceNode=choicesEl.querySelector('[data-box-index="'+selectedIndex+'"]');
  if(!sourceNode)return;
  const sourceRect=sourceNode.getBoundingClientRect(),shellRect=shell.getBoundingClientRect();
@@ -295,11 +317,18 @@ async function onChoose(column){
  try{await animateBoxLoading(source,slotCenter(freeSlot),box.color);}
  finally{
   loadingSlots.delete(freeSlot);renderSlots();
-  if(!resetting&&!resolverRunning)void runResolver();
+  const landedSlot=slotsEl.children[freeSlot];
+  if(landedSlot&&!window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+   landedSlot.animate(
+    [{transform:"translateY(-5px) scale(.94)",filter:"brightness(1.08)"},{transform:"translateY(2px) scale(1.035)",filter:"brightness(1.03)"},{transform:"translateY(0) scale(1)",filter:"brightness(1)"}],
+    {duration:430,easing:"cubic-bezier(.2,.8,.25,1)"}
+   );
+  }
+  if(!resetting&&!resolverRunning&&loadingSlots.size===0)void runResolver();
  }
 }
 async function restart(){
- if(resetting||resolverRunning)return;
+ if(resetting||resolverRunning||loadingSlots.size>0)return;
  resetting=true;renderChoices();state=createGame();await clearLocal();resetting=false;render();
  $("save-status").textContent="Новая игра";
 }
