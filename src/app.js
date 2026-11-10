@@ -75,7 +75,7 @@ function renderChoices(){
   if(index!==null&&index!==undefined)button.dataset.boxIndex=String(index);
   button.disabled=!box||resetting||resetAfterMenu||state.won||state.lost||!canChoose(state);
   if(box){button.style.setProperty("--ant-color",COLORS[box.color].hex);
-   const crate=document.createElement("span");crate.className="choice-crate";crate.textContent="◆";
+   const crate=document.createElement("span");crate.className="choice-crate";crate.textContent="📦";
    const name=document.createElement("strong");name.textContent=COLORS[box.color].name;
    const count=document.createElement("small");count.textContent=`${box.ants.toLocaleString("ru-RU")} кубиков`;
    button.append(crate,name,count);button.setAttribute("aria-label",`Выбрать бокс: ${COLORS[box.color].name}, ${box.ants} кубиков`);
@@ -91,7 +91,7 @@ function renderChoices(){
   const old=oldPositions.get(button.dataset.boxIndex);
   if(old&&button.dataset.boxIndex!==undefined){const r=button.getBoundingClientRect(),dx=old.left-r.left,dy=old.top-r.top;if((dx||dy)&&!window.matchMedia("(prefers-reduced-motion: reduce)").matches)button.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:"translate(0,0)"}],{duration:320,easing:"cubic-bezier(.2,.75,.25,1)"});}
  }
- $("choice-status").textContent="Выбери один из трёх боксов — дальше муравьишки всё сделают сами";
+ $("choice-status").textContent=`Открытый слой: ${getExposedPixels(state.board).length} блоков · собирай снаружи внутрь`;
  $("queue-count").textContent=`${Math.max(0,getIncoming(state.levelId).length-state.nextContainer)} в запасе`;
 }
 function render(){
