@@ -34,10 +34,9 @@ export function createGame(){
 export function isAccessible(board,x,y){
  const size=board.length;
  if(!board[y]?.[x])return false;
- return [[-1,0],[1,0],[0,-1],[0,1]].some(([dx,dy])=>{
-  const nx=x+dx,ny=y+dy;
-  return nx<0||nx>=size||ny<0||ny>=size||board[ny][nx]==="";
- });
+ return x===0||y===0||x===size-1||y===size-1||
+  board[y][x-1]===""||board[y][x+1]===""||
+  board[y-1]?.[x]===""||board[y+1]?.[x]==="";
 }
 export function findAccessiblePixel(board,color){
  for(let y=0;y<board.length;y++)for(let x=0;x<board[y].length;x++)if(board[y][x]===color&&isAccessible(board,x,y))return{x,y};
@@ -51,15 +50,22 @@ export function findAccessiblePixels(board,color,limit=Infinity){
  return found;
 }
 export function findAntWave(state){
- const wave=[],reserved=new Set();
+ const byColor=new Map(),wave=[],cursor=new Map();
+ for(let y=0;y<state.board.length;y++)for(let x=0;x<state.board[y].length;x++){
+  const color=state.board[y][x];
+  if(color&&isAccessible(state.board,x,y)){
+   if(!byColor.has(color))byColor.set(color,[]);
+   byColor.get(color).push({x,y});
+  }
+ }
  for(let slot=0;slot<state.slots.length;slot++){
   const box=state.slots[slot];if(!box||box.ants<=0)continue;
-  let assigned=0;
-  for(const target of findAccessiblePixels(state.board,box.color)){
-   const key=target.x+","+target.y;if(reserved.has(key))continue;
-   reserved.add(key);wave.push({slot,color:box.color,target});assigned++;
-   if(assigned>=box.ants)break;
+  const targets=byColor.get(box.color)||[];
+  let index=cursor.get(box.color)||0,assigned=0;
+  while(index<targets.length&&assigned<box.ants){
+   wave.push({slot,color:box.color,target:targets[index++]});assigned++;
   }
+  cursor.set(box.color,index);
  }
  return wave;
 }
