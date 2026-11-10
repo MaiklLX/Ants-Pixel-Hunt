@@ -98,3 +98,40 @@ footer span{color:#a6b5a2}
 .bottom-actions{order:7}
 footer{order:8}
 .ant-layer{order:9}
+
+/* KT-023 mobile fit: keep the complete board, five live boxes and 3×3 rack in view. */
+@media(max-width:599px){
+ .app-shell{gap:7px;padding-left:12px;padding-right:12px}
+ .topbar{min-height:34px}
+ .brand-mark{font-size:25px}
+ h1{font-size:18px}
+ .eyebrow{font-size:7px;letter-spacing:1.2px}
+ .subtitle{font-size:8px;letter-spacing:2px;margin-top:3px}
+ .icon-button{width:31px;height:31px}
+ .level-heading h2{font-size:15px}
+ .board-status{font-size:10px}
+ .board-wrap{width:min(100%,34dvh);padding:5px;border-radius:13px}
+ .slots-section,.choices-section,.conveyor-section{gap:4px}
+ .section-line h3{font-size:9px;letter-spacing:.7px}
+ .section-line>span{font-size:8px}
+ .slot{height:53px}
+ .slot .ant-count{font-size:14px}
+ .choices{grid-template-rows:repeat(3,minmax(59px,auto));gap:6px}
+ .choice-card{min-height:59px;padding:4px 3px;gap:2px}
+ .choice-card strong{font-size:12px}
+ .choice-card small{font-size:8px}
+ .choice-number{font-size:6px}
+ .ant-dots{font-size:10px}
+ .conveyor{height:34px}
+ .message{font-size:10px;min-height:14px}
+ .restart-button{padding:7px 11px}
+ footer{font-size:8px;padding-top:5px}
+}
+@media(max-height:760px) and (max-width:599px){
+ .app-shell{gap:5px}
+ .board-wrap{width:min(100%,30dvh)}
+ .slot{height:48px}
+ .choices{grid-template-rows:repeat(3,minmax(53px,auto))}
+ .choice-card{min-height:53px}
+ .conveyor{height:30px}
+}
