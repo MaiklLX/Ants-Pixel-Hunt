@@ -123,7 +123,10 @@ function createAntSprite(color,carrying,gait){
  ctx.fillStyle=body;ctx.beginPath();ctx.arc(3.1,-.35,1.7,0,Math.PI*2);ctx.fill();
  ctx.strokeStyle="#26372d";ctx.lineWidth=.85;
  ctx.beginPath();ctx.moveTo(3.7,-1.6);ctx.quadraticCurveTo(4.2,-4.3,6.3,-4.1);ctx.moveTo(2.4,-1.8);ctx.quadraticCurveTo(1.8,-4.4,3.4,-5);ctx.stroke();
- ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(3.8,-.8,.72,0,Math.PI*2);ctx.fill();\n ctx.fillStyle="#24352c";ctx.beginPath();ctx.arc(4.02,-.8,.28,0,Math.PI*2);ctx.fill();\n ctx.fillStyle="#f3a29a";ctx.globalAlpha=.82;ctx.beginPath();ctx.arc(4.45,1.05,.62,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;\n ctx.fillStyle="#ffffff88";ctx.beginPath();ctx.ellipse(-3.8,-1.15,.9,.45,-.25,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(3.8,-.8,.72,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#24352c";ctx.beginPath();ctx.arc(4.02,-.8,.28,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#f3a29a";ctx.globalAlpha=.82;ctx.beginPath();ctx.arc(4.45,1.05,.62,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+ ctx.fillStyle="#ffffff88";ctx.beginPath();ctx.ellipse(-3.8,-1.15,.9,.45,-.25,0,Math.PI*2);ctx.fill();
  if(carrying){ctx.fillStyle="#f6d36e";ctx.strokeStyle="#8e6c2d";ctx.lineWidth=.7;ctx.beginPath();ctx.arc(-6.3,2.2,1.8,0,Math.PI*2);ctx.fill();ctx.stroke();}
  antSpriteCache.set(key,sprite);return sprite;
 }
