@@ -344,10 +344,10 @@ test("linked crates wait until both partners are at the top and two slots are fr
  assert.deepEqual(s.tray,before,"failed placement must not advance either queue");assert.equal(s.slots.filter(Boolean).length,4);
 });
 test("linked crates are placed atomically into two start compartments",()=>{
- const s=createGame(),pair=getLinkedPair(s.levelId);s.tray[0][0]=pair[0];s.tray[0][1]=pair[1];const untouched=s.tray[0][2];
+ const s=createGame(),pair=getLinkedPair(s.levelId);s.tray[0][0]=pair[0];s.tray[0][1]=pair[1];const untouched=s.tray[0][2],next0=s.tray[1][0],next1=s.tray[1][1];
  assert.equal(chooseTopColumn(s,0),true);assert.equal(s.pendingLinkedIndex,null);
  assert.deepEqual(s.slots.slice(0,2).map(box=>box.sourceIndex),pair);assert.ok(s.slots.slice(0,2).every(box=>box.special==="linked"));
- assert.equal(s.tray[0][0],s.tray[1][0]);assert.equal(s.tray[0][1],s.tray[1][1]);assert.equal(s.tray[0][2],untouched);
+ assert.equal(s.tray[0][0],next0);assert.equal(s.tray[0][1],next1);assert.equal(s.tray[0][2],untouched);
  assert.match(s.message,/вместе/);
 });
 test("atomic linked-pair placement uses the first two free compartments",()=>{
