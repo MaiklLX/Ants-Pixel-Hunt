@@ -64,3 +64,25 @@ footer span{color:#a6b5a2}
 @media(max-height:760px){.app-shell{gap:8px}.board-wrap{width:min(100%,min(390px,44dvh))}.topbar .brand-mark{font-size:28px}.slots .slot{height:50px}.choice-card{min-height:74px}}
 @media(min-width:600px){.app-shell{justify-content:flex-start;padding-top:24px}.board-wrap{width:470px}.topbar{margin-bottom:3px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* KT-023 reference composition: the five live boxes sit directly above the 3x3 rack. */
+.slots-section{order:2}
+.choices-section{order:3}
+.conveyor-section{order:4}
+.slots{gap:6px}
+.slot{height:66px;border:2px solid color-mix(in srgb,var(--box-color,#b9d3b3) 78%,#fff);border-radius:13px;background:linear-gradient(145deg,#fff 0%,color-mix(in srgb,var(--box-color,#eaf5e5) 20%,#fff) 48%,color-mix(in srgb,var(--box-color,#eaf5e5) 38%,#fff) 100%);box-shadow:0 3px 0 color-mix(in srgb,var(--box-color,#9dbb98) 55%,#fff),0 5px 10px #526d461c,inset 0 2px #fff}
+.slot.filled{background:linear-gradient(155deg,#fff,color-mix(in srgb,var(--box-color,#eaf5e5) 24%,#fff));}
+.slot .ant-count{font-size:17px;font-weight:950;color:#344c3a;text-shadow:0 1px #fff}
+.slot .slot-number{font-size:7px;letter-spacing:.45px}
+.slot .slot-color{width:70%;height:7px;border-radius:3px;box-shadow:inset 0 1px 2px #0002}
+.choices{grid-template-rows:repeat(3,minmax(76px,auto));gap:8px}
+.choice-card{min-height:76px;border:2px solid color-mix(in srgb,var(--ant-color,#d3e4ce) 72%,#fff);border-radius:13px;background:linear-gradient(150deg,#fff 0%,color-mix(in srgb,var(--ant-color,#f2f8ed) 14%,#fff) 60%,color-mix(in srgb,var(--ant-color,#f2f8ed) 24%,#fff) 100%);box-shadow:0 3px 0 color-mix(in srgb,var(--ant-color,#d3e4ce) 45%,#fff),0 5px 9px #527e4812}
+.choice-card.locked{background:linear-gradient(150deg,#f5f4ef,#e7e5df);border:2px solid #d4d0c8;opacity:.9}
+.choice-card strong{font-size:14px;text-shadow:0 1px #fff}
+.choice-card small{font-size:10px}
+.choice-number{font-size:7px}
+.board-wrap{width:min(100%,min(470px,48dvh));border-radius:16px;padding:7px;background:linear-gradient(145deg,#fff9f0,#e9dfd3);border:2px solid #e0d0bf;box-shadow:0 5px 0 #cdbba7,0 10px 24px #765f451c}
+.board{border-radius:7px;background:#f0e8df}
+.level-heading h2{font-size:17px}
+@media(max-height:760px){.board-wrap{width:min(100%,min(370px,40dvh))}.slot{height:56px}.choices{grid-template-rows:repeat(3,minmax(64px,auto))}.choice-card{min-height:64px}}
+@media(min-width:600px){.board-wrap{width:min(470px,48dvh)}}
