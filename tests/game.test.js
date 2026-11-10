@@ -17,7 +17,7 @@ test("the box deck contains exactly enough ants to collect every pixel by color"
  for(const row of INITIAL_BOARD)for(const color of row)if(color)totals[color]++;
  const deckTotals={red:0,blue:0,yellow:0,green:0,purple:0};
  for(const box of INCOMING)deckTotals[box.color]+=box.ants;
- assert.deepEqual(deckTotals,totals);assert.ok(INCOMING.length>9);assert.equal(BOX_CAPACITY,100);
+ assert.deepEqual(deckTotals,totals);assert.ok(INCOMING.length>9);assert.equal(BOX_CAPACITY,60);
  assert.deepEqual(INCOMING.slice(0,5).map(box=>box.color),["green","blue","purple","yellow","red"]);
 });
 test("only top-row boxes can be selected; chosen column shifts upward and refills at bottom",()=>{
