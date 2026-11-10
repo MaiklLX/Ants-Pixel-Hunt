@@ -16,7 +16,7 @@ const MAX_ACTIVE_ANTS=36,ANT_FRAME_INTERVAL=1000/30;
 const colorRGB=Object.fromEntries(Object.entries(COLORS).map(([key,value])=>[key,value.hex.match(/[\da-f]{2}/gi).map(v=>parseInt(v,16))]));
 let boardEmptyGradient=null;
 function updateBoardProgress(){
- $("board-status").textContent=`Осталось кубиков: ${state.remaining.toLocaleString("ru-RU")}`;
+ $("board-status").textContent=`Осталось: ${state.remaining.toLocaleString("ru-RU")}`;
  const collected=totalBlocks-state.remaining,percent=Math.round(collected/totalBlocks*100);
  const progress=$("progress-fill"),track=progress?.parentElement;
  if(progress)progress.style.width=percent+"%";
@@ -65,18 +65,16 @@ function renderSlots(){
   const slot=document.createElement("div");
   slot.style.setProperty("--box-color",box?COLORS[box.color].hex:"#d8e5d2");
   slot.className="slot"+(box?" filled":"")+(box?.status==="departing"?" departing":"")+(loadingSlots.has(index)?" loading":"")+((state.activeSlots?.includes(index))?" active":"");
-  const number=document.createElement("span");number.className="slot-number";number.textContent=`ОТСЕК ${index+1}`;slot.append(number);
+  const number=document.createElement("span");number.className="slot-number";number.textContent=String(index+1);slot.append(number);
   if(box){
    const stripe=document.createElement("span");stripe.className="slot-color";stripe.style.background=COLORS[box.color].hex;
-   const count=document.createElement("strong");count.className="ant-count";count.textContent=box.status==="departing"?(countSlotWorkers(workerPromises,index)?`↩ ${countSlotWorkers(workerPromises,index)} в пути`:"ГОТОВ К ОТГРУЗКЕ"):`🐜 ${box.ants.toLocaleString("ru-RU")}`;
+   const count=document.createElement("strong");count.className="ant-count";count.textContent=box.status==="departing"?"…":box.ants.toLocaleString("ru-RU");
    slot.append(stripe,count);
   }else{const plus=document.createElement("span");plus.className="slot-plus";plus.textContent="＋";slot.append(plus);}
   slotsEl.append(slot);
  });
 }
-function renderConveyor(){
- $("sorted-count").textContent=`Отгружено боксов: ${(state.sortedBoxes||0).toLocaleString("ru-RU")}`;
-}
+function renderConveyor(){}
 function renderChoices(){
  const oldPositions=new Map();
  for(const node of choicesEl.querySelectorAll(".choice-card[data-box-index]")){const r=node.getBoundingClientRect();oldPositions.set(node.dataset.boxIndex,{left:r.left,top:r.top});}
@@ -91,22 +89,21 @@ function renderChoices(){
    const crate=document.createElement("span");crate.className="choice-crate";crate.setAttribute("aria-hidden","true");
    const gem=document.createElement("i");gem.style.setProperty("--gem-color",COLORS[box.color].hex);crate.append(gem);
    const name=document.createElement("strong");name.textContent=COLORS[box.color].name;
-   const count=document.createElement("small");count.textContent=`${box.ants.toLocaleString("ru-RU")} муравьёв`;
+   const count=document.createElement("small");count.textContent=`${box.ants.toLocaleString("ru-RU")} 🐜`;
    button.append(crate,name,count);button.setAttribute("aria-label",`Выбрать бокс: ${COLORS[box.color].name}, ${box.ants} муравьёв`);
   }else{button.textContent="Очередь закончилась";button.setAttribute("aria-label","В этой колонке больше нет боксов");}
   button.addEventListener("click",()=>onChoose(col));lane.append(button);
   const preview=document.createElement("div");preview.className="queue-preview";preview.setAttribute("aria-label","Следующие боксы в колонке");
   for(let row=1;row<TRAY_SIZE;row++){const nextIndex=state.tray[row][col],nextBox=nextIndex===null||nextIndex===undefined?null:getIncoming(state.levelId)[nextIndex];
    const peek=document.createElement("span");peek.className="queue-peek"+(nextBox?"":" empty");
-   if(nextBox){peek.style.setProperty("--peek-color",COLORS[nextBox.color].hex);peek.title=`Далее: ${COLORS[nextBox.color].name}, ${nextBox.ants} муравьёв`;}else peek.title="Очередь закончилась";
+   if(nextBox){peek.style.setProperty("--peek-color",COLORS[nextBox.color].hex);peek.textContent=String(nextBox.ants);peek.title=`${COLORS[nextBox.color].name}: ${nextBox.ants} муравьёв`;}else{peek.textContent="·";peek.title="Очередь закончилась";}
    preview.append(peek);
   }
   lane.append(preview);choicesEl.append(lane);
   const old=oldPositions.get(button.dataset.boxIndex);
   if(old&&button.dataset.boxIndex!==undefined){const r=button.getBoundingClientRect(),dx=old.left-r.left,dy=old.top-r.top;if((dx||dy)&&!window.matchMedia("(prefers-reduced-motion: reduce)").matches)button.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:"translate(0,0)"}],{duration:320,easing:"cubic-bezier(.2,.75,.25,1)"});}
  }
- $("choice-status").textContent=`Открытый слой: ${getExposedPixels(state.board).length} блоков · собирай снаружи внутрь`;
- $("queue-count").textContent=`${Math.max(0,getIncoming(state.levelId).length-state.nextContainer)} в запасе`;
+ $("queue-count").textContent=`${Math.max(0,getIncoming(state.levelId).length-state.nextContainer)} ещё`;
 }
 function render(){
  const level=getLevel(state.levelId);
@@ -382,8 +379,13 @@ async function runSlotWorker(slot,target,workerId){
  finally{
   reservedTargets.delete(key);workerPromises.delete(workerId);
   if(!resetting&&canDepartSlot(workerPromises,slot)&&state.slots[slot]?.status==="departing"){
-   await animateBoxDepartures([slot]);completeBoxDeparture(state,slot);
-   renderSlots();renderConveyor();
+   // Snapshot the crate animation, then release the logical slot immediately.
+   const departureAnimation=animateBoxDepartures([slot]);
+   completeBoxDeparture(state,slot);
+   resolverRunning=workerPromises.size>0;
+   state.activeSlots=[...new Set([...workerPromises.values()].map(worker=>worker.slot))];
+   renderSlots();renderChoices();renderConveyor();
+   await departureAnimation;
   }
   resolverRunning=workerPromises.size>0;
   state.activeSlots=[...new Set([...workerPromises.values()].map(worker=>worker.slot))];
