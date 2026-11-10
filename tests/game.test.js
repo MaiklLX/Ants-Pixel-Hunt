@@ -75,6 +75,19 @@ test("pixel stays accounted for until ant delivery, then empty box departs to so
  assert.equal(s.slots[0].status,"departing");assert.equal(freeSlotCount(s),4);
  assert.equal(completeBoxDeparture(s,0),true);assert.equal(freeSlotCount(s),5);assert.equal(s.sortedBoxes,1);
 });
+test("a returned empty box frees its slot immediately so a new box can be chosen",()=>{
+ const s=createGame();
+ s.slots=Array.from({length:SLOT_COUNT},(_,index)=>({color:"red",ants:index===0?0:3,status:index===0?"departing":"waiting"}));
+ const workers=new Map([[41,{slot:0,phase:"returning"}]]);
+ assert.equal(canChoose(s),false);
+ workers.delete(41);
+ assert.equal(canDepartSlot(workers,0),true);
+ assert.equal(completeBoxDeparture(s,0),true);
+ assert.equal(freeSlotCount(s),1);
+ assert.equal(canChoose(s),true);
+ assert.equal(chooseTopColumn(s,0),true);
+});
+
 test("leftmost eligible start compartment receives the next ant turn",()=>{
  const s=createGame();s.board=Array.from({length:5},()=>Array(5).fill(""));
  s.board[0][0]="red";s.board[4][4]="blue";s.remaining=2;
