@@ -122,3 +122,23 @@ test("a full wave never assigns the same board cell to two ants",()=>{
  assert.equal(new Set(keys).size,keys.length);
  assert.ok(wave.every(m=>s.board[m.target.y][m.target.x]===m.color));
 });
+
+test("the complete authored frog level has a verified winning strategy",()=>{
+ const s=createGame();
+ let cursor=0,steps=0;
+ while(!s.won&&!s.lost&&steps<500){
+  steps++;
+  // Keep the five launch slots supplied while rotating through the three rack columns.
+  for(let attempt=0;attempt<TRAY_SIZE&&freeSlotCount(s)>0;attempt++){
+   const column=(cursor+attempt)%TRAY_SIZE;
+   if(chooseTopColumn(s,column)){cursor=(column+1)%TRAY_SIZE;break;}
+  }
+  const wave=findAntWave(s);
+  for(const move of wave)applyAntMove(s,move.slot,move.target);
+  for(let slot=0;slot<SLOT_COUNT;slot++)if(s.slots[slot]?.status==="departing")completeBoxDeparture(s,slot);
+  if(s.remaining===0){s.won=true;break;}
+  if(!wave.length&&freeSlotCount(s)===0&&!s.slots.some(box=>box?.status==="departing"))s.lost=true;
+ }
+ assert.equal(s.won,true,`solver did not clear level: remaining=${s.remaining}, steps=${steps}, slots=${JSON.stringify(s.slots)}`);
+ assert.ok(steps<500);
+});
