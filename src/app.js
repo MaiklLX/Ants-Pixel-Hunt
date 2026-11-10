@@ -53,7 +53,7 @@ function renderChoices(){
    const name=document.createElement("strong");name.textContent=COLORS[box.color].name;
    const count=document.createElement("small");count.textContent=`${box.ants.toLocaleString("ru-RU")} блоков`;
    button.append(pos,dots,name,count);
-   button.setAttribute("aria-label",row===0?`Выбрать бокс: ${COLORS[box.color].name}, ${box.ants} муравьёв`:`Закрытый бокс ряда ${row+1}: ${COLORS[box.color].name}, ${box.ants} крупных блоков`);
+   button.setAttribute("aria-label",row===0?`Выбрать бокс: ${COLORS[box.color].name}, ${box.ants} крупных блоков`:`Закрытый бокс ряда ${row+1}: ${COLORS[box.color].name}, ${box.ants} крупных блоков`);
   }else{button.classList.add("empty-box");button.textContent="Очередь пуста";}
   if(row===0)button.addEventListener("click",()=>onChoose(col));
   choicesEl.append(button);
