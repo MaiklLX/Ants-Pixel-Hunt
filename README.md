@@ -9,7 +9,7 @@
 По подтверждению пользователя проект переводится с Godot на HTML5 / CSS / JavaScript.
 
 - Godot KT-017 сохранён без изменений: [legacy branch](https://github.com/MaiklLX/Ants-Pixel-Hunt/tree/legacy/godot-kt017-2026-11-10).
-- Браузерная версия развивается в отдельной ветке: `migration/browser-html5-2026-11-10`.
+- Текущая публичная браузерная версия находится в `main`; ветка `migration/browser-html5-2026-11-10` сохранена как история миграции.
 - Браузерная версия влита в публичную ветку `main` через [PR #1](https://github.com/MaiklLX/Ants-Pixel-Hunt/pull/1).
 - Исходный Godot-прототип сохранён отдельно и не удалён.
 
