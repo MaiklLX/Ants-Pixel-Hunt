@@ -1,5 +1,6 @@
-import {COLORS,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,LEVELS,getLevel,getIncoming,createGame,canChoose,chooseTopColumn,findAntWave,applyAntMove,completeBoxDeparture,serializeGame,restoreGame,isDefeat,countOutboundBySlot,countSlotWorkers,canDepartSlot} from "./game.js";
+import {COLORS,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,LEVELS,getLevel,getIncoming,createGame,canChoose,chooseTopColumn,findAntWave,applyAntMove,completeBoxDeparture,isDefeat,countOutboundBySlot,countSlotWorkers,canDepartSlot} from "./game.js";
 import {getAntTripFrame,getAntLaunchDelay} from "./ant-animation.js";
+import {isCampaignLevelUnlocked,getNextCampaignLevel} from "./campaign.js";
 const $=id=>document.getElementById(id);
 const shell=$("app-shell"),boardEl=$("board"),slotsEl=$("slots"),choicesEl=$("choices"),antLayer=$("ant-layer"),conveyorEl=$("conveyor");
 const boardCtx=boardEl.getContext("2d"),antCtx=antLayer.getContext("2d");
@@ -7,8 +8,8 @@ let state=createGame(),resolverRunning=false,resetting=false,resetAfterMenu=fals
 const CAMPAIGN_KEY="ants-campaign-progress";
 function completedLevels(){try{return new Set(JSON.parse(localStorage.getItem(CAMPAIGN_KEY)||"[]"));}catch{return new Set();}}
 function markLevelComplete(levelId){const done=completedLevels();done.add(levelId);try{localStorage.setItem(CAMPAIGN_KEY,JSON.stringify([...done]));}catch{}}
-function isLevelUnlocked(level){const index=LEVELS.findIndex(item=>item.id===level.id);return index<=0||completedLevels().has(LEVELS[index-1].id);}
-function nextLevel(){const index=LEVELS.findIndex(item=>item.id===state.levelId);return LEVELS[index+1]||null;}
+function isLevelUnlocked(level){return isCampaignLevelUnlocked(LEVELS,completedLevels(),level.id);}
+function nextLevel(){return getNextCampaignLevel(LEVELS,state.levelId);}
 const loadingSlots=new Set(),workerPromises=new Map(),reservedTargets=new Set(),activeAnts=new Map();
 let workerSequence=0;
 const colorRGB=Object.fromEntries(Object.entries(COLORS).map(([key,value])=>[key,value.hex.match(/[\da-f]{2}/gi).map(v=>parseInt(v,16))]));
