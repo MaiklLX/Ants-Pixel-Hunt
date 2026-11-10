@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {createGame,INITIAL_BOARD,INCOMING,isAccessible,findAccessiblePixel,findAccessiblePixels,chooseTopColumn,findNextMove,applyAntMove,resolveAll,freeSlotCount,isDefeat,SIZE,SLOT_COUNT,TRAY_SIZE,canChoose,restoreGame,serializeGame} from "../src/game.js";
+import {createGame,INITIAL_BOARD,INCOMING,isAccessible,findAccessiblePixel,findAccessiblePixels,findAntWave,chooseTopColumn,findNextMove,applyAntMove,resolveAll,freeSlotCount,isDefeat,SIZE,SLOT_COUNT,TRAY_SIZE,canChoose,restoreGame,serializeGame} from "../src/game.js";
 test("level has a 7x7 board, five launch slots and a 3x3 box rack",()=>{
  const s=createGame();assert.equal(INITIAL_BOARD.length,SIZE);assert.ok(INITIAL_BOARD.every(r=>r.length===SIZE));
  assert.equal(s.slots.length,SLOT_COUNT);assert.equal(s.tray.length,TRAY_SIZE);assert.ok(s.tray.every(r=>r.length===TRAY_SIZE));
@@ -45,6 +45,14 @@ test("250x250 board survives save restoration without falling back to the demo f
  assert.equal(restored.board.length,250);
  assert.equal(restored.board[249].length,250);
  assert.deepEqual(findAccessiblePixel(restored.board,"red"),{x:0,y:0});
+});
+test("swarm planner sends eligible ants together and reserves targets left-to-right",()=>{
+ const s=createGame();s.board=Array.from({length:SIZE},()=>Array(SIZE).fill("green"));
+ s.board[0][0]="red";s.board[0][1]="red";s.board[0][2]="red";s.remaining=49;
+ s.slots[0]={color:"red",ants:2};s.slots[3]={color:"red",ants:2};
+ const wave=findAntWave(s);
+ assert.deepEqual(wave.map(move=>[move.slot,move.target.x,move.target.y]),[[0,0,0],[0,1,0],[3,2,0]]);
+ assert.equal(new Set(wave.map(move=>move.target.x+","+move.target.y)).size,wave.length);
 });
 test("findAccessiblePixels returns a bounded wave of matching exposed pixels",()=>{
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill("green"));
