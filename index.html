@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101a16">
+  <meta name="description" content="Муравьишки: Пиксельная охота — цветная пиксельная головоломка">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="stylesheet" href="./src/styles.css">
+  <title>Муравьишки: Пиксельная охота</title>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="brand-mark" aria-hidden="true">🐜</div>
+      <div><p class="eyebrow">МАЛЕНЬКИЕ ГЕРОИ · БОЛЬШАЯ ОХОТА</p><h1>МУРАВЬИШКИ</h1><p class="subtitle">ПИКСЕЛЬНАЯ ОХОТА</p></div>
+      <button id="sound-toggle" class="icon-button" type="button" aria-label="Звук выключен" title="Звук">♫</button>
+    </header>
+
+    <section class="level-heading">
+      <span class="level-kicker">ПОЛЕВАЯ ОПЕРАЦИЯ</span>
+      <h2>Уровень 1</h2>
+      <p id="board-status" class="board-status">Пикселей осталось: 49</p>
+    </section>
+
+    <section class="board-wrap" aria-label="Игровое поле">
+      <div id="board" class="board" role="grid" aria-label="Поле из цветных пикселей"></div>
+      <div id="ant-layer" class="ant-layer" aria-hidden="true"></div>
+      <div class="board-corners" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    </section>
+
+    <section class="slots-section">
+      <div class="section-line"><h3>ПУСКОВЫЕ ЯЧЕЙКИ</h3><span>ПРИОРИТЕТ 1 → 5</span></div>
+      <div id="slots" class="slots" aria-label="Пять пусковых ячеек"></div>
+    </section>
+
+    <section class="incoming-panel">
+      <div class="incoming-icon" aria-hidden="true">📦</div>
+      <div class="incoming-copy"><span class="section-label">СЛЕДУЮЩИЙ КОНТЕЙНЕР</span><strong id="queue-status">Жёлтые · 3 муравья</strong></div>
+      <div id="queue-count" class="queue-count">1 / 17</div>
+    </section>
+
+    <p id="message" class="message" role="status" aria-live="polite">Свободных пусковых ячеек: 5 из 5</p>
+    <div class="bottom-actions">
+      <button id="restart" class="restart-button" type="button"><span aria-hidden="true">↻</span> Начать заново</button>
+      <span id="save-status" class="save-status">Сохранение на устройстве</span>
+    </div>
+    <footer>Муравьишки · автономная игра <span>v0.1 · браузерная сборка</span></footer>
+  </main>
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>
