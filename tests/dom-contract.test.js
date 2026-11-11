@@ -74,3 +74,22 @@ test("KT-074 forest plaque styling stays dark and includes icon sizing", async (
   assert.ok(styles.includes(".hub-location-icon svg"));
   assert.ok(styles.includes("background:linear-gradient(145deg,#30483a 0%,#263c30"));
 });
+
+
+test("KT-075 main menu ties the title and diorama together with a forest scene label", () => {
+  const menuStart = html.indexOf('<section id="main-menu"');
+  const menuEnd = html.indexOf('<header class="topbar"', menuStart);
+  const menu = html.slice(menuStart, menuEnd);
+  assert.match(menu, /<span class="garden-stamp">ЛЕСНАЯ ПОЛЯНКА<\\/span>/);
+  assert.ok(menu.indexOf('class="menu-brand"') < menu.indexOf('class="menu-garden"'));
+  assert.ok(menu.indexOf('class="menu-garden"') < menu.indexOf('class="menu-progress-card"'));
+  assert.match(html, /app-version" content="KT-075"/);
+});
+
+test("KT-075 keeps the home menu compact and its scene label legible", async () => {
+  const styles = await readFile(new URL("../src/styles.css", import.meta.url), "utf8");
+  assert.ok(styles.includes("KT-075 — unify the menu title, diorama and navigation"));
+  assert.ok(styles.includes(".garden-stamp::before"));
+  assert.ok(styles.includes("@media(max-height:700px)"));
+  assert.ok(styles.includes("background:#1c3029b8"));
+});
