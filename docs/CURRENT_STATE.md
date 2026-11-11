@@ -12,13 +12,13 @@
 
 ## Последняя сверенная игровая база
 - Дата: 11 ноября 2026.
-- Последняя проверенная кодовая точка KT-076: `03ef6bb4ccd1f2f85c0e87924452c2271f0f99da` (основной кодовый commit `2eb6b27dd8c7f31079ce12a33b13ff90bc6a7f06`, затем минимальная коррекция DOM-теста `03ef6bb4ccd1f2f85c0e87924452c2271f0f99da`).
-- KT-076: единые паузоустойчивые часы для рейсов муравьёв, походки, feedback-колец и анимаций перемещения боксов; скрытое время страницы не прибавляется к игровым анимациям.
-- App version KT-076; PWA shell cache v46. `service-worker.js` и `public/service-worker.js` идентичны.
-- GitHub Actions для проверенного SHA `03ef6bb4ccd1f2f85c0e87924452c2271f0f99da`: Pages run [43000997858](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43000997858) — 66/66 тестов, production build и deploy PASS; Godot run [43000997759](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43000997759) — import, rules tests и smoke test PASS; Android run [43000997894](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43000997894) — 66/66 тестов, production build, debug APK build и artifact upload PASS.
-- KT-075 — композиция главного меню и лесная метка; отдельная запись восстановлена в [KT-075](KT-075_HOME_MENU_COMPOSITION.md). Последний CI KT-075: Pages [42999455756](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/42999455756), Godot [42999455704](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/42999455704), Android [42999455670](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/42999455670) — все PASS.
-- Публичный Pages deployment для KT-076 подтверждён успешным шагом deploy в run 43000997858. Прямая загрузка публичного URL из текущего инструментария недоступна; браузерный скриншот и физическое тестирование на телефоне не проводились. Android workflow собрал debug APK, но установка и тест на устройстве не выполнялись.
-- Игровые правила, скорость рейсов, маршруты, очередь, слоты, экономика и сохранения не менялись.
+- HEAD main: KT-079 `e7a82e5ff1b863bbb2782046d3946c235fe9703a`; следующий визуальный этап KT-080 готовится в этой сессии.
+- KT-079: Catmull–Rom позиция и направление каждого муравья вычисляются одной выборкой с аналитической производной; траектория и игровой ритм не менялись.
+- App version KT-079; PWA shell cache v49. Оба service worker файла идентичны.
+- GitHub Actions для KT-079: Pages run [43004885991](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43004885991) — PASS; Godot run [43004886251](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43004886251) — PASS; Android debug APK run [43004885978](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43004885978) — PASS.
+- Для KT-079 workflow подтвердили публикацию Pages, Godot-проверки и сборку Android debug APK с artifact upload. APK на физическом устройстве не устанавливался; браузерный скриншот и ручная проверка на телефоне не проводились.
+- KT-078: карта лесных троп и архитектура муравейника; app version KT-078, cache v48. CI Pages, Godot и Android PASS на SHA `44e7553c46b236e36ff5381c74dd48ec3c3adfbb`.
+- Игровые правила, экономика, прогресс, управление и сохранения в KT-079 не менялись.
 
 ## Реализовано
 - Web/PWA на HTML5, CSS, JavaScript и Vite.
