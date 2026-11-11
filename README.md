@@ -53,6 +53,7 @@
 - [KT-079 — оптимизация позы муравья](docs/KT-079_ANT_TRAIL_POSE_OPTIMIZATION.md)
 - [KT-080 — общий лесной стиль и переходы](docs/KT-080_WOODLAND_TRANSITIONS.md)
 - [KT-081 — единые кнопки и индикаторы прогресса](docs/KT-081_CONTROL_AND_PROGRESS_SYSTEM.md)
+- KT-082 — единая визуальная иерархия игрового HUD
 - [Игровая спецификация](docs/GAMEPLAY_SPEC.md)
 - [Установка PWA](docs/WEB_INSTALL.md)
 
