@@ -1784,3 +1784,51 @@ body{
 .menu-level-card:active:not(:disabled),.hub-location:active{filter:brightness(1.08)}
 @media(max-width:380px){.hub-location-icon svg{width:21px;height:21px}.menu-progress-top strong{font-size:11px}}
 @media(prefers-reduced-motion:reduce){.menu-progress-card,.menu-level-card,.hub-location{transition:none}}
+
+
+/* KT-075 — unify the menu title, diorama and navigation into one forest hub. */
+.main-menu{gap:clamp(8px,1.65dvh,13px)}
+.menu-brand{min-height:50px;gap:0;text-align:center}
+.menu-brand>div{position:relative;padding-bottom:7px}
+.menu-brand>div::after{content:"";display:block;width:42px;height:2px;margin:7px auto 0;border-radius:4px;background:linear-gradient(90deg,transparent,#b7a66d 22%,#d7c58d 50%,#b7a66d 78%,transparent)}
+.menu-brand h1{font-size:clamp(26px,6.6vw,34px);letter-spacing:3.2px;color:#d7e2bd;text-shadow:0 2px 0 #263b2c,0 5px 16px #0b1a12a6}
+.menu-brand .subtitle{margin-top:1px;color:#b6c69e;font-size:9px;letter-spacing:3.5px}
+.menu-brand::after{display:inline-flex;align-items:center;justify-content:center;margin-top:1px;padding:4px 11px;border:1px solid #526b4c;border-radius:999px;background:linear-gradient(180deg,#2d4433,#23382b);box-shadow:inset 0 1px #ffffff0b;color:#cdbb82;font-size:8px;letter-spacing:1.7px}
+.menu-garden{height:clamp(160px,25dvh,216px);border:1px solid #71865f;border-radius:23px;box-shadow:0 5px 0 #14251d,0 13px 25px #07140f88,inset 0 1px #ffffff1b}
+.garden-stamp{position:absolute;z-index:5;top:11px;left:12px;display:inline-flex;align-items:center;gap:7px;padding:5px 9px;border:1px solid #9ca97966;border-radius:8px;background:#1c3029b8;box-shadow:inset 0 1px #ffffff14;color:#e0d4a3;font-size:8px;font-weight:900;letter-spacing:1.2px;text-shadow:0 1px #17251c;backdrop-filter:blur(5px)}
+.garden-stamp::before{content:"";width:5px;height:5px;border-radius:1px;background:#d8bd78;box-shadow:0 0 7px #d8bd7888;transform:rotate(45deg)}
+.menu-progress-card{padding:10px 15px 9px;border-radius:15px}
+.menu-progress-top{align-items:baseline}
+.menu-progress-track{margin-top:8px}
+.menu-level-card{min-height:70px;border-radius:16px}
+.level-thumb{border-radius:12px}
+.hub-locations{gap:9px}
+.hub-location{border-radius:14px}
+.menu-actions{gap:4px}
+.menu-primary{min-height:52px;border-radius:14px;box-shadow:0 4px 0 #3b583b,0 8px 17px #07140f66,inset 0 1px #ffffff25}
+.menu-link{min-height:31px;padding-top:6px;padding-bottom:6px}
+@media(min-width:700px){
+  .main-menu{gap:12px}
+  .menu-brand{min-height:54px}
+  .menu-garden{height:clamp(190px,25dvh,232px)}
+  .menu-progress-card{padding:12px 17px}
+  .menu-level-card{min-height:76px}
+}
+@media(max-width:380px){
+  .main-menu{gap:7px}
+  .menu-brand{min-height:43px}
+  .menu-brand h1{font-size:clamp(24px,7vw,28px);letter-spacing:2.5px}
+  .menu-brand::after{padding:3px 9px;font-size:7px}
+  .menu-garden{height:clamp(140px,22dvh,170px);border-radius:19px}
+  .garden-stamp{top:8px;left:8px;padding:4px 7px;font-size:7px}
+  .menu-progress-card{padding:8px 10px}
+  .menu-level-card{min-height:61px}
+}
+@media(max-height:700px){
+  .menu-brand{min-height:40px}
+  .menu-garden{height:clamp(120px,19dvh,150px)}
+  .garden-stamp{top:7px;left:8px}
+}
+@media(prefers-reduced-motion:reduce){
+  .garden-stamp{backdrop-filter:none}
+}
