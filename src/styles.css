@@ -1832,3 +1832,27 @@ body{
 @media(prefers-reduced-motion:reduce){
   .garden-stamp{backdrop-filter:none}
 }
+
+
+/* KT-077 — add quiet foreground depth and independent firefly rhythms. */
+.menu-garden-art .firefly{
+  transform-box:fill-box;
+  transform-origin:center;
+  will-change:transform,opacity;
+}
+.menu-garden-art .firefly-a{animation:firefly-drift 5.8s ease-in-out infinite alternate}
+.menu-garden-art .firefly-b{animation:firefly-drift 7.1s ease-in-out -2.4s infinite alternate-reverse}
+.menu-garden-art .firefly-c{animation:firefly-drift 6.4s ease-in-out -4.1s infinite alternate}
+.menu-garden-art .garden-leaf-sway{
+  transform-box:fill-box;
+  transform-origin:center bottom;
+  animation:meadow-leaf-sway 7.5s ease-in-out infinite;
+}
+.menu-garden-art .garden-leaf-right{animation-delay:-3.8s;animation-duration:8.4s}
+@keyframes meadow-leaf-sway{
+  0%,100%{transform:rotate(-1deg);opacity:.88}
+  50%{transform:rotate(1.2deg);opacity:1}
+}
+@media(prefers-reduced-motion:reduce){
+  .menu-garden-art .firefly,.menu-garden-art .garden-leaf-sway{animation:none;will-change:auto}
+}
