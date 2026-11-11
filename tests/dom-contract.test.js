@@ -96,11 +96,24 @@ test("KT-075 keeps the home menu compact and its scene label legible", async () 
 
 test("KT-076 freezes ant, pickup and crate animation time while the page is hidden", async () => {
   const source = await readFile(new URL("../src/app.js", import.meta.url), "utf8");
-  assert.match(html, /app-version" content="KT-076"/);
+  assert.match(html, /app-version" content="KT-077"/);
   assert.ok(source.includes('document.addEventListener("visibilitychange"'));
   assert.ok(source.includes("animationClock.pause()"));
   assert.ok(source.includes("animationClock.resume()"));
   assert.equal(source.split("animationClock.fromFrame(timestamp)").length - 1, 3);
   assert.ok(source.includes("startTime:animationClock.now()"));
   assert.equal(source.split("performance.now()").length - 1, 1);
+});
+
+
+test("KT-077 gives the forest diorama layered foreground and staggered fireflies", async () => {
+  const styles = await readFile(new URL("../src/styles.css", import.meta.url), "utf8");
+  assert.match(html, /class=["']firefly firefly-a["']/);
+  assert.match(html, /class=["']firefly firefly-b["']/);
+  assert.match(html, /class=["']firefly firefly-c["']/);
+  assert.match(html, /class=["']garden-foreground["']/);
+  assert.match(html, /garden-leaf-left/);
+  assert.ok(styles.includes("KT-077 — add quiet foreground depth"));
+  assert.ok(styles.includes("@keyframes meadow-leaf-sway"));
+  assert.match(styles, /prefers-reduced-motion:reduce[\s\S]*garden-leaf-sway\{animation:none/);
 });
