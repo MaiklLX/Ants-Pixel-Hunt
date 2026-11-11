@@ -14,3 +14,18 @@ export function getAntLaunchDelay(sequence,seed=0){
  const jitter=Math.max(0,Math.min(1,Number(seed)||0))*28;
  return order*48+jitter;
 }
+
+
+/** A monotonic animation clock that stops advancing while the document is hidden. */
+export function createPausableClock(readNow=()=>performance.now()){
+ let pausedAt=null,pausedDuration=0;
+ const toActiveTime=timestamp=>timestamp-pausedDuration-(pausedAt===null?0:Math.max(0,timestamp-pausedAt));
+ return{
+  now(){return toActiveTime(readNow());},
+  fromFrame(timestamp){return toActiveTime(timestamp);},
+  pause(timestamp=readNow()){if(pausedAt===null)pausedAt=timestamp;},
+  resume(timestamp=readNow()){
+   if(pausedAt!==null){pausedDuration+=Math.max(0,timestamp-pausedAt);pausedAt=null;}
+  }
+ };
+}

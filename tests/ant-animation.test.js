@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {getAntTripFrame} from "../src/ant-animation.js";
+import {createPausableClock,getAntLaunchDelay,getAntTripFrame} from "../src/ant-animation.js";
 
 test("ant trip waits for its staggered launch without starting motion early",()=>{
  assert.deepEqual(getAntTripFrame(120,150,2000,1800),{
@@ -31,10 +31,40 @@ test("ant trip returns along its own route and completes only after return durat
  assert.equal(done.picked,true);
 });
 
-import {getAntLaunchDelay} from "../src/ant-animation.js";
 test("ant launch stagger repeats in short bounded waves instead of growing for the whole level",()=>{
  assert.equal(getAntLaunchDelay(0,0),0);assert.equal(getAntLaunchDelay(1,0),48);
  assert.equal(getAntLaunchDelay(7,0),336);assert.equal(getAntLaunchDelay(8,0),0);
  assert.equal(getAntLaunchDelay(500,0),getAntLaunchDelay(500%8,0));
  assert.ok(getAntLaunchDelay(987654,1)<=364);
+});
+
+
+test("pausable animation clock freezes ant and box timelines while the document is hidden",()=>{
+ let now=1000;
+ const clock=createPausableClock(()=>now);
+ const startedAt=clock.now();
+ now=1700;
+ clock.pause();
+ now=11700;
+ const pausedAt=clock.fromFrame(now);
+ assert.equal(pausedAt-startedAt,700);
+ assert.equal(getAntTripFrame(pausedAt-startedAt,0,1000,1000).finished,false);
+ assert.equal(clock.now(),pausedAt);
+ now=12700;
+ clock.resume();
+ assert.equal(clock.now(),pausedAt);
+ now=13000;
+ assert.equal(clock.fromFrame(now)-startedAt,1000);
+});
+
+test("pausable animation clock ignores duplicate hide and show notifications",()=>{
+ let now=0;
+ const clock=createPausableClock(()=>now);
+ now=50;clock.pause();
+ now=75;clock.pause();
+ now=175;clock.resume();
+ now=200;clock.resume();
+ assert.equal(clock.now(),75);
+ now=225;
+ assert.equal(clock.now(),100);
 });

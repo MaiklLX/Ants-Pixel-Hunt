@@ -1,11 +1,17 @@
 import {COLORS,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,LEVELS,getLevel,getIncoming,createGame,canChoose,chooseTopColumn,isLockedBox,getLinkedPartner,findAntWave,applyAntMove,completeBoxDeparture,isDefeat,getExposedPixels,countOutboundBySlot,countSlotWorkers,canDepartSlot} from "./game.js";
-import {getAntTripFrame,getAntLaunchDelay} from "./ant-animation.js";
+import {getAntTripFrame,getAntLaunchDelay,createPausableClock} from "./ant-animation.js";
 import {isCampaignLevelUnlocked,getNextCampaignLevel} from "./campaign.js";
 import {BUILDINGS,createEconomy,normalizeEconomy,collectCube,completeMeadow,purchaseBuilding,buildingCost} from "./economy.js";
 const $=id=>document.getElementById(id);
 const shell=$("app-shell"),boardEl=$("board"),slotsEl=$("slots"),choicesEl=$("choices"),antLayer=$("ant-layer"),conveyorEl=$("conveyor");
 const boardCtx=boardEl.getContext("2d"),antCtx=antLayer.getContext("2d");
 let state=createGame(),resolverRunning=false,resetting=false,resetAfterMenu=false,antFrame=0,antCanvasWidth=0,antCanvasHeight=0,gameStarted=false,totalBlocks=state.remaining;
+const animationClock=createPausableClock(()=>performance.now());
+if(document.hidden)animationClock.pause();
+document.addEventListener("visibilitychange",()=>{
+ if(document.hidden)animationClock.pause();
+ else animationClock.resume();
+});
 const CAMPAIGN_KEY="ants-campaign-progress";
 const ECONOMY_STORAGE_KEY="ants-colony-economy-v1";
 function loadEconomy(){try{return normalizeEconomy(JSON.parse(localStorage.getItem(ECONOMY_STORAGE_KEY)||"null"));}catch{return createEconomy();}}
@@ -296,8 +302,8 @@ function createAntSprite(color,carrying,gait){
  }
  antSpriteCache.set(key,sprite);return sprite;
 }
-function drawAnt(ctx,point,color,carrying,index,direction=0){
- const phase=performance.now()*.008+index*1.73,gait=Math.floor(phase/1.7)%4;
+function drawAnt(ctx,point,color,carrying,index,direction=0,timestamp=animationClock.now()){
+ const phase=timestamp*.008+index*1.73,gait=Math.floor(phase/1.7)%4;
  const bob=Math.sin(phase*1.7+index*.31)*.8;
  ctx.save();ctx.translate(point.x,point.y+bob);
  ctx.fillStyle="#36523d26";ctx.beginPath();ctx.ellipse(0,7,8,2.6,0,0,Math.PI*2);ctx.fill();
@@ -355,16 +361,17 @@ function drawPickupEffects(timestamp){
 function renderAntFrame(timestamp){
  if(timestamp-lastAntFrameAt<ANT_FRAME_INTERVAL){antFrame=requestAnimationFrame(renderAntFrame);return;}
  lastAntFrameAt=timestamp;
+ const clockTime=animationClock.fromFrame(timestamp);
  antCtx.clearRect(0,0,antCanvasWidth,antCanvasHeight);
  for(const [workerId,ant] of activeAnts){
-  const phase=getAntTripFrame(timestamp-ant.startTime,ant.delay,ant.outbound,ant.returning);
+  const phase=getAntTripFrame(clockTime-ant.startTime,ant.delay,ant.outbound,ant.returning);
   if(phase.waiting)continue;
   if(phase.picked&&!ant.picked){
    ant.picked=true;
    if(applyAntMove(state,ant.move.slot,ant.move.target)){
     ant.onPickup();
     const pickupPoint=cellCenter(ant.move.target.x,ant.move.target.y);
-    pickupEffects.push({x:pickupPoint.x,y:pickupPoint.y,color:ant.move.color,startedAt:timestamp,seed:workerId*.618});
+    pickupEffects.push({x:pickupPoint.x,y:pickupPoint.y,color:ant.move.color,startedAt:clockTime,seed:workerId*.618});
    }
    renderBoardAfterPickup(ant.move.target);
    $("message").textContent="Муравьишки собирают кубики по извилистым тропинкам";
@@ -380,9 +387,9 @@ function renderAntFrame(timestamp){
   const before=trailPoint(trail,Math.max(0,phase.progress-.012));
   const after=trailPoint(trail,Math.min(1,phase.progress+.012));
   const tangent={x:after.x-before.x,y:after.y-before.y};
-  drawAnt(antCtx,point,ant.move.color,phase.returningNow,workerId,Math.atan2(tangent.y,tangent.x));
+  drawAnt(antCtx,point,ant.move.color,phase.returningNow,workerId,Math.atan2(tangent.y,tangent.x),clockTime);
  }
- drawPickupEffects(timestamp);
+ drawPickupEffects(clockTime);
  if(activeAnts.size||pickupEffects.length)antFrame=requestAnimationFrame(renderAntFrame);
  else antFrame=0;
 }
@@ -394,7 +401,7 @@ function animateAntTrip(move,index,onPickup=()=>{}){
  const distance=Math.hypot(end.x-start.x,end.y-start.y);
  const delay=getAntLaunchDelay(index,seed),outbound=2050+distance*.82,returning=1800+distance*.68;
  return new Promise(resolve=>{
-  activeAnts.set(index,{move,onPickup,resolve,startTime:performance.now(),delay,outbound,returning,outboundTrail,returnTrail});
+  activeAnts.set(index,{move,onPickup,resolve,startTime:animationClock.now(),delay,outbound,returning,outboundTrail,returnTrail});
   if(!antFrame)antFrame=requestAnimationFrame(renderAntFrame);
  });
 }
@@ -442,11 +449,11 @@ async function animateBoxLoading(source,slot,color){
  flightLayer.style.width=shellRect.width+"px";flightLayer.style.height=shellRect.height+"px";shell.append(flightLayer);
  const ctx=flightLayer.getContext("2d");ctx.setTransform(dpr,0,0,dpr,0,0);
  const control=curveControl(source,slot,Math.min(46,Math.max(24,Math.abs(slot.y-source.y)*.16)));
- const duration=1120,startTime=performance.now();let lastFrame=0;
+ const duration=1120,startTime=animationClock.now();let lastFrame=0;
  const ease=t=>t*t*(3-2*t);
  return new Promise(resolve=>{const frame=timestamp=>{
   if(timestamp-lastFrame<1000/30){requestAnimationFrame(frame);return;}lastFrame=timestamp;
-  const t=Math.min(1,(timestamp-startTime)/duration),progress=ease(t),point=quadPoint(source,control,slot,progress);
+  const clockTime=animationClock.fromFrame(timestamp),t=Math.min(1,(clockTime-startTime)/duration),progress=ease(t),point=quadPoint(source,control,slot,progress);
   ctx.clearRect(0,0,shellRect.width,shellRect.height);
   const tilt=(1-progress)*-.055+Math.sin(progress*Math.PI)*.012,lift=Math.sin(progress*Math.PI)*5,scale=1+Math.sin(progress*Math.PI)*.035;
   const animatedPoint={x:point.x,y:point.y-lift};
@@ -462,11 +469,11 @@ async function animateBoxDepartures(slotIndices,simultaneous=false){
  layer.style.width=shellRect.width+"px";layer.style.height=shellRect.height+"px";shell.append(layer);
  const ctx=layer.getContext("2d");ctx.setTransform(dpr,0,0,dpr,0,0);
  const starts=slotIndices.map(slot=>({slot,start:slotCenter(slot),color:state.slots[slot]?.color||"yellow"}));
- const belt=pointFor(conveyorEl),startTime=performance.now(),duration=1900;let lastFrame=0;const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+ const belt=pointFor(conveyorEl),startTime=animationClock.now(),duration=1900;let lastFrame=0;const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
  return new Promise(resolve=>{
   const frame=timestamp=>{
    if(timestamp-lastFrame<1000/30){requestAnimationFrame(frame);return;}lastFrame=timestamp;
-   const elapsed=timestamp-startTime;ctx.clearRect(0,0,shellRect.width,shellRect.height);
+   const elapsed=animationClock.fromFrame(timestamp)-startTime;ctx.clearRect(0,0,shellRect.width,shellRect.height);
    let finished=0;
    starts.forEach((item,index)=>{
     const delay=simultaneous?0:index*170,t=Math.max(0,Math.min(1,(elapsed-delay)/duration));

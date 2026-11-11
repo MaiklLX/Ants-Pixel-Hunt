@@ -93,3 +93,14 @@ test("KT-075 keeps the home menu compact and its scene label legible", async () 
   assert.ok(styles.includes("@media(max-height:700px)"));
   assert.ok(styles.includes("background:#1c3029b8"));
 });
+
+
+test("KT-076 freezes ant, pickup and crate animation time while the page is hidden", async () => {
+  const source = await readFile(new URL("../src/app.js", import.meta.url), "utf8");
+  assert.ok(source.includes('document.addEventListener("visibilitychange"'));
+  assert.ok(source.includes("animationClock.pause()"));
+  assert.ok(source.includes("animationClock.resume()"));
+  assert.equal(source.split("animationClock.fromFrame(timestamp)").length - 1, 3);
+  assert.ok(source.includes("startTime:animationClock.now()"));
+  assert.equal(source.split("performance.now()").length - 1, 1);
+});
