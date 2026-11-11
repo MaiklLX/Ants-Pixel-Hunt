@@ -2212,3 +2212,104 @@ button:not(:disabled):active{filter:brightness(.96)}
     transition:none;
   }
 }
+
+
+/* KT-082 — a calmer, unified visual hierarchy for the live arena HUD. */
+.topbar{
+  border-bottom:1px solid #3c5544;
+  background:linear-gradient(180deg,#263d31aa,transparent);
+}
+.topbar h1{
+  text-shadow:0 2px 9px #07140f88;
+}
+.level-heading{
+  position:relative;
+  padding:5px 10px 7px;
+  border-bottom:1px solid #3a5142;
+}
+.level-kicker{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:3px 8px;
+  border:1px solid #53694e;
+  border-radius:999px;
+  background:#263b2e;
+  color:#c8b47c;
+  letter-spacing:1.25px;
+}
+.level-kicker::before{
+  content:"";
+  width:5px;height:5px;
+  border-radius:50%;
+  background:#a8bd82;
+  box-shadow:0 0 0 3px #a8bd8222;
+}
+.level-heading h2{
+  margin-top:4px;
+  text-shadow:0 2px 10px #07140f66;
+}
+.board-status{
+  border-color:#53694f;
+  background:linear-gradient(145deg,#30483a,#263b30);
+  box-shadow:inset 0 1px #ffffff0c,0 2px 6px #07140f66;
+}
+.slots-section,.choices-section{
+  position:relative;
+  padding:7px 8px 8px;
+  border:1px solid #405a48;
+  border-radius:13px;
+  background:linear-gradient(155deg,#263d31dd,#20352bdf);
+  box-shadow:inset 0 1px #ffffff09,0 3px 9px #07140f44;
+}
+.slots-section::before,.choices-section::before{
+  content:"";
+  position:absolute;
+  left:12px;right:12px;top:0;
+  height:1px;
+  background:linear-gradient(90deg,transparent,#a7ad704d,transparent);
+  pointer-events:none;
+}
+.section-line{
+  padding:0 2px 2px;
+}
+.section-line h3{
+  letter-spacing:1.15px;
+}
+.section-line h3::before{
+  width:5px;height:5px;
+  background:#a9b77b;
+  box-shadow:0 0 0 3px #a9b77b20;
+}
+.slots{
+  padding:4px;
+  border-radius:11px;
+  background:linear-gradient(180deg,#1d3026,#192b23);
+  border-color:#3b5543;
+  box-shadow:inset 0 2px 5px #07140f99,0 1px #ffffff08;
+}
+.slot{
+  border-radius:9px;
+}
+.choices{
+  border-radius:10px;
+}
+.choice-card{
+  border-radius:10px;
+}
+.conveyor-section{
+  padding:0 7px;
+}
+.conveyor{
+  border-color:#53694f;
+  box-shadow:inset 0 2px 4px #07140f88,inset 0 -2px 3px #10201788,0 2px 0 #17281f;
+}
+@media(max-width:599px){
+  .level-heading{padding:3px 7px 5px}
+  .slots-section,.choices-section{padding:5px 6px 6px;border-radius:11px}
+  .section-line{padding-bottom:1px}
+  .conveyor-section{padding:0 5px}
+}
+@media(prefers-reduced-motion:reduce){
+  .slot,.choice-card,.topbar,.level-heading{transition:none}
+}
