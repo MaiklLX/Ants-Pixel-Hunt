@@ -11,7 +11,7 @@ test("every literal app.js DOM lookup has a matching HTML id", () => {
   const htmlIds = new Set([...html.matchAll(/\bid=["']([^"']+)["']/g)].map((match) => match[1]));
   const lookups = [...app.matchAll(/\$\(["']([^"']+)["']\)/g)].map((match) => match[1]);
   const missing = [...new Set(lookups.filter((id) => !htmlIds.has(id)))].sort();
-  assert.deepEqual(missing, [], \`Missing DOM ids referenced by src/app.js: \${missing.join(", ")}\`);
+  assert.deepEqual(missing, [], "Missing DOM ids referenced by src/app.js: " + missing.join(", "));
 });
 
 test("the save-status live region exists and is announced politely", () => {
