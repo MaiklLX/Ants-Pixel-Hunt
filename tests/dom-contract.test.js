@@ -54,11 +54,14 @@ test("README feature list uses real line breaks instead of literal escape text",
 });
 
 
+
 test("home navigation uses authored forest SVG icons instead of platform map/home emoji", () => {
-  const mapButton = html.match(/<button\\b[^>]*\\bid=["']map-open["'][^>]*>[\\s\\S]*?<\\/button>/)?.[0];
-  const nestButton = html.match(/<button\\b[^>]*\\bid=["']nest-open["'][^>]*>[\\s\\S]*?<\\/button>/)?.[0];
-  assert.ok(mapButton && /<svg\\b/.test(mapButton), "map navigation needs an inline SVG icon");
-  assert.ok(nestButton && /<svg\\b/.test(nestButton), "anthill navigation needs an inline SVG icon");
+  const mapStart = html.indexOf('id="map-open"');
+  const nestStart = html.indexOf('id="nest-open"');
+  const mapButton = html.slice(html.lastIndexOf("<button", mapStart), html.indexOf("</button>", mapStart) + 9);
+  const nestButton = html.slice(html.lastIndexOf("<button", nestStart), html.indexOf("</button>", nestStart) + 9);
+  assert.ok(mapStart >= 0 && /<svg\b/.test(mapButton), "map navigation needs an inline SVG icon");
+  assert.ok(nestStart >= 0 && /<svg\b/.test(nestButton), "anthill navigation needs an inline SVG icon");
   assert.match(mapButton, /aria-hidden=["']true["']/);
   assert.match(nestButton, /aria-hidden=["']true["']/);
   assert.equal(mapButton.includes("🗺️"), false);
@@ -67,7 +70,7 @@ test("home navigation uses authored forest SVG icons instead of platform map/hom
 
 test("KT-074 forest plaque styling stays dark and includes icon sizing", async () => {
   const styles = await readFile(new URL("../src/styles.css", import.meta.url), "utf8");
-  assert.match(styles, /KT-074 — home hub cards/);
-  assert.match(styles, /\\.hub-location-icon svg/);
-  assert.match(styles, /background:linear-gradient\\(145deg,#30483a 0%,#263c30/);
+  assert.ok(styles.includes("KT-074 — home hub cards"));
+  assert.ok(styles.includes(".hub-location-icon svg"));
+  assert.ok(styles.includes("background:linear-gradient(145deg,#30483a 0%,#263c30"));
 });
