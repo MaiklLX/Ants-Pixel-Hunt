@@ -1660,6 +1660,7 @@ body{
 }
 .menu-secondary{background:#2d4437;border-color:#526b55;color:#cbd7bd}
 .how-panel{
+  order:6;
   width:min(100%,470px);
   border:1px solid #50694e;
   border-radius:15px;
