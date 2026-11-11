@@ -934,3 +934,10 @@ body{background:radial-gradient(ellipse at 50% -14%,#fff 0%,#f5faef 43%,#e7f1e4 
 .nest-buy:disabled{opacity:.68}
 @media(max-width:380px){.map-summary{padding:9px 10px}.map-levels .campaign-level{min-height:67px;padding:7px}.map-levels .map-level-hint{font-size:7px}.nest-stats{gap:4px}.nest-stats>div{padding:8px 2px}.nest-stats small{font-size:7px}}
 @media(prefers-reduced-motion:reduce){.map-summary-track span,.nest-progress-track span{transition:none}}
+
+/* KT-060 — the next available meadow and chapter progress are easy to spot. */
+.map-chapter-track{height:4px;margin:-2px 2px 7px;overflow:hidden;border-radius:99px;background:#edf2e9}
+.map-chapter-track span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#b5d79a,#79b987);transition:width .25s ease}
+.map-levels .campaign-level.next-stop{border-color:#b8d8a8;background:linear-gradient(110deg,#f7fff0,#edf8e8);box-shadow:inset 3px 0 #8fbd78,0 2px 7px #527c4910}
+.map-levels .campaign-level.next-stop .map-level-hint{color:#638b5d;font-weight:800}
+@media(prefers-reduced-motion:reduce){.map-chapter-track span{transition:none}}
