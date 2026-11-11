@@ -31,3 +31,8 @@ test("the home illustration hooks match the styled markup and contain no stray e
   assert.match(styles, /pixel-ant-breathe/);
   assert.equal(html.includes(String.raw`\n    <p id="save-status"`), false);
 });
+
+test("the pixel diorama is not covered by legacy garden overlays", async () => {
+  const styles = await readFile(new URL("../src/styles.css", import.meta.url), "utf8");
+  assert.match(styles, /\.menu-garden::before,\.menu-garden::after\{content:none\}/);
+});
