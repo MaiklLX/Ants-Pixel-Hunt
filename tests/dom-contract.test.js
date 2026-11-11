@@ -20,3 +20,11 @@ test("the save-status live region exists and is announced politely", () => {
   assert.match(match[0], /aria-live=["']polite["']/);
   assert.match(match[0], /role=["']status["']/);
 });
+
+
+test("the home illustration hooks match the styled markup and contain no stray escape text", () => {
+  assert.match(html, /class=["']garden-pixels["']/);
+  const styles = await readFile(new URL("../src/styles.css", import.meta.url), "utf8");
+  assert.match(styles, /\.garden-pixels(?:,|\s*\{)/);
+  assert.doesNotMatch(html, /\\\\n\s*<p id=["']save-status/);
+});
