@@ -242,5 +242,17 @@ test("KT-089 gives the lower HUD a clear slots-conveyor-queue order and larger t
  assert.match(styles,/\.choices-section\{order:4/);
  assert.match(styles,/\.choice-card\{min-height:68px/);
  assert.match(styles,/grid-auto-rows:clamp\(20px,2\.8dvh,24px\)/);
- assert.ok(markup.includes('content="KT-089"'));
+ assert.match(markup,/content="KT-0(89|90)"/);
+});
+
+
+test("KT-090 keeps desktop arena order and woodland HUD styling in sync with mobile", async () => {
+ const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
+ const markup=await readFile(new URL("../index.html",import.meta.url),"utf8");
+ assert.ok(styles.includes("KT-090 — bring the desktop arena into the same woodland HUD composition as mobile"));
+ assert.match(styles,/@media\(min-width:600px\)\{[\s\S]*?\.slots-section\{order:2/);
+ assert.match(styles,/@media\(min-width:600px\)\{[\s\S]*?\.conveyor-section\{order:3/);
+ assert.match(styles,/@media\(min-width:600px\)\{[\s\S]*?\.choices-section\{order:4/);
+ assert.match(styles,/\.queue-lane\{gap:5px;padding:5px;border:1px solid #3b5543/);
+ assert.ok(markup.includes('content="KT-090"'));
 });
