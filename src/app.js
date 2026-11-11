@@ -1,5 +1,5 @@
 import {COLORS,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,LEVELS,getLevel,getIncoming,createGame,canChoose,chooseTopColumn,isLockedBox,getLinkedPartner,findAntWave,applyAntMove,completeBoxDeparture,isDefeat,getExposedPixels,countOutboundBySlot,countSlotWorkers,canDepartSlot} from "./game.js";
-import {getAntTripFrame,getAntLaunchDelay,createPausableClock} from "./ant-animation.js";
+import {getAntTripFrame,getAntLaunchDelay,createPausableClock,getTrailPose} from "./ant-animation.js";
 import {isCampaignLevelUnlocked,getNextCampaignLevel} from "./campaign.js";
 import {BUILDINGS,createEconomy,normalizeEconomy,collectCube,completeMeadow,purchaseBuilding,buildingCost} from "./economy.js";
 const $=id=>document.getElementById(id);
@@ -334,12 +334,6 @@ function makeAntTrail(start,end,seed,spread=1){
  }
  points.push(end);return points;
 }
-function trailPoint(points,t){
- const scaled=Math.max(0,Math.min(.999999,t))*(points.length-1),i=Math.floor(scaled),u=scaled-i;
- const p0=points[Math.max(0,i-1)],p1=points[i],p2=points[i+1],p3=points[Math.min(points.length-1,i+2)];
- const calc=(a,b,c,d)=>.5*((2*b)+(-a+c)*u+(2*a-5*b+4*c-d)*u*u+(-a+3*b-3*c+d)*u*u*u);
- return{x:calc(p0.x,p1.x,p2.x,p3.x),y:calc(p0.y,p1.y,p2.y,p3.y)};
-}
 function drawPickupEffects(timestamp){
  for(let i=pickupEffects.length-1;i>=0;i--){
   const effect=pickupEffects[i],t=(timestamp-effect.startedAt)/460;
@@ -383,11 +377,8 @@ function renderAntFrame(timestamp){
    continue;
   }
   const trail=phase.returningNow?ant.returnTrail:ant.outboundTrail;
-  const point=trailPoint(trail,phase.progress);
-  const before=trailPoint(trail,Math.max(0,phase.progress-.012));
-  const after=trailPoint(trail,Math.min(1,phase.progress+.012));
-  const tangent={x:after.x-before.x,y:after.y-before.y};
-  drawAnt(antCtx,point,ant.move.color,phase.returningNow,workerId,Math.atan2(tangent.y,tangent.x),clockTime);
+  const pose=getTrailPose(trail,phase.progress);
+  drawAnt(antCtx,pose,ant.move.color,phase.returningNow,workerId,pose.angle,clockTime);
  }
  drawPickupEffects(clockTime);
  if(activeAnts.size||pickupEffects.length)antFrame=requestAnimationFrame(renderAntFrame);

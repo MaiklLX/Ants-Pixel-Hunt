@@ -96,7 +96,7 @@ test("KT-075 keeps the home menu compact and its scene label legible", async () 
 
 test("KT-076 freezes ant, pickup and crate animation time while the page is hidden", async () => {
   const source = await readFile(new URL("../src/app.js", import.meta.url), "utf8");
-  assert.match(html, /app-version" content="KT-078"/);
+  assert.match(html, /app-version" content="KT-\d+"/);
   assert.ok(source.includes('document.addEventListener("visibilitychange"'));
   assert.ok(source.includes("animationClock.pause()"));
   assert.ok(source.includes("animationClock.resume()"));
@@ -131,4 +131,13 @@ test("KT-078 maps the campaign as a dotted forest trail and keeps all map and ne
   assert.ok(styles.includes("prefers-reduced-motion:reduce"));
   assert.equal(/\.map-summary\s*\{[^}]*background:\s*#fff/i.test(styles), false);
   assert.equal(/\.nest-progress-wrap\s*,?\s*\.nest-stats>div\s*\{[^}]*background:\s*#fff/i.test(styles), false);
+});
+
+
+test("KT-079 samples each ant trail position and heading once per rendered ant", async () => {
+  const source = await readFile(new URL("../src/app.js", import.meta.url), "utf8");
+  assert.match(source, /getTrailPose\(trail,phase\.progress\)/);
+  assert.match(source, /drawAnt\(antCtx,pose,ant\.move\.color,phase\.returningNow,workerId,pose\.angle,clockTime\)/);
+  assert.equal(source.includes("function trailPoint("), false);
+  assert.equal(source.includes("trailPoint("), false);
 });

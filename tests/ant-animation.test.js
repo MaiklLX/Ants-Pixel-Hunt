@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {createPausableClock,getAntLaunchDelay,getAntTripFrame} from "../src/ant-animation.js";
+import {createPausableClock,getAntLaunchDelay,getAntTripFrame,getTrailPose} from "../src/ant-animation.js";
 
 test("ant trip waits for its staggered launch without starting motion early",()=>{
  assert.deepEqual(getAntTripFrame(120,150,2000,1800),{
@@ -67,4 +67,37 @@ test("pausable animation clock ignores duplicate hide and show notifications",()
  assert.equal(clock.now(),75);
  now=225;
  assert.equal(clock.now(),100);
+});
+
+
+function legacyTrailPoint(points, progress) {
+ const scaled = Math.max(0, Math.min(0.999999, progress)) * (points.length - 1);
+ const index = Math.floor(scaled), u = scaled - index;
+ const p0 = points[Math.max(0, index - 1)], p1 = points[index];
+ const p2 = points[index + 1], p3 = points[Math.min(points.length - 1, index + 2)];
+ const calc = (a, b, c, d) => 0.5 * ((2 * b) + (-a + c) * u + (2 * a - 5 * b + 4 * c - d) * u * u + (-a + 3 * b - 3 * c + d) * u * u * u);
+ return { x: calc(p0.x, p1.x, p2.x, p3.x), y: calc(p0.y, p1.y, p2.y, p3.y) };
+}
+
+test("trail pose preserves Catmull–Rom positions and derives a stable heading", () => {
+ const points = [{x: 12, y: 18}, {x: 42, y: 8}, {x: 66, y: 54}, {x: 108, y: 36}, {x: 144, y: 80}];
+ for (const progress of [0, 0.05, 0.17, 0.33, 0.51, 0.76, 0.94, 0.999]) {
+  const pose = getTrailPose(points, progress);
+  const expected = legacyTrailPoint(points, progress);
+  assert.ok(Math.abs(pose.x - expected.x) < 1e-9, "x position must remain unchanged");
+  assert.ok(Math.abs(pose.y - expected.y) < 1e-9, "y position must remain unchanged");
+  assert.ok(Number.isFinite(pose.angle), "heading must be finite");
+  if (progress > 0.01 && progress < 0.99) {
+   const before = legacyTrailPoint(points, progress - 0.0001);
+   const after = legacyTrailPoint(points, progress + 0.0001);
+   const expectedAngle = Math.atan2(after.y - before.y, after.x - before.x);
+   const difference = Math.atan2(Math.sin(pose.angle - expectedAngle), Math.cos(pose.angle - expectedAngle));
+   assert.ok(Math.abs(difference) < 0.02, "analytic tangent must follow the sampled path");
+  }
+ }
+});
+
+test("trail pose safely handles empty and single-point paths", () => {
+ assert.deepEqual(getTrailPose([], 0.5), {x: 0, y: 0, angle: 0});
+ assert.deepEqual(getTrailPose([{x: 7, y: 9}], 0.5), {x: 7, y: 9, angle: 0});
 });
