@@ -24,6 +24,10 @@ function renderNest(){
  if(meadows)meadows.textContent=colony.completed.toLocaleString("ru-RU");
  if(upgrades)upgrades.textContent=String(colony.buildings.garden+colony.buildings.granary)+" / 6";
  const list=$("nest-buildings");if(!list)return;list.replaceChildren();
+ const activeGroup=document.createElement("div");activeGroup.className="nest-building-group";
+ const futureGroup=document.createElement("div");futureGroup.className="nest-building-group future-group";
+ const activeTitle=document.createElement("p");activeTitle.className="nest-group-label";activeTitle.textContent="Работают каждый день";activeGroup.append(activeTitle);
+ const futureTitle=document.createElement("p");futureTitle.className="nest-group-label";futureTitle.textContent="Будущие открытия";futureGroup.append(futureTitle);
  for(const building of BUILDINGS){
   const level=colony.buildings[building.id],cost=buildingCost(building,level),comingSoon=building.id==="nursery",card=document.createElement("article");
   card.className="nest-building"+(comingSoon?" coming-soon":"");
@@ -32,12 +36,14 @@ function renderNest(){
   const title=document.createElement("strong");title.textContent=building.name;
   const desc=document.createElement("small");desc.textContent=comingSoon?"Особые муравьи появятся в одном из будущих обновлений. Нектар пока лучше сохранить.":building.description;
   const rank=document.createElement("span");rank.textContent=comingSoon?"Новое открытие готовится":level>=3?"Максимум · 3/3":`Уровень ${level}/3`;copy.append(title,desc,rank);
+  if(!comingSoon){const levels=document.createElement("span");levels.className="nest-level-pips";levels.setAttribute("aria-label",`Уровень ${level} из 3`);for(let step=0;step<3;step++){const pip=document.createElement("i");if(step<level)pip.classList.add("filled");levels.append(pip);}copy.append(levels);}
   const buy=document.createElement("button");buy.type="button";buy.className="nest-buy";buy.disabled=comingSoon||level>=3||colony.nectar<cost;
   buy.textContent=comingSoon?"Скоро":level>=3?"Готово":`🌼 ${cost}`;
   buy.setAttribute("aria-label",comingSoon?"Питомник будет доступен в будущем":level>=3?`${building.name}: максимальный уровень`:`Улучшить ${building.name} за ${cost} нектара`);
   buy.addEventListener("click",()=>{const result=purchaseBuilding(colony,building.id);if(result.ok){colony=result.economy;updateEconomy();}else renderNest();});
-  card.append(icon,copy,buy);list.append(card);
+  card.append(icon,copy,buy);(comingSoon?futureGroup:activeGroup).append(card);
  }
+ list.append(activeGroup,futureGroup);
 }
 function openNest(){renderNest();$("nest-overlay").hidden=false;}
 function closeNest(){$("nest-overlay").hidden=true;}
