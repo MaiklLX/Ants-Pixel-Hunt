@@ -385,3 +385,17 @@
 - Обновлены app version KT-072 и PWA shell cache v42.
 - Игровая логика, экономика, прогресс и сохранения не менялись.
 - Это source review; браузерный скриншот и физическое тестирование на телефоне не выполнялись.
+
+
+## KT-073 — доступное раскрытие правил на главном экране
+- Кнопка «Как играть?» теперь объявляет связанную панель через `aria-controls="how-panel"` и начальное `aria-expanded="false"`.
+- При каждом нажатии `aria-expanded`, `hidden` и подпись кнопки синхронно обновляются; игровые правила и управление не менялись.
+- DOM-контрактный тест проверяет связь кнопки с панелью, начальное скрытое состояние и обновление aria-expanded.
+- Исправлен буквальный `\n` в списке README; добавлена регрессия, запрещающая такой escape-перенос.
+- Файлы: `index.html`, `src/app.js`, `tests/dom-contract.test.js`, `README.md`, `service-worker.js`, `public/service-worker.js`.
+- App version KT-073; PWA shell cache v43 в обоих worker-файлах.
+- Кодовый commit: `52ce3174ed06af1fb31515d59dd9eafaaab6f4cb`.
+- GitHub Pages run [42996419245](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/42996419245): gameplay tests PASS, production build PASS, Pages deploy PASS.
+- Godot run [42996419111](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/42996419111): resource import, gameplay rules tests и project smoke test PASS.
+- Android debug APK run [42996419194](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/42996419194) оставался in progress на момент проверки; не записывается как успешная сборка или тест устройства.
+- Браузерный скриншот и физическое тестирование на телефоне не проводились.
