@@ -1,7 +1,7 @@
 export const BUILDINGS=[
  {id:"garden",name:"Сад нектара",icon:"🌼",description:"Больше нектара за каждые 10 собранных кубиков.",baseCost:30},
  {id:"granary",name:"Большое хранилище",icon:"🧺",description:"Больше награда за полностью собранную полянку.",baseCost:45},
- {id:"nursery",name:"Питомник героев",icon:"🐣",description:"Готовит колонию к появлению особых муравьёв.",baseCost:60}
+ {id:"nursery",name:"Питомник героев",icon:"🐣",description:"Особые муравьи появятся в одном из будущих обновлений.",baseCost:60}
 ];
 export function createEconomy(){return{nectar:0,progress:0,lifetime:0,completed:0,buildings:{garden:0,granary:0,nursery:0}};}
 export function normalizeEconomy(value){
