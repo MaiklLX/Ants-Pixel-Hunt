@@ -161,5 +161,5 @@ test("KT-081 gives controls and progress indicators one accessible woodland trea
   assert.match(styles, /\.menu-secondary,\.nest-close,\.nest-buy,\.icon-button,\.restart-button/);
   assert.match(styles, /\.menu-progress-track,\.map-summary-track,\.map-chapter-track,[\s\S]*?\.nest-progress-track,\.level-progress/);
   assert.match(styles, /linear-gradient\(90deg,#829e69 0%,#a5ad72 72%,#c2a96c 100%\)/);
-  assert.match(styles, /prefers-reduced-motion:reduce[\s\S]*\.level-progress span\{transition:none/);
+  assert.match(styles, /prefers-reduced-motion:reduce[\s\S]*?\.level-progress span\s*\{\s*transition:none/);
 });
