@@ -1001,3 +1001,22 @@ body{background:radial-gradient(ellipse at 50% -14%,#fff 0%,#f5faef 43%,#e7f1e4 
 .future-group .nest-building-icon{background:#f3f0e4}
 @media(max-width:380px){.nest-scene{height:126px}.nest-chamber{top:43px;width:106px;height:76px}.nest-building{grid-template-columns:36px minmax(0,1fr) auto;padding:8px}.nest-building-icon{width:34px;height:34px}.nest-building-copy strong{font-size:10px}.nest-building-copy small{font-size:8px}.nest-buy{min-width:55px}}
 @media(prefers-reduced-motion:reduce){.nest-buy{transition:none}}
+
+
+/* KT-063 — the colony's actual upgrades shape the underground home. */
+.nest-scene{--garden-growth:0;--granary-growth:0}
+.nest-garden-plot{position:absolute;z-index:2;left:10%;bottom:18px;display:flex;align-items:flex-end;gap:3px;width:70px;height:42px;padding:0 5px 3px;border-bottom:5px solid #9b784e;border-radius:0 0 50% 50%;background:linear-gradient(180deg,#9fc77c44,#6d9d5a55);transform:rotate(-4deg)}
+.nest-garden-plot span{font-size:15px;line-height:1;opacity:.28;transform:translateY(5px) scale(.72);filter:saturate(.7);transition:opacity .25s,transform .25s,filter .25s}
+.nest-scene[data-garden-level="1"] .nest-garden-plot span:nth-child(-n+2),.nest-scene[data-garden-level="2"] .nest-garden-plot span:nth-child(-n+3),.nest-scene[data-garden-level="3"] .nest-garden-plot span{opacity:1;transform:translateY(0) scale(1);filter:saturate(1.1)}
+.nest-scene[data-garden-level="2"] .nest-garden-plot span:nth-child(2),.nest-scene[data-garden-level="3"] .nest-garden-plot span:nth-child(2){font-size:18px}
+.nest-scene[data-garden-level="3"] .nest-garden-plot{width:82px;height:47px;background:linear-gradient(180deg,#b6d99166,#6eaa5c77);border-bottom-color:#7b9d4c}
+.nest-granary-store{position:absolute;z-index:2;right:10%;bottom:17px;display:flex;align-items:flex-end;gap:0;width:67px;height:42px;padding:0 4px 2px;border-bottom:5px solid #9b784e;border-radius:0 0 9px 9px;background:#a8794c55;transform:rotate(4deg)}
+.nest-granary-store span{font-size:16px;line-height:1;opacity:.24;transform:translateY(4px) scale(.8);transition:opacity .25s,transform .25s}
+.nest-scene[data-granary-level="1"] .nest-granary-store span:first-child,.nest-scene[data-granary-level="2"] .nest-granary-store span:nth-child(-n+2),.nest-scene[data-granary-level="3"] .nest-granary-store span{opacity:1;transform:translateY(0) scale(1)}
+.nest-scene[data-granary-level="2"] .nest-granary-store,.nest-scene[data-granary-level="3"] .nest-granary-store{width:75px;height:47px;background:#a8794c77}
+.nest-scene[data-granary-level="3"] .nest-granary-store{width:84px;height:52px;border-bottom-width:7px}
+.nest-scene[data-garden-level="0"] .nest-garden-plot,.nest-scene[data-granary-level="0"] .nest-granary-store{opacity:.52}
+.nest-progress-track{background:repeating-linear-gradient(90deg,#e4eddf 0 calc(10% - 2px),#fff  calc(10% - 2px) 10%)}
+.nest-progress-track span{background:linear-gradient(90deg,#f0cf78,#d8a94d);box-shadow:0 0 7px #e7c36a66}
+@media(max-width:380px){.nest-garden-plot{left:5%;transform:scale(.82) rotate(-4deg);transform-origin:left bottom}.nest-granary-store{right:5%;transform:scale(.82) rotate(4deg);transform-origin:right bottom}}
+@media(prefers-reduced-motion:reduce){.nest-garden-plot span,.nest-granary-store span{transition:none}}
