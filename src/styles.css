@@ -1232,3 +1232,60 @@ footer span{color:#c7ad72}
  .conveyor{border-radius:9px}
 }
 @media(prefers-reduced-motion:reduce){.choice-card:focus-visible{scroll-behavior:auto}}
+
+
+/* KT-068 — remove glaring white button surfaces across every screen. */
+button:not(.menu-primary){
+  color:#d6e2d0;
+  background:linear-gradient(150deg,#354d3d 0%,#263b30 100%);
+  border-color:#526b53;
+  box-shadow:inset 0 1px #ffffff0b,0 3px 7px #07140e55;
+  color-scheme:dark;
+}
+button:not(.menu-primary):hover:not(:disabled){
+  background:linear-gradient(150deg,#405a45 0%,#2d4436 100%);
+  border-color:#718765;
+}
+button:not(.menu-primary):active:not(:disabled){
+  background:linear-gradient(150deg,#293f32,#203329);
+}
+button:not(.menu-primary):disabled{
+  color:#899989;
+  background:linear-gradient(150deg,#2b3d32,#223329);
+  border-color:#405444;
+  box-shadow:none;
+  opacity:.72;
+}
+.icon-button,.nest-close{
+  background:linear-gradient(145deg,#3b5341,#293e32);
+  color:#d2dfc9;
+  border-color:#5a7358;
+}
+.restart-button{
+  background:linear-gradient(145deg,#3b4b3b,#2b3d31);
+  color:#e0c17d;
+  border-color:#756b4a;
+}
+.menu-secondary,.menu-link{
+  background:#2d4437;
+  color:#cbd9c2;
+  border-color:#526b55;
+}
+.nest-buy{
+  background:linear-gradient(145deg,#514a32,#393d2d);
+  color:#ead18f;
+  border-color:#827148;
+}
+.nest-buy:disabled{
+  background:#2b3b30;
+  color:#879685;
+  border-color:#455746;
+}
+.menu-primary{
+  background:linear-gradient(145deg,#78966a,#4e7656);
+  border-color:#91a982;
+  box-shadow:0 4px 0 #304f3a,0 7px 13px #08150f66,inset 0 1px #ffffff18;
+}
+@media(prefers-reduced-motion:reduce){
+  button:not(.menu-primary){transition:none}
+}
