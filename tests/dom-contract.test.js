@@ -215,7 +215,7 @@ test("KT-087 restores mobile vertical rhythm and prevents queue overlap", async 
  assert.ok(styles.includes("width:100%;height:auto;min-height:58px"));
  assert.match(styles,/grid-auto-rows:clamp\(14px,2.1dvh,18px\)/);
  assert.match(styles,/max-height:620px/);
- assert.ok(markup.includes('content="KT-087"'));
+ assert.match(markup,/content="KT-0(87|88|89)"/);
 });
 
 
@@ -230,4 +230,17 @@ test("KT-088 restores useful mobile feedback and improves arena touch/readabilit
  assert.ok(source.includes('slot.setAttribute("aria-label"'));
  assert.ok(markup.includes('content="KT-088"'));
  assert.ok(markup.includes('id="slots" class="slots" role="group"'));
+});
+
+
+test("KT-089 gives the lower HUD a clear slots-conveyor-queue order and larger touch targets", async () => {
+ const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
+ const markup=await readFile(new URL("../index.html",import.meta.url),"utf8");
+ assert.ok(styles.includes("KT-089 — rebalance the lower HUD around slots, conveyor and queue"));
+ assert.match(styles,/\.slots-section\{order:2/);
+ assert.match(styles,/\.conveyor-section\{order:3/);
+ assert.match(styles,/\.choices-section\{order:4/);
+ assert.match(styles,/\.choice-card\{min-height:68px/);
+ assert.match(styles,/grid-auto-rows:clamp\(20px,2\.8dvh,24px\)/);
+ assert.ok(markup.includes('content="KT-089"'));
 });
