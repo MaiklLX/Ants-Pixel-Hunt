@@ -496,4 +496,9 @@
 - Для reduced motion переходы и анимации ширины отключаются.
 - Игровая логика, расчёт прогресса, экономика, доступность уровней и управление не менялись.
 - Обновлены app version KT-081 и PWA shell cache v51 в обоих Service Worker файлах.
+- Контрольный code/test commit: `740dad725c540c6da1bd535f9ea70107bc6a5aba`; контрактные тесты — 73/73 PASS.
+- GitHub Pages run [43009162149](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43009162149): тесты, production build, artifact upload и deploy PASS.
+- Godot run [43009162033](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43009162033): resource import, rules tests и smoke test PASS.
+- Android run [43009161917](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43009161917): tests, production build, debug APK и artifact upload PASS.
+- APK не устанавливался на физическое устройство; визуальная проверка браузером/скриншотом не выполнялась.
 - Добавлен DOM/CSS contract test общего набора контролов, индикаторов и фокуса.
