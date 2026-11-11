@@ -2091,3 +2091,50 @@ body{
 @media(prefers-reduced-motion:reduce){
   .map-levels .campaign-level,.nest-chamber,.chamber-lamp{transition:none;animation:none}
 }
+
+
+/* KT-080 — shared woodland identity and quiet screen arrivals. */
+.main-menu::after,.map-card::after,.nest-card::after{
+  content:"";
+  position:absolute;
+  z-index:4;
+  top:13px;
+  right:15px;
+  width:38px;
+  height:13px;
+  pointer-events:none;
+  opacity:.62;
+  border-top:1px solid #c2ad7040;
+  background:
+    radial-gradient(circle at 5px 7px,#d0b879 0 1.7px,transparent 2.5px),
+    radial-gradient(circle at 16px 7px,#8da16d 0 1.7px,transparent 2.5px),
+    radial-gradient(circle at 27px 7px,#d0b879 0 1.7px,transparent 2.5px);
+}
+.main-menu::after{top:calc(env(safe-area-inset-top) + 17px);right:20px}
+.nest-overlay:not([hidden]){
+  animation:woodland-overlay-arrive .18s ease-out both;
+}
+.nest-overlay:not([hidden])>.nest-card{
+  transform-origin:50% 46%;
+  animation:woodland-card-arrive .24s cubic-bezier(.2,.72,.25,1) both;
+}
+.app-shell.menu-open .main-menu{
+  animation:woodland-menu-arrive .24s ease-out both;
+}
+@keyframes woodland-overlay-arrive{
+  from{opacity:0}
+  to{opacity:1}
+}
+@keyframes woodland-card-arrive{
+  from{opacity:.72;transform:translateY(9px) scale(.985)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+@keyframes woodland-menu-arrive{
+  from{opacity:.78}
+  to{opacity:1}
+}
+@media(prefers-reduced-motion:reduce){
+  .nest-overlay:not([hidden]),.nest-overlay:not([hidden])>.nest-card,.app-shell.menu-open .main-menu{
+    animation:none;
+  }
+}
