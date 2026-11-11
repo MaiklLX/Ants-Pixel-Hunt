@@ -52,3 +52,22 @@ test("the home help disclosure exposes its controlled panel and expanded state",
 test("README feature list uses real line breaks instead of literal escape text", () => {
   assert.equal(readme.includes("\\n- Текущее состояние поля"), false);
 });
+
+
+test("home navigation uses authored forest SVG icons instead of platform map/home emoji", () => {
+  const mapButton = html.match(/<button\\b[^>]*\\bid=["']map-open["'][^>]*>[\\s\\S]*?<\\/button>/)?.[0];
+  const nestButton = html.match(/<button\\b[^>]*\\bid=["']nest-open["'][^>]*>[\\s\\S]*?<\\/button>/)?.[0];
+  assert.ok(mapButton && /<svg\\b/.test(mapButton), "map navigation needs an inline SVG icon");
+  assert.ok(nestButton && /<svg\\b/.test(nestButton), "anthill navigation needs an inline SVG icon");
+  assert.match(mapButton, /aria-hidden=["']true["']/);
+  assert.match(nestButton, /aria-hidden=["']true["']/);
+  assert.equal(mapButton.includes("🗺️"), false);
+  assert.equal(nestButton.includes("🏡"), false);
+});
+
+test("KT-074 forest plaque styling stays dark and includes icon sizing", async () => {
+  const styles = await readFile(new URL("../src/styles.css", import.meta.url), "utf8");
+  assert.match(styles, /KT-074 — home hub cards/);
+  assert.match(styles, /\\.hub-location-icon svg/);
+  assert.match(styles, /background:linear-gradient\\(145deg,#30483a 0%,#263c30/);
+});
