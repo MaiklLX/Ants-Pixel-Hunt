@@ -594,3 +594,12 @@
 - Изменены: `src/styles.css`, `index.html`, `tests/dom-contract.test.js`, оба Service Worker, `README.md`, `docs/CURRENT_STATE.md`, `docs/KT_LOG.md`.
 - App version KT-090; PWA shell cache v60.
 - Игровая логика, порядок боксов, анимации и сохранения не менялись.
+
+
+## KT-091 — единый вертикальный ритм на ПК
+- Пересобрана desktop-компоновка в ту же центральную вертикальную последовательность, что и на телефоне: поле → слоты → конвейер → очередь.
+- Расширена центральная колонка до 600px; увеличены размеры стартовых слотов, ленты конвейера и карточек очереди.
+- Сохранён компактный профиль для невысоких окон; мобильный профиль не затронут.
+- Игровая логика, очередность боксов, анимации и сохранения не менялись.
+- Изменены: `src/styles.css`, `index.html`, `tests/dom-contract.test.js`, оба Service Worker, `README.md`, `docs/CURRENT_STATE.md`, `docs/KT_LOG.md`.
+- App version KT-091; PWA shell cache v61.

@@ -256,3 +256,16 @@ test("KT-090 keeps desktop arena order and woodland HUD styling in sync with mob
  assert.match(styles,/\.queue-lane\{gap:5px;padding:5px;border:1px solid #3b5543/);
  assert.ok(markup.includes('content="KT-090"'));
 });
+
+
+test("KT-091 gives desktop the same vertical arena order with roomier desktop sizing", async () => {
+ const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
+ const markup=await readFile(new URL("../index.html",import.meta.url),"utf8");
+ assert.ok(styles.includes("KT-091 — make desktop use the same centered, vertical arena rhythm as mobile"));
+ assert.match(styles,/@media\(min-width:600px\)\{[\s\S]*?\.slots-section\{order:3/);
+ assert.match(styles,/@media\(min-width:600px\)\{[\s\S]*?\.conveyor-section\{order:4/);
+ assert.match(styles,/@media\(min-width:600px\)\{[\s\S]*?\.choices-section\{order:5/);
+ assert.match(styles,/width:min\(100%,600px\)/);
+ assert.match(styles,/grid-template-columns:repeat\(3,minmax\(0,1fr\)\);grid-template-rows:auto;gap:8px/);
+ assert.ok(markup.includes('content="KT-091"'));
+});
