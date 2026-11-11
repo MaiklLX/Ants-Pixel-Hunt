@@ -1139,3 +1139,44 @@ footer span{color:#c7ad72}
 .result-card>p:not(.result-kicker){color:#b7c6af}
 .result-card .menu-secondary{background:#304638;color:#d0ddc8;border-color:#506a54}
 @media(prefers-reduced-motion:reduce){.menu-progress-track span,.nest-progress-track span{transition:none}}
+
+/* KT-065 — the canvas itself joins the woodland palette, not only its frame. */
+.board-wrap{
+ background:linear-gradient(145deg,#3a5142 0%,#263c30 55%,#1b2e25 100%);
+ border-color:#526d57;
+ box-shadow:0 8px 22px #07150f99,inset 0 1px #ffffff12,0 0 0 1px #17291f;
+}
+.board{
+ background:#20372c;
+ border:1px solid #526b53;
+ box-shadow:inset 0 0 0 1px #0e1d16,inset 0 0 24px #0b1a1288;
+}
+.board-corners i{border-color:#cbb477;opacity:.8}
+
+/* A quiet worker trail makes the colony feel occupied without covering controls. */
+.nest-worker{
+ position:absolute;z-index:5;display:block;font-size:15px;line-height:1;
+ filter:drop-shadow(0 2px 1px #101c16aa);
+ pointer-events:none;will-change:transform;
+}
+.nest-worker i{
+ position:absolute;left:-7px;top:-5px;font-size:9px;font-style:normal;
+ filter:drop-shadow(0 1px 1px #17251b88);
+}
+.nest-worker-one{left:13%;top:72%;animation:nest-worker-route-one 8.5s ease-in-out infinite}
+.nest-worker-two{right:13%;top:79%;animation:nest-worker-route-two 10s ease-in-out infinite}
+@keyframes nest-worker-route-one{
+ 0%,100%{transform:translate(0,0) scaleX(1)}
+ 24%{transform:translate(34px,-5px) scaleX(1)}
+ 49%{transform:translate(67px,1px) scaleX(-1)}
+ 73%{transform:translate(30px,4px) scaleX(-1)}
+}
+@keyframes nest-worker-route-two{
+ 0%,100%{transform:translate(0,0) scaleX(-1)}
+ 30%{transform:translate(-27px,-3px) scaleX(-1)}
+ 58%{transform:translate(-55px,2px) scaleX(1)}
+ 82%{transform:translate(-24px,0) scaleX(1)}
+}
+@media(prefers-reduced-motion:reduce){
+ .nest-worker-one,.nest-worker-two{animation:none}
+}
