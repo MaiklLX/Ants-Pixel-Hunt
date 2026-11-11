@@ -603,3 +603,11 @@
 - Игровая логика, очередность боксов, анимации и сохранения не менялись.
 - Изменены: `src/styles.css`, `index.html`, `tests/dom-contract.test.js`, оба Service Worker, `README.md`, `docs/CURRENT_STATE.md`, `docs/KT_LOG.md`.
 - App version KT-091; PWA shell cache v61.
+
+
+## KT-092 — версионная совместимость тестов
+- Исторические контрактные тесты больше не требуют строго старые версии приложения; они принимают актуальную KT-091.
+- Исправлена проверка KT-090, чтобы она оставалась корректной после обновления версии.
+- Изменены: `tests/dom-contract.test.js`, оба Service Worker, `README.md`, `docs/CURRENT_STATE.md`, `docs/KT_LOG.md`.
+- App version KT-091; PWA shell cache v62.
+- CSS KT-091 и игровые правила не менялись.
