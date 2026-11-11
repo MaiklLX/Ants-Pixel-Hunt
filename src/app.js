@@ -12,6 +12,7 @@ function loadEconomy(){try{return normalizeEconomy(JSON.parse(localStorage.getIt
 let colony=loadEconomy();
 function updateEconomy(){try{localStorage.setItem(ECONOMY_STORAGE_KEY,JSON.stringify(colony));}catch{}const pill=$("nest-nectar");if(pill)pill.textContent=String(colony.nectar);if(!$("nest-overlay")?.hidden)renderNest();}
 function renderNest(){
+ const scene=$("nest-scene");if(scene){const garden=colony.buildings.garden,granary=colony.buildings.granary;scene.dataset.gardenLevel=String(garden);scene.dataset.granaryLevel=String(granary);scene.setAttribute("aria-label",`Подземный дом колонии. Сад нектара: уровень ${garden} из 3. Хранилище: уровень ${granary} из 3.`);}
  const balance=$("nest-balance");if(balance)balance.textContent=colony.nectar.toLocaleString("ru-RU");
  const progress=$("nest-progress"),bar=$("nest-progress-bar"),fill=$("nest-progress-fill"),label=$("nest-progress-label");
  const percent=Math.round(colony.progress/10*100);
