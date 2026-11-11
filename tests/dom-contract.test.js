@@ -217,3 +217,17 @@ test("KT-087 restores mobile vertical rhythm and prevents queue overlap", async 
  assert.match(styles,/max-height:620px/);
  assert.ok(markup.includes('content="KT-087"'));
 });
+
+
+test("KT-088 restores useful mobile feedback and improves arena touch/readability", async () => {
+ const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
+ const source=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
+ const markup=await readFile(new URL("../index.html",import.meta.url),"utf8");
+ assert.ok(styles.includes("KT-088 — make the live arena readable, tactile and calmer to play"));
+ assert.match(styles,/grid-auto-rows:clamp\(18px,2\.5dvh,22px\)/);
+ assert.match(styles,/\.message\s*\{[\s\S]*?min-height:30px;height:auto;max-height:42px/);
+ assert.match(styles,/\.queue-lane\s*\{[\s\S]*?border:1px solid #3b5543/);
+ assert.ok(source.includes('slot.setAttribute("aria-label"'));
+ assert.ok(markup.includes('content="KT-088"'));
+ assert.ok(markup.includes('id="slots" class="slots" role="group"'));
+});
