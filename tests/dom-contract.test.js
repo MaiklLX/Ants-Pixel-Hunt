@@ -163,3 +163,14 @@ test("KT-081 gives controls and progress indicators one accessible woodland trea
   assert.match(styles, /linear-gradient\(90deg,#829e69 0%,#a5ad72 72%,#c2a96c 100%\)/);
   assert.match(styles, /prefers-reduced-motion:reduce[\s\S]*?\.level-progress span\s*\{\s*transition:none/);
 });
+
+
+test("KT-082 gives the live arena HUD a unified dark woodland hierarchy", async () => {
+  const styles = await readFile(new URL("../src/styles.css", import.meta.url), "utf8");
+  assert.ok(styles.includes("KT-082 — a calmer, unified visual hierarchy for the live arena HUD"));
+  assert.match(styles, /\.level-kicker::before/);
+  assert.match(styles, /\.slots-section,\.choices-section\s*\{[^}]*background:linear-gradient\(155deg,#263d31dd,#20352bdf\)/);
+  assert.match(styles, /\.slots\s*\{[^}]*background:linear-gradient\(180deg,#1d3026,#192b23\)/);
+  assert.match(styles, /@media\(prefers-reduced-motion:reduce\)[\s\S]*?\.slot,\.choice-card,\.topbar,\.level-heading\{transition:none\}/);
+  assert.equal(/\.slots-section,\.choices-section\s*\{[^}]*background:\s*#fff/i.test(styles), false);
+});
