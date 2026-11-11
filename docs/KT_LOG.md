@@ -424,3 +424,16 @@
 - Добавлены DOM-контрактные проверки порядка блоков и наличия метки.
 - CI предыдущей контрольной точки KT-074: GitHub Pages, Godot 4.3 и Android debug APK PASS. Для KT-075 проверки запускаются после коммитов.
 - Скриншотная проверка браузера и физическое тестирование на телефоне не проводились.
+
+
+## KT-076 — паузоустойчивые часы анимаций колонии
+- Обнаружен риск скачка фаз после возврата из фоновой вкладки: абсолютное время RAF/performance.now продолжало учитывать скрытый период.
+- Добавлен `createPausableClock`; события `visibilitychange` замораживают и возобновляют логическое время без накопления фоновой длительности.
+- Общие часы применены к рейсам муравьёв, походке, pickup-кольцам, перемещению бокса в слот и отправке боксов на конвейер.
+- Добавлены unit-тесты заморозки/возобновления/повторных событий и DOM-contract тест трёх RAF-циклов.
+- Файлы: `src/ant-animation.js`, `src/app.js`, `tests/ant-animation.test.js`, `tests/dom-contract.test.js`, `index.html`, `service-worker.js`, `public/service-worker.js`.
+- App version KT-076; PWA shell cache v46; оба service worker файла идентичны.
+- Основной code commit: `2eb6b27dd8c7f31079ce12a33b13ff90bc6a7f06`; минимальный test-fix commit: `03ef6bb4ccd1f2f85c0e87924452c2271f0f99da`.
+- Первичный CI выявил устаревшую проверку версии KT-075; тест исправлен без изменения игровой логики. Итоговый Pages run [43000997858](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43000997858): 66/66 tests PASS, production build PASS, deploy PASS.
+- Godot run [43000997759](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43000997759): import, rules tests и smoke test PASS. Android run [43000997894](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43000997894): 66/66 tests, production build, debug APK и artifact upload PASS.
+- Не проводились локальный npm test/build, браузерный скриншот, ручное переключение вкладки и физический тест устройства; APK workflow — только сборка артефакта.
