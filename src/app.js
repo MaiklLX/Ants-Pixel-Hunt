@@ -108,28 +108,36 @@ function updateBoardProgress(){
  if(progress)progress.style.width=percent+"%";
  if(track)track.setAttribute("aria-valuenow",String(percent));
 }
+function drawBoardGridCell(x,y,cell){
+ const px=x*cell,py=y*cell;
+ boardCtx.save();boardCtx.strokeStyle="#a6c3a044";boardCtx.lineWidth=.65;
+ boardCtx.strokeRect(px+.35,py+.35,cell-.7,cell-.7);boardCtx.restore();
+}
 function drawBoardTile(x,y,exposed,cell){
  const color=state.board[y][x];if(!color)return;
  const px=x*cell,py=y*cell,size=cell-1.25,rgb=COLORS[color].hex;
  boardCtx.save();
- boardCtx.shadowColor="#35513b38";boardCtx.shadowBlur=2.1;boardCtx.shadowOffsetY=1.7;
+ boardCtx.shadowColor="#07150f66";boardCtx.shadowBlur=2.3;boardCtx.shadowOffsetY=1.4;
  const face=boardCtx.createLinearGradient(px,py,px+size,py+size);
- face.addColorStop(0,"#ffffff");face.addColorStop(.12,rgb);face.addColorStop(.72,rgb);face.addColorStop(1,"#456b4a");
+ face.addColorStop(0,"#ffffffb8");face.addColorStop(.13,rgb);face.addColorStop(.76,rgb);face.addColorStop(1,"#263b30");
  boardCtx.fillStyle=face;boardCtx.beginPath();boardCtx.roundRect(px+.7,py+.5,size,size,1.9);boardCtx.fill();
  boardCtx.shadowColor="transparent";boardCtx.shadowBlur=0;boardCtx.shadowOffsetY=0;
- boardCtx.strokeStyle="#ffffffa8";boardCtx.lineWidth=.65;boardCtx.stroke();
- boardCtx.strokeStyle="#35513b35";boardCtx.lineWidth=.7;
+ boardCtx.strokeStyle="#d8e6d044";boardCtx.lineWidth=.65;boardCtx.stroke();
+ boardCtx.strokeStyle="#14251d77";boardCtx.lineWidth=.7;
  boardCtx.beginPath();boardCtx.moveTo(px+2,py+size-1);boardCtx.lineTo(px+size-1,py+size-1);boardCtx.lineTo(px+size-1,py+2);boardCtx.stroke();
- boardCtx.fillStyle="#ffffff55";boardCtx.beginPath();boardCtx.roundRect(px+2,py+1.6,size-4,1.15,.7);boardCtx.fill();
- if(exposed){boardCtx.strokeStyle="#fff3c9cc";boardCtx.lineWidth=.85;boardCtx.beginPath();boardCtx.roundRect(px+1.25,py+1.1,size-2.3,size-2.3,1.5);boardCtx.stroke();}
+ boardCtx.fillStyle="#ffffff30";boardCtx.beginPath();boardCtx.roundRect(px+2,py+1.6,size-4,1.05,.7);boardCtx.fill();
+ if(exposed){boardCtx.strokeStyle="#d6bd78cc";boardCtx.lineWidth=.85;boardCtx.beginPath();boardCtx.roundRect(px+1.25,py+1.1,size-2.3,size-2.3,1.5);boardCtx.stroke();}
  boardCtx.restore();
 }
 function renderBoard(){
  const width=boardEl.width,height=boardEl.height,cell=width/SIZE;
  boardCtx.clearRect(0,0,width,height);
  boardEmptyGradient=boardCtx.createLinearGradient(0,0,width,height);
- boardEmptyGradient.addColorStop(0,"#f5f2df");boardEmptyGradient.addColorStop(1,"#dcebdc");
+ boardEmptyGradient.addColorStop(0,"#263e32");boardEmptyGradient.addColorStop(.55,"#20372c");boardEmptyGradient.addColorStop(1,"#182b23");
  boardCtx.fillStyle=boardEmptyGradient;boardCtx.fillRect(0,0,width,height);
+ boardCtx.save();boardCtx.strokeStyle="#a6c3a02a";boardCtx.lineWidth=.55;
+ for(let i=0;i<=SIZE;i++){const p=i*cell+.5;boardCtx.beginPath();boardCtx.moveTo(p,0);boardCtx.lineTo(p,height);boardCtx.stroke();boardCtx.beginPath();boardCtx.moveTo(0,p);boardCtx.lineTo(width,p);boardCtx.stroke();}
+ boardCtx.restore();
  lastExposedPixels=new Set(getExposedPixels(state.board).map(point=>point.x+","+point.y));
  for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)drawBoardTile(x,y,lastExposedPixels.has(x+","+y),cell);
  updateBoardProgress();
@@ -137,7 +145,8 @@ function renderBoard(){
 function renderBoardAfterPickup(target){
  const cell=boardEl.width/SIZE,px=target.x*cell,py=target.y*cell;
  boardCtx.save();boardCtx.beginPath();boardCtx.rect(px-2,py-2,cell+4,cell+4);boardCtx.clip();
- boardCtx.fillStyle=boardEmptyGradient||"#e8eddd";boardCtx.fillRect(px-2,py-2,cell+4,cell+4);boardCtx.restore();
+ boardCtx.fillStyle=boardEmptyGradient||"#20372c";boardCtx.fillRect(px-2,py-2,cell+4,cell+4);boardCtx.restore();
+ drawBoardGridCell(target.x,target.y,cell);
  const nextExposed=new Set(getExposedPixels(state.board).map(point=>point.x+","+point.y));
  for(const key of nextExposed){
   if(lastExposedPixels.has(key))continue;
