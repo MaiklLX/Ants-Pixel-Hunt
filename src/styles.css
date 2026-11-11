@@ -1753,3 +1753,34 @@ body{
 }
 
 .menu-garden::before,.menu-garden::after{content:none}
+
+
+/* KT-074 — home hub cards become tactile forest wayfinding pieces. */
+.menu-progress-card{position:relative;overflow:hidden;border-color:#5b7354;border-radius:14px 18px 14px 18px;background:radial-gradient(ellipse at 0 0,#566b43 0%,transparent 52%),linear-gradient(135deg,#304637 0%,#263b30 58%,#203329 100%);box-shadow:inset 0 1px #ffffff12,0 4px 0 #17291f,0 9px 18px #07140f66}
+.menu-progress-card::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:0 4px 4px 0;background:linear-gradient(#b8bd7b,#d1b477,#718e61);opacity:.85}
+.menu-progress-top{padding-left:5px}.menu-progress-top strong{font-size:12px;letter-spacing:.35px}.menu-progress-top span{color:#d0c18e}
+.menu-progress-track{height:7px;border:1px solid #405842;background:#17291f;box-shadow:inset 0 1px 3px #07140f99}
+.menu-progress-track span{background:linear-gradient(90deg,#789c68,#a8b879 68%,#d0b477);box-shadow:0 0 9px #b6c27a44}
+.menu-progress-card p{color:#b8c4aa;letter-spacing:.05px}
+.menu-level-card{border-color:#71835a;background:radial-gradient(ellipse at 0 50%,#64764a44,transparent 48%),linear-gradient(112deg,#3b533c 0%,#2c4334 56%,#26382e 100%);box-shadow:inset 0 1px #ffffff14,0 4px 0 #182b20,0 10px 18px #07140f70}
+.level-thumb{overflow:hidden;border-color:#829568;background:radial-gradient(circle at 50% 30%,#84975c 0%,#506c43 58%,#344d36 100%);box-shadow:inset 0 1px #ffffff20,0 3px 7px #08150f88}
+.level-thumb::after{content:"";position:absolute;inset:auto 5px 5px;height:4px;border-radius:50%;background:#17291f99;filter:blur(3px)}
+.level-thumb i{z-index:1;color:#e7d18e;text-shadow:0 1px 5px #17291f}
+.level-card-copy>span{color:#d8c184}.level-card-copy strong{color:#edf0dc}.level-card-copy small{color:#bdc8ae}
+.level-play-mark{border-color:#6a8052;background:linear-gradient(145deg,#4a613f,#354c36);color:#e1dfb5;box-shadow:inset 0 1px #ffffff13,0 2px 0 #1a2c20}
+.hub-locations{gap:9px}
+.hub-location{position:relative;overflow:hidden;border-color:#536d50;background:linear-gradient(145deg,#30483a 0%,#263c30 65%,#21352a 100%);box-shadow:inset 0 1px #ffffff10,0 3px 0 #17291f,0 8px 14px #07140f66}
+.hub-location::after{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:linear-gradient(#829b65,#d0b477);opacity:.65}
+.hub-location-icon{display:grid;place-items:center;border-color:#637952;background:linear-gradient(145deg,#4c6546,#304735);box-shadow:inset 0 1px #ffffff18,0 2px 5px #08150f66}
+.hub-location-icon svg{display:block;width:24px;height:24px;fill:none;stroke:#d7dfb5;stroke-width:1.65;stroke-linecap:round;stroke-linejoin:round}
+.adventure-location .hub-location-icon svg{stroke:#c5d6a0}
+.nest-location{border-color:#786b48;background:linear-gradient(145deg,#49432f 0%,#373b2d 72%,#2c372b 100%)}
+.nest-location::after{background:linear-gradient(#d5bf7e,#927b49)}
+.nest-location .hub-location-icon{border-color:#82724b;background:linear-gradient(145deg,#65583a,#443d2d)}
+.nest-location .hub-location-icon svg{stroke:#e1ca8c}
+.hub-location-arrow{color:#d2dcae}
+.hub-location-resource{border-color:#756644;background:linear-gradient(145deg,#51482f,#3d3b2b);color:#e5d18e;box-shadow:inset 0 1px #ffffff12}
+.menu-progress-card,.menu-level-card,.hub-location{transition:transform .16s ease,border-color .16s ease,filter .16s ease}
+.menu-level-card:active:not(:disabled),.hub-location:active{filter:brightness(1.08)}
+@media(max-width:380px){.hub-location-icon svg{width:21px;height:21px}.menu-progress-top strong{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.menu-progress-card,.menu-level-card,.hub-location{transition:none}}
