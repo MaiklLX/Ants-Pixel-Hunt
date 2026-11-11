@@ -620,3 +620,10 @@
 - Мобильные правила и игровая логика не затронуты.
 - Изменены: `src/styles.css`, `index.html`, `tests/dom-contract.test.js`, оба Service Worker, `README.md`, `docs/CURRENT_STATE.md`, `docs/KT_LOG.md`.
 - App version KT-093; PWA shell cache v63.
+
+
+## KT-094 — исправление исторических version assertions
+- Пять старых DOM-контрактных тестов падали из-за того, что ожидали метки KT-087–KT-091, хотя приложение уже имело KT-093. Это блокировало и Pages, и Android workflow при 78/83 успешных тестах.
+- Исторические тесты теперь проверяют формат текущей версии, сохраняя отдельные проверки CSS-компоновки; KT-093 assertion также не привязан к старому номеру.
+- App version KT-094; PWA shell cache v64; оба Service Worker обновлены синхронно.
+- Игровой код, CSS и механика не менялись.
