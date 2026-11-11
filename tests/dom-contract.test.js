@@ -96,7 +96,7 @@ test("KT-075 keeps the home menu compact and its scene label legible", async () 
 
 test("KT-076 freezes ant, pickup and crate animation time while the page is hidden", async () => {
   const source = await readFile(new URL("../src/app.js", import.meta.url), "utf8");
-  assert.match(html, /app-version" content="KT-077"/);
+  assert.match(html, /app-version" content="KT-078"/);
   assert.ok(source.includes('document.addEventListener("visibilitychange"'));
   assert.ok(source.includes("animationClock.pause()"));
   assert.ok(source.includes("animationClock.resume()"));
