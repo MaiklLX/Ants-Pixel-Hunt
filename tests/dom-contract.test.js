@@ -215,7 +215,7 @@ test("KT-087 restores mobile vertical rhythm and prevents queue overlap", async 
  assert.ok(styles.includes("width:100%;height:auto;min-height:58px"));
  assert.match(styles,/grid-auto-rows:clamp\(14px,2.1dvh,18px\)/);
  assert.match(styles,/max-height:620px/);
- assert.match(markup,/content="KT-0(87|88|89)"/);
+ assert.match(markup,/content="KT-0(87|88|89|90)"/);
 });
 
 
@@ -228,7 +228,7 @@ test("KT-088 restores useful mobile feedback and improves arena touch/readabilit
  assert.match(styles,/\.message\s*\{[\s\S]*?min-height:30px;height:auto;max-height:42px/);
  assert.match(styles,/\.queue-lane\s*\{[\s\S]*?border:1px solid #3b5543/);
  assert.ok(source.includes('slot.setAttribute("aria-label"'));
- assert.match(markup,/content="KT-0(88|89)"/);
+ assert.match(markup,/content="KT-0(88|89|90)"/);
  assert.ok(markup.includes('id="slots" class="slots" role="group"'));
 });
 
