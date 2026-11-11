@@ -207,3 +207,14 @@ test("KT-085 fits the complete mobile arena inside the dynamic viewport", async 
  assert.match(styles,/footer\s*\{display:none\}/);
  assert.ok(markup.includes('id="board"'));
 });
+
+
+test("KT-086 lifts and enlarges the mobile board while preserving short-screen limits", async () => {
+ const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
+ const markup=await readFile(new URL("../index.html",import.meta.url),"utf8");
+ assert.ok(styles.includes("KT-086 — lift and enlarge the mobile playfield using the unused upper viewport"));
+ assert.match(styles,/width:min\(100%,39dvh,calc\(100dvh - 300px\),320px\)/);
+ assert.match(styles,/aspect-ratio:1;margin:-3px auto 0/);
+ assert.match(styles,/width:min\(100%,34dvh,calc\(100dvh - 285px\),270px\)/);
+ assert.ok(markup.includes('content="KT-086"'));
+});
