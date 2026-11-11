@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#14251d">
-  <meta name="app-version" content="KT-071">
+  <meta name="app-version" content="KT-072">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Муравьишки">
@@ -22,11 +22,70 @@
         <div><h1>МУРАВЬИШКИ</h1><p class="subtitle">ПИКСЕЛЬНАЯ ОХОТА</p></div>
       </header>
       <div class="menu-garden" aria-hidden="true">
-        <span class="garden-cloud cloud-one"></span><span class="garden-cloud cloud-two"></span>
-        <span class="garden-flower flower-one">✿</span><span class="garden-flower flower-two">✿</span>
-        <span class="garden-grass grass-one"></span><span class="garden-grass grass-two"></span>
-        <div class="garden-ant">🐜</div>
-        <div class="garden-pixels"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <svg class="menu-garden-art" viewBox="0 0 640 300" preserveAspectRatio="xMidYMid slice" role="presentation" focusable="false">
+          <defs>
+            <linearGradient id="garden-sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#526b63"/><stop offset=".62" stop-color="#344f40"/><stop offset="1" stop-color="#263d30"/></linearGradient>
+            <linearGradient id="garden-hill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#71875b"/><stop offset="1" stop-color="#344d36"/></linearGradient>
+            <linearGradient id="garden-earth" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#536747"/><stop offset="1" stop-color="#293c2c"/></linearGradient>
+            <radialGradient id="garden-lantern"><stop stop-color="#f4d58b" stop-opacity=".55"/><stop offset="1" stop-color="#f4d58b" stop-opacity="0"/></radialGradient>
+          </defs>
+          <rect width="640" height="300" fill="url(#garden-sky)"/>
+          <circle cx="493" cy="72" r="69" fill="url(#garden-lantern)"/>
+          <circle cx="493" cy="72" r="29" fill="#d8c58c" opacity=".82"/>
+          <path d="M0 174 Q95 111 192 160 T390 150 T640 139 V300 H0Z" fill="#405b43"/>
+          <path d="M0 205 Q110 150 236 192 T462 177 T640 187 V300 H0Z" fill="url(#garden-hill)"/>
+          <g fill="#b8c88c" opacity=".78">
+            <path d="M72 50h4v4h-4zM128 93h3v3h-3zM227 48h4v4h-4zM370 83h3v3h-3zM573 122h4v4h-4z"/>
+            <path d="M416 39h3v3h-3zM180 124h3v3h-3zM544 35h4v4h-4z"/>
+          </g>
+          <g class="firefly" fill="#f4d58b"><circle cx="110" cy="132" r="3"/><circle cx="556" cy="155" r="2.5"/><circle cx="390" cy="111" r="2"/></g>
+          <g fill="#294431">
+            <path d="M0 177V93h18v-17h17v34h14v-52h18v39h15v80z"/>
+            <path d="M640 190V83h-17V66h-17v34h-14V54h-18v45h-15v91z"/>
+          </g>
+          <g fill="#54734b">
+            <path d="M20 174l-16-18 21 5-10-25 25 23 12-19 2 34z"/>
+            <path d="M618 185l18-25-24 9 8-29-24 26-11-18-4 38z"/>
+          </g>
+          <path d="M0 228 Q110 194 214 225 T430 218 T640 224 V300 H0Z" fill="url(#garden-earth)"/>
+          <path d="M0 256 Q160 220 320 257 T640 247 V300 H0Z" fill="#263b2b" opacity=".7"/>
+          <g class="garden-mushroom">
+            <path d="M92 229h19v38H92z" fill="#d5c49a"/><path d="M72 230q4-34 29-34t30 34z" fill="#a96e53"/>
+            <path d="M82 220q15-12 36 0" fill="none" stroke="#d99c72" stroke-width="5"/>
+            <path d="M98 196h5v5h-5zM114 208h4v4h-4z" fill="#f1d5a6"/>
+          </g>
+          <g fill="#829d61">
+            <path d="M40 270q-12-24-5-39 17 12 12 39zM53 271q1-30 19-38 4 23-13 39z"/>
+            <path d="M560 268q-8-27 7-42 12 21 0 43zM579 268q4-25 24-31 0 23-18 34z"/>
+          </g>
+          <g fill="#d7bd79">
+            <path d="M57 250h5v5h-5zM61 245h5v5h-5zM66 250h5v5h-5zM61 255h5v5h-5z"/>
+            <path d="M586 236h5v5h-5zM590 231h5v5h-5zM595 236h5v5h-5zM590 241h5v5h-5z"/>
+          </g>
+          <g class="ant-shadow" fill="#1c2e22" opacity=".6"><ellipse cx="315" cy="244" rx="82" ry="12"/></g>
+          <g class="pixel-ant" stroke="#271e1b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M284 190l-29 28-18 1M302 201l-25 35-17 4M349 199l24 31 19 1M359 185l31 20 18-1" fill="none"/>
+            <path d="M291 161l-21-26-18-7M310 157l-5-34-13-12" fill="none"/>
+            <path d="M286 180l-13 11-12-2" fill="none" stroke="#a95d3d" stroke-width="7"/>
+            <ellipse cx="277" cy="184" rx="19" ry="16" fill="#a95d3d"/>
+            <ellipse cx="322" cy="184" rx="27" ry="24" fill="#bd6b43"/>
+            <ellipse cx="366" cy="174" rx="22" ry="21" fill="#a95d3d"/>
+            <path d="M358 167q9-8 17 0" fill="none" stroke="#f0c28b" stroke-width="3"/>
+            <circle cx="374" cy="168" r="4" fill="#f3d79a" stroke="none"/>
+            <circle cx="367" cy="169" r="3" fill="#241d1a" stroke="none"/>
+            <path d="M379 181q-8 7-15 2" fill="none" stroke="#4b2b25" stroke-width="2.5"/>
+            <path d="M373 155q14-19 25-16M361 154q1-20-10-26" fill="none" stroke="#a95d3d" stroke-width="4"/>
+            <circle cx="399" cy="139" r="3" fill="#d6b87a" stroke="none"/>
+            <circle cx="350" cy="127" r="3" fill="#d6b87a" stroke="none"/>
+            <path d="M275 187l-7 7M320 178l5 6" fill="none" stroke="#e6a06a" stroke-width="3"/>
+          </g>
+          <g class="pixel-prize" stroke="#26372a" stroke-width="3" stroke-linejoin="round">
+            <path d="M438 224h29v29h-29z" fill="#d5b75f"/><path d="M438 224l10-9h29l-10 9z" fill="#ead28b"/><path d="M467 224l10-9v29l-10 9z" fill="#967c43"/>
+            <path d="M475 250h25v25h-25z" fill="#6c9bb0"/><path d="M475 250l8-8h25l-8 8z" fill="#9fc6d0"/><path d="M500 250l8-8v25l-8 8z" fill="#456c80"/>
+            <path d="M418 260h21v21h-21z" fill="#8a78a8"/><path d="M418 260l7-7h21l-7 7z" fill="#b7a3d0"/><path d="M439 260l7-7v21l-7 7z" fill="#5d4c79"/>
+          </g>
+          <g fill="#d8c58c"><path d="M208 240h4v4h-4zM224 258h3v3h-3zM530 205h4v4h-4z"/></g>
+        </svg>
       </div>
       <section class="menu-progress-card" aria-label="Прогресс колонии">
         <div class="menu-progress-top"><strong>Моя колония</strong><span id="menu-progress-count">0 из 6 полянок</span></div>
