@@ -1289,3 +1289,6 @@ button:not(.menu-primary):disabled{
 @media(prefers-reduced-motion:reduce){
   button:not(.menu-primary){transition:none}
 }
+
+/* Native controls and browser widgets follow the same dark woodland theme. */
+:root{color-scheme:dark}
