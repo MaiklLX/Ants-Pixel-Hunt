@@ -80,7 +80,7 @@ test("KT-075 main menu ties the title and diorama together with a forest scene l
   const menuStart = html.indexOf('<section id="main-menu"');
   const menuEnd = html.indexOf('<header class="topbar"', menuStart);
   const menu = html.slice(menuStart, menuEnd);
-  assert.match(menu, /<span class="garden-stamp">ЛЕСНАЯ ПОЛЯНКА<\\/span>/);
+  assert.ok(menu.includes('<span class="garden-stamp">ЛЕСНАЯ ПОЛЯНКА</span>'));
   assert.ok(menu.indexOf('class="menu-brand"') < menu.indexOf('class="menu-garden"'));
   assert.ok(menu.indexOf('class="menu-garden"') < menu.indexOf('class="menu-progress-card"'));
   assert.match(html, /app-version" content="KT-075"/);
