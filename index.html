@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#f3f8ed">
-  <meta name="app-version" content="KT-058">
+  <meta name="app-version" content="KT-059">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Муравьишки">
@@ -88,8 +88,9 @@
     <section id="map-overlay" class="nest-overlay map-overlay" role="dialog" aria-modal="true" aria-labelledby="map-title" hidden>
       <div class="nest-card map-card">
         <header class="nest-header"><div><p class="nest-kicker">ПУТЕШЕСТВИЕ ПО МИРУ</p><h2 id="map-title">Карта приключений</h2></div><button id="map-close" class="nest-close" type="button" aria-label="Закрыть">×</button></header>
-        <p class="map-intro">Каждая полянка — новая картинка, новые задачи и маленькие открытия.</p>
-        <div class="map-chapter-label"><span>🌿</span> ПОЛЯНКИ КОЛОНИИ <small>Открывай по порядку</small></div>
+        <p class="map-intro">Путешествуй от цветочной поляны к грибному лесу. Каждая собранная картинка открывает следующий маршрут.</p>
+        <div id="map-summary" class="map-summary" aria-live="polite"></div>
+        <div class="map-legend"><span><i class="legend-dot open"></i> Доступно</span><span><i class="legend-dot done"></i> Пройдено</span><span><i class="legend-dot locked"></i> Впереди</span></div>
         <div id="campaign-levels" class="campaign-levels map-levels"></div>
       </div>
     </section>
@@ -97,8 +98,9 @@
       <div class="nest-card">
         <header class="nest-header"><div><p class="nest-kicker">ДОМ НАШЕЙ КОЛОНИИ</p><h2 id="nest-title">Муравейник</h2></div><button id="nest-close" class="nest-close" type="button" aria-label="Закрыть">×</button></header>
         <div class="nest-wallet"><span>🌼</span><div><strong id="nest-balance">0</strong><small>нектар в запасе</small></div></div>
-        <p id="nest-progress" class="nest-progress">0/10 кубиков до следующего нектара</p>
-        <div class="nest-section-title">ПОСТРОЙКИ КОЛОНИИ</div>
+        <div class="nest-progress-wrap"><div class="nest-progress-label"><strong>Следующий нектар</strong><span id="nest-progress-label">0 / 10 кубиков</span></div><div id="nest-progress-bar" class="nest-progress-track" role="progressbar" aria-label="Прогресс до следующего нектара" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0"><span id="nest-progress-fill"></span></div><p id="nest-progress" class="nest-progress">Собирай кубики на полянках — колония пополняет запасы</p></div>
+        <div class="nest-stats"><div><strong id="nest-total-cubes">0</strong><small>кубиков собрано</small></div><div><strong id="nest-meadows-done">0</strong><small>полянок завершено</small></div><div><strong id="nest-upgrades">0 / 9</strong><small>улучшений куплено</small></div></div>
+        <div class="nest-section-title">РАЗВИТИЕ МУРАВЕЙНИКА</div>
         <div id="nest-buildings" class="nest-buildings"></div>
         <p class="nest-footnote">Нектар начисляется за собранные кубики. Запасы и постройки сохраняются.</p>
       </div>
