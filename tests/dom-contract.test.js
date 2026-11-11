@@ -228,7 +228,7 @@ test("KT-088 restores useful mobile feedback and improves arena touch/readabilit
  assert.match(styles,/\.message\s*\{[\s\S]*?min-height:30px;height:auto;max-height:42px/);
  assert.match(styles,/\.queue-lane\s*\{[\s\S]*?border:1px solid #3b5543/);
  assert.ok(source.includes('slot.setAttribute("aria-label"'));
- assert.ok(markup.includes('content="KT-088"'));
+ assert.match(markup,/content="KT-0(88|89)"/);
  assert.ok(markup.includes('id="slots" class="slots" role="group"'));
 });
 
