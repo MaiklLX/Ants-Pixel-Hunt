@@ -12,14 +12,14 @@
 
 ## Последняя сверенная игровая база
 - Дата: 11 ноября 2026.
-- HEAD main перед KT-081: документационная синхронизация KT-080 `1a61984e615bd82cf9af7e41c0e41a09b759ba2a`; кодовая точка KT-080 — `9a524e3b3f93e2e7ecbfb1fb4fbfd6f5133a7eb4`.
-- KT-080: общий лесной декоративный акцент и мягкие появления главного меню, карты и муравейника; переходы отключаются при `prefers-reduced-motion`.
-- App version KT-080; PWA shell cache v50; оба Service Worker файла идентичны.
-- GitHub Pages run [43006278142](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43006278142): 72/72 теста PASS, production build и deploy PASS.
-- Godot run [43006277999](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43006277999): resource import, gameplay rules tests и smoke test PASS.
-- Android run [43006278065](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43006278065): 72/72 теста, production build, debug APK и artifact upload PASS.
-- APK создан как CI-артефакт, но не устанавливался на физическое устройство. Браузерный скриншот и ручное тестирование на телефоне не выполнялись.
-- Следующий визуальный этап KT-081: единая система кнопок, состояний фокуса и индикаторов прогресса; игровая логика не меняется.
+- HEAD main после KT-081: `740dad725c540c6da1bd535f9ea70107bc6a5aba` (исправление тестового шаблона); основной набор визуальных изменений KT-081 внесён в предшествующей серии коммитов.
+- KT-081: единый тёмный стиль второстепенных кнопок и состояний фокуса; прогресс меню, карты, глав, муравейника и игрового HUD приведён к общей дорожке и градиенту мшисто-зелёного/янтарного заполнения. Reduced-motion отключает переходы.
+- App version KT-081; PWA shell cache v51. `service-worker.js` и `public/service-worker.js` идентичны.
+- GitHub Pages run [43009162149](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43009162149): 73/73 теста PASS, production build, artifact upload и deploy PASS.
+- Godot run [43009162033](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43009162033): resource import, gameplay rules tests и project smoke test PASS.
+- Android run [43009161917](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43009161917): 73/73 теста, production build, Gradle debug APK и artifact upload PASS.
+- APK создан CI как артефакт, но не устанавливался на физическое устройство. Скриншотная визуальная проверка и ручное тестирование на телефоне не проводились.
+- Игровые правила, экономика, прогресс, управление, доступность полянок и сохранения в KT-081 не менялись.
 
 ## Реализовано
 - Web/PWA на HTML5, CSS, JavaScript и Vite.
