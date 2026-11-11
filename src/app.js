@@ -514,10 +514,21 @@ async function onChoose(column){
 }
 function updateMainMenu(){
  const primary=$("start-game"),fresh=$("new-game"),progress=$("menu-progress"),level=getLevel(state.levelId);
+ const completed=completedLevels(),completedCount=LEVELS.filter(item=>completed.has(item.id)).length;
+ const unlockedCount=LEVELS.filter(item=>isLevelUnlocked(item)).length,total=LEVELS.length;
+ const percent=total?Math.round(completedCount/total*100):0;
  $("menu-level-name").textContent=level.name;$("menu-level-number").textContent=`ПОЛЯНКА ${String(level.number).padStart(2,"0")}`;$("menu-level-emoji").textContent=level.emoji;
+ $("menu-progress-count").textContent=`${completedCount} из ${total} полянок`;
+ $("menu-progress-fill").style.width=percent+"%";
+ $("menu-progress-bar").setAttribute("aria-valuemax",String(total));
+ $("menu-progress-bar").setAttribute("aria-valuenow",String(completedCount));
+ $("menu-progress-hint").textContent=completedCount===total?"Вся коллекция собрана — можно пройти полянки ещё раз":`Открыто: ${unlockedCount} из ${total} · осталось собрать ${total-completedCount}`;
+ const currentButton=$("menu-current-level");
+ currentButton.disabled=resetAfterMenu||!isLevelUnlocked(level);
+ currentButton.setAttribute("aria-label",`Играть: полянка ${level.number}, ${level.name}`);
  const list=$("campaign-levels");
  if(list){list.replaceChildren();for(const item of LEVELS){
-  const unlocked=isLevelUnlocked(item),done=completedLevels().has(item.id),button=document.createElement("button");button.type="button";
+  const unlocked=isLevelUnlocked(item),done=completed.has(item.id),button=document.createElement("button");button.type="button";
   button.className="campaign-level"+(item.id===state.levelId?" current":"")+(unlocked?"":" locked");button.disabled=!unlocked;
   const icon=document.createElement("span");icon.className="campaign-emoji";icon.textContent=unlocked?"📦":"🔒";
   const copy=document.createElement("span");copy.className="campaign-copy";
@@ -526,13 +537,10 @@ function updateMainMenu(){
   const status=document.createElement("span");status.className="campaign-state";status.textContent=done?"✓":unlocked?"›":"🔒";
   button.append(icon,copy,status);button.addEventListener("click",()=>{if(unlocked){closeMap();void startFreshGame(item.id);}});list.append(button);
  }}
-
- primary.textContent=gameStarted?"Вернуться на полянку":"Начать охоту";
- primary.disabled=resetAfterMenu;
- primary.querySelector("span")?.remove();
- const arrow=document.createElement("span");arrow.setAttribute("aria-hidden","true");arrow.textContent="→";primary.append(arrow);
+ primary.textContent=gameStarted?"Вернуться на полянку":"Начать охоту";primary.disabled=resetAfterMenu;
+ primary.querySelector("span")?.remove();const arrow=document.createElement("span");arrow.setAttribute("aria-hidden","true");arrow.textContent="→";primary.append(arrow);
  fresh.hidden=true;
- progress.textContent=completedLevels().has(level.id)?"Пройдена · можно повторить":isLevelUnlocked(level)?"Открыта · можно отправляться":"Полянка пока закрыта";
+ progress.textContent=completed.has(level.id)?"Пройдена · можно повторить":isLevelUnlocked(level)?"Открыта · можно отправляться":"Полянка пока закрыта";
 }
 function showMainMenu(){
  shell.classList.add("menu-open");
@@ -573,6 +581,7 @@ async function boot(){
 }
 $("menu-toggle").addEventListener("click",showMainMenu);
 $("start-game").addEventListener("click",startGame);
+ $("menu-current-level").addEventListener("click",startGame);
 $("new-game").addEventListener("click",()=>startFreshGame(state.levelId));
 $("result-retry").addEventListener("click",()=>startFreshGame(state.levelId));
 $("result-next").addEventListener("click",()=>{const index=LEVELS.findIndex(level=>level.id===state.levelId),next=LEVELS[index+1];if(next&&isLevelUnlocked(next))void startFreshGame(next.id);});
