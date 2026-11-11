@@ -1180,3 +1180,35 @@ footer span{color:#c7ad72}
 @media(prefers-reduced-motion:reduce){
  .nest-worker-one,.nest-worker-two{animation:none}
 }
+
+
+/* KT-066 — readable dark HUD: progress, live slots and the numbered reserve share one woodland surface. */
+.level-progress{background:#14251d;border:1px solid #4b654d;box-shadow:inset 0 2px 4px #07140f99,0 1px #ffffff0a}
+.level-progress span{background:linear-gradient(90deg,#8eae78,#c2a96c);box-shadow:0 0 9px #a6bb7955}
+.board-status{background:linear-gradient(145deg,#30483a,#263b30);border-color:#4c654e;color:#d1dfc9;box-shadow:inset 0 1px #ffffff0a,0 2px 5px #09170f66}
+.slots{background:linear-gradient(180deg,#2a4033,#20352a);border:1px solid #415b46;box-shadow:inset 0 2px 4px #0c1a12aa,0 2px 0 #17291f}
+.slot{background:linear-gradient(150deg,#354c3d,#293e32);border-color:#506b53;border-bottom-color:color-mix(in srgb,var(--box-color,#8aa781) 55%,#26392d);box-shadow:0 2px 0 #17291f,0 4px 8px #08150f66,inset 0 1px #ffffff0d}
+.slot.filled{background:linear-gradient(145deg,#3a5542,#2b4234);border-color:#688566}
+.slot .slot-number{color:#a9b99e}
+.slot .slot-plus{color:#789078}
+.slot.linked-waiting{border-color:#c7a96d;box-shadow:0 0 0 1px #c7a96d44,0 3px 8px #08150f66}
+.queue-lane{gap:5px}
+.choice-card .choice-crate{background:linear-gradient(145deg,#425b46,#2b4235);border:1px solid color-mix(in srgb,var(--ant-color,#789a73) 48%,#516c54);box-shadow:inset 0 1px #ffffff18,0 2px 4px #0b1a1266}
+.choice-card small{color:#c0cdb8}
+.choice-card.selectable:not(:disabled){background:linear-gradient(150deg,#3a5543,#293f33);border-color:color-mix(in srgb,var(--ant-color,#6d906b) 48%,#506b54);border-bottom-color:color-mix(in srgb,var(--ant-color,#6d906b) 58%,#24392d);box-shadow:0 3px 0 #17291f,0 5px 9px #08150f66,inset 0 1px #ffffff0d}
+.choice-card.selectable:not(:disabled):hover{filter:brightness(1.08);transform:translateY(-1px)}
+.choice-card:disabled{filter:saturate(.72)}
+.choice-card.empty-box{background:#25382d;border-color:#405545;color:#839682}
+.queue-preview{gap:4px}
+.queue-peek{background:linear-gradient(100deg,#304738,#263b30);border-color:#455f49;box-shadow:inset 0 1px #ffffff0a,0 1px 2px #08150f66;color:#d5e1ce}
+.peek-order{background:#1c3025;border-color:#4c654e;color:#b8c8ad}
+.queue-peek .peek-count{color:#c2d0b9}
+.queue-peek.empty{background:#21342a;border-color:#394e3e}
+.queue-peek.sealed-peek{background:linear-gradient(100deg,#49432f,#343a2c);border-color:#89734a}
+.queue-peek.linked-peek::after{color:#d2b875}
+.choice-card.linked-box{background:linear-gradient(150deg,#3c5541,#2c4234);border-color:#9ab17e;box-shadow:0 3px 0 #1a2c22,0 5px 10px #08150f66}
+.linked-mark{background:#4a593a;color:#e1d09b;box-shadow:inset 0 1px #ffffff18}
+.choice-card.sealed-box{background:linear-gradient(150deg,#4b4634,#353b2e);border-color:#87744d}
+.sealed-progress{color:#e1c987}
+@media(hover:hover){.hub-location:hover,.nest-building:hover{filter:brightness(1.08)}}
+@media(prefers-reduced-motion:reduce){.level-progress span{transition:none}}
