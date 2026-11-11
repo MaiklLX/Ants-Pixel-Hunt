@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#f3f8ed">
-  <meta name="app-version" content="KT-057">
+  <meta name="app-version" content="KT-058">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Муравьишки">
@@ -27,12 +27,16 @@
         <div class="garden-ant">🐜</div>
         <div class="garden-pixels"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
       </div>
-      <p class="menu-scene-caption">Маленькая команда · большие открытия</p>
-      <div class="menu-level-card">
+      <section class="menu-progress-card" aria-label="Прогресс колонии">
+        <div class="menu-progress-top"><strong>Моя колония</strong><span id="menu-progress-count">0 из 6 полянок</span></div>
+        <div class="menu-progress-track" role="progressbar" aria-label="Пройденные полянки" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0" id="menu-progress-bar"><span id="menu-progress-fill"></span></div>
+        <p id="menu-progress-hint">Каждая собранная картинка открывает новые приключения</p>
+      </section>
+      <button type="button" class="menu-level-card" id="menu-current-level" aria-label="Начать текущую полянку">
         <div class="level-thumb" aria-hidden="true"><span id="menu-level-emoji">🐸</span><i>✦</i></div>
         <div class="level-card-copy"><span id="menu-level-number">ПОЛЯНКА 01</span><strong id="menu-level-name">Портрет лягушонка</strong><small id="menu-progress">Готов к сборке · первая полянка</small></div>
-        <span class="level-play-mark" aria-hidden="true">›</span>
-      </div>
+        <span class="level-play-mark" aria-hidden="true">Играть&nbsp; ›</span>
+      </button>
       <section class="hub-locations" aria-label="Места колонии">
         <button id="map-open" class="hub-location adventure-location" type="button"><span class="hub-location-icon">🗺️</span><span class="hub-location-copy"><strong>Приключения</strong><small>Карта полянок</small></span><span class="hub-location-arrow">›</span></button>
         <button id="nest-open" class="hub-location nest-location" type="button"><span class="hub-location-icon">🏡</span><span class="hub-location-copy"><strong>Муравейник</strong><small>Развитие колонии</small></span><span class="hub-location-resource">🌼 <b id="nest-nectar">0</b></span></button>
