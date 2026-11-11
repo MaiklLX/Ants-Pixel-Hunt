@@ -17,7 +17,7 @@
 - Исправление: добавлен визуально скрытый, но доступный для assistive technology status region с role=status и aria-live=polite; PWA shell cache обновлён до v39-kt069.
 - Добавлен tests/dom-contract.test.js: проверяет, что все буквальные document.getElementById-вызовы через helper $() ссылаются на существующие HTML id, и отдельно проверяет live region.
 - KT-069 source baseline SHA: 99f86b03fdd45f085abac8cb61bd969178051560.
-- KT-070 source commit: 8413f4a3e00a179059b1f28413990119d3d8c412. Текущий SHA после обновления документации сверить с GitHub Actions.
+- KT-070 source commit: 8413f4a3e00a179059b1f28413990119d3d8c412; app version KT-070, PWA shell cache v40. Текущий SHA после обновления документации сверить с GitHub Actions.
 - Физическая проверка на телефоне и скриншотная проверка браузера не проводились.
 
 ## Реализовано
