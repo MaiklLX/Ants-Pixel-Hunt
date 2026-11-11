@@ -12,17 +12,14 @@
 
 ## Последняя сверенная игровая база
 - Дата: 11 ноября 2026.
-- HEAD main перед документационной синхронизацией: KT-080 `9a524e3b3f93e2e7ecbfb1fb4fbfd6f5133a7eb4`; предыдущая кодовая точка KT-079 — `e7a82e5ff1b863bbb2782046d3946c235fe9703a`.
-- KT-079: позиция и направление муравья теперь вычисляются одной Catmull–Rom выборкой через `getTrailPose`; координаты совпадают с прежней интерполяцией, направление берётся из аналитической производной. Маршруты, темп и игровые правила не менялись.
-- KT-080: общий лесной декоративный акцент и мягкие появления главного меню, карты и муравейника; все новые переходы отключаются при `prefers-reduced-motion`. Игровая логика и состояние экранов не менялись.
-- App version KT-080; PWA shell cache v50. `service-worker.js` и `public/service-worker.js` идентичны.
-- GitHub Pages run [43005475246](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43005475246): 72/72 теста PASS, Vite production build PASS, Pages artifact upload PASS, deploy PASS.
-- Android run [43005475169](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43005475169): 72/72 теста PASS, production build PASS, Gradle debug APK PASS, artifact upload PASS; артефакт `ants-pixel-hunt-debug-apk` — 3,822,155 bytes.
-- Godot legacy check [43005475184](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43005475184): resource import, gameplay rules tests и project smoke test PASS.
-- KT-079 CI: Pages [43004885991](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43004885991) — 71/71 tests, build и deploy PASS; Android [43004885978](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43004885978) — tests, build, debug APK и artifact upload PASS; Godot [43004886251](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43004886251) — import, rules tests и smoke PASS.
-- Pages deployment подтверждён успешным шагом GitHub Actions для KT-080. Прямой запрос публичного URL через текущий браузерный инструмент недоступен; скриншот и ручная визуальная проверка не выполнялись.
-- Debug APK создан CI как артефакт, но не устанавливался. Физическое тестирование Android/iOS не проводилось; локальные `npm test` и `npm run build` не запускались.
-- Следующий приоритет: расширение первой главы к 20 уникальным полянкам с точным цветовым бюджетом боксов и автоматической проверкой стартовой доступности/решаемости каждого рисунка.
+- HEAD main перед KT-081: документационная синхронизация KT-080 `1a61984e615bd82cf9af7e41c0e41a09b759ba2a`; кодовая точка KT-080 — `9a524e3b3f93e2e7ecbfb1fb4fbfd6f5133a7eb4`.
+- KT-080: общий лесной декоративный акцент и мягкие появления главного меню, карты и муравейника; переходы отключаются при `prefers-reduced-motion`.
+- App version KT-080; PWA shell cache v50; оба Service Worker файла идентичны.
+- GitHub Pages run [43006278142](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43006278142): 72/72 теста PASS, production build и deploy PASS.
+- Godot run [43006277999](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43006277999): resource import, gameplay rules tests и smoke test PASS.
+- Android run [43006278065](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43006278065): 72/72 теста, production build, debug APK и artifact upload PASS.
+- APK создан как CI-артефакт, но не устанавливался на физическое устройство. Браузерный скриншот и ручное тестирование на телефоне не выполнялись.
+- Следующий визуальный этап KT-081: единая система кнопок, состояний фокуса и индикаторов прогресса; игровая логика не меняется.
 
 ## Реализовано
 - Web/PWA на HTML5, CSS, JavaScript и Vite.
