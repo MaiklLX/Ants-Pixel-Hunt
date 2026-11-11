@@ -592,11 +592,11 @@ function updateMainMenu(){
  const unlockedCount=LEVELS.filter(item=>isLevelUnlocked(item)).length,total=LEVELS.length;
  const percent=total?Math.round(completedCount/total*100):0;
  $("menu-level-name").textContent=level.name;$("menu-level-number").textContent=`ПОЛЯНКА ${String(level.number).padStart(2,"0")}`;$("menu-level-emoji").textContent=level.emoji;
- $("menu-progress-count").textContent=`${completedCount} из ${total} полянок`;
+ $("menu-progress-count").textContent=`${completedCount} / ${total}`;
  $("menu-progress-fill").style.width=percent+"%";
  $("menu-progress-bar").setAttribute("aria-valuemax",String(total));
  $("menu-progress-bar").setAttribute("aria-valuenow",String(completedCount));
- $("menu-progress-hint").textContent=completedCount===total?"Вся коллекция собрана — можно пройти полянки ещё раз":`Открыто: ${unlockedCount} из ${total} · осталось собрать ${total-completedCount}`;
+ $("menu-progress-hint").textContent=completedCount===total?"Вся кампания пройдена":`Открыто полянок: ${unlockedCount}`;
  const currentButton=$("menu-current-level");
  currentButton.disabled=resetAfterMenu||!isLevelUnlocked(level);
  currentButton.setAttribute("aria-label",`Играть: полянка ${level.number}, ${level.name}`);
