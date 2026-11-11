@@ -1212,3 +1212,23 @@ footer span{color:#c7ad72}
 .sealed-progress{color:#e1c987}
 @media(hover:hover){.hub-location:hover,.nest-building:hover{filter:brightness(1.08)}}
 @media(prefers-reduced-motion:reduce){.level-progress span{transition:none}}
+
+
+/* KT-067 — finish the woodland arena language around the playfield. */
+.section-line{min-height:17px;padding:0 2px}
+.section-line h3{color:#c1d0b8;letter-spacing:1.05px}
+.section-line h3::before{width:6px;height:6px;background:#b7a16d;box-shadow:0 0 0 3px #b7a16d20,0 0 8px #b7a16d22}
+.section-line>span{padding:3px 8px;border:1px solid #4b624b;border-radius:999px;background:#263b2e;color:#bdcbb1;font-variant-numeric:tabular-nums}
+.conveyor{border:1px solid #536d56;border-radius:11px;background:linear-gradient(180deg,#354d3d,#24392e);box-shadow:inset 0 2px 4px #0c1b12aa,0 3px 0 #17291f,0 5px 10px #08150f55}
+.conveyor-in,.conveyor-out{color:#b0c19f}
+.belt{background:repeating-linear-gradient(135deg,#526b53 0 7px,#344b3a 7px 14px);border-color:#6a825f;box-shadow:inset 0 2px 4px #17291f99}
+.belt i{background:linear-gradient(145deg,#d7d9b9,#899b7c);border-color:#5b7356;box-shadow:0 1px 2px #0e1b13}
+.message{color:#d4dfcb;background:linear-gradient(105deg,#2c4637,#293d39);border-color:#506951;border-radius:11px;box-shadow:inset 0 1px #ffffff0a,0 3px 8px #08150f55}
+.choice-card:focus-visible,.icon-button:focus-visible,.restart-button:focus-visible,.nest-close:focus-visible,.menu-primary:focus-visible,.menu-secondary:focus-visible{outline:2px solid #d5bc7e;outline-offset:3px}
+@media(max-width:599px){
+ .section-line{min-height:15px}
+ .section-line h3{font-size:9px;letter-spacing:.65px}
+ .section-line>span{padding:2px 6px;font-size:8px}
+ .conveyor{border-radius:9px}
+}
+@media(prefers-reduced-motion:reduce){.choice-card:focus-visible{scroll-behavior:auto}}
