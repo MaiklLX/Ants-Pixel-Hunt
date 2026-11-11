@@ -1473,6 +1473,7 @@ body{
   mask-image:linear-gradient(#000 0%,#000 55%,transparent 100%);
 }
 .menu-brand{
+  flex-direction:column;
   width:min(100%,470px);
   min-height:48px;
   position:relative;
