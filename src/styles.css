@@ -2138,3 +2138,77 @@ body{
     animation:none;
   }
 }
+
+
+/* KT-081 — one tactile language for controls, labels and progress. */
+button:not(:disabled){
+  -webkit-tap-highlight-color:transparent;
+  transition:transform .14s ease,border-color .14s ease,background .14s ease,box-shadow .14s ease,filter .14s ease;
+}
+button:focus-visible{
+  outline:2px solid #d8bd78;
+  outline-offset:3px;
+}
+button:disabled{cursor:not-allowed}
+button:not(:disabled):active{filter:brightness(.96)}
+.menu-primary:focus-visible,.menu-secondary:focus-visible,.menu-link:focus-visible,
+.nest-close:focus-visible,.nest-buy:focus-visible,.icon-button:focus-visible,
+.restart-button:focus-visible,.campaign-level:focus-visible{
+  outline:2px solid #d8bd78;
+  outline-offset:3px;
+}
+.menu-primary{
+  border-color:#91a982;
+  background:linear-gradient(145deg,#78966a 0%,#4e7656 100%);
+  box-shadow:0 4px 0 #304f3a,0 7px 13px #08150f66,inset 0 1px #ffffff18;
+}
+.menu-primary:not(:disabled):active{
+  transform:translateY(2px);
+  box-shadow:0 2px 0 #304f3a,0 4px 8px #08150f66;
+}
+.menu-secondary,.nest-close,.nest-buy,.icon-button,.restart-button{
+  border-color:#526b53;
+  background:linear-gradient(145deg,#354d3d 0%,#263b30 100%);
+  color:#d6e2d0;
+  box-shadow:inset 0 1px #ffffff0b,0 3px 7px #07140e55;
+}
+.nest-buy{border-color:#827148;color:#ead18f;background:linear-gradient(145deg,#514a32,#393d2d)}
+.nest-buy:disabled{background:#2b3b30;color:#879685;border-color:#455746;box-shadow:none}
+.menu-link{color:#bdcbb1}
+.menu-secondary:not(:disabled):hover,.nest-close:not(:disabled):hover,
+.nest-buy:not(:disabled):hover,.icon-button:not(:disabled):hover,
+.restart-button:not(:disabled):hover{
+  border-color:#82956a;
+  filter:brightness(1.08);
+}
+.menu-progress-track,.map-summary-track,.map-chapter-track,
+.nest-progress-track,.level-progress{
+  overflow:hidden;
+  border:1px solid #52694e;
+  border-radius:999px;
+  background:#17291f;
+  box-shadow:inset 0 2px 4px #07140f99,0 1px #ffffff08;
+}
+.menu-progress-track span,.map-summary-track span,.map-chapter-track span,
+.nest-progress-track span,.level-progress span{
+  display:block;
+  border-radius:inherit;
+  background:linear-gradient(90deg,#829e69 0%,#a5ad72 72%,#c2a96c 100%);
+  box-shadow:0 0 8px #a6bb7950;
+}
+.menu-progress-track span,.map-summary-track span,.map-chapter-track span,
+.nest-progress-track span{height:100%}
+.menu-progress-track span,.map-summary-track span,.map-chapter-track span,
+.nest-progress-track span,.level-progress span{transition:width .28s ease}
+.map-legend,.nest-progress-label span,.menu-progress-top span{
+  font-variant-numeric:tabular-nums;
+}
+.nest-kicker,.nest-section-title,.map-chapter-label,.section-line h3{
+  text-shadow:0 1px #14251d;
+}
+@media(prefers-reduced-motion:reduce){
+  button:not(:disabled),.menu-progress-track span,.map-summary-track span,
+  .map-chapter-track span,.nest-progress-track span,.level-progress span{
+    transition:none;
+  }
+}
