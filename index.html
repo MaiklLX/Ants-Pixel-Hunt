@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#14251d">
-  <meta name="app-version" content="KT-082">
+  <meta name="app-version" content="KT-083">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Муравьишки">
@@ -95,22 +95,22 @@
         </svg>
         <span class="garden-stamp">ЛЕСНАЯ ПОЛЯНКА</span>
       </div>
-      <section class="menu-progress-card" aria-label="Прогресс колонии">
-        <div class="menu-progress-top"><strong>Моя колония</strong><span id="menu-progress-count">0 из 6 полянок</span></div>
+      <section class="menu-progress-card" aria-label="Прогресс кампании">
+        <div class="menu-progress-top"><strong>Прогресс</strong><span id="menu-progress-count">0 из 6 полянок</span></div>
         <div class="menu-progress-track" role="progressbar" aria-label="Пройденные полянки" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0" id="menu-progress-bar"><span id="menu-progress-fill"></span></div>
         <p id="menu-progress-hint">Каждая собранная картинка открывает новые приключения</p>
       </section>
-      <button type="button" class="menu-level-card" id="menu-current-level" aria-label="Начать текущую полянку">
+      <button type="button" class="menu-level-card" id="menu-current-level" hidden aria-label="Начать текущую полянку">
         <div class="level-thumb" aria-hidden="true"><span id="menu-level-emoji">🐸</span><i>✦</i></div>
         <div class="level-card-copy"><span id="menu-level-number">ПОЛЯНКА 01</span><strong id="menu-level-name">Портрет лягушонка</strong><small id="menu-progress">Готов к сборке · первая полянка</small></div>
         <span class="level-play-mark" aria-hidden="true">Играть&nbsp; ›</span>
       </button>
       <section class="hub-locations" aria-label="Места колонии">
-        <button id="map-open" class="hub-location adventure-location" type="button"><span class="hub-location-icon" aria-hidden="true"><svg viewBox="0 0 32 32" focusable="false"><path d="M5 7.5 12 4l8 3 7-3v20.5l-7 3-8-3-7 3z"/><path d="M12 4v20.5M20 7v20.5"/><path d="M9 16c3-4 5 4 8 0s4-2 6-5"/><circle cx="9" cy="16" r="1.8"/><circle cx="23" cy="11" r="1.8"/></svg></span><span class="hub-location-copy"><strong>Приключения</strong><small>Карта полянок</small></span><span class="hub-location-arrow">›</span></button>
+        <button id="map-open" class="hub-location adventure-location" type="button" aria-label="Открыть кампанию и выбрать полянку"><span class="hub-location-icon" aria-hidden="true"><svg viewBox="0 0 32 32" focusable="false"><path d="M5 7.5 12 4l8 3 7-3v20.5l-7 3-8-3-7 3z"/><path d="M12 4v20.5M20 7v20.5"/><path d="M9 16c3-4 5 4 8 0s4-2 6-5"/><circle cx="9" cy="16" r="1.8"/><circle cx="23" cy="11" r="1.8"/></svg></span><span class="hub-location-copy"><strong>Кампания</strong><small>Выбрать полянку</small></span><span class="hub-location-arrow">›</span></button>
         <button id="nest-open" class="hub-location nest-location" type="button"><span class="hub-location-icon" aria-hidden="true"><svg viewBox="0 0 32 32" focusable="false"><path d="m4 15 12-10 12 10"/><path d="M7 13v14h18V13"/><path d="M12 27v-8h8v8"/><path d="M3.5 15.5 16 5l12.5 10.5"/><path d="M11 13h.01M21 13h.01"/></svg></span><span class="hub-location-copy"><strong>Муравейник</strong><small>Развитие колонии</small></span><span class="hub-location-resource">🌼 <b id="nest-nectar">0</b></span></button>
       </section>
       <div class="menu-actions">
-        <button id="start-game" class="menu-primary" type="button">Начать охоту <span aria-hidden="true">→</span></button>
+        <button id="start-game" class="menu-primary" type="button" hidden>Начать охоту <span aria-hidden="true">→</span></button>
         <button id="new-game" class="menu-secondary" type="button" hidden>Начать заново</button>
         <button id="how-to-play" class="menu-link" type="button" aria-controls="how-panel" aria-expanded="false">Как играть?</button>
       </div>
