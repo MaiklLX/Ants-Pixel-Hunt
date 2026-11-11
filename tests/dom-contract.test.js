@@ -141,3 +141,14 @@ test("KT-079 samples each ant trail position and heading once per rendered ant",
   assert.equal(source.includes("function trailPoint("), false);
   assert.equal(source.includes("trailPoint("), false);
 });
+
+
+test("KT-080 gives the menu, map and anthill a shared forest detail and restrained arrivals", async () => {
+  const styles = await readFile(new URL("../src/styles.css", import.meta.url), "utf8");
+  assert.match(styles, /\.main-menu::after,\.map-card::after,\.nest-card::after/);
+  assert.match(styles, /@keyframes woodland-overlay-arrive/);
+  assert.match(styles, /@keyframes woodland-card-arrive/);
+  assert.match(styles, /\.nest-overlay:not\(\[hidden\]\)>\.nest-card/);
+  assert.match(styles, /prefers-reduced-motion:reduce[\s\S]*woodland-menu-arrive/);
+  assert.match(styles, /#d0b879/);
+});
