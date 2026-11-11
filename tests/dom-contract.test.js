@@ -174,3 +174,18 @@ test("KT-082 gives the live arena HUD a unified dark woodland hierarchy", async 
   assert.match(styles, /@media\(prefers-reduced-motion:reduce\)[\s\S]*?\.slot,\.choice-card,\.topbar,\.level-heading\{transition:none\}/);
   assert.equal(/\.slots-section,\.choices-section\s*\{[^}]*background:\s*#fff/i.test(styles), false);
 });
+
+test("KT-083 makes the home screen campaign-first and restores compact one-screen play sizing", async () => {
+ const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
+ const markup=await readFile(new URL("../index.html",import.meta.url),"utf8");
+ const source=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
+ assert.ok(markup.includes('id="menu-current-level" hidden'));
+ assert.ok(markup.includes('id="start-game" class="menu-primary" type="button" hidden'));
+ assert.ok(markup.includes('aria-label="Открыть кампанию и выбрать полянку"'));
+ assert.ok(markup.includes("<strong>Кампания</strong><small>Выбрать полянку</small>"));
+ assert.ok(styles.includes("KT-083 — compact campaign-first home and restore the one-screen play layout"));
+ assert.ok(styles.includes(".menu-brand::after{content:none;display:none}"));
+ assert.ok(styles.includes(".slots-section,.choices-section{padding:3px 4px"));
+ assert.ok(styles.includes(".board-wrap{width:min(100%,22dvh,220px)"));
+ assert.ok(source.includes("menu-progress-count"));
+});
