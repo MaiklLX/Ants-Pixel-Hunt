@@ -1704,3 +1704,50 @@ body{
   .garden-ant{animation:none}
   .menu-level-card,.hub-location,.menu-primary{transition:none}
 }
+
+
+/* KT-072 — a hand-drawn pixel diorama replaces platform-dependent emoji art. */
+.menu-garden{
+  height:clamp(164px,26dvh,226px);
+  overflow:hidden;
+  border:1px solid #657d5d;
+  border-radius:25px;
+  background:#314b3c;
+  box-shadow:0 7px 0 #172b20,0 16px 30px #07140f99,inset 0 1px #ffffff16;
+}
+.menu-garden-art{
+  position:absolute;
+  inset:0;
+  display:block;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  shape-rendering:crispEdges;
+}
+.menu-garden-art .pixel-ant{
+  transform-box:fill-box;
+  transform-origin:center;
+  animation:pixel-ant-breathe 3.2s ease-in-out infinite;
+}
+.menu-garden-art .firefly{
+  animation:firefly-drift 4.5s ease-in-out infinite alternate;
+}
+.menu-garden-art .garden-mushroom{filter:drop-shadow(0 3px 2px #15291e88)}
+.menu-garden-art .pixel-prize{filter:drop-shadow(0 4px 2px #14251c88)}
+@keyframes pixel-ant-breathe{
+  0%,100%{transform:translateY(0) rotate(-1deg)}
+  50%{transform:translateY(-3px) rotate(1deg)}
+}
+@keyframes firefly-drift{
+  0%{opacity:.35;transform:translateY(2px)}
+  100%{opacity:1;transform:translateY(-7px)}
+}
+@media(max-width:380px){
+  .menu-garden{height:clamp(145px,23dvh,180px)}
+}
+@media(max-height:700px){
+  .menu-garden{height:clamp(124px,20dvh,158px)}
+}
+@media(prefers-reduced-motion:reduce){
+  .menu-garden-art .pixel-ant,.menu-garden-art .firefly{animation:none}
+}
