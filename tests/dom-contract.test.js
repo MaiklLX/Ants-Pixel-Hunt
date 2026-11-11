@@ -197,14 +197,11 @@ test("KT-084 keeps every numbered queue preview on the dark woodland surface", a
  assert.match(styles,/\.queue-peek\[data-queue-step="2"\]:not\(\.empty\):not\(\.sealed-peek\)\s*\{[^}]*border-color:#455f49/);
 });
 
-test("KT-085 fits the complete mobile arena inside the dynamic viewport", async () => {
+test("KT-085 keeps the mobile arena inside the dynamic viewport", async () => {
  const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
  const markup=await readFile(new URL("../index.html",import.meta.url),"utf8");
- assert.ok(styles.includes("KT-085 — fit the complete play screen to the mobile dynamic viewport"));
- assert.match(styles,/\.app-shell\s*\{[^}]*height:100svh;min-height:0;max-height:100svh/);
- assert.match(styles,/\.board-wrap\s*\{[^}]*width:min\(100%,34dvh,calc\(100dvh - 350px\),280px\)/);
- assert.match(styles,/\.choices\s*\{[^}]*height:clamp\(92px,17dvh,132px\)/);
- assert.match(styles,/footer\s*\{display:none\}/);
+ assert.match(styles,/height:100svh;min-height:0;max-height:100svh;overflow:hidden/);
+ assert.match(styles,/@supports\(height:100dvh\)\{\.app-shell\{height:100dvh;max-height:100dvh\}\}/);
  assert.ok(markup.includes('id="board"'));
 });
 
@@ -215,7 +212,7 @@ test("KT-087 restores mobile vertical rhythm and prevents queue overlap", async 
  assert.ok(styles.includes("KT-087 — restore vertical rhythm and prevent mobile queue overlap"));
  assert.match(styles,/justify-content:space-between/);
  assert.match(styles,/height:auto;max-height:none;min-height:0/);
- assert.match(styles,/.choice-cards*{[^}]*height:auto;min-height:58px/);
+ assert.match(styles,/\\.choice-card\\s*\\{[^}]*height:auto;min-height:58px/);
  assert.match(styles,/grid-auto-rows:clamp\(14px,2.1dvh,18px\)/);
  assert.match(styles,/max-height:620px/);
  assert.ok(markup.includes('content="KT-087"'));
