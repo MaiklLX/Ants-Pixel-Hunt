@@ -83,7 +83,6 @@ test("KT-075 main menu ties the title and diorama together with a forest scene l
   assert.ok(menu.includes('<span class="garden-stamp">ЛЕСНАЯ ПОЛЯНКА</span>'));
   assert.ok(menu.indexOf('class="menu-brand"') < menu.indexOf('class="menu-garden"'));
   assert.ok(menu.indexOf('class="menu-garden"') < menu.indexOf('class="menu-progress-card"'));
-  assert.match(html, /app-version" content="KT-075"/);
 });
 
 test("KT-075 keeps the home menu compact and its scene label legible", async () => {
@@ -97,6 +96,7 @@ test("KT-075 keeps the home menu compact and its scene label legible", async () 
 
 test("KT-076 freezes ant, pickup and crate animation time while the page is hidden", async () => {
   const source = await readFile(new URL("../src/app.js", import.meta.url), "utf8");
+  assert.match(html, /app-version" content="KT-076"/);
   assert.ok(source.includes('document.addEventListener("visibilitychange"'));
   assert.ok(source.includes("animationClock.pause()"));
   assert.ok(source.includes("animationClock.resume()"));
