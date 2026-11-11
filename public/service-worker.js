@@ -1,4 +1,4 @@
-const CACHE="ants-pixel-hunt-shell-v39-kt069";
+const CACHE="ants-pixel-hunt-shell-v40-kt070";
 const STATIC_FILES=["./manifest.webmanifest","./assets/icon-192.svg","./assets/icon-512.svg"];
 self.addEventListener("install",event=>{
  event.waitUntil((async()=>{
