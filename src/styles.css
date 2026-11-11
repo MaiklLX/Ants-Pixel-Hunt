@@ -1751,3 +1751,5 @@ body{
 @media(prefers-reduced-motion:reduce){
   .menu-garden-art .pixel-ant,.menu-garden-art .firefly{animation:none}
 }
+
+.menu-garden::before,.menu-garden::after{content:none}
