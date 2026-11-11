@@ -12,13 +12,17 @@
 
 ## Последняя сверенная игровая база
 - Дата: 11 ноября 2026.
-- HEAD main: KT-079 `e7a82e5ff1b863bbb2782046d3946c235fe9703a`; следующий визуальный этап KT-080 готовится в этой сессии.
-- KT-079: Catmull–Rom позиция и направление каждого муравья вычисляются одной выборкой с аналитической производной; траектория и игровой ритм не менялись.
-- App version KT-079; PWA shell cache v49. Оба service worker файла идентичны.
-- GitHub Actions для KT-079: Pages run [43004885991](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43004885991) — PASS; Godot run [43004886251](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43004886251) — PASS; Android debug APK run [43004885978](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43004885978) — PASS.
-- Для KT-079 workflow подтвердили публикацию Pages, Godot-проверки и сборку Android debug APK с artifact upload. APK на физическом устройстве не устанавливался; браузерный скриншот и ручная проверка на телефоне не проводились.
-- KT-078: карта лесных троп и архитектура муравейника; app version KT-078, cache v48. CI Pages, Godot и Android PASS на SHA `44e7553c46b236e36ff5381c74dd48ec3c3adfbb`.
-- Игровые правила, экономика, прогресс, управление и сохранения в KT-079 не менялись.
+- HEAD main перед документационной синхронизацией: KT-080 `9a524e3b3f93e2e7ecbfb1fb4fbfd6f5133a7eb4`; предыдущая кодовая точка KT-079 — `e7a82e5ff1b863bbb2782046d3946c235fe9703a`.
+- KT-079: позиция и направление муравья теперь вычисляются одной Catmull–Rom выборкой через `getTrailPose`; координаты совпадают с прежней интерполяцией, направление берётся из аналитической производной. Маршруты, темп и игровые правила не менялись.
+- KT-080: общий лесной декоративный акцент и мягкие появления главного меню, карты и муравейника; все новые переходы отключаются при `prefers-reduced-motion`. Игровая логика и состояние экранов не менялись.
+- App version KT-080; PWA shell cache v50. `service-worker.js` и `public/service-worker.js` идентичны.
+- GitHub Pages run [43005475246](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43005475246): 72/72 теста PASS, Vite production build PASS, Pages artifact upload PASS, deploy PASS.
+- Android run [43005475169](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43005475169): 72/72 теста PASS, production build PASS, Gradle debug APK PASS, artifact upload PASS; артефакт `ants-pixel-hunt-debug-apk` — 3,822,155 bytes.
+- Godot legacy check [43005475184](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43005475184): resource import, gameplay rules tests и project smoke test PASS.
+- KT-079 CI: Pages [43004885991](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43004885991) — 71/71 tests, build и deploy PASS; Android [43004885978](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43004885978) — tests, build, debug APK и artifact upload PASS; Godot [43004886251](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43004886251) — import, rules tests и smoke PASS.
+- Pages deployment подтверждён успешным шагом GitHub Actions для KT-080. Прямой запрос публичного URL через текущий браузерный инструмент недоступен; скриншот и ручная визуальная проверка не выполнялись.
+- Debug APK создан CI как артефакт, но не устанавливался. Физическое тестирование Android/iOS не проводилось; локальные `npm test` и `npm run build` не запускались.
+- Следующий приоритет: расширение первой главы к 20 уникальным полянкам с точным цветовым бюджетом боксов и автоматической проверкой стартовой доступности/решаемости каждого рисунка.
 
 ## Реализовано
 - Web/PWA на HTML5, CSS, JavaScript и Vite.
@@ -364,3 +368,20 @@
 - App version KT-078; PWA shell cache v48 в обоих Service Worker файлах.
 - Добавлены DOM/CSS contract проверки темных поверхностей, карты-точек и сцены муравейника.
 - Скриншотная проверка и физическое тестирование на телефоне не проводились.
+
+
+## KT-079 — оптимизация выборки позы муравья
+- `getTrailPose` в `src/ant-animation.js` возвращает прежнюю Catmull–Rom позицию и аналитическое направление за один вызов.
+- `renderAntFrame` использует один pose sample вместо трёх `trailPoint`; визуальная позиция математически сохранена.
+- Кодовый commit: `e7a82e5ff1b863bbb2782046d3946c235fe9703a`; app version KT-079, PWA cache v49.
+- Unit/DOM tests и CI: Pages 43004885991 — 71/71, build/deploy PASS; Android 43004885978 — 71/71, build/APK/artifact PASS; Godot 43004886251 — import/rules/smoke PASS.
+- Изменённые файлы кода: `src/ant-animation.js`, `src/app.js`, `tests/ant-animation.test.js`, `tests/dom-contract.test.js`, `index.html`, `service-worker.js`, `public/service-worker.js`, `README.md`.
+- Реальный FPS/CPU, screenshot и физическое тестирование не выполнялись.
+
+## KT-080 — единый лесной почерк и мягкие переходы
+- Главный экран, карта и муравейник получили общую декоративную метку из трёх приглушённых огоньков; добавлены короткие появления панелей/затемнения.
+- `prefers-reduced-motion` отключает новые переходы; правила игры, экономика, прогресс и управление не менялись.
+- Контрольный HEAD серии: `9a524e3b3f93e2e7ecbfb1fb4fbfd6f5133a7eb4`; app version KT-080, PWA cache v50.
+- Pages 43005475246 — 72/72, production build и deploy PASS; Android 43005475169 — 72/72, production build, debug APK и artifact upload PASS; Godot 43005475184 — import/rules/smoke PASS.
+- Физическое тестирование и браузерный скриншот не проводились.
+

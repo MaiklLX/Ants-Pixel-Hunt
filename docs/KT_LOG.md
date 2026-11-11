@@ -462,18 +462,28 @@
 
 
 ## KT-079 — одна выборка позы на муравья
-- Вынесена функция `getTrailPose`: позиция Catmull–Rom и касательная вычисляются за один проход; угол движения получается аналитической производной.
-- Убраны две дополнительные выборки маршрута для вычисления направления каждого муравья; положение остаётся математически эквивалентным прежней интерполяции.
-- Добавлен DOM/source contract test, проверяющий использование единой выборки в RAF-цикле.
-- Обновлены app version KT-079 и PWA shell cache v49 в обоих service worker файлах.
-- Коммит: `e7a82e5ff1b863bbb2782046d3946c235fe9703a`.
-- GitHub Actions: Pages [43004885991](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43004885991), Godot [43004886251](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43004886251), Android [43004885978](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43004885978) — все PASS.
-- Игровые правила, траектории, экономика, прогресс и управление не менялись; физическое тестирование APK не проводилось.
+- В `src/ant-animation.js` добавлена чистая функция `getTrailPose(points, progress)`: она возвращает прежнюю Catmull–Rom позицию и угол по аналитической производной той же кривой.
+- В `src/app.js` рендер одного муравья заменил три вычисления `trailPoint` (позиция, точка до и точка после) одной выборкой `getTrailPose`. Координаты совпадают с прежней формулой с точностью теста 1e-9; форма маршрута и длительность движения не менялись.
+- На каждого муравья за кадр число Catmull–Rom выборок положения сокращено с трёх до одной; скалярных полиномиальных вычислений позиции/направления — с шести до четырёх (около 33%). Это оценка по коду, не измеренный FPS/CPU benchmark.
+- Добавлены unit-тесты совпадения координат на восьми значениях прогресса, проверки угла касательной и пустого/одноточечного маршрута; добавлен DOM-contract test одного вызова в RAF-цикле.
+- Исправлена хрупкая версия в старом KT-076 тесте: теперь проверяется формат `KT-число`, а не фиксированный номер предыдущей версии.
+- Файлы кода: `src/ant-animation.js`, `src/app.js`, `tests/ant-animation.test.js`, `tests/dom-contract.test.js`, `index.html`, `service-worker.js`, `public/service-worker.js`, `README.md`.
+- App version KT-079; PWA shell cache v49; оба service worker файла идентичны.
+- Code commit: `e7a82e5ff1b863bbb2782046d3946c235fe9703a`.
+- Pages run [43004885991](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43004885991): `npm test` — 71/71 PASS; `npm run build` — PASS; Pages artifact upload и deploy — PASS.
+- Android run [43004885978](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43004885978): `npm test` и `npm run build` PASS; Gradle debug APK и artifact upload PASS (artifact `ants-pixel-hunt-debug-apk`, 3,821,833 bytes).
+- Godot run [43004886251](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43004886251): resource import, gameplay rules tests и project smoke test PASS.
+- Не проводились локальный npm test/build, браузерный скриншот, установка APK и физическое тестирование на телефоне.
 
 ## KT-080 — общий лесной почерк и мягкое появление экранов
-- Добавлена общая тонкая природная метка в верхней части главного меню, карты и муравейника: три приглушённых огонька в оливково-янтарной гамме.
+- Добавлена общая тонкая природная метка в верхней части главного меню, карты приключений и муравейника: три приглушённых огонька в оливково-янтарной гамме.
 - Для карты и муравейника добавлено спокойное появление затемнения и панели; главное меню получает короткое плавное проявление при открытии.
-- Анимации отключаются при `prefers-reduced-motion`; переходы не вмешиваются в обработчики, состояние экранов или прокрутку.
-- Обновлены app version KT-080 и PWA shell cache v50 в обоих service worker файлах.
-- Добавлен DOM/CSS contract test общего декоративного элемента, анимаций и reduced-motion.
-- Игровая логика, экономика, прогресс, очередь, управление и сохранения не менялись.
+- Новые анимации отключаются при `prefers-reduced-motion`; переходы не меняют обработчики, состояние экранов или прокрутку.
+- Файлы: `src/styles.css`, `index.html`, `tests/dom-contract.test.js`, `service-worker.js`, `public/service-worker.js`, `README.md`, `docs/CURRENT_STATE.md`, `docs/KT_LOG.md`.
+- App version KT-080; PWA shell cache v50 в обоих service worker файлах.
+- Контрольный HEAD серии: `9a524e3b3f93e2e7ecbfb1fb4fbfd6f5133a7eb4`.
+- Pages run [43005475246](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43005475246): `npm test` — 72/72 PASS; Vite production build, Pages artifact upload и deploy PASS.
+- Android run [43005475169](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43005475169): `npm test` и `npm run build` PASS; Gradle debug APK и artifact upload PASS (artifact `ants-pixel-hunt-debug-apk`, 3,822,155 bytes).
+- Godot run [43005475184](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43005475184): resource import, gameplay rules tests и project smoke test PASS.
+- Скриншотная проверка и физическое тестирование на телефоне не проводились.
+

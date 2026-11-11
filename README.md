@@ -50,6 +50,8 @@
 - [KT-039 — кампания и первые уровни](docs/KT-039_CAMPAIGN_LEVELS.md)
 - [KT-075 — композиция главного меню](docs/KT-075_HOME_MENU_COMPOSITION.md)
 - [KT-076 — паузоустойчивые анимации](docs/KT-076_PAUSABLE_ANIMATION_CLOCK.md)
+- [KT-079 — оптимизация позы муравья](docs/KT-079_ANT_TRAIL_POSE_OPTIMIZATION.md)
+- [KT-080 — общий лесной стиль и переходы](docs/KT-080_WOODLAND_TRANSITIONS.md)
 - [Игровая спецификация](docs/GAMEPLAY_SPEC.md)
 - [Установка PWA](docs/WEB_INSTALL.md)
 
