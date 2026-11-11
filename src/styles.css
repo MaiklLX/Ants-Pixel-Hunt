@@ -941,3 +941,20 @@ body{background:radial-gradient(ellipse at 50% -14%,#fff 0%,#f5faef 43%,#e7f1e4 
 .map-levels .campaign-level.next-stop{border-color:#b8d8a8;background:linear-gradient(110deg,#f7fff0,#edf8e8);box-shadow:inset 3px 0 #8fbd78,0 2px 7px #527c4910}
 .map-levels .campaign-level.next-stop .map-level-hint{color:#638b5d;font-weight:800}
 @media(prefers-reduced-motion:reduce){.map-chapter-track span{transition:none}}
+
+/* KT-061 — campaign map reads as a connected journey, not a plain task list. */
+.map-summary-next{font-weight:800;color:#658b60!important}
+.map-chapter-heading{align-items:center}
+.map-chapter-heading strong{display:flex;align-items:center;gap:7px}
+.map-chapter-heading strong::before{content:"";width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:#c8d7c0;box-shadow:0 0 0 3px #edf4e9}
+.map-chapter.chapter-active .map-chapter-heading strong::before{background:#83b879;box-shadow:0 0 0 3px #e6f2df}
+.map-chapter.chapter-complete .map-chapter-heading strong::before{background:#d0ad57;box-shadow:0 0 0 3px #f7f0dc}
+.map-chapter-track{height:5px;margin:-2px 2px 8px;background:#e9efe4}
+.map-chapter-track span{background:linear-gradient(90deg,#a9cf8b,#6eae7b)}
+.map-levels .campaign-level{position:relative;overflow:visible}
+.map-levels .campaign-level:not(:last-child)::after{content:"";position:absolute;left:24px;bottom:-7px;height:7px;border-left:2px dashed #cbdcc4;pointer-events:none}
+.map-levels .campaign-level.completed:not(:last-child)::after{border-color:#a9c99c}
+.map-levels .campaign-level.locked:not(:last-child)::after{border-color:#dce4d8}
+.map-levels .campaign-level.next-stop{outline:1px solid #c5dfb5;outline-offset:1px}
+.map-levels .campaign-state{min-width:24px;font-size:9px;letter-spacing:-.2px}
+@media(max-width:380px){.map-levels .campaign-state{font-size:8px;min-width:20px}}
