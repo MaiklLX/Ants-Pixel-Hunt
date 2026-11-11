@@ -23,8 +23,11 @@ test("the save-status live region exists and is announced politely", () => {
 
 
 test("the home illustration hooks match the styled markup and contain no stray escape text", async () => {
-  assert.match(html, /class=["']garden-pixels["']/);
+  assert.match(html, /class=["']menu-garden-art["']/);
+  assert.match(html, /class=["']pixel-ant["']/);
+  assert.match(html, /viewBox=["']0 0 640 300["']/);
   const styles = await readFile(new URL("../src/styles.css", import.meta.url), "utf8");
-  assert.match(styles, /\.garden-pixels(?:,|\s*\{)/);
+  assert.match(styles, /\.menu-garden-art/);
+  assert.match(styles, /pixel-ant-breathe/);
   assert.equal(html.includes(String.raw`\n    <p id="save-status"`), false);
 });
