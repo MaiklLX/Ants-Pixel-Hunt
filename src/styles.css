@@ -2390,3 +2390,14 @@ button:not(:disabled):active{filter:brightness(.96)}
  .conveyor{height:18px}
 }
 @media(prefers-reduced-motion:reduce){.hub-location{transition:none}}
+
+
+/* KT-084 — remove the legacy pale second-step queue plaque. */
+.queue-peek[data-queue-step="2"]:not(.empty):not(.sealed-peek){
+ background:linear-gradient(105deg,#304738 0%,#263b30 100%);
+ border-color:#455f49;
+ box-shadow:inset 0 1px #ffffff0a,0 1px 2px #08150f66;
+ color:#d5e1ce;
+}
+.queue-peek[data-queue-step="2"]:not(.empty):not(.sealed-peek) .peek-count{color:#c2d0b9}
+.queue-peek[data-queue-step="2"]:not(.empty):not(.sealed-peek) .peek-order{background:#1c3025;border-color:#4c654e;color:#b8c8ad}
