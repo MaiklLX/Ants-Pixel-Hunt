@@ -888,3 +888,49 @@ body{background:radial-gradient(ellipse at 50% -14%,#fff 0%,#f5faef 43%,#e7f1e4 
 .menu-level-card:active:not(:disabled){transform:translateY(1px)}
 @media(max-width:380px){.menu-progress-card{padding:8px 10px}.menu-progress-top strong{font-size:10px}.menu-progress-card p{font-size:8px}.level-play-mark{padding:5px 6px;font-size:8px}}
 @media(prefers-reduced-motion:reduce){.menu-progress-track span{transition:none}}
+
+
+/* KT-059 — adventure map becomes a readable journey; anthill becomes a clear progress dashboard. */
+.map-card{width:min(100%,500px)}
+.map-intro{margin:-3px 2px 10px;max-width:42em}
+.map-summary{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:3px 12px;padding:11px 13px;margin:0 0 10px;border:1px solid #dcebd6;border-radius:15px;background:linear-gradient(135deg,#fbfff7,#eef7e9)}
+.map-summary-main{grid-row:span 2;display:grid;gap:1px;min-width:70px}
+.map-summary-main strong{font-size:23px;line-height:1;color:#527d56;font-variant-numeric:tabular-nums}
+.map-summary-main span{font-size:8px;color:#879b80}
+.map-summary-track{height:8px;overflow:hidden;border-radius:99px;background:#dfead9}
+.map-summary-track span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#a5cf85,#69ad7b);transition:width .3s ease}
+.map-summary>small{font-size:8px;color:#84977e;line-height:1.25}
+.map-legend{display:flex;flex-wrap:wrap;gap:8px 13px;margin:0 2px 12px;color:#84957e;font-size:8px;font-weight:750}
+.map-legend>span{display:flex;align-items:center;gap:5px}
+.legend-dot{width:7px;height:7px;border-radius:50%;background:#a6c89a}
+.legend-dot.done{background:#72ad7c}.legend-dot.locked{background:#c5cfc0}
+.map-chapter{margin:0 0 13px}
+.map-chapter-heading{display:flex;align-items:center;justify-content:space-between;margin:0 2px 7px;padding-bottom:5px;border-bottom:1px solid #e5eddf}
+.map-chapter-heading strong{font-size:10px;color:#658367}
+.map-chapter-heading small{font-size:9px;color:#9aaa94;font-weight:800}
+.map-levels{grid-template-columns:1fr;gap:6px}
+.map-levels .campaign-level{min-height:72px;grid-template-columns:38px minmax(0,1fr) 16px;padding:8px 10px;border-radius:13px}
+.map-levels .campaign-level.completed{border-color:#cce3c6;background:linear-gradient(135deg,#f8fff4,#eaf6e7)}
+.map-levels .campaign-level.current{box-shadow:0 0 0 2px #d6e9c9,0 3px 8px #537c4910}
+.map-levels .campaign-copy{gap:2px}
+.map-levels .campaign-copy strong{font-size:10px}
+.map-levels .map-level-hint{font-size:8px;line-height:1.25;color:#8b9b85;white-space:normal}
+.map-levels .campaign-emoji{width:34px;height:34px;border-radius:11px}
+.map-levels .campaign-level.locked .map-level-hint{color:#a0aaa0}
+.nest-card{width:min(100%,460px)}
+.nest-progress-wrap{padding:11px 12px 9px;margin:10px 0;border:1px solid #dcebd6;border-radius:14px;background:#ffffffbd}
+.nest-progress-label{display:flex;justify-content:space-between;gap:8px;color:#68856a}
+.nest-progress-label strong{font-size:10px}.nest-progress-label span{font-size:9px;font-weight:850;color:#a18142}
+.nest-progress-track{height:8px;margin-top:8px;overflow:hidden;border-radius:99px;background:#e8efe2}
+.nest-progress-track span{display:block;height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,#a7d28a,#75b884);transition:width .25s ease}
+.nest-progress{margin:7px 0 0;color:#8a9b84;font-size:8px;line-height:1.35}
+.nest-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:9px 0 15px}
+.nest-stats>div{display:grid;gap:3px;justify-items:center;padding:9px 4px;border:1px solid #e0eadb;border-radius:12px;background:#ffffffa8;text-align:center}
+.nest-stats strong{font-size:17px;line-height:1;color:#638767;font-variant-numeric:tabular-nums}
+.nest-stats small{font-size:8px;color:#8c9b86;line-height:1.2}
+.nest-building.coming-soon{background:linear-gradient(135deg,#fffefa,#f4f2e8);border-style:dashed;border-color:#e4dfca}
+.nest-building.coming-soon .nest-building-icon{background:#f3f0e2}
+.nest-building.coming-soon .nest-building-copy span{color:#9b9273}
+.nest-buy:disabled{opacity:.68}
+@media(max-width:380px){.map-summary{padding:9px 10px}.map-levels .campaign-level{min-height:67px;padding:7px}.map-levels .map-level-hint{font-size:7px}.nest-stats{gap:4px}.nest-stats>div{padding:8px 2px}.nest-stats small{font-size:7px}}
+@media(prefers-reduced-motion:reduce){.map-summary-track span,.nest-progress-track span{transition:none}}
