@@ -117,3 +117,18 @@ test("KT-077 gives the forest diorama layered foreground and staggered fireflies
   assert.ok(styles.includes("@keyframes meadow-leaf-sway"));
   assert.match(styles, /prefers-reduced-motion:reduce[\s\S]*garden-leaf-sway\{animation:none/);
 });
+
+
+test("KT-078 maps the campaign as a dotted forest trail and keeps all map and nest surfaces dark", async () => {
+  const styles = await readFile(new URL("../src/styles.css", import.meta.url), "utf8");
+  assert.ok(styles.includes("KT-078 — map trails and anthill architecture"));
+  assert.ok(styles.includes("radial-gradient(circle at 34% 28%"));
+  assert.ok(styles.includes(".map-levels .campaign-level:not(:last-child)::after"));
+  assert.ok(styles.includes(".map-chapter{"));
+  assert.ok(styles.includes(".nest-scene::before"));
+  assert.ok(styles.includes("@keyframes nest-lamp-glow"));
+  assert.ok(styles.includes("background:linear-gradient(145deg,#344b3a,#263a2e)"));
+  assert.ok(styles.includes("prefers-reduced-motion:reduce"));
+  assert.equal(/\.map-summary\s*\{[^}]*background:\s*#fff/i.test(styles), false);
+  assert.equal(/\.nest-progress-wrap\s*,?\s*\.nest-stats>div\s*\{[^}]*background:\s*#fff/i.test(styles), false);
+});
