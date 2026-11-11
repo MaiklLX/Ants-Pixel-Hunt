@@ -51,7 +51,7 @@ function renderMap(){
  const count=document.createElement("strong");count.textContent=`${finished} / ${LEVELS.length}`;
  const copy=document.createElement("span");copy.textContent="полянок пройдено";stat.append(count,copy);
  const track=document.createElement("div");track.className="map-summary-track";const fill=document.createElement("span");fill.style.width=(finished/LEVELS.length*100)+"%";track.append(fill);
- const next=document.createElement("small");next.textContent=finished===LEVELS.length?"Все маршруты открыты — можно устроить повторное путешествие":nextPlayable?"Доступно "+open+" из "+LEVELS.length+" · дальше: полянка "+String(nextPlayable.number).padStart(2,"0"):"Доступно "+open+" из "+LEVELS.length+" полянок";
+ const next=document.createElement("small");next.className="map-summary-next";next.textContent=finished===LEVELS.length?"Все маршруты пройдены — можно вернуться на любимую полянку":nextPlayable?"Следующая остановка · "+nextPlayable.name:"Доступно "+open+" из "+LEVELS.length+" полянок";
  summary.append(stat,track,next);
  list.replaceChildren();
  const chapters=[];for(const level of LEVELS){let group=chapters.find(item=>item.name===level.chapter);if(!group){group={name:level.chapter,levels:[]};chapters.push(group);}group.levels.push(level);}
@@ -60,8 +60,9 @@ function renderMap(){
   const heading=document.createElement("header");heading.className="map-chapter-heading";
   const title=document.createElement("strong");title.textContent=chapter.name;
   const chapterDone=chapter.levels.filter(level=>done.has(level.id)).length;
-  const meta=document.createElement("small");meta.textContent=`${chapterDone} / ${chapter.levels.length}`;
+  const meta=document.createElement("small");meta.textContent=chapterDone===chapter.levels.length?"ГЛАВА ПРОЙДЕНА":chapterDone?`${chapterDone} / ${chapter.levels.length} · В ПУТИ`:`0 / ${chapter.levels.length} · ВПЕРЕДИ`;
   heading.append(title,meta);
+  section.classList.add(chapterDone===chapter.levels.length?"chapter-complete":chapterDone?"chapter-active":"chapter-locked");
   const chapterTrack=document.createElement("div");chapterTrack.className="map-chapter-track";chapterTrack.setAttribute("aria-label","Прогресс главы: "+chapterDone+" из "+chapter.levels.length);
   const chapterFill=document.createElement("span");chapterFill.style.width=(chapterDone/chapter.levels.length*100)+"%";chapterTrack.append(chapterFill);
   section.append(heading,chapterTrack);
@@ -70,13 +71,14 @@ function renderMap(){
    const unlocked=isLevelUnlocked(item),completed=done.has(item.id),button=document.createElement("button");button.type="button";
    const isNext=nextPlayable?.id===item.id;
    button.className="campaign-level"+(item.id===state.levelId?" current":"")+(completed?" completed":"")+(isNext?" next-stop":"")+(unlocked?"":" locked");button.disabled=!unlocked;
+   button.setAttribute("aria-label",`Полянка ${item.number}: ${item.name}. ${completed?"Пройдена":unlocked?(isNext?"Следующая доступная полянка":"Доступна"):"Пока закрыта"}`);
    const icon=document.createElement("span");icon.className="campaign-emoji";icon.textContent=completed?"✓":unlocked?item.emoji:"🔒";
    const copy=document.createElement("span");copy.className="campaign-copy";
    const number=document.createElement("small");number.textContent=`ПОЛЯНКА ${String(item.number).padStart(2,"0")}`;
    const name=document.createElement("strong");name.textContent=item.name;
    const hint=document.createElement("small");hint.className="map-level-hint";hint.textContent=unlocked?(completed?"Можно пройти ещё раз":isNext?"Следующая остановка · "+item.hint:item.hint):"Сначала заверши предыдущую полянку";
    copy.append(number,name,hint);
-   const status=document.createElement("span");status.className="campaign-state";status.textContent=completed?"✓":unlocked?"›":"🔒";
+   const status=document.createElement("span");status.className="campaign-state";status.textContent=completed?"✓":unlocked?isNext?"СТАРТ":"›":"🔒";
    button.append(icon,copy,status);button.addEventListener("click",()=>{if(unlocked){closeMap();void startFreshGame(item.id);}});grid.append(button);
   }
   section.append(grid);list.append(section);
