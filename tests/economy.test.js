@@ -28,3 +28,9 @@ test("economy save normalization rejects invalid values and clamps upgrades",()=
  const state=normalizeEconomy({nectar:-2,progress:23,lifetime:"12",buildings:{garden:9,granary:-1,nursery:2}});
  assert.deepEqual(state,{nectar:0,progress:3,lifetime:12,completed:0,buildings:{garden:3,granary:0,nursery:2}});
 });
+
+test("meadow victory counter counts completed runs, including a replay",()=>{
+ let state=createEconomy();state=completeMeadow(state);state=completeMeadow(state);
+ assert.equal(state.completed,2);
+ assert.equal(state.nectar,24);
+});
