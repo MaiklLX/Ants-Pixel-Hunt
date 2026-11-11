@@ -1296,3 +1296,160 @@ button:not(.menu-primary):disabled{
 
 /* Accessible status text that must not occupy visible layout space. */
 .visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+
+
+
+/* KT-070 — unify every large surface around the deep woodland palette. */
+:root{
+  color-scheme:dark;
+  --bg:#14231c;
+  --panel:#263b30;
+  --panel2:#30483a;
+  --gold:#d2b477;
+  --muted:#a8b9a1;
+  --text:#e2eadb;
+  --line:#465f4b;
+}
+html{background:#14231c}
+body{
+  background:radial-gradient(ellipse at 50% -12%,#2b4235 0%,#1b2d24 54%,#111e18 100%);
+  color:#e2eadb;
+}
+.app-shell:not(.menu-open){
+  background:linear-gradient(155deg,#23382d 0%,#1c3026 54%,#16271f 100%);
+}
+.main-menu{
+  background:radial-gradient(ellipse at 50% 7%,#304a38 0%,#20372b 48%,#14251d 100%);
+  color:#e2eadb;
+}
+.main-menu::before{opacity:.1}
+.menu-brand h1{color:#b7ce9f}
+.menu-brand .subtitle{color:#a9b99d}
+.menu-garden{
+  background:radial-gradient(ellipse at 50% 115%,#536c46 0%,#354e38 54%,#263b30 100%);
+  border-color:#526b50;
+  box-shadow:0 5px 0 #172a20,0 10px 22px #07140f88,inset 0 1px #ffffff10;
+}
+.menu-level-card,.menu-progress-card,.hub-location,.how-panel{
+  background:linear-gradient(145deg,#30483a,#24382e);
+  border-color:#4a644d;
+  box-shadow:0 3px 0 #17291f,0 6px 13px #08150f66,inset 0 1px #ffffff0a;
+}
+.menu-progress-top{color:#dce7d5}
+.menu-progress-top span,.menu-progress-card p{color:#aebda5}
+.menu-progress-track{background:#182a20}
+.menu-level-card .level-card-copy strong{color:#e1ead9}
+.menu-level-card .level-card-copy small{color:#adbea5}
+.level-play-mark{background:#344b36;color:#c5d7a9}
+.hub-location-copy strong{color:#e0e9d8}
+.hub-location-copy small{color:#aebda5}
+.hub-location-icon{background:linear-gradient(145deg,#425b43,#2c4233)}
+.nest-location{background:linear-gradient(145deg,#453f2d,#30382b);border-color:#756644}
+.nest-location .hub-location-icon{background:linear-gradient(145deg,#65583a,#443d2d)}
+.map-card,.nest-card{
+  background:linear-gradient(155deg,#2b4235 0%,#20352a 58%,#1b2d24 100%);
+  border-color:#4b654f;
+  color:#dfe9d8;
+}
+.map-intro,.nest-progress,.nest-footnote{color:#aebda5}
+.map-summary{
+  background:linear-gradient(135deg,#30483a,#263b30)!important;
+  border-color:#4c654d;
+  color:#dfe9d8;
+  box-shadow:inset 0 1px #ffffff0a,0 3px 9px #07140f55;
+}
+.map-summary-main strong{color:#d6e5c7}
+.map-summary-main span,.map-summary>small{color:#a7b79e}
+.map-summary-track{background:#182a20}
+.map-summary-track span{background:linear-gradient(90deg,#87a96f,#c0a66a)}
+.map-legend{color:#b1c0a8;font-size:10px}
+.legend-dot{background:#a7c48a;box-shadow:0 0 7px #a7c48a44}
+.legend-dot.done{background:#83b78a}
+.legend-dot.locked{background:#667668}
+.map-chapter-heading{border-color:#405844}
+.map-chapter-heading strong{color:#d0ddc3}
+.map-chapter-heading small{color:#9eaf98}
+.map-chapter-track{background:#182a20}
+.map-chapter-track span{background:linear-gradient(90deg,#789b67,#c1a66b)}
+.map-levels .campaign-level{
+  background:linear-gradient(145deg,#344c3c,#293e32)!important;
+  border-color:#506b53;
+  color:#dce8d5;
+  box-shadow:0 2px 0 #17291f,0 4px 8px #08150f55;
+}
+.map-levels .campaign-level.completed{
+  background:linear-gradient(145deg,#354c38,#2a4031)!important;
+  border-color:#66845b;
+}
+.map-levels .campaign-level.current{
+  box-shadow:0 0 0 2px #b7bd8066,0 3px 9px #07140f77;
+}
+.map-levels .campaign-level.next-stop{
+  background:linear-gradient(110deg,#3c5038,#2b4233)!important;
+  border-color:#9bad72;
+  box-shadow:inset 3px 0 #b0bd78,0 3px 8px #07140f66;
+}
+.map-levels .campaign-level.locked{
+  background:linear-gradient(145deg,#27392f,#223329)!important;
+  border-color:#405344;
+  color:#a0ad9b;
+}
+.map-levels .campaign-copy strong{color:#e1ead9}
+.map-levels .campaign-copy small,.map-levels .map-level-hint{color:#b2c0a9}
+.map-levels .campaign-level.locked .map-level-hint{color:#899989}
+.map-levels .campaign-state{color:#d4c083}
+.nest-progress-wrap,.nest-stats>div{
+  background:#263b30;
+  border-color:#465f4b;
+}
+.nest-progress-label{color:#d4e0cc}
+.nest-progress-label span{color:#d2b477}
+.nest-progress-track{background:repeating-linear-gradient(90deg,#405744 0 calc(10% - 2px),#26392e calc(10% - 2px) 10%)}
+.nest-stats strong{color:#d8e5ce}
+.nest-stats small{color:#aab9a2}
+.nest-building{
+  background:linear-gradient(145deg,#30483a,#263b30);
+  border-color:#4b654f;
+  box-shadow:0 3px 8px #08150f66;
+}
+.nest-building-icon{background:linear-gradient(145deg,#455f47,#304637)}
+.nest-building-copy strong{color:#e0ead8}
+.nest-building-copy small{color:#aebda5}
+.nest-building-copy span{color:#d1b477}
+.nest-building.coming-soon{
+  background:linear-gradient(145deg,#2b3b30,#25362c);
+  border-color:#5c6048;
+}
+.nest-building.coming-soon .nest-building-icon{background:#374337}
+.nest-wallet{background:linear-gradient(135deg,#49432f,#393b2c);border-color:#756646}
+.nest-scene{
+  background:linear-gradient(180deg,#304b3b 0%,#263e30 42%,#1c2d24 43%,#17251e 100%);
+  border-color:#53694d;
+  box-shadow:inset 0 1px #ffffff0a,0 5px 14px #07140f66;
+}
+.nest-hill{
+  background:linear-gradient(160deg,#71885a,#435f40 75%);
+  box-shadow:inset 0 -5px #354d35;
+}
+.nest-hill i{background:#e2c77e;box-shadow:0 0 7px #d9bd7066}
+.nest-tunnel{
+  border-color:#6d6246;
+  background:linear-gradient(180deg,#493f2f,#292d25);
+}
+.nest-chamber{
+  border-color:#776443;
+  background:radial-gradient(ellipse at 50% 28%,#786b43,#4a4932 70%,#30382b);
+  box-shadow:0 0 0 3px #a28b5366,0 7px 14px #07140f88;
+}
+.chamber-glow{background:#d7b86b22}
+.chamber-lamp{color:#f0d68d;text-shadow:0 0 10px #e6c875aa}
+.nest-root{border-color:#746448;opacity:.65}
+.nest-scene-caption{color:#d7dfc5;text-shadow:0 1px 4px #07140f}
+.nest-garden-plot{filter:saturate(.82) brightness(.78)}
+.nest-granary-store{filter:saturate(.75) brightness(.78)}
+.result-card{background:linear-gradient(155deg,#2d4437,#20342a);border-color:#506b55;color:#dce8d5}
+@media(max-width:380px){
+  .map-legend{font-size:9px;gap:7px 10px}
+  .map-levels .map-level-hint{font-size:9px}
+  .map-levels .campaign-level{min-height:69px}
+}
