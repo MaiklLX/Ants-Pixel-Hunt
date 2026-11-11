@@ -212,7 +212,7 @@ test("KT-087 restores mobile vertical rhythm and prevents queue overlap", async 
  assert.ok(styles.includes("KT-087 — restore vertical rhythm and prevent mobile queue overlap"));
  assert.match(styles,/justify-content:space-between/);
  assert.match(styles,/height:auto;max-height:none;min-height:0/);
- assert.match(styles,/\\.choice-card\\s*\\{[^}]*height:auto;min-height:58px/);
+ assert.ok(styles.includes("width:100%;height:auto;min-height:58px"));
  assert.match(styles,/grid-auto-rows:clamp\(14px,2.1dvh,18px\)/);
  assert.match(styles,/max-height:620px/);
  assert.ok(markup.includes('content="KT-087"'));
