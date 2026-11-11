@@ -164,6 +164,9 @@ function renderSlots(){
  slotsEl.replaceChildren();
  state.slots.forEach((box,index)=>{
   const slot=document.createElement("div");
+  slot.setAttribute("aria-label",box
+   ? `Отсек ${index+1}: ${box.status==="departing"?"бокс отправляется":box.ants+" муравьёв, цвет "+box.color}`
+   : `Отсек ${index+1}: свободен`);
   slot.style.setProperty("--box-color",box?COLORS[box.color].hex:"#d8e5d2");
   slot.className="slot"+(box?" filled":"")+(box?.status==="departing"?" departing":"")+(box?.status==="waiting-linked"?" linked-waiting":"")+(box?.special==="linked"?" linked-member":"")+(loadingSlots.has(index)?" loading":"")+((state.activeSlots?.includes(index))?" active":"");
   const number=document.createElement("span");number.className="slot-number";number.textContent=String(index+1);slot.append(number);
