@@ -189,3 +189,10 @@ test("KT-083 makes the home screen campaign-first and restores compact one-scree
  assert.ok(styles.includes(".board-wrap{width:min(100%,22dvh,220px)"));
  assert.ok(source.includes("menu-progress-count"));
 });
+
+test("KT-084 keeps every numbered queue preview on the dark woodland surface", async () => {
+ const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
+ assert.ok(styles.includes("KT-084 — remove the legacy pale second-step queue plaque"));
+ assert.match(styles,/\.queue-peek\[data-queue-step="2"\]:not\(\.empty\):not\(\.sealed-peek\)\s*\{[^}]*background:linear-gradient\(105deg,#304738 0%,#263b30 100%\)/);
+ assert.match(styles,/\.queue-peek\[data-queue-step="2"\]:not\(\.empty\):not\(\.sealed-peek\)\s*\{[^}]*border-color:#455f49/);
+});
