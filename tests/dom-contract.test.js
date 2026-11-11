@@ -209,12 +209,14 @@ test("KT-085 fits the complete mobile arena inside the dynamic viewport", async 
 });
 
 
-test("KT-086 lifts and enlarges the mobile board while preserving short-screen limits", async () => {
+test("KT-087 restores mobile vertical rhythm and prevents queue overlap", async () => {
  const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
  const markup=await readFile(new URL("../index.html",import.meta.url),"utf8");
- assert.ok(styles.includes("KT-086 — lift and enlarge the mobile playfield using the unused upper viewport"));
- assert.match(styles,/width:min\(100%,39dvh,calc\(100dvh - 300px\),320px\)/);
- assert.match(styles,/aspect-ratio:1;margin:-3px auto 0/);
- assert.match(styles,/width:min\(100%,34dvh,calc\(100dvh - 285px\),270px\)/);
- assert.ok(markup.includes('content="KT-086"'));
+ assert.ok(styles.includes("KT-087 — restore vertical rhythm and prevent mobile queue overlap"));
+ assert.match(styles,/justify-content:space-between/);
+ assert.match(styles,/height:auto;max-height:none;min-height:0/);
+ assert.match(styles,/.choice-cards*{[^}]*height:auto;min-height:58px/);
+ assert.match(styles,/grid-auto-rows:clamp\(14px,2.1dvh,18px\)/);
+ assert.match(styles,/max-height:620px/);
+ assert.ok(markup.includes('content="KT-087"'));
 });
