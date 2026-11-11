@@ -196,3 +196,14 @@ test("KT-084 keeps every numbered queue preview on the dark woodland surface", a
  assert.match(styles,/\.queue-peek\[data-queue-step="2"\]:not\(\.empty\):not\(\.sealed-peek\)\s*\{[^}]*background:linear-gradient\(105deg,#304738 0%,#263b30 100%\)/);
  assert.match(styles,/\.queue-peek\[data-queue-step="2"\]:not\(\.empty\):not\(\.sealed-peek\)\s*\{[^}]*border-color:#455f49/);
 });
+
+test("KT-085 fits the complete mobile arena inside the dynamic viewport", async () => {
+ const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
+ const markup=await readFile(new URL("../index.html",import.meta.url),"utf8");
+ assert.ok(styles.includes("KT-085 — fit the complete play screen to the mobile dynamic viewport"));
+ assert.match(styles,/\.app-shell\s*\{[^}]*height:100svh;min-height:0;max-height:100svh/);
+ assert.match(styles,/\.board-wrap\s*\{[^}]*width:min\(100%,34dvh,calc\(100dvh - 350px\),280px\)/);
+ assert.match(styles,/\.choices\s*\{[^}]*height:clamp\(92px,17dvh,132px\)/);
+ assert.match(styles,/footer\s*\{display:none\}/);
+ assert.ok(markup.includes('id="board"'));
+});
