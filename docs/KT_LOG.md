@@ -611,3 +611,12 @@
 - Изменены: `tests/dom-contract.test.js`, оба Service Worker, `README.md`, `docs/CURRENT_STATE.md`, `docs/KT_LOG.md`.
 - App version KT-091; PWA shell cache v62.
 - CSS KT-091 и игровые правила не менялись.
+
+
+## KT-093 — визуальная иерархия арены на ПК
+- Уменьшена визуальная конкуренция вложенных рамок; фон колонок очереди стал спокойнее, карточки боксов — отчётливее.
+- Подтянуты контраст и типографика заголовков нижнего HUD, слотов и конвейера.
+- Добавлен доступный focus-visible для клавиатурной навигации по карточкам.
+- Мобильные правила и игровая логика не затронуты.
+- Изменены: `src/styles.css`, `index.html`, `tests/dom-contract.test.js`, оба Service Worker, `README.md`, `docs/CURRENT_STATE.md`, `docs/KT_LOG.md`.
+- App version KT-093; PWA shell cache v63.

@@ -2697,3 +2697,57 @@ button:not(:disabled):active{filter:brightness(.96)}
  .queue-preview{grid-auto-rows:16px}
  .message{min-height:24px}
 }
+
+
+/* KT-093 — refine desktop HUD hierarchy: calm containers, crisp active content. */
+@media(min-width:600px){
+ .app-shell{max-width:600px}
+ .topbar,.level-heading{width:100%;max-width:100%}
+ .board-wrap{
+  padding:9px;
+  border:1px solid #3b5544;
+  background:linear-gradient(145deg,#22382c,#192d23);
+  box-shadow:inset 0 1px #ffffff0a,0 8px 22px #07140f66;
+ }
+ .slots-section,.choices-section{
+  border-color:#344d3b;
+  background:linear-gradient(155deg,#203529e8,#192d23e8);
+  box-shadow:inset 0 1px #ffffff08,0 4px 12px #07140f38;
+ }
+ .section-line{align-items:center;padding:1px 3px 4px}
+ .section-line h3{font-size:10px;letter-spacing:1.15px;color:#d5e1ca}
+ .section-line>span{font-size:9px;letter-spacing:.2px;color:#a9bba0}
+ .slots{
+  border-color:#344b3a;
+  background:linear-gradient(180deg,#192c22,#17271f);
+  box-shadow:inset 0 2px 6px #07140f99;
+ }
+ .slot,.slot.filled{
+  border-color:color-mix(in srgb,var(--box-color,#53694f) 38%,#344b3a);
+  background:linear-gradient(160deg,#293f31,#203328);
+  box-shadow:inset 0 1px #ffffff0a,0 2px 4px #07140f44;
+ }
+ .conveyor{
+  border-color:#3a5542;
+  background:linear-gradient(180deg,#22382b,#192d23);
+  box-shadow:inset 0 1px #ffffff0a,0 3px 8px #07140f44;
+ }
+ .queue-lane{
+  border-color:#304938;
+  background:linear-gradient(155deg,#1a2e23,#17281f);
+  box-shadow:inset 0 1px #ffffff06;
+ }
+ .choice-card,.choice-card.locked,.choice-card.empty-box{
+  border-color:#48634b;
+  background:linear-gradient(155deg,#304a37,#253b2d);
+  box-shadow:inset 0 1px #ffffff0d,0 3px 7px #07140f55;
+ }
+ .choice-card:focus-visible{outline:2px solid #c5b77a;outline-offset:2px}
+ .queue-preview{padding-top:1px}
+ .queue-peek{
+  border-color:#3a5541;
+  background:linear-gradient(145deg,#2a4131,#22372a);
+ }
+ .queue-peek.empty{background:#192b21;border-color:#304636}
+ .message{border-color:#344f3c;background:linear-gradient(110deg,#20372a,#1a2e23)}
+}

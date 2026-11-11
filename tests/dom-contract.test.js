@@ -269,3 +269,13 @@ test("KT-091 gives desktop the same vertical arena order with roomier desktop si
  assert.match(styles,/grid-template-columns:repeat\(3,minmax\(0,1fr\)\);grid-template-rows:auto;gap:8px/);
  assert.ok(markup.includes('content="KT-091"'));
 });
+
+
+test("KT-093 refines desktop arena hierarchy without changing mobile styling", async () => {
+ const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
+ const markup=await readFile(new URL("../index.html",import.meta.url),"utf8");
+ assert.ok(styles.includes("KT-093 — refine desktop HUD hierarchy: calm containers, crisp active content."));
+ assert.match(styles,/@media\(min-width:600px\)\{[\s\S]*?\.queue-lane\{[\s\S]*?background:linear-gradient\(155deg,#1a2e23,#17281f\)/);
+ assert.match(styles,/@media\(min-width:600px\)\{[\s\S]*?\.choice-card:focus-visible\{outline:2px solid #c5b77a/);
+ assert.ok(markup.includes('content="KT-093"'));
+});
