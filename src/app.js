@@ -669,8 +669,11 @@ $("map-overlay").addEventListener("click",event=>{if(event.target===$("map-overl
 $("nest-close").addEventListener("click",closeNest);
 $("nest-overlay").addEventListener("click",event=>{if(event.target===$("nest-overlay"))closeNest();});
 $("how-to-play").addEventListener("click",()=>{
- const panel=$("how-panel");panel.hidden=!panel.hidden;
- $("how-to-play").textContent=panel.hidden?"Как играть?":"Свернуть правила";
+ const button=$("how-to-play");
+ const panel=$("how-panel");
+ panel.hidden=!panel.hidden;
+ button.setAttribute("aria-expanded",String(!panel.hidden));
+ button.textContent=panel.hidden?"Как играть?":"Свернуть правила";
 });
 window.addEventListener("resize",()=>{resizeAntLayer();renderBoard();});
 boot();

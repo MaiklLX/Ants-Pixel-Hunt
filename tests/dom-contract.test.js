@@ -2,9 +2,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [app, html] = await Promise.all([
+const [app, html, readme] = await Promise.all([
   readFile(new URL("../src/app.js", import.meta.url), "utf8"),
   readFile(new URL("../index.html", import.meta.url), "utf8"),
+  readFile(new URL("../README.md", import.meta.url), "utf8"),
 ]);
 
 test("every literal app.js DOM lookup has a matching HTML id", () => {
@@ -35,4 +36,19 @@ test("the home illustration hooks match the styled markup and contain no stray e
 test("the pixel diorama is not covered by legacy garden overlays", async () => {
   const styles = await readFile(new URL("../src/styles.css", import.meta.url), "utf8");
   assert.match(styles, /\.menu-garden::before,\.menu-garden::after\{content:none\}/);
+});
+
+
+test("the home help disclosure exposes its controlled panel and expanded state", () => {
+  const button = html.match(/<button\b[^>]*\bid=["']how-to-play["'][^>]*>/)?.[0];
+  const panel = html.match(/<div\b[^>]*\bid=["']how-panel["'][^>]*>/)?.[0];
+  assert.ok(button, "index.html must provide #how-to-play");
+  assert.match(button, /aria-controls=["']how-panel["']/);
+  assert.match(button, /aria-expanded=["']false["']/);
+  assert.ok(panel && /\bhidden\b/.test(panel), "#how-panel must start collapsed");
+  assert.match(app, /button\.setAttribute\(["']aria-expanded["'],\s*String\(!panel\.hidden\)\)/);
+});
+
+test("README feature list uses real line breaks instead of literal escape text", () => {
+  assert.equal(readme.includes("\\n- Текущее состояние поля"), false);
 });
