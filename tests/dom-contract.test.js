@@ -279,3 +279,10 @@ test("KT-093 refines desktop arena hierarchy without changing mobile styling", a
  assert.match(styles,/@media\(min-width:600px\)\{[\s\S]*?\.choice-card:focus-visible\{outline:2px solid #c5b77a/);
  assert.match(markup,/content="KT-0\d{2}"/);
 });
+
+
+test("KT-095 reuses per-ant phase and pose buffers inside the shared renderer", () => {
+  assert.ok(app.includes("getAntTripFrame(clockTime-ant.startTime,ant.delay,ant.outbound,ant.returning,ant.phaseFrame)"));
+  assert.ok(app.includes("getTrailPose(trail,phase.progress,ant.pose)"));
+  assert.ok(app.includes("phaseFrame:{},pose:{x:0,y:0,angle:0}"));
+});
