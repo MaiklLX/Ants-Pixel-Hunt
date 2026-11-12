@@ -361,7 +361,7 @@ function renderAntFrame(timestamp){
  const clockTime=animationClock.fromFrame(timestamp);
  antCtx.clearRect(0,0,antCanvasWidth,antCanvasHeight);
  for(const [workerId,ant] of activeAnts){
-  const phase=getAntTripFrame(clockTime-ant.startTime,ant.delay,ant.outbound,ant.returning);
+  const phase=getAntTripFrame(clockTime-ant.startTime,ant.delay,ant.outbound,ant.returning,ant.phaseFrame);
   if(phase.waiting)continue;
   if(phase.picked&&!ant.picked){
    ant.picked=true;
@@ -380,7 +380,7 @@ function renderAntFrame(timestamp){
    continue;
   }
   const trail=phase.returningNow?ant.returnTrail:ant.outboundTrail;
-  const pose=getTrailPose(trail,phase.progress);
+  const pose=getTrailPose(trail,phase.progress,ant.pose);
   drawAnt(antCtx,pose,ant.move.color,phase.returningNow,workerId,pose.angle,clockTime);
  }
  drawPickupEffects(clockTime);
@@ -395,7 +395,7 @@ function animateAntTrip(move,index,onPickup=()=>{}){
  const distance=Math.hypot(end.x-start.x,end.y-start.y);
  const delay=getAntLaunchDelay(index,seed),outbound=2050+distance*.82,returning=1800+distance*.68;
  return new Promise(resolve=>{
-  activeAnts.set(index,{move,onPickup,resolve,startTime:animationClock.now(),delay,outbound,returning,outboundTrail,returnTrail});
+  activeAnts.set(index,{move,onPickup,resolve,startTime:animationClock.now(),delay,outbound,returning,outboundTrail,returnTrail,phaseFrame:{},pose:{x:0,y:0,angle:0}});
   if(!antFrame)antFrame=requestAnimationFrame(renderAntFrame);
  });
 }
