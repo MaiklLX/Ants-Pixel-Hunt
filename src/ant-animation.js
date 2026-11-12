@@ -1,11 +1,18 @@
-export function getAntTripFrame(elapsed,delay,outbound,returning){
- if(elapsed<delay)return{waiting:true,picked:false,returningNow:false,progress:0,finished:false};
+export function getAntTripFrame(elapsed,delay,outbound,returning,out={}){
+ if(elapsed<delay){
+  out.waiting=true;out.picked=false;out.returningNow=false;out.progress=0;out.finished=false;
+  return out;
+ }
  const tripElapsed=elapsed-delay;
  const returningNow=tripElapsed>=outbound;
  const duration=returningNow?returning:outbound;
  const raw=Math.min(1,Math.max(0,(tripElapsed-(returningNow?outbound:0))/duration));
- const progress=raw*raw*(3-2*raw);
- return{waiting:false,picked:tripElapsed>=outbound,returningNow,progress,finished:tripElapsed>=outbound+returning};
+ out.waiting=false;
+ out.picked=tripElapsed>=outbound;
+ out.returningNow=returningNow;
+ out.progress=raw*raw*(3-2*raw);
+ out.finished=tripElapsed>=outbound+returning;
+ return out;
 }
 
 /** Keep launch staggering bounded; lifetime worker IDs must not create longer waits. */
@@ -36,9 +43,15 @@ export function createPausableClock(readNow=()=>performance.now()){
  * The position matches the former trailPoint() interpolation exactly; the
  * analytic derivative supplies the ant heading without two extra samples.
  */
-export function getTrailPose(points, progress) {
- if (!Array.isArray(points) || points.length === 0) return { x: 0, y: 0, angle: 0 };
- if (points.length === 1) return { x: points[0].x, y: points[0].y, angle: 0 };
+export function getTrailPose(points, progress, out = {}) {
+ if (!Array.isArray(points) || points.length === 0) {
+  out.x = 0; out.y = 0; out.angle = 0;
+  return out;
+ }
+ if (points.length === 1) {
+  out.x = points[0].x; out.y = points[0].y; out.angle = 0;
+  return out;
+ }
 
  const last = points.length - 1;
  const t = Number.isFinite(progress) ? Math.max(0, Math.min(0.999999, progress)) : 0;
@@ -53,9 +66,10 @@ export function getTrailPose(points, progress) {
   0.5 * ((2 * b) + (-a + c) * u + (2 * a - 5 * b + 4 * c - d) * u * u + (-a + 3 * b - 3 * c + d) * u * u * u);
  const derivative = (a, b, c, d) =>
   0.5 * ((-a + c) + 2 * (2 * a - 5 * b + 4 * c - d) * u + 3 * (-a + 3 * b - 3 * c + d) * u * u);
- const x = sample(p0.x, p1.x, p2.x, p3.x);
- const y = sample(p0.y, p1.y, p2.y, p3.y);
+ out.x = sample(p0.x, p1.x, p2.x, p3.x);
+ out.y = sample(p0.y, p1.y, p2.y, p3.y);
  const dx = derivative(p0.x, p1.x, p2.x, p3.x);
  const dy = derivative(p0.y, p1.y, p2.y, p3.y);
- return { x, y, angle: Math.atan2(dy, dx) };
+ out.angle = Math.atan2(dy, dx);
+ return out;
 }
