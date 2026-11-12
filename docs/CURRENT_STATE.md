@@ -11,15 +11,16 @@
 - Это самостоятельный проект, не часть MaiklLX/Game-ANTS.
 
 ## Последняя сверенная игровая база
-- Дата: 11 ноября 2026.
-- HEAD main после KT-081: `740dad725c540c6da1bd535f9ea70107bc6a5aba` (исправление тестового шаблона); основной набор визуальных изменений KT-081 внесён в предшествующей серии коммитов.
-- KT-081: единый тёмный стиль второстепенных кнопок и состояний фокуса; прогресс меню, карты, глав, муравейника и игрового HUD приведён к общей дорожке и градиенту мшисто-зелёного/янтарного заполнения. Reduced-motion отключает переходы.
-- App version KT-081; PWA shell cache v51. `service-worker.js` и `public/service-worker.js` идентичны.
-- GitHub Pages run [43009162149](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43009162149): 73/73 теста PASS, production build, artifact upload и deploy PASS.
-- Godot run [43009162033](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43009162033): resource import, gameplay rules tests и project smoke test PASS.
-- Android run [43009161917](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43009161917): 73/73 теста, production build, Gradle debug APK и artifact upload PASS.
-- APK создан CI как артефакт, но не устанавливался на физическое устройство. Скриншотная визуальная проверка и ручное тестирование на телефоне не проводились.
-- Игровые правила, экономика, прогресс, управление, доступность полянок и сохранения в KT-081 не менялись.
+- Дата: 12 ноября 2026.
+- Последний подтверждённый кодовый checkpoint KT-095: `4a1a4ee90eac1e775f6f47ef54f4a29b68c6e197`. Базовый HEAD перед работой: `209352e11957dd6f74cc8ecca2530cb7a56f1af8` (KT-094).
+- KT-095: общий RAF renderer переиспользует индивидуальные `phaseFrame` и `pose` буферы каждого активного муравья; функции `getAntTripFrame` и `getTrailPose` записывают результат в переданный объект. Математика траекторий и правила игры не менялись.
+- Добавлены unit и DOM-contract регрессии на повторное использование буферов и сброс для пустого/одноточечного маршрута.
+- App version KT-095; PWA shell cache v65. `service-worker.js` и `public/service-worker.js` синхронизированы.
+- Локальный точечный Node.js harness для новой логики: PASS. Полные `npm test` и `npm run build` не запускались: clone репозитория заблокирован DNS/network error, рабочая копия недоступна.
+- GitHub Actions для code checkpoint KT-095 не подтверждены: connector не предоставил push-triggered runs, а combined commit status вернул пустой список. Не переносить на этот SHA прежние успешные прогоны.
+- GitHub Pages deploy для KT-095 не подтверждён: публичный URL недоступен через текущий web-инструмент, а список push workflow runs connector не предоставляет.
+- Физическое Android/iOS тестирование, Godot Editor QA, screenshot QA и FPS/CPU/memory profiling не выполнялись.
+- Следующий шаг после подтверждения CI/Pages: авторские уникальные поля первой главы, проверка цветовых бюджетов, стартовой доступности внешнего слоя и автоматической решаемости уровней. Новые препятствия и бонусы пока не добавлять.
 
 ## Реализовано
 - Web/PWA на HTML5, CSS, JavaScript и Vite.
