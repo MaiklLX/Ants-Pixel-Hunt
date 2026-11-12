@@ -101,3 +101,32 @@ test("trail pose safely handles empty and single-point paths", () => {
  assert.deepEqual(getTrailPose([], 0.5), {x: 0, y: 0, angle: 0});
  assert.deepEqual(getTrailPose([{x: 7, y: 9}], 0.5), {x: 7, y: 9, angle: 0});
 });
+
+
+test("ant trip frame reuses one caller-owned buffer across every phase",()=>{
+ const frame={};
+ assert.strictEqual(getAntTripFrame(0,100,200,180,frame),frame);
+ assert.deepEqual(frame,{waiting:true,picked:false,returningNow:false,progress:0,finished:false});
+ assert.strictEqual(getAntTripFrame(150,100,200,180,frame),frame);
+ assert.deepEqual(frame,{waiting:false,picked:false,returningNow:false,progress:0.15625,finished:false});
+ assert.strictEqual(getAntTripFrame(300,100,200,180,frame),frame);
+ assert.deepEqual(frame,{waiting:false,picked:true,returningNow:true,progress:0,finished:false});
+ assert.strictEqual(getAntTripFrame(480,100,200,180,frame),frame);
+ assert.deepEqual(frame,{waiting:false,picked:true,returningNow:true,progress:1,finished:true});
+});
+
+test("trail pose reuses its output object and resets it for degenerate paths",()=>{
+ const points=[{x:10,y:20},{x:40,y:5},{x:75,y:55},{x:110,y:30}];
+ const buffer={x:-1,y:-1,angle:-1};
+ const first=getTrailPose(points,.2,buffer);
+ assert.strictEqual(first,buffer);
+ const firstValues={...buffer};
+ const second=getTrailPose(points,.8,buffer);
+ assert.strictEqual(second,buffer);
+ assert.notDeepEqual(buffer,firstValues);
+ assert.equal(Number.isFinite(buffer.x)&&Number.isFinite(buffer.y)&&Number.isFinite(buffer.angle),true);
+ assert.strictEqual(getTrailPose([],0.5,buffer),buffer);
+ assert.deepEqual(buffer,{x:0,y:0,angle:0});
+ assert.strictEqual(getTrailPose([{x:7,y:9}],0.5,buffer),buffer);
+ assert.deepEqual(buffer,{x:7,y:9,angle:0});
+});
