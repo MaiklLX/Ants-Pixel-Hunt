@@ -627,3 +627,17 @@
 - Исторические тесты теперь проверяют формат текущей версии, сохраняя отдельные проверки CSS-компоновки; KT-093 assertion также не привязан к старому номеру.
 - App version KT-094; PWA shell cache v64; оба Service Worker обновлены синхронно.
 - Игровой код, CSS и механика не менялись.
+
+
+## KT-095 — переиспользование буферов кадра муравьёв
+- В `getAntTripFrame(..., out)` добавлена запись пяти полей фазы в переданный буфер; без `out` сохраняется прежнее поведение.
+- `getTrailPose(points, progress, out)` переиспользует объект координат/угла, включая безопасный сброс для пустого и одноточечного маршрутов.
+- Каждый активный муравей создаёт `phaseFrame` и `pose` один раз при запуске рейса; общий `renderAntFrame` переиспользует их.
+- Добавлены unit-тесты повторного использования фазы/позы и DOM-contract тест привязки буферов к активному муравью.
+- Изменены: `src/ant-animation.js`, `src/app.js`, `tests/ant-animation.test.js`, `tests/dom-contract.test.js`, `index.html`, `service-worker.js`, `public/service-worker.js`, `README.md`, `docs/CURRENT_STATE.md`, `docs/KT_LOG.md`, `docs/ARCHITECTURE.md`, `docs/KT-095_REUSABLE_ANT_FRAME_BUFFERS.md`.
+- Кодовый checkpoint SHA: `4a1a4ee90eac1e775f6f47ef54f4a29b68c6e197`; документация: KT-095 file `726cf6860f9f79542637b6650cc7bc441d1daa65`, architecture `163690c3151a80ca583370cea677927375435cd8`, README `21aedd5c691ba68ec94eea3a5c50dd5e4d96e804`, CURRENT_STATE `14d97640ca158b35b33e139d2d836f78a86bfdf4`.
+- Точечный Node.js harness: PASS. Полные `npm test` и `npm run build` локально не запускались из-за недоступности GitHub clone (DNS/network error).
+- GitHub Actions для итогового KT-095 SHA не подтверждены: connector вернул пустой combined status и не показывает push-triggered runs через commit workflow endpoint. Старые CI не засчитываются для нового SHA.
+- GitHub Pages deploy для KT-095 не подтверждён; публичный URL недоступен web-инструменту.
+- Не проверялись: физическое устройство, Godot Editor, browser screenshot, FPS/CPU/memory benchmark.
+- Следующий шаг: после подтверждения CI/Pages — авторские уникальные поля и автоматический аудит решаемости/цветовых бюджетов; без новых препятствий до отдельного балансового этапа.
