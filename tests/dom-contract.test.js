@@ -136,7 +136,7 @@ test("KT-078 maps the campaign as a dotted forest trail and keeps all map and ne
 
 test("KT-079 samples each ant trail position and heading once per rendered ant", async () => {
   const source = await readFile(new URL("../src/app.js", import.meta.url), "utf8");
-  assert.match(source, /getTrailPose\(trail,phase\.progress\)/);
+  assert.match(source, /getTrailPose\(trail,phase\.progress,ant\.pose\)/);
   assert.match(source, /drawAnt\(antCtx,pose,ant\.move\.color,phase\.returningNow,workerId,pose\.angle,clockTime\)/);
   assert.equal(source.includes("function trailPoint("), false);
   assert.equal(source.includes("trailPoint("), false);
