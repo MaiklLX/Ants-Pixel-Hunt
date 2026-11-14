@@ -391,3 +391,32 @@ test("every campaign deck places its linked pair outside the sealed-box position
   assert.notEqual(pair[0]%TRAY_SIZE,pair[1]%TRAY_SIZE,"linked crates must be in different lanes");
  }
 });
+
+
+test("the seventh firefly meadow has five exact color budgets and a fully solvable queue",()=>{
+ const level=LEVELS.find(item=>item.id==="forest-07");
+ assert.ok(level);assert.equal(level.number,7);assert.equal(level.name,"Светлячок в сумерках");
+ assert.equal(LEVELS.length,7);
+ const board=createArtworkBoard(level.id);
+ assert.equal(board.length,SIZE);assert.ok(board.every(row=>row.length===SIZE));
+ const totals={red:0,blue:0,yellow:0,green:0,purple:0};
+ for(const row of board)for(const color of row)if(color)totals[color]++;
+ assert.ok(Object.values(totals).every(total=>total>0));
+ const exposed=getExposedPixels(board);
+ assert.ok(exposed.length>0);
+ assert.ok(exposed.every(({x,y})=>board[y][x]==="green"),"only the outer green band should be exposed first");
+ assert.equal(exposed.length,totals.green,"the complete first band must be reachable from outside");
+ const deck=getIncoming(level.id),deckTotals={red:0,blue:0,yellow:0,green:0,purple:0};
+ for(const box of deck){deckTotals[box.color]+=box.ants;assert.ok(box.ants>0&&box.ants<=BOX_CAPACITY);}
+ assert.deepEqual(deckTotals,totals,"the queue must contain exactly one ant per artwork block");
+ assert.equal(getLinkedPair(level.id).length,2,"the authored queue must retain its linked pair");
+ const state=createGame(level.id);
+ const winningColumns=[1,2,0,0,1,0,2,2,2,0,2,2,2,1,1,0,0,0];
+ for(let step=0;step<winningColumns.length;step++){
+  const column=winningColumns[step];
+  assert.equal(chooseTopColumn(state,column),true,"winning move "+(step+1)+" must be selectable from column "+(column+1));
+  resolveAll(state);
+  assert.equal(state.lost,false,"winning route must not enter FIELD BLOCKED at move "+(step+1));
+ }
+ assert.equal(state.remaining,0);assert.equal(state.won,true,"the complete queue route must clear the firefly artwork");
+});
