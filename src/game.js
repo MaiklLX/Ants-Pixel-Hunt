@@ -138,13 +138,54 @@ function createSnailBoard(){
  return board;
 }
 
+function createFireflyBoard(){
+ const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
+ const silhouette=Array.from({length:SIZE},(_,y)=>Array.from({length:SIZE},(_,x)=>
+  ellipse(x,y,10,13,8.5,8.2)||ellipse(x,y,24,13,8.5,8.2)||
+  ellipse(x,y,17,7,4.7,4.8)||ellipse(x,y,17,14,5.4,5.5)||
+  ellipse(x,y,17,22,6.4,10.2)||ellipse(x,y,17,31,5.2,3.2)||
+  lineDistance(x,y,14,4,11,1)<=.9||lineDistance(x,y,20,4,23,1)<=.9||
+  lineDistance(x,y,12,19,8,23)<=.9||lineDistance(x,y,22,19,26,23)<=.9
+ ));
+ // Measure depth from outside-connected air so each color band opens from the
+ // perimeter inward, following the same four-way accessibility rule as play.
+ const outside=Array.from({length:SIZE},()=>Array(SIZE).fill(false)),air=[];
+ const addAir=(x,y)=>{
+  if(x<0||y<0||x>=SIZE||y>=SIZE||outside[y][x]||silhouette[y][x])return;
+  outside[y][x]=true;air.push([x,y]);
+ };
+ for(let x=0;x<SIZE;x++){addAir(x,0);addAir(x,SIZE-1);}
+ for(let y=0;y<SIZE;y++){addAir(0,y);addAir(SIZE-1,y);}
+ for(let head=0;head<air.length;head++){
+  const [x,y]=air[head];
+  addAir(x-1,y);addAir(x+1,y);addAir(x,y-1);addAir(x,y+1);
+ }
+ const depth=Array.from({length:SIZE},()=>Array(SIZE).fill(Infinity)),queue=[];
+ for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)if(outside[y][x]){
+  depth[y][x]=0;queue.push([x,y]);
+ }
+ for(let head=0;head<queue.length;head++){
+  const [x,y]=queue[head],next=depth[y][x]+1;
+  for(const [nx,ny] of [[x-1,y],[x+1,y],[x,y-1],[x,y+1]]){
+   if(nx<0||ny<0||nx>=SIZE||ny>=SIZE||depth[ny][nx]<=next)continue;
+   depth[ny][nx]=next;queue.push([nx,ny]);
+  }
+ }
+ for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)if(silhouette[y][x]){
+  const layer=depth[y][x];
+  board[y][x]=layer<=1?"green":layer<=3?"blue":layer<=5?"purple":layer<=7?"yellow":"red";
+ }
+ return board;
+}
+
 export const LEVELS=[
  {id:"meadow-01",number:1,chapter:"Зелёная поляна",name:"Портрет лягушонка",emoji:"🐸",hint:"Знакомство с цветными боксами и пятью отсеками"},
  {id:"garden-02",number:2,chapter:"Цветочный сад",name:"Бабочка на ветру",emoji:"🦋",hint:"Новые сочетания цветов и более длинная очередь"},
  {id:"garden-03",number:3,chapter:"Цветочный сад",name:"Солнечный цветок",emoji:"🌻",hint:"Учимся открывать центральные блоки постепенно"},
  {id:"forest-04",number:4,chapter:"Грибной лес",name:"Красная шляпка",emoji:"🍄",hint:"Новый силуэт и более плотные цветовые группы"},
  {id:"forest-05",number:5,chapter:"Грибной лес",name:"Жёлудь для запаса",emoji:"🌰",hint:"Собираем осеннюю находку из пяти цветов"},
- {id:"forest-06",number:6,chapter:"Грибной лес",name:"Улитка-путешественница",emoji:"🐌",hint:"Финальная картинка первой маленькой главы"}
+ {id:"forest-06",number:6,chapter:"Грибной лес",name:"Улитка-путешественница",emoji:"🐌",hint:"Финальная картинка первой маленькой главы"},
+ {id:"forest-07",number:7,chapter:"Светлячковая роща",name:"Светлячок в сумерках",emoji:"✨",hint:"Снимаем пять мягких цветовых слоёв от крыльев к огоньку"}
 ];
 export function getLevel(levelId="meadow-01"){
  return LEVELS.find(level=>level.id===levelId)||LEVELS[0];
@@ -156,6 +197,7 @@ export function createArtworkBoard(levelId="meadow-01"){
  if(id==="forest-04")return createMushroomBoard();
  if(id==="forest-05")return createAcornBoard();
  if(id==="forest-06")return createSnailBoard();
+ if(id==="forest-07")return createFireflyBoard();
  return createFrogBoard();
 }
 
