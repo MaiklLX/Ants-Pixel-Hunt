@@ -722,3 +722,23 @@ KT-097: создать одну авторскую седьмую полянку
 - Для push SHA `51372284224f24ebeebcf311d77ca91c0cb91030` GitHub Actions connector вернул пустые PR-triggered runs и пустой combined status; push-triggered run не предоставлен. Pages deployment не подтверждён. Старые CI KT-096 не засчитываются.
 - Не проводились: ручная браузерная проверка, скриншоты, Godot Editor QA, физическое Android/iOS тестирование, FPS/CPU/memory profiling.
 - Следующий этап: дождаться фактического CI/Pages подтверждения, затем визуально проверить седьмую полянку; после этого KT-098 — дальнейшие авторские уровни и solver/balance QA.
+
+
+# KT-098 — согласование внешнего слоя светлячка и восстановление CI
+
+- Дата: 15 ноября 2026.
+- Базовый HEAD перед исправлением: `c242476f074967397350aa911cce4b31a703e4e6`.
+- Обнаружены два провала Pages/Android CI: тест кампании требовал ровно 6 уровней вместо динамического количества; один доступный граничный блок `(17,34)` светлячка был окрашен в голубой вместо зелёного.
+- `src/game.js`: занятые клетки границы добавлены в BFS глубины как виртуальные внешние источники с depth 1; теперь раскраска совпадает с `getExposedPixels`.
+- `tests/game.test.js`: проверки уникальности кампании сравнивают результат с `LEVELS.length`, а не с устаревшим числом 6; названия общих тестов больше не обещают ровно шесть уровней.
+- Исправленный `forest-07`: зелёный 106, голубой 168, сиреневый 133, жёлтый 96, красный 125; всего 628. Весь начальный доступный слой зелёный. Маршрут полного прохождения сохранён.
+- Code commits: `281caa2f23702a9d3fc251dbc3906e14ff9cefe2`; `5d50860d01516fbc93c2eb10ab23335bee045e60`.
+- Изменены: `src/game.js`, `tests/game.test.js`, `index.html`, `service-worker.js`, `public/service-worker.js`, `docs/KT-097_SEVENTH_FIREFLY_MEADOW.md`, `docs/KT-098_FIREFLY_EDGE_ACCESSIBILITY_AND_CI.md`, `docs/ARCHITECTURE.md`, `docs/CURRENT_STATE.md`, `docs/KT_LOG.md`, `README.md`.
+- App version KT-098; PWA shell cache v67; оба Service Worker синхронны.
+- Pages run [#43699531416](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43699531416) для code SHA `5d50860d01516fbc93c2eb10ab23335bee045e60`: **success** — gameplay tests, production build, artifact upload и deploy прошли.
+- Godot run [#43699531432](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43699531432) и Android run [#43699531447](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43699531447) на момент записи ещё выполнялись; не считать их успешными заранее.
+- Предыдущие failing runs: Pages [#43579512314](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43579512314), Android [#43579512210](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43579512210) (85/87 тестов); после первого исправления Pages [#43699495673](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43699495673) выявил последнее жёсткое ожидание `signatures.size === 6`, исправленное во втором code commit.
+- Локальные `npm test` и `npm run build` не запускались; полный test/build подтверждён Pages workflow. Не проводились ручной visual QA, физическое тестирование телефона, Godot Editor QA и performance profiling.
+- GitHub Pages deploy подтверждён для code SHA; независимый браузерный fetch публичной страницы не удался.
+- Следующий шаг: KT-099 — визуальная проверка седьмой полянки и восьмой авторский рисунок с solver-регрессией.
+
