@@ -751,3 +751,15 @@ KT-097: создать одну авторскую седьмую полянку
 - Godot run [#43699732051](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43699732051) для документационного SHA: **success** — import, gameplay rules tests и smoke test.
 - Android run [#43699732060](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43699732060) на момент последней проверки ещё выполнял Build debug APK; `npm test`, `npm run build`, Capacitor generation и sync уже прошли. Не считать APK artifact для этого SHA подтверждённым. Для code SHA `5d50860d01516fbc93c2eb10ab23335bee045e60` Android run #43699531447 завершился success, artifact ID 14155862239.
 - Следующая точка входа: docs/CURRENT_STATE.md → docs/KT_LOG.md → KT-099.
+
+
+## Финальная проверка KT-098 — docs HEAD 5c791de
+
+- Проверенный HEAD main: `5c791de52b89da2e666f301acb679af5b5ab4765`.
+- Pages run [#43699935473](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43699935473): **success** — gameplay tests 87/87, production build, Pages artifact upload и deploy.
+- Godot run [#43699935385](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43699935385): **success** — project import, gameplay rules tests, headless smoke test.
+- Android run [#43699935437](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43699935437): **success** — npm test/build, Capacitor generation/sync, debug APK build и upload; artifact ID `14156455065`, 3.83 MB. APK не тестировался на физическом устройстве.
+- Pages workflow подтвердил environment URL `https://maikllx.github.io/Ants-Pixel-Hunt/`.
+- Локальные npm test/build, ручной visual QA, screenshot QA, физическое устройство и performance profiling не выполнялись.
+- Следующая точка входа: docs/CURRENT_STATE.md → docs/KT_LOG.md → KT-099.
+

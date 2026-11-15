@@ -86,3 +86,12 @@ GitHub Actions для KT-097 не были зелёными, хотя преды
 ## Следующий шаг
 
 KT-099: визуально проверить силуэт светлячка на опубликованной версии и узком экране; затем создать восьмую авторскую полянку с независимым цветовым бюджетом и solver-регрессией. Новые препятствия и бонусы пока не добавлять.
+
+
+## Финальная проверка HEAD 5c791de
+
+- Pages [#43699935473](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43699935473): **success**, 87/87 tests, production build, artifact upload, deploy.
+- Godot [#43699935385](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43699935385): **success**, import + rules tests + smoke test.
+- Android [#43699935437](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43699935437): **success**, debug APK artifact ID `14156455065` (3.83 MB). Это CI artifact, не проверка устройства.
+- Public Pages environment URL: `https://maikllx.github.io/Ants-Pixel-Hunt/`.
+- Локальные test/build, ручной visual QA и физическое мобильное тестирование не выполнялись.
