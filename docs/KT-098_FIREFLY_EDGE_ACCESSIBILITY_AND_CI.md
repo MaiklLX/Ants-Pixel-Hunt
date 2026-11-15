@@ -1,7 +1,7 @@
 # KT-098 — согласование внешнего слоя светлячка и восстановление CI
 
 **Дата:** 15 ноября 2026.  
-**Статус:** кодовый checkpoint подтверждён тестами, production build и Pages deployment. Godot и Android workflow для code SHA были запущены; итог на момент документирования ещё ожидался.
+**Статус:** кодовый checkpoint подтверждён gameplay tests, production build, Pages deploy, Godot import/smoke test и Android debug APK workflow. APK не проверялся на физическом устройстве.
 
 ## Что обнаружено
 
@@ -65,8 +65,8 @@ GitHub Actions для KT-097 не были зелёными, хотя преды
 ## GitHub Actions и публикация для code SHA
 
 - Pages run [#43699531416](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43699531416), SHA `5d50860d01516fbc93c2eb10ab23335bee045e60`: **success**. `npm test` — все 87 тестов прошли; `npm run build` — success; Pages artifact upload — success; deploy job — success.
-- Godot run [#43699531432](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43699531432): был в процессе на момент этой записи.
-- Android run [#43699531447](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43699531447): `npm test`, `npm run build`, генерация и sync Android-проекта прошли; APK build был в процессе на момент этой записи.
+- Godot run [#43699531432](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43699531432): **success** — import, gameplay rules tests и project smoke test.
+- Android run [#43699531447](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43699531447): **success** — `npm test`, `npm run build`, Capacitor generation/sync, debug APK build и artifact upload. Artifact ID `14155862239`, 3.83 MB; это CI artifact, не подтверждение запуска на телефоне.
 - Промежуточный Pages run для SHA `281caa2f23702a9d3fc251dbc3906e14ff9cefe2` завершился failure из-за оставшегося жёсткого ожидания шести рисунков; лог подтвердил `expected: 6, actual: 7`. Это ожидание исправлено в следующем commit.
 - GitHub Pages deployment подтверждён только для code SHA выше. Доступный браузерный инструмент не смог независимо загрузить публичный URL.
 
