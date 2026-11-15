@@ -742,3 +742,12 @@ KT-097: создать одну авторскую седьмую полянку
 - GitHub Pages deploy подтверждён для code SHA; независимый браузерный fetch публичной страницы не удался.
 - Следующий шаг: KT-099 — визуальная проверка седьмой полянки и восьмой авторский рисунок с solver-регрессией.
 
+
+
+## Дополнение к KT-098 — документационный checkpoint и повторные workflow
+
+- Документационный checkpoint: `c5c488ac3956b22daae4d42cc9bbf1ffe3357ee7` (обновлены CURRENT_STATE, KT_LOG и KT-098 после завершения platform workflows для кодового SHA).
+- Pages run [#43699732026](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43699732026) для документационного SHA: **success** — 87 gameplay tests, production build, Pages artifact upload и deploy прошли; GitHub Actions сообщил URL `https://maikllx.github.io/Ants-Pixel-Hunt/`.
+- Godot run [#43699732051](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43699732051) для документационного SHA: **success** — import, gameplay rules tests и smoke test.
+- Android run [#43699732060](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43699732060) на момент последней проверки ещё выполнял Build debug APK; `npm test`, `npm run build`, Capacitor generation и sync уже прошли. Не считать APK artifact для этого SHA подтверждённым. Для code SHA `5d50860d01516fbc93c2eb10ab23335bee045e60` Android run #43699531447 завершился success, artifact ID 14155862239.
+- Следующая точка входа: docs/CURRENT_STATE.md → docs/KT_LOG.md → KT-099.

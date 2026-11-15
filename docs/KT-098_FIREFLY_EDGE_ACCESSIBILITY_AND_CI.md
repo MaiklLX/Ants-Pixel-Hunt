@@ -78,6 +78,11 @@ GitHub Actions для KT-097 не были зелёными, хотя преды
 - Не проводились: визуальная проверка браузерного экрана, screenshot QA, физическое Android/iOS тестирование, Godot Editor QA, FPS/CPU/memory profiling.
 - Android debug APK workflow не означает тестирование APK на физическом устройстве.
 
+## Документационный checkpoint и повторные workflow
+
+- Docs checkpoint `c5c488ac3956b22daae4d42cc9bbf1ffe3357ee7`: Pages run [#43699732026](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43699732026) — **success** (87 tests, build, artifact upload, deploy); Godot run [#43699732051](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43699732051) — **success**.
+- Android run [#43699732060](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43699732060) для docs checkpoint оставался в Build debug APK; test/build/generation/sync прошли, artifact ещё не подтверждён. Для кодового SHA Android APK workflow уже прошёл и загрузил artifact ID 14155862239.
+
 ## Следующий шаг
 
 KT-099: визуально проверить силуэт светлячка на опубликованной версии и узком экране; затем создать восьмую авторскую полянку с независимым цветовым бюджетом и solver-регрессией. Новые препятствия и бонусы пока не добавлять.
