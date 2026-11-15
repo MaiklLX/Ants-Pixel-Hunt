@@ -193,7 +193,7 @@ test("all campaign levels have distinct deterministic artwork and exact matching
   assert.equal(deck.reduce((sum,box)=>sum+box.ants,0),createGame(level.id).remaining);
   signatures.add(board.map(row=>row.join(",")).join(";"));
  }
- assert.equal(signatures.size,6,"each campaign level must have its own pixel artwork");
+ assert.equal(signatures.size,LEVELS.length,"each campaign level must have its own pixel artwork");
  assert.equal(getLevel("unknown").id,"meadow-01");
 });
 test("campaign level identity survives save and restore",()=>{
