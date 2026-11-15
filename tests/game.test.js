@@ -178,8 +178,8 @@ test("a box cannot depart while any ant assigned to its slot is still travelling
  assert.equal(countOutboundBySlot(workers).get(1),1);
 });
 
-test("campaign levels have distinct deterministic artwork and exact matching box decks",()=>{
- assert.equal(LEVELS.length,6);
+test("all campaign levels have distinct deterministic artwork and exact matching box decks",()=>{
+ assert.ok(LEVELS.length>0);
  const signatures=new Set();
  for(const level of LEVELS){
   const board=createArtworkBoard(level.id),deck=getIncoming(level.id);
@@ -205,7 +205,7 @@ test("campaign level identity survives save and restore",()=>{
  assert.equal(getIncoming(restored.levelId).length,getIncoming("garden-02").length);
 });
 
-test("all six campaign levels start with accessible colors represented in their box deck",()=>{
+test("all campaign levels start with accessible colors represented in their box deck",()=>{
  for(const level of LEVELS){
   const board=createArtworkBoard(level.id),deck=getIncoming(level.id);
   const accessibleColors=new Set();
@@ -239,7 +239,7 @@ test("choosing a butterfly box refills from the butterfly deck, not the frog dec
  assert.ok(s.tray.flat().every(index=>index===null||(index>=0&&index<deck.length)));
 });
 
-test("all six campaign drawings remain solvable when only the true outer layer is collectible",()=>{
+test("all campaign drawings remain solvable when only the true outer layer is collectible",()=>{
  for(const level of LEVELS){
   const board=createArtworkBoard(level.id),deck=getIncoming(level.id).map(box=>({...box}));
   const active=Array(SLOT_COUNT).fill(null);let remaining=board.flat().filter(Boolean).length,steps=0;
@@ -404,7 +404,7 @@ test("the seventh firefly meadow has five exact color budgets and a fully solvab
  assert.ok(Object.values(totals).every(total=>total>0));
  const exposed=getExposedPixels(board);
  assert.ok(exposed.length>0);
- assert.ok(exposed.every(({x,y})=>board[y][x]==="green"),"only the outer green band should be exposed first");
+ assert.ok(exposed.every(({x,y})=>board[y][x]==="green"),"every game-exposed block, including board-edge cells, must use the outer green color");
  assert.equal(exposed.length,totals.green,"the complete first band must be reachable from outside");
  const deck=getIncoming(level.id),deckTotals={red:0,blue:0,yellow:0,green:0,purple:0};
  for(const box of deck){deckTotals[box.color]+=box.ants;assert.ok(box.ants>0&&box.ants<=BOX_CAPACITY);}

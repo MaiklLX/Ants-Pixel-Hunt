@@ -164,6 +164,13 @@ function createFireflyBoard(){
  for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)if(outside[y][x]){
   depth[y][x]=0;queue.push([x,y]);
  }
+ // Match the gameplay rule: occupied cells on the board edge are exposed
+ // directly to the virtual exterior, even though they are not empty air.
+ for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)if(
+  silhouette[y][x]&&(x===0||y===0||x===SIZE-1||y===SIZE-1)
+ ){
+  depth[y][x]=1;queue.push([x,y]);
+ }
  for(let head=0;head<queue.length;head++){
   const [x,y]=queue[head],next=depth[y][x]+1;
   for(const [nx,ny] of [[x-1,y],[x+1,y],[x,y-1],[x,y+1]]){
