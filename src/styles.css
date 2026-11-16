@@ -2774,7 +2774,3 @@ button:not(:disabled):active{filter:brightness(.96)}
 .speed-current{min-width:20px;padding:0 3px;color:#c6b47b;font-size:8px;font-weight:900;text-align:center}
 @media(max-width:599px){.speed-control{gap:4px;margin-top:5px;padding:3px 5px}.speed-caption{font-size:7px}.speed-option{min-width:32px;height:24px;padding:0 7px}.speed-current{font-size:8px}}
 @media(prefers-reduced-motion:reduce){.speed-option{transition:none}}
-
-
-/* KT-104 — restrained warm pulse when a worker brings a cube home. */
-@media(prefers-reduced-motion:no-preference){.nest-entrance{transition:filter .2s ease}.nest-entrance.nest-arrival{filter:drop-shadow(0 0 7px #b9a56c66)}}
