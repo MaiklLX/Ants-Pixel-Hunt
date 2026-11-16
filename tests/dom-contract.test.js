@@ -317,6 +317,15 @@ test("KT-100 waits for all crate-loading animations before dispatching ants", ()
  assert.equal(choose.split("kickColony()").length-1,1,"dispatch resumes exactly once from the loading cleanup path");
 });
 
+test("KT-103 draws a slower alternating tripod gait with subtle antennae and body motion",async()=>{
+ const source=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
+ assert.ok(source.includes("getAntGaitFrame(timestamp,index)"));
+ assert.ok(source.includes("gait*Math.PI/4"));
+ assert.ok(source.includes("const groupPhase=(side===-1?0:Math.PI)+(leg===1?Math.PI:0)"));
+ assert.ok(source.includes("const feeler=Math.sin(gaitPhase)*.42"));
+ assert.ok(source.includes("Math.sin(phase*2+index*.31)*.34"));
+});
+
 test("game speed controls expose the three supported presets and accessible pressed state",()=>{
  for(const speed of [1,2,4]){
   const button=html.match(new RegExp('<button[^>]*data-game-speed="'+speed+'"[^>]*>'));
