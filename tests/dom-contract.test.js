@@ -179,7 +179,8 @@ test("KT-083 makes the home screen campaign-first and restores compact one-scree
  const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
  const markup=await readFile(new URL("../index.html",import.meta.url),"utf8");
  const source=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
- assert.ok(markup.includes('id="menu-current-level" hidden'));
+ assert.ok(markup.includes('id="menu-current-level"'));
+ assert.doesNotMatch(markup.match(/<[^>]*id="menu-current-level"[^>]*>/)?.[0]||"",/\shidden(?:\s|>)/);
  assert.ok(markup.includes('id="start-game" class="menu-primary" type="button" hidden'));
  assert.ok(markup.includes('aria-label="Открыть кампанию и выбрать полянку"'));
  assert.ok(markup.includes("<strong>Кампания</strong><small>Выбрать полянку</small>"));
