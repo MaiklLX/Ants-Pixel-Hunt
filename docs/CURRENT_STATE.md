@@ -600,3 +600,12 @@
 - Start-slot counts now use bold tabular numerals inside dark, color-accented capsules with a small ant marker; box and preview counts use matching capsules.
 - Queue remaining count is now a compact amber/forest badge.
 - Kept the woodland palette, queue geometry, box sizes, game rules, ant movement and timings unchanged. Responsive sizing and reduced-motion behavior are preserved.
+
+
+## KT-118 — более спокойная смена боксов
+- Дата: 17 ноября 2026; база: KT-117, `5a82113099a7a7bbdfc4eeb51f2345569ec38d85`.
+- Перемещение сохраняет FLIP-позиционирование и теперь длится 760 ms вместо 460 ms; easing смягчён для постепенного старта и уверенной остановки.
+- Два следующих бокса в каждой колонке двигаются каскадом: второй ряд начинает сдвиг с дополнительной задержкой 55 ms, чтобы очередь не выглядела синхронным резким скачком.
+- Сохранены размеры, вертикальное выравнивание, цвета, механика очереди, скорость муравьёв и правила выбора. Учтён `prefers-reduced-motion`.
+- App version KT-118; оба Service Worker используют cache v86. Добавлен DOM-contract тест.
+- Публикация считается подтверждённой только после успешного Pages CI/deploy на итоговом SHA.
