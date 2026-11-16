@@ -3825,3 +3825,156 @@ button:not(:disabled):active{filter:brightness(.96)}
  .menu-level-card,.hub-location,.menu-link{transition:none!important}
  .menu-level-card:not(:disabled):hover{transform:none}
 }
+
+
+/* KT-123 — campaign map becomes a scrollable journey with chapter shortcuts and a clear next stop. */
+.map-overlay{
+ display:block!important;
+ overflow-x:hidden;
+ overflow-y:auto;
+ overscroll-behavior:contain;
+ -webkit-overflow-scrolling:touch;
+ touch-action:pan-y;
+ padding:calc(env(safe-area-inset-top) + 10px) 12px calc(env(safe-area-inset-bottom) + 18px);
+}
+.map-card{
+ width:min(100%,620px);
+ max-height:none;
+ height:auto;
+ overflow:visible;
+ margin:0 auto;
+ padding:clamp(13px,2.5vw,20px);
+}
+.map-card>.nest-header{
+ position:sticky;
+ top:-1px;
+ z-index:6;
+ padding:3px 0 10px;
+ margin:-2px 0 10px;
+ background:linear-gradient(180deg,#2d4437 80%,#2d443700);
+}
+.map-summary{
+ grid-template-columns:auto minmax(0,1fr);
+}
+.map-summary-next{grid-column:2}
+.map-continue{
+ grid-column:1/-1;
+ justify-self:stretch;
+ min-height:42px;
+ margin-top:5px;
+ padding:9px 15px;
+ border:1px solid #a2a66f;
+ border-radius:999px 999px 999px 9px;
+ background:linear-gradient(110deg,#65794a,#3d5b3c);
+ color:#f0e7bd;
+ font-size:11px;
+ font-weight:900;
+ letter-spacing:.25px;
+ box-shadow:inset 0 1px #ffffff25,0 3px 0 #17291f,0 7px 14px #07140f55;
+}
+.map-continue:disabled{opacity:.55;filter:saturate(.5)}
+.map-continue:not(:disabled):active{transform:translateY(2px);box-shadow:inset 0 1px #ffffff20,0 1px 0 #17291f}
+.map-chapter-nav{
+ display:flex;
+ gap:7px;
+ overflow-x:auto;
+ padding:3px 2px 10px;
+ margin:0 0 8px;
+ scrollbar-width:thin;
+ scrollbar-color:#71865a #1c3026;
+ overscroll-behavior-x:contain;
+}
+.map-chapter-jump{
+ flex:0 0 auto;
+ min-height:31px;
+ padding:6px 12px;
+ border:1px solid #536b4d;
+ border-radius:999px 999px 999px 7px;
+ background:linear-gradient(145deg,#344b39,#263c2e);
+ color:#c9d4b9;
+ font-size:9px;
+ font-weight:850;
+ white-space:nowrap;
+ box-shadow:inset 0 1px #ffffff12,0 2px 0 #17291f;
+}
+.map-chapter-jump:focus-visible,.map-continue:focus-visible{
+ outline:3px solid #d2a94f;
+ outline-offset:3px;
+}
+.map-chapter{
+ scroll-margin-top:72px;
+ border-radius:18px 11px 18px 11px;
+ padding:10px 9px 8px;
+ background:
+  radial-gradient(ellipse at 0 0,#84985a16,transparent 48%),
+  linear-gradient(145deg,#2b4234,#203529);
+}
+.map-chapter.chapter-active{border-color:#718458}
+.map-chapter.chapter-complete{border-color:#887a50}
+.map-chapter-heading{padding-bottom:8px}
+.map-chapter-heading strong{font-size:11px}
+.map-chapter-heading small{font-size:9px}
+.map-levels .campaign-level{
+ min-height:78px;
+ border-radius:16px 10px 16px 10px;
+}
+.map-levels .campaign-level:not(:disabled){cursor:pointer}
+.map-levels .campaign-level:not(:disabled):hover{
+ transform:translateY(-2px);
+ filter:brightness(1.09);
+ border-color:#a4b77a;
+}
+.map-levels .campaign-level:active:not(:disabled){transform:translateY(1px)}
+.map-levels .campaign-level.next-stop{
+ position:relative;
+ border-color:#c3bb7d;
+ box-shadow:inset 3px 0 #d1c17c,0 0 0 1px #c1b87a44,0 5px 14px #07140f88;
+}
+.map-levels .campaign-level.next-stop::before{
+ content:"СЛЕДУЮЩАЯ";
+ position:absolute;
+ top:-7px;
+ right:9px;
+ padding:2px 6px;
+ border:1px solid #b6a96c;
+ border-radius:999px;
+ background:#394b32;
+ color:#e7d99d;
+ font-size:7px;
+ font-weight:950;
+ letter-spacing:.7px;
+}
+.map-levels .campaign-level.completed .campaign-state{color:#a9c28c}
+.map-levels .campaign-level.locked{opacity:.72}
+@media(min-width:760px){
+ .map-overlay{padding:24px 22px 34px}
+ .map-card{width:min(100%,760px);padding:22px 25px}
+ .map-levels{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .map-levels .campaign-level{min-height:84px}
+ .map-chapter-nav{position:sticky;top:61px;z-index:5;padding:8px 5px;background:linear-gradient(180deg,#22382d 75%,#22382d00)}
+}
+@media(max-width:599px){
+ .map-overlay{padding:calc(env(safe-area-inset-top) + 7px) 8px calc(env(safe-area-inset-bottom) + 12px)}
+ .map-card{padding:13px 11px;border-radius:20px}
+ .map-card>.nest-header{top:-1px}
+ .map-intro{margin-bottom:10px}
+ .map-summary{padding:10px}
+ .map-chapter-nav{gap:6px;margin-bottom:5px}
+ .map-chapter-jump{min-height:29px;padding:5px 10px;font-size:8px}
+ .map-chapter{padding:8px 7px 7px;margin-bottom:9px}
+ .map-levels{gap:7px}
+ .map-levels .campaign-level{min-height:75px;padding:7px}
+ .map-levels .campaign-copy strong{font-size:10px}
+ .map-levels .map-level-hint{font-size:8px}
+}
+@media(max-width:360px){
+ .map-levels{grid-template-columns:1fr}
+ .map-levels .campaign-level{min-height:68px;grid-template-columns:34px minmax(0,1fr) 15px;padding:7px 9px}
+ .map-levels .campaign-emoji{width:31px;height:31px}
+ .map-levels .campaign-copy strong{font-size:10px}
+ .map-levels .map-level-hint{font-size:8px}
+}
+@media(prefers-reduced-motion:reduce){
+ .map-levels .campaign-level,.map-continue{transition:none!important}
+ .map-levels .campaign-level:not(:disabled):hover{transform:none}
+}
