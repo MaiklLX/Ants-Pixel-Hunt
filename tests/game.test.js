@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {COLORS,createGame,LEVELS,getLevel,getIncoming,createArtworkBoard,resolveAll,INITIAL_BOARD,INCOMING,isAccessible,getExposedPixels,findAccessiblePixel,findAccessiblePixels,findAntWave,chooseTopColumn,findNextMove,applyAntMove,completeBoxDeparture,freeSlotCount,isDefeat,SIZE,GRID_SIZE,BLOCK_SIZE,BOX_CAPACITY,SLOT_COUNT,TRAY_SIZE,canChoose,restoreGame,serializeGame,countOutboundBySlot,countSlotWorkers,canDepartSlot,isLockedBox,getLinkedPair,LOCKED_BOX_INDEX,LOCKED_BOX_COLUMN} from "../src/game.js";
+import {COLORS,createGame,LEVELS,getLevel,getIncoming,createArtworkBoard,resolveAll,INITIAL_BOARD,INCOMING,isAccessible,getExposedPixels,findAccessiblePixel,findAccessiblePixels,findAntWave,chooseTopColumn,findNextMove,applyAntMove,applyAntPickup,completeBoxDeparture,freeSlotCount,isDefeat,SIZE,GRID_SIZE,BLOCK_SIZE,BOX_CAPACITY,SLOT_COUNT,TRAY_SIZE,canChoose,restoreGame,serializeGame,countOutboundBySlot,countQueuedBySlot,countSlotWorkers,canDepartSlot,isLockedBox,getLinkedPair,LOCKED_BOX_INDEX,LOCKED_BOX_COLUMN} from "../src/game.js";
 const smallBoard=()=>Array.from({length:5},()=>Array(5).fill("green"));
 
 test("the authored frog is built from large collectible blocks on a 350x350 display grid",()=>{
@@ -419,4 +419,19 @@ test("the seventh firefly meadow has five exact color budgets and a fully solvab
   assert.equal(state.lost,false,"winning route must not enter FIELD BLOCKED at move "+(step+1));
  }
  assert.equal(state.remaining,0);assert.equal(state.won,true,"the complete queue route must clear the firefly artwork");
+});
+
+test("runtime pickup removes the block without consuming another ant from the source box",()=>{
+ const s=createGame();const box=getIncoming(s.levelId).find(item=>item.color==="green");
+ const slot=0,target=getExposedPixels(s.board)[0];s.slots[slot]={...box,ants:7};
+ const before=s.remaining;
+ assert.equal(applyAntPickup(s,slot,target,box.color),true);
+ assert.equal(s.remaining,before-1);assert.equal(s.slots[slot].ants,7);
+ assert.equal(applyAntPickup(s,slot,target,box.color),false,"a block can only be carried once");
+});
+test("only ants still waiting to leave a box count against its undispatched supply",()=>{
+ const workers=new Map([[1,{slot:2,phase:"queued"}],[2,{slot:2,phase:"outbound"}],[3,{slot:2,phase:"returning"}],[4,{slot:1,phase:"queued"}]]);
+ const queued=countQueuedBySlot(workers);
+ assert.equal(queued.get(2),1);assert.equal(queued.get(1),1);
+ assert.equal(countOutboundBySlot(workers).get(2),1);
 });
