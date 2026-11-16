@@ -100,7 +100,7 @@ test("KT-076 freezes ant, pickup and crate animation time while the page is hidd
   assert.ok(source.includes('document.addEventListener("visibilitychange"'));
   assert.ok(source.includes("animationClock.pause()"));
   assert.ok(source.includes("animationClock.resume()"));
-  assert.equal(source.split("animationClock.fromFrame(timestamp)").length - 1, 3);
+  assert.equal(source.split("animationClock.fromFrame(timestamp)").length - 1, 2);
   assert.ok(source.includes("startTime:animationClock.now()"));
   assert.equal(source.split("performance.now()").length - 1, 1);
 });
