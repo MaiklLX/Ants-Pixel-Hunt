@@ -347,7 +347,7 @@ test("KT-107 releases dispatch capacity as soon as an ant starts returning",asyn
 
 
 test("KT-106 keeps the reserve queue still while ants leave active boxes",async()=>{
- assert.ok(app.includes("function renderChoices(){\n choicesEl.replaceChildren();"));
+ assert.ok(app.includes("function renderChoices(){\n const previousPositions=captureQueuePositions();\n choicesEl.replaceChildren();"));
  assert.doesNotMatch(app,/oldPositions/);
  assert.doesNotMatch(app,/button\.animate\(\[\{transform:/);
  const worker=app.slice(app.indexOf("async function runSlotWorker"),app.indexOf("function updateResultOverlay"));
@@ -489,7 +489,7 @@ test("KT-115 removes nested queue cards and renders reserve entries as miniature
  const app=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
  const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
  const visual=styles.slice(styles.indexOf("KT-115 —"));
- assert.match(html,/app-version" content="KT-115"/);
+ assert.match(html,/app-version" content="KT-116"/);
  assert.match(visual,/\.queue-lane\s*\{[\s\S]*?border:0!important/);
  assert.match(visual,/\.choice-card,\.choice-card\.locked,\.choice-card\.empty-box\s*\{[\s\S]*?background:transparent!important/);
  assert.match(visual,/\.queue-peek \.peek-crate::before/);
@@ -506,7 +506,7 @@ test("KT-116 gives queue crates descending sizes and animates stable boxes upwar
  assert.match(source,/data-queue-key/);
  assert.match(source,/previous\.top-rect\.top/);
  assert.match(source,/requestAnimationFrame/);
- assert.match(source,/animateQueueReflow\(previousPositions\)/);
+ assert.match(source,/animateQueueReflow\(previousPositions\)/);\n assert.match(source,/peek\.dataset\.queueStep=String\(row\)/);
  const visual=styles.slice(styles.indexOf("KT-116 —"));
  assert.match(visual,/\.queue-peek\[data-queue-step="1"\] \.peek-crate/);
  assert.match(visual,/\.queue-peek\[data-queue-step="2"\] \.peek-crate/);
