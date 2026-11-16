@@ -151,7 +151,7 @@ test("animation clock scales continuously at 1x, 2x, 3x and 4x",()=>{
  clock.setSpeed(4);
  now=2025;assert.equal(clock.now(),2000);
  clock.setSpeed(1);
- now=2250;assert.equal(clock.now(),2250);
+ now=2250;assert.equal(clock.now(),2225);
 });
 test("animation clock keeps the selected speed across pause and resume",()=>{
  let now=0;
