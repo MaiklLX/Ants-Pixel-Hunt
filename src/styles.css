@@ -3979,3 +3979,112 @@ button:not(:disabled):active{filter:brightness(.96)}
  .map-levels .campaign-level,.map-continue{transition:none!important}
  .map-levels .campaign-level:not(:disabled):hover{transform:none}
 }
+
+
+/* KT-124 — campaign levels become a winding woodland trail with tactile stop markers. */
+.map-trail{
+ display:flex!important;
+ flex-direction:column;
+ align-items:stretch;
+ gap:0!important;
+ position:relative;
+ isolation:isolate;
+ padding:12px 0 18px;
+ background:
+  radial-gradient(ellipse at 50% 8%,#a1a66a13,transparent 42%),
+  radial-gradient(ellipse at 50% 92%,#a1a66a10,transparent 42%);
+}
+.map-trail::before{
+ content:"";
+ position:absolute;
+ z-index:-1;
+ top:24px;
+ bottom:28px;
+ left:50%;
+ width:3px;
+ transform:translateX(-50%);
+ border-radius:99px;
+ background:repeating-linear-gradient(to bottom,#9eaa6a99 0 5px,#9eaa6a00 5px 11px);
+ box-shadow:0 0 10px #9eaa6a20;
+}
+.map-trail .campaign-level{
+ position:relative;
+ width:min(82%,390px);
+ min-height:76px;
+ margin:7px 0;
+ display:grid;
+ grid-template-columns:42px minmax(0,1fr) 18px;
+ border:1px solid #526b4d;
+ background:linear-gradient(145deg,#344c3b,#263d30);
+ box-shadow:inset 0 1px #ffffff13,0 4px 0 #17291f,0 8px 15px #07140f44;
+}
+.map-trail .campaign-level:nth-child(odd){align-self:flex-start;margin-left:3%}
+.map-trail .campaign-level:nth-child(even){align-self:flex-end;margin-right:3%}
+.map-trail .campaign-level::after{
+ content:"";
+ position:absolute;
+ top:50%;
+ width:clamp(16px,7vw,48px);
+ border-top:2px dotted #a5ae7188;
+}
+.map-trail .campaign-level:nth-child(odd)::after{left:100%}
+.map-trail .campaign-level:nth-child(even)::after{right:100%}
+.map-trail .campaign-level .campaign-emoji{
+ width:36px;height:36px;
+ border:1px solid #9ca96c88;
+ background:radial-gradient(circle at 35% 25%,#8d9a5b55,#263a2c 72%);
+ box-shadow:inset 0 1px #ffffff20,0 2px 5px #07140f66;
+}
+.map-trail .campaign-level.completed{
+ border-color:#9a9866;
+ background:linear-gradient(145deg,#3c4b36,#2b3e2d);
+}
+.map-trail .campaign-level.completed .campaign-emoji{
+ color:#d8d6a0;
+ border-color:#c0b77c;
+ background:radial-gradient(circle,#65784b,#344631);
+}
+.map-trail .campaign-level.next-stop{
+ border:1px solid #d0bd79;
+ background:linear-gradient(120deg,#536746,#334b35);
+ box-shadow:inset 0 1px #ffffff2b,0 0 0 2px #d0bd7930,0 5px 0 #17291f,0 10px 18px #07140f66;
+}
+.map-trail .campaign-level.next-stop::before{
+ top:-8px;right:12px;
+ padding:3px 8px;
+ background:#4b5c3b;
+ font-size:7px;
+}
+.map-trail .campaign-level.locked{filter:saturate(.55);opacity:.66}
+.map-trail .campaign-level:focus-visible{
+ outline:3px solid #d2a94f;outline-offset:3px;z-index:2;
+}
+.map-chapter-nav{
+ scroll-snap-type:x proximity;
+}
+.map-chapter-jump[aria-current="location"]{
+ border-color:#c8b778;
+ background:linear-gradient(140deg,#566846,#344a34);
+ color:#f0e7bd;
+ box-shadow:0 0 0 1px #c8b77833;
+}
+@media(min-width:760px){
+ .map-trail{max-width:660px;margin:0 auto;padding:18px 18px 24px}
+ .map-trail .campaign-level{width:min(76%,420px);min-height:82px}
+ .map-trail .campaign-level:nth-child(odd){margin-left:4%}
+ .map-trail .campaign-level:nth-child(even){margin-right:4%}
+ .map-trail .campaign-level::after{width:clamp(30px,8vw,72px)}
+}
+@media(max-width:420px){
+ .map-trail .campaign-level{width:86%;min-height:72px;grid-template-columns:36px minmax(0,1fr) 16px;padding:7px}
+ .map-trail .campaign-level:nth-child(odd){margin-left:1%}
+ .map-trail .campaign-level:nth-child(even){margin-right:1%}
+ .map-trail .campaign-level::after{width:clamp(12px,5vw,22px)}
+ .map-trail .campaign-level .campaign-emoji{width:31px;height:31px}
+ .map-trail .campaign-copy strong{font-size:10px}
+ .map-trail .map-level-hint{font-size:8px}
+}
+@media(prefers-reduced-motion:reduce){
+ .map-trail .campaign-level{transition:none!important}
+ .map-trail .campaign-level:not(:disabled):hover{transform:none}
+}
