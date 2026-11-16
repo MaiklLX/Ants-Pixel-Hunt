@@ -70,7 +70,7 @@ function renderMap(){
  const chapters=[];for(const level of LEVELS){let group=chapters.find(item=>item.name===level.chapter);if(!group){group={name:level.chapter,levels:[]};chapters.push(group);}group.levels.push(level);}
  for(let index=0;index<chapters.length;index++){
   const chapter=chapters[index],section=document.createElement("section");section.className="map-chapter";section.id="campaign-chapter-"+index;
-   const jump=document.createElement("button");jump.type="button";jump.className="map-chapter-jump";jump.textContent=chapter.name;jump.addEventListener("click",()=>section.scrollIntoView({block:"start",behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"}));chapterNav.append(jump);
+   const jump=document.createElement("button");jump.type="button";jump.className="map-chapter-jump";jump.textContent=chapter.name;jump.addEventListener("click",()=>{chapterNav.querySelectorAll("[aria-current]").forEach(active=>active.removeAttribute("aria-current"));jump.setAttribute("aria-current","location");section.scrollIntoView({block:"start",behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});});if(nextPlayable&&chapter.levels.some(level=>level.id===nextPlayable.id))jump.setAttribute("aria-current","location");chapterNav.append(jump);
   const heading=document.createElement("header");heading.className="map-chapter-heading";
   const title=document.createElement("strong");title.textContent=chapter.name;
   const chapterDone=chapter.levels.filter(level=>done.has(level.id)).length;
