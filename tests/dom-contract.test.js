@@ -570,8 +570,8 @@ test("KT-120 removes visual queue numbers and preserves fixed five-slot and thre
  assert.doesNotMatch(app,/order\.className="peek-order"/);
  assert.match(app,/Бокс в резервной очереди, цвет/);
  const visual=styles.slice(styles.indexOf("KT-120 —"));
- assert.match(visual,/grid-template-columns:repeat\(5,minmax\(0,1fr\))!important/);
- assert.match(visual,/grid-template-columns:repeat\(3,minmax\(0,1fr\))!important/);
+ assert.ok(visual.includes("grid-template-columns:repeat(5,minmax(0,1fr))!important"));
+ assert.ok(visual.includes("grid-template-columns:repeat(3,minmax(0,1fr))!important"));
  assert.match(visual,/\.queue-peek,\.queue-peek\.empty\{[\s\S]*?flex:0 0/);
  assert.match(visual,/\.queue-lane\{[\s\S]*?height:clamp/);
  assert.match(visual,/\.slots \.slot-number,\.queue-peek \.peek-order\{display:none!important\}/);
