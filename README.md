@@ -181,4 +181,4 @@ GitHub Actions автоматически запускает игровые те
 - Время путешествия муравьёв KT-102 и спокойная походка KT-103 не менялись.
 
 
-KT-108 queue-slot availability fix is awaiting a clean Pages run. The first deployment attempt was blocked by a stale version assertion in the test suite; do not treat that attempt as published.
+KT-108 подтверждена чистым Pages deploy: 111/111 gameplay-тестов, Godot import/rules/smoke — success. KT-109 — визуальная полировка тёмной лесной арены: глубина рамки поля, контраст стартовых отсеков, читаемость очереди, тёплые акценты и focus-состояния; игровая логика и скорость муравьишек не менялись. App version KT-109; PWA shell cache v77.
