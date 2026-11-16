@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {createPausableClock,getAntLaunchDelay,getAntQueueDelay,getAntTripFrame,getTrailPose,getAntTravelDurations} from "../src/ant-animation.js";
+import {createPausableClock,getAntLaunchDelay,getAntQueueDelay,getAntTripFrame,getTrailPose,getAntTravelDurations,getAntGaitFrame} from "../src/ant-animation.js";
 
 test("ant trip waits for its staggered launch without starting motion early",()=>{
  assert.deepEqual(getAntTripFrame(120,150,2000,1800),{
@@ -173,4 +173,17 @@ test("ant journeys use a noticeably slower relaxed baseline in both directions",
  assert.deepEqual(typical,{outbound:6450,returning:5950});
  const long=getAntTravelDurations(2400,1800);
  assert.deepEqual(long,{outbound:8200,returning:6870});
+});
+
+
+test("ant gait cycles through eight calm alternating poses without changing travel timing",()=>{
+ const first=getAntGaitFrame(0,0);
+ assert.deepEqual(first,{phase:0,frame:0});
+ const frames=new Set();
+ for(let i=0;i<8;i++)frames.add(getAntGaitFrame(i*175,0).frame);
+ assert.equal(frames.size,8);
+ assert.equal(getAntGaitFrame(0,1).frame,Math.floor(1.73/(Math.PI/4))%8);
+ const oneCycle=getAntGaitFrame((Math.PI*2)/.0045,0);
+ assert.equal(oneCycle.frame,0);
+ assert.ok(Math.abs(oneCycle.phase)<1e-9);
 });
