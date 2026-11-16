@@ -3394,3 +3394,13 @@ button:not(:disabled):active{filter:brightness(.96)}
 @media(prefers-reduced-motion:reduce){
  .slots .slot.filled .ant-count,.choice-card .box-count,.queue-peek .peek-count{transition:none!important}
 }
+
+
+/* KT-118 — slower, cascading queue handoff with a soft landing. */
+.choice-card,.queue-peek{
+ transition:transform 760ms cubic-bezier(.22,.72,.18,1);
+ will-change:transform;
+}
+@media(prefers-reduced-motion:reduce){
+ .choice-card,.queue-peek{transition:none!important;will-change:auto}
+}
