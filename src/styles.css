@@ -3404,3 +3404,22 @@ button:not(:disabled):active{filter:brightness(.96)}
 @media(prefers-reduced-motion:reduce){
  .choice-card,.queue-peek{transition:none!important;will-change:auto}
 }
+
+
+/* KT-119 — make the current meadow the clear, immediate play action. */
+.main-menu .menu-level-card:not([hidden]){
+ width:min(100%,470px);min-height:78px;padding:11px 14px;border:1px solid #829765;border-radius:17px;
+ background:radial-gradient(ellipse at 0 50%,#8b9b5630,transparent 52%),linear-gradient(112deg,#3d563d 0%,#304a37 58%,#293e31 100%);
+ box-shadow:inset 0 1px #ffffff18,0 4px 0 #192d21,0 10px 20px #07140f77;
+}
+.main-menu .menu-level-card:not([hidden])::before{content:"";position:absolute;left:0;top:13px;bottom:13px;width:3px;border-radius:0 4px 4px 0;background:linear-gradient(#9bb477,#d6bd78);box-shadow:0 0 9px #b7c17a30}
+.main-menu .level-thumb{flex-basis:56px;width:56px;height:56px;border:1px solid #849765}
+.main-menu .level-card-copy>span{font-size:8px;letter-spacing:1.3px;color:#d9c68a}
+.main-menu .level-card-copy strong{font-size:14px;color:#f0f0dc;line-height:1.2}
+.main-menu .level-card-copy small{font-size:10px;color:#c2cdb4}
+.main-menu .level-play-mark{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:8px 10px;border:1px solid #8b9560;border-radius:10px;background:linear-gradient(145deg,#65764a,#455d3b);color:#f1e2a8;box-shadow:inset 0 1px #ffffff1a,0 2px 0 #1c3023;font-size:10px;font-weight:950;letter-spacing:.6px;text-transform:uppercase}
+.main-menu .menu-level-card:not(:disabled):hover{border-color:#b4b67b;filter:brightness(1.06)}
+.main-menu .menu-level-card:focus-visible{outline:2px solid #d8bd78;outline-offset:4px}
+@media(max-width:599px){.main-menu .menu-level-card:not([hidden]){min-height:68px;padding:8px 10px;gap:9px;border-radius:14px}.main-menu .level-thumb{flex-basis:48px;width:48px;height:48px;font-size:28px}.main-menu .level-card-copy strong{font-size:12px}.main-menu .level-card-copy small{font-size:9px}.main-menu .level-play-mark{padding:7px 8px;font-size:9px}}
+@media(max-height:700px){.main-menu .menu-level-card:not([hidden]){min-height:62px;padding:7px 10px}}
+@media(prefers-reduced-motion:reduce){.main-menu .menu-level-card{transition:none}}
