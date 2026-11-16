@@ -15,11 +15,17 @@ export function getAntTripFrame(elapsed,delay,outbound,returning,out={}){
  return out;
 }
 
-/** Keep launch staggering bounded; lifetime worker IDs must not create longer waits. */
+/** Keep the legacy bounded stagger for compatibility with earlier animation callers. */
 export function getAntLaunchDelay(sequence,seed=0){
  const order=Math.max(0,Math.floor(Number(sequence)||0))%8;
  const jitter=Math.max(0,Math.min(1,Number(seed)||0))*28;
  return order*48+jitter;
+}
+/** Per-box queue: each worker exits after the previous one, without waiting for its return. */
+export function getAntQueueDelay(order,seed=0){
+ const position=Math.max(0,Math.floor(Number(order)||0));
+ const jitter=Math.max(0,Math.min(1,Number(seed)||0))*24;
+ return position*118+jitter;
 }
 
 
