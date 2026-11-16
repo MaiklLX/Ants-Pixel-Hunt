@@ -320,16 +320,26 @@ export function findAntWave(state,reservedTargets=new Set(),pendingBySlot=new Ma
   }
  }
  const supplies=state.slots.map((box,slot)=>({slot,color:box?.color,remaining:box&&box.ants>0&&box.status!=="departing"?Math.max(0,box.ants-(pendingBySlot.get(slot)||0)):0,assigned:0}));
- // Round-robin by slot prevents one large box from starving other colours.
+ const scheduleOne=supply=>{
+  if(!supply.remaining||supply.assigned>=supply.remaining)return false;
+  const targets=byColor.get(supply.color)||[],index=cursor.get(supply.color)||0;
+  if(index>=targets.length)return false;
+  wave.push({slot:supply.slot,color:supply.color,target:targets[index]});
+  cursor.set(supply.color,index+1);supply.assigned++;
+  return true;
+ };
+ // Every eligible starter box gets its own first dispatch before any box receives a second.
+ // A shared colour cursor prevents duplicate targets, not one box waiting behind another.
+ for(const supply of supplies){
+  if(wave.length>=maxMoves)break;
+  scheduleOne(supply);
+ }
+ // Continue in fair rounds while each box still has ants and matching exposed pixels remain.
  while(wave.length<maxMoves){
   let scheduled=false;
   for(const supply of supplies){
    if(wave.length>=maxMoves)break;
-   if(!supply.remaining||supply.assigned>=supply.remaining)continue;
-   const targets=byColor.get(supply.color)||[],index=cursor.get(supply.color)||0;
-   if(index>=targets.length)continue;
-   wave.push({slot:supply.slot,color:supply.color,target:targets[index]});
-   cursor.set(supply.color,index+1);supply.assigned++;scheduled=true;
+   if(scheduleOne(supply))scheduled=true;
   }
   if(!scheduled)break;
  }
