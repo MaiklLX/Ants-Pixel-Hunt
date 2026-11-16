@@ -340,10 +340,11 @@ test("game speed controls expose the three supported presets and accessible pres
 
 test("KT-104 draws a restrained delivery ripple at the anthill without changing ant travel timing", () => {
   assert.match(app, /function drawDeliveryEffects\(timestamp\)/);
-  assert.match(app, /deliveryEffects\.push\(\{x:ant\.nestPoint\.x,y:ant\.nestPoint\.y,startedAt:clockTime\}\)/);
+  assert.match(app, /if\(ant\.delivered\)deliveryEffects\.push\(\{x:ant\.nestPoint\.x,y:ant\.nestPoint\.y,startedAt:clockTime\}\)/);
   assert.match(app, /drawPickupEffects\(clockTime\);drawDeliveryEffects\(clockTime\)/);
   assert.match(app, /deliveryEffects\.length=0/);
   assert.match(app, /nestPoint:nest/);
+  assert.match(app, /ant\.onPickup\(\);ant\.delivered=true/);
   assert.match(app, /#b9a56c/);
   assert.match(html, /app-version" content="KT-104"/);
 });
