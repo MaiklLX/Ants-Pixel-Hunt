@@ -333,6 +333,11 @@ export function countOutboundBySlot(workers){
  for(const worker of workers.values())if(worker.phase==="outbound")pending.set(worker.slot,(pending.get(worker.slot)||0)+1);
  return pending;
 }
+export function countQueuedBySlot(workers){
+ const pending=new Map();
+ for(const worker of workers.values())if(worker.phase==="queued")pending.set(worker.slot,(pending.get(worker.slot)||0)+1);
+ return pending;
+}
 export function countSlotWorkers(workers,slot){
  let count=0;for(const worker of workers.values())if(worker.slot===slot)count++;
  return count;
@@ -405,11 +410,18 @@ export function applyAntMove(state,slot,target){
    }
   }else box.status="departing";
  }
- // A linked pair leaves only after both crates have collected every ant's cube.
  if(box.pairId&&box.ants<=0){
   const partner=state.slots.find((other,index)=>index!==slot&&other?.pairId===box.pairId);
   if(partner&&partner.ants<=0){box.status="departing";partner.status="departing";}
  }
+ return true;
+}
+/** Browser runtime pickup: the ant count was already deducted when it left its box. */
+export function applyAntPickup(state,slot,target,color){
+ if(state.board[target.y]?.[target.x]!==color)return false;
+ state.board[target.y][target.x]="";state.remaining--;
+ state.resolutionLog.push({slot,color,x:target.x,y:target.y});
+ if(state.resolutionLog.length>300)state.resolutionLog.splice(0,100);
  return true;
 }
 export function completeBoxDeparture(state,slot){
