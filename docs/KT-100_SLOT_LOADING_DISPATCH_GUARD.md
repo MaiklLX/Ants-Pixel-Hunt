@@ -2,7 +2,7 @@
 
 **Дата:** 16 ноября 2026.
 **Кодовый HEAD после исправления теста:** 5a645534ecb68e6a0667e6127a415d28b4cec597.
-**Статус:** Pages tests/build/deploy и Godot check подтверждены; Android debug APK ещё выполнялся на момент записи.
+**Статус:** Pages tests/build/deploy, Godot check и Android debug APK workflow подтверждены успешно.
 
 ## Зачем нужен тест
 
@@ -31,7 +31,7 @@
 
 - Pages [run #43851392070](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43851392070) — success: npm test 92/92, npm run build, Pages artifact upload и deploy.
 - Godot [run #43851391110](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43851391110) — success: project import, gameplay rules tests и smoke test.
-- Android [run #43851391164](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43851391164) — на момент фиксации: npm test, npm run build, Capacitor generation/sync прошли; Build debug APK ещё выполнялся, artifact не подтверждён.
+- Android [run #43851391164](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43851391164) — success: npm test/build, Capacitor generation/sync, debug APK build и upload прошли; artifact ID 14216594498, 3,831,828 bytes. APK не тестировался на физическом устройстве.
 
 ## Ограничения
 
@@ -41,4 +41,4 @@
 
 ## Следующая точка
 
-Проверить Android artifact для SHA 5a6455 и CI для документационного HEAD. Затем зафиксировать продуктовое решение по конвейеру/норе до следующей визуальной перестройки арены.
+Android artifact для SHA 5a6455 подтверждён. Следующий шаг — проверить CI для документационного HEAD. Затем зафиксировать продуктовое решение по конвейеру/норе до следующей визуальной перестройки арены.
