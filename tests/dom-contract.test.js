@@ -337,7 +337,8 @@ test("game speed uses one accessible button cycling from 1x through 4x",async()=
 });
 
 
-test("KT-107 releases dispatch capacity as soon as an ant starts returning",()=>{
+test("KT-107 releases dispatch capacity as soon as an ant starts returning",async()=>{
+ const game=await readFile(new URL("../src/game.js",import.meta.url),"utf8");
  assert.match(app,/countDispatchingWorkers\(workerPromises\)/);
  assert.match(app,/worker\.phase="returning"/);
  assert.match(app,/worker\.phase="outbound"/);
