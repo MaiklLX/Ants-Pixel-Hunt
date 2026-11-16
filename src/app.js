@@ -435,7 +435,7 @@ function renderAntFrame(timestamp){
   if(phase.picked&&!ant.picked){
    ant.picked=true;
    if(applyAntPickup(state,ant.move.slot,ant.move.target,ant.move.color)){
-    ant.onPickup();
+    ant.onPickup();ant.delivered=true;
     const pickupPoint=cellCenter(ant.move.target.x,ant.move.target.y);
     pickupEffects.push({x:pickupPoint.x,y:pickupPoint.y,color:ant.move.color,startedAt:clockTime,seed:workerId*.618});
     renderBoardAfterPickup(ant.move.target);
@@ -444,7 +444,7 @@ function renderAntFrame(timestamp){
    }
   }
   if(phase.finished){
-   if(ant.picked)deliveryEffects.push({x:ant.nestPoint.x,y:ant.nestPoint.y,startedAt:clockTime});
+   if(ant.delivered)deliveryEffects.push({x:ant.nestPoint.x,y:ant.nestPoint.y,startedAt:clockTime});
    activeAnts.delete(workerId);
    ant.resolve();
    continue;
