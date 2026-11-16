@@ -628,6 +628,6 @@ test("KT-123 makes the campaign map scrollable and adds chapter shortcuts plus a
  assert.match(app,/continueButton.addEventListener\("click"/);
  assert.match(app,/chapterNav.append\(jump\)/);
  assert.match(app,/nextStop.scrollIntoView/);
- assert.match(app,/data-level-id/);
+ assert.match(app,/dataset\.levelId/);
  assert.match(visual,/@media\(prefers-reduced-motion:reduce\)/);
 });
