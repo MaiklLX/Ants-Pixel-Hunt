@@ -542,7 +542,8 @@ async function runSlotWorker(move,workerId){
     if(box.ants===0){
      if(box.pairId)box.status="waiting-linked";
      else box.status="departing";
-     completeBoxDeparture(state,slot);
+     const slotFreed=completeBoxDeparture(state,slot);
+     if(slotFreed)renderChoices();
     }
     state.activeSlots=[...new Set([...workerPromises.values()].map(worker=>worker.slot))];
     renderSlots();
