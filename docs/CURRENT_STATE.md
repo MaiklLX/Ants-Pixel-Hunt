@@ -17,7 +17,7 @@
 - При подборе блока фактура восстанавливается в освободившейся клетке; открывшиеся цветные блоки остаются поверх неё.
 - Изменены `src/app.js`, `tests/dom-contract.test.js`, `index.html`, оба Service Worker, `README.md`, добавлен `docs/KT-111_FOREST_FLOOR_TEXTURE.md`.
 - Скорость KT-102, походка KT-103, маршруты, цветовые бюджеты, правила и диспетчеризация не менялись.
-- App version KT-111; PWA shell cache v79. Кодовый commit: `e599365dca6aba734e8f68cc1e78450d93b556b6`.
+- App version KT-111; PWA shell cache v79. Кодовый commit: `fc7fc34624d6d64b3696afcbe867e572ad1c718c`.
 - GitHub Actions для KT-111 запускаются/проверяются отдельно; не считать публикацию подтверждённой до успешного Pages deploy.
 - Последняя подтверждённая контрольная точка KT-110: Pages build/deploy, gameplay tests, Godot smoke test и Android debug APK — success (runs #43939817047, #43939817032, #43939817154).
 
