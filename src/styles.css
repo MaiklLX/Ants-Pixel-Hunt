@@ -4088,3 +4088,57 @@ button:not(:disabled):active{filter:brightness(.96)}
  .map-trail .campaign-level{transition:none!important}
  .map-trail .campaign-level:not(:disabled):hover{transform:none}
 }
+
+
+/* KT-125 — small woodland landmarks enrich the trail without competing with level buttons. */
+.map-trail{
+ background:
+  radial-gradient(ellipse at 12% 18%,#8d9f5c17,transparent 18%),
+  radial-gradient(ellipse at 88% 34%,#8d9f5c14,transparent 20%),
+  radial-gradient(ellipse at 15% 72%,#b18b5b12,transparent 18%),
+  radial-gradient(ellipse at 82% 88%,#8d9f5c15,transparent 20%);
+}
+.map-trail .campaign-level:not(.next-stop)::before{
+ content:"";
+ position:absolute;
+ z-index:1;
+ width:13px;height:17px;
+ top:50%;transform:translateY(-50%);
+ pointer-events:none;
+ opacity:.88;
+ background:
+  radial-gradient(ellipse at 48% 14%,#b6c17d 0 22%,transparent 25%),
+  radial-gradient(ellipse at 22% 42%,#78945b 0 27%,transparent 30%),
+  radial-gradient(ellipse at 76% 52%,#91a76a 0 25%,transparent 28%),
+  linear-gradient(90deg,transparent 44%,#9a8b5b 45% 57%,transparent 58%);
+}
+.map-trail .campaign-level:nth-child(odd):not(.next-stop)::before{right:-22px}
+.map-trail .campaign-level:nth-child(even):not(.next-stop)::before{left:-22px}
+.map-trail .campaign-level.next-stop::after{
+ border-top:2px dotted #d6c58b;
+ filter:drop-shadow(0 0 3px #d6c58b77);
+}
+.map-trail .campaign-level.next-stop .campaign-emoji{
+ position:relative;
+}
+.map-trail .campaign-level.next-stop .campaign-emoji::after{
+ content:"✦";
+ position:absolute;
+ top:-8px;right:-8px;
+ color:#f0d58b;
+ font-size:11px;
+ text-shadow:0 0 7px #f0d58b99;
+ animation:trail-firefly 2.4s ease-in-out infinite;
+}
+.map-trail .campaign-level.completed::after{
+ border-top-color:#b4b17b;
+}
+.map-trail .campaign-level.locked::before{opacity:.35;filter:grayscale(.6)}
+@keyframes trail-firefly{
+ 0%,100%{opacity:.45;transform:translateY(1px) scale(.85)}
+ 50%{opacity:1;transform:translateY(-3px) scale(1.12)}
+}
+.map-trail .campaign-level:focus-visible{z-index:3}
+@media(prefers-reduced-motion:reduce){
+ .map-trail .campaign-level.next-stop .campaign-emoji::after{animation:none}
+}
