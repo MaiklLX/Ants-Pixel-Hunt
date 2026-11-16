@@ -102,7 +102,7 @@ function completedLevels(){try{return new Set(JSON.parse(localStorage.getItem(CA
 function markLevelComplete(levelId){const done=completedLevels();done.add(levelId);try{localStorage.setItem(CAMPAIGN_KEY,JSON.stringify([...done]));}catch{}}
 function isLevelUnlocked(level){return isCampaignLevelUnlocked(LEVELS,completedLevels(),level.id);}
 function nextLevel(){return getNextCampaignLevel(LEVELS,state.levelId);}
-const loadingSlots=new Set(),workerPromises=new Map(),reservedTargets=new Set(),activeAnts=new Map(),pickupEffects=[];
+const loadingSlots=new Set(),workerPromises=new Map(),reservedTargets=new Set(),activeAnts=new Map(),pickupEffects=[],deliveryEffects=[];
 let workerSequence=0,lastAntFrameAt=0,lastExposedPixels=new Set();
 const MAX_ACTIVE_ANTS=36,ANT_FRAME_INTERVAL=1000/60;
 const colorRGB=Object.fromEntries(Object.entries(COLORS).map(([key,value])=>[key,value.hex.match(/[\da-f]{2}/gi).map(v=>parseInt(v,16))]));
@@ -404,6 +404,23 @@ function drawPickupEffects(timestamp){
   antCtx.restore();
  }
 }
+function drawDeliveryEffects(timestamp){
+ for(let i=deliveryEffects.length-1;i>=0;i--){
+  const effect=deliveryEffects[i],t=(timestamp-effect.startedAt)/680;
+  if(t>=1){deliveryEffects.splice(i,1);continue;}
+  const fade=1-t,breath=Math.sin(t*Math.PI);
+  antCtx.save();antCtx.globalAlpha=fade*.62;
+  antCtx.shadowColor="#b9a56c";antCtx.shadowBlur=7*breath;
+  antCtx.strokeStyle="#b9a56c";antCtx.lineWidth=1.5*fade;
+  for(let ring=0;ring<2;ring++){
+   const radius=5+t*({14,21}[ring]);
+   antCtx.beginPath();antCtx.ellipse(effect.x,effect.y+ring*1.5,radius,radius*.48,0,0,Math.PI*2);antCtx.stroke();
+  }
+  antCtx.fillStyle="#c3ae72";antCtx.globalAlpha=fade*.55;
+  antCtx.beginPath();antCtx.arc(effect.x,effect.y-2,1.4+breath*.7,0,Math.PI*2);antCtx.fill();
+  antCtx.restore();
+ }
+}
 function renderAntFrame(timestamp){
  if(timestamp-lastAntFrameAt<ANT_FRAME_INTERVAL){antFrame=requestAnimationFrame(renderAntFrame);return;}
  lastAntFrameAt=timestamp;
@@ -447,7 +464,7 @@ function animateAntTrip(move,index,onPickup=()=>{},onLaunch=()=>{}){
  const returnDistance=returnTrail.reduce((sum,point,i)=>i?sum+Math.hypot(point.x-returnTrail[i-1].x,point.y-returnTrail[i-1].y):0,0);
  const delay=move.launchDelay??getAntLaunchDelay(index,seed),{outbound,returning}=getAntTravelDurations(distance,returnDistance);
  return new Promise(resolve=>{
-  activeAnts.set(index,{move,onPickup,onLaunch,resolve,startTime:animationClock.now(),delay,outbound,returning,outboundTrail,returnTrail,phaseFrame:{},pose:{x:0,y:0,angle:0},launched:false});
+  activeAnts.set(index,{move,onPickup,onLaunch,resolve,startTime:animationClock.now(),delay,outbound,returning,outboundTrail,returnTrail,nestPoint:nest,phaseFrame:{},pose:{x:0,y:0,angle:0},launched:false});
   if(!antFrame)antFrame=requestAnimationFrame(renderAntFrame);
  });
 }
@@ -663,7 +680,7 @@ function showMainMenu(){
 }
 function maybeFinalizeMenuExit(){
  if(!resetAfterMenu||workerPromises.size||loadingSlots.size||resetting)return;
- resetting=true;cancelAnimationFrame(antFrame);antFrame=0;activeAnts.clear();pickupEffects.length=0;reservedTargets.clear();
+ resetting=true;cancelAnimationFrame(antFrame);antFrame=0;activeAnts.clear();pickupEffects.length=0;deliveryEffects.length=0;reservedTargets.clear();
  state=createGame(state.levelId);totalBlocks=state.remaining;gameStarted=false;resetAfterMenu=false;resetting=false;
  render();$("save-status").textContent="Партия сброшена · открытые полянки сохранены";updateMainMenu();
 }
@@ -674,7 +691,7 @@ function startGame(){
 }
 async function startFreshGame(levelId=state.levelId){
  if(workerPromises.size>0||loadingSlots.size>0||resetAfterMenu)return;
- resetting=true;cancelAnimationFrame(antFrame);activeAnts.clear();reservedTargets.clear();state=createGame(levelId);totalBlocks=state.remaining;resetting=false;
+ resetting=true;cancelAnimationFrame(antFrame);activeAnts.clear();pickupEffects.length=0;deliveryEffects.length=0;reservedTargets.clear();state=createGame(levelId);totalBlocks=state.remaining;resetting=false;
  gameStarted=true;render();$("save-status").textContent="Новая партия · прогресс уровня не сохраняется";shell.classList.remove("menu-open");updateMainMenu();kickColony();
 }
 async function boot(){
