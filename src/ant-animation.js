@@ -15,6 +15,13 @@ export function getAntTripFrame(elapsed,delay,outbound,returning,out={}){
  return out;
 }
 
+/** A calm eight-pose alternating tripod gait for the tiny workers. */
+export function getAntGaitFrame(timestamp,index=0){
+ const phase=(Number(timestamp)||0)*.0045+(Number(index)||0)*1.73;
+ const cycle=((phase%(Math.PI*2))+Math.PI*2)%(Math.PI*2);
+ return {phase:cycle,frame:Math.floor(cycle/(Math.PI/4))%8};
+}
+
 /** Slow, natural travel times for the full outbound and return journeys. */
 export function getAntTravelDurations(outboundDistance,returnDistance){
  const outbound=Math.max(0,Number(outboundDistance)||0);
