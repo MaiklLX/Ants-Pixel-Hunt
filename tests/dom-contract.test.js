@@ -385,7 +385,7 @@ test("KT-105 renders fully colored supply crates, visible chain hardware and a b
  assert.match(styles,/\.choice-card \.choice-crate \.sealed-plank\{/);
  assert.match(styles,/\.choice-card\.linked-box::after/);
  assert.match(styles,/@keyframes queue-crate-drop/);
- assert.match(html,/app-version" content="KT-108"/);
+ assert.match(html,/app-version" content="KT-109"/);
 });
 
 test("KT-108 immediately refreshes queue choices when a starting slot is physically freed",()=>{
@@ -407,4 +407,13 @@ test("a freed ordinary start compartment immediately makes the top queue selecta
  assert.equal(game.completeBoxDeparture(state,0),true);
  assert.equal(game.freeSlotCount(state),1);
  assert.equal(game.canChoose(state),true);
+});
+
+
+test("KT-109 keeps the arena on the dark woodland palette and refreshes the PWA shell", async () => {
+  const styles = await readFile(new URL("../src/styles.css", import.meta.url), "utf8");
+  const worker = await readFile(new URL("../public/service-worker.js", import.meta.url), "utf8");
+  assert.match(styles, /KT-109 — polished woodland arena/);
+  assert.match(styles, /\.choice-card\.selectable:not\(:disabled\)/);
+  assert.match(worker, /ants-pixel-hunt-shell-v77-kt109/);
 });
