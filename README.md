@@ -179,3 +179,6 @@ GitHub Actions автоматически запускает игровые те
 - Очередь больше не пересоздаётся при каждом выходе муравья из стартового бокса; удалены повторные FLIP/drop-анимации неподвижных ящиков.
 - Выпуск из одного стартового бокса идёт с интервалом 340 ms. Диспетчеризация распределяет каждый пакет по активным цветам по очереди, чтобы один большой бокс не задерживал остальные.
 - Время путешествия муравьёв KT-102 и спокойная походка KT-103 не менялись.
+
+
+KT-108 queue-slot availability fix is awaiting a clean Pages run. The first deployment attempt was blocked by a stale version assertion in the test suite; do not treat that attempt as published.
