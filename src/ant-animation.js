@@ -15,6 +15,13 @@ export function getAntTripFrame(elapsed,delay,outbound,returning,out={}){
  return out;
 }
 
+/** Slow, natural travel times for the full outbound and return journeys. */
+export function getAntTravelDurations(outboundDistance,returnDistance){
+ const outbound=Math.max(0,Number(outboundDistance)||0);
+ const returning=Math.max(0,Number(returnDistance)||0);
+ return {outbound:5200+outbound*1.25,returning:4800+returning*1.15};
+}
+
 /** Keep the legacy bounded stagger for compatibility with earlier animation callers. */
 export function getAntLaunchDelay(sequence,seed=0){
  const order=Math.max(0,Math.floor(Number(sequence)||0))%8;
