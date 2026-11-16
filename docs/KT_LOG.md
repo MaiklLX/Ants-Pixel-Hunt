@@ -775,3 +775,27 @@ KT-097: создать одну авторскую седьмую полянку
 - Пять стартовых отсеков, три колонки очереди, текущие цвета и кампанийные уровни сохранены. Адаптивная сетка 2–5 колонок и расширение палитры отложены.
 - App version KT-099; PWA shell cache v68 в обоих Service Worker.
 - Требуется подтвердить Pages, Godot и Android CI; физическая проверка на телефоне и screenshot QA не заявляются.
+
+
+# KT-099 — нора-возврат и независимая диспетчеризация
+
+- Дата: 16 ноября 2026; code HEAD: 017737a0f38854aa56197612df6b22592ca4be18.
+- Конвейер заменён общей норой-возвратом под полем; нора принимает кубики и не является точкой появления муравьёв.
+- Боксы анимированно занимают пять стартовых отсеков; муравьи выходят из каждого бокса по одному с независимым интервалом. Следующий муравей не ждёт возвращения предыдущего.
+- Счётчик бокса уменьшается при фактическом выходе. Обычный отсек освобождается после выхода последнего муравья; связанная пара — атомарно после выхода обоих участников.
+- После pickup applyAntPickup удаляет блок и kickColony немедленно планирует новую волну для открывшихся блоков.
+- Runtime: src/app.js, src/game.js, src/ant-animation.js, index.html, src/styles.css; тесты: tests/game.test.js, tests/ant-animation.test.js, tests/dom-contract.test.js; PWA: оба Service Worker.
+- Ключевые commits: cde9a924559671651c73f00c050e4528bc3e3884, 48b3443f53125bf27012a65e69f95deaac2435d1, 628c9616d2963644bfd6803375eb0b7681065085, 5ba77d155fdff3555b7c182946fed953423b8218, 674e1c23a0b2712afb55a27f6534460bd168b451, финальный 017737a0f38854aa56197612df6b22592ca4be18.
+- App version KT-099; PWA cache v68; оба SW идентичны.
+- Pages [#43848612261](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43848612261), Godot [#43848612223](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43848612223), Android [#43848612178](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43848612178) — все success для code SHA. Android artifact ID 14216481765, 3,831,829 bytes; не тестировался на устройстве.
+- Ручной visual QA, физическое устройство и performance profiling не проводились.
+- Продуктовое расхождение: первоначальный brief предполагал конвейер; текущий main заменил его норой. Не откатывать автоматически, но получить решение владельца до дальнейшей перестройки HUD.
+
+# KT-100 — защита отправки до завершения перелёта боксов
+
+- Дата: 16 ноября 2026; базовый code HEAD KT-099: 017737a0f38854aa56197612df6b22592ca4be18.
+- Добавлен source-contract тест в tests/dom-contract.test.js: слоты резервируются до анимации; Promise.all ожидает все перелёты бокса/связанной пары; только после снятия loadingSlots вызываются kickColony и settleColony.
+- Первый test commit cf1b5afe283cf47fb4d43b1dbe00cd100f8c356b имел ошибку в matcher и дал 91/92; исправление 5a645534ecb68e6a0667e6127a415d28b4cec597 заменило regex на точный split по kickColony().
+- Для SHA 5a645534ecb68e6a0667e6127a415d28b4cec597: Pages [#43851392070](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43851392070) — success, 92/92 tests, production build, artifact upload и deploy; Godot [#43851391110](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43851391110) — success. Android [#43851391164](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/43851391164) на момент записи ещё выполнял Build debug APK после успешных tests/build/Capacitor sync.
+- App version KT-099 и PWA cache v68 не менялись, поскольку runtime assets не изменялись.
+- Следующий шаг: подтвердить Android artifact для SHA 5a6455 и перепроверить все workflows для документационного HEAD.
