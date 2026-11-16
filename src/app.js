@@ -186,7 +186,6 @@ function renderSlots(){
    : `Отсек ${index+1}: свободен`);
   slot.style.setProperty("--box-color",box?COLORS[box.color].hex:"#d8e5d2");
   slot.className="slot"+(box?" filled":"")+(box?.status==="departing"?" departing":"")+(box?.status==="waiting-linked"?" linked-waiting":"")+(box?.special==="linked"?" linked-member":"")+(loadingSlots.has(index)?" loading":"")+((state.activeSlots?.includes(index))?" active":"");
-  const number=document.createElement("span");number.className="slot-number";number.textContent=String(index+1);slot.append(number);
   if(box){
    const stripe=document.createElement("span");stripe.className="slot-color";stripe.style.background=COLORS[box.color].hex;
    const count=document.createElement("strong");count.className="ant-count";count.textContent=box.status==="departing"?"…":box.ants.toLocaleString("ru-RU");
@@ -259,7 +258,6 @@ function renderChoices(){
   const preview=document.createElement("div");preview.className="queue-preview";preview.setAttribute("aria-label","Следующие боксы в колонке");
   for(let row=1;row<TRAY_SIZE;row++){const nextIndex=state.tray[row][col],nextBox=nextIndex===null||nextIndex===undefined?null:getIncoming(state.levelId)[nextIndex];
    const peek=document.createElement("span");peek.className="queue-peek"+(nextBox?"":" empty");peek.dataset.queueStep=String(row);if(nextIndex!==null&&nextIndex!==undefined)peek.dataset.queueKey=`${col}:${nextIndex}`;
-   const order=document.createElement("span");order.className="peek-order";order.textContent=String(row);peek.append(order);
    const sealedPreview=nextBox&&isLockedBox(state,nextIndex),revealPreview=nextBox&&state.lockedBoxOpen&&!state.lockedBoxRevealPlayed&&nextIndex===8;
    if(revealPreview){peek.classList.add("sealed-reveal");state.lockedBoxRevealPlayed=true;}
    if(sealedPreview){
@@ -274,10 +272,10 @@ function renderChoices(){
     const colorName=document.createElement("small");colorName.className="peek-color-name";colorName.textContent=color.short;
     const count=document.createElement("small");count.className="peek-count";count.textContent=String(nextBox.ants)+" 🐜";
     meta.append(colorName,count);peek.append(miniCrate,meta);
-    peek.title=`Следующий бокс №${row}: ${nextBox.ants} муравьёв`;peek.setAttribute("aria-label",`Бокс в очереди номер ${row}, цвет ${color.name}, ${nextBox.ants} муравьёв`);
+    peek.title=`Бокс в резерве: ${color.name}, ${nextBox.ants} муравьёв`;peek.setAttribute("aria-label",`Бокс в резервной очереди, цвет ${color.name}, ${nextBox.ants} муравьёв`);
    }else{
     const empty=document.createElement("span");empty.className="peek-empty-mark";empty.textContent="—";peek.append(empty);
-    peek.title=`Позиция ${row}: очередь закончилась`;peek.setAttribute("aria-label",peek.title);
+    peek.title="Пустая позиция резервной очереди";peek.setAttribute("aria-label",peek.title);
    }
    preview.append(peek);
   }
