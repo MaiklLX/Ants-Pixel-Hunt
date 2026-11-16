@@ -444,6 +444,7 @@ function renderAntFrame(timestamp){
    }
   }
   if(phase.finished){
+   if(ant.picked)deliveryEffects.push({x:ant.nestPoint.x,y:ant.nestPoint.y,startedAt:clockTime});
    activeAnts.delete(workerId);
    ant.resolve();
    continue;
@@ -452,8 +453,8 @@ function renderAntFrame(timestamp){
   const pose=getTrailPose(trail,phase.progress,ant.pose);
   drawAnt(antCtx,pose,ant.move.color,phase.returningNow,workerId,pose.angle,clockTime);
  }
- drawPickupEffects(clockTime);
- if(activeAnts.size||pickupEffects.length)antFrame=requestAnimationFrame(renderAntFrame);
+ drawPickupEffects(clockTime);drawDeliveryEffects(clockTime);
+ if(activeAnts.size||pickupEffects.length||deliveryEffects.length)antFrame=requestAnimationFrame(renderAntFrame);
  else antFrame=0;
 }
 function animateAntTrip(move,index,onPickup=()=>{},onLaunch=()=>{}){
