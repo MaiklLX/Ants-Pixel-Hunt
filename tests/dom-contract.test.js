@@ -619,7 +619,7 @@ test("KT-123 makes the campaign map scrollable and adds chapter shortcuts plus a
  const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
  const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
  const visual=styles.slice(styles.indexOf("KT-123 —"));
- assert.match(html,/app-version" content="KT-123"/);
+ assert.match(html,/app-version" content="KT-124"/);
  assert.match(html,/id="map-chapter-nav"[^>]*aria-label="Переход к главе кампании"/);
  assert.match(visual,/.map-overlay{[\s\S]*?overflow-y:auto[\s\S]*?touch-action:pan-y/);
  assert.match(visual,/.map-card{[\s\S]*?max-height:none[\s\S]*?overflow:visible/);
@@ -647,4 +647,16 @@ test("KT-124 renders campaign levels as an accessible winding forest trail",asyn
  assert.match(visual,/\.map-trail \.campaign-level:nth-child\(even\)/);
  assert.match(visual,/\.map-trail \.campaign-level.next-stop/);
  assert.match(visual,/@media\(prefers-reduced-motion:reduce\)/);
+});
+
+
+test("KT-125 adds quiet woodland details and keeps chapter shortcut state accessible",async()=>{
+ const app=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
+ const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
+ const visual=styles.slice(styles.indexOf("KT-125 —"));
+ assert.match(app,/jump\.setAttribute\("aria-current","location"\)/);
+ assert.match(app,/chapterNav\.querySelectorAll\("\[aria-current\]"\)/);
+ assert.match(visual,/\.map-trail \.campaign-level:not\(\.next-stop\)::before/);
+ assert.match(visual,/trail-firefly/);
+ assert.match(visual,/prefers-reduced-motion:reduce/);
 });
