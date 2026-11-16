@@ -297,3 +297,22 @@ test("KT-099 replaces the conveyor with a clearly labelled anthill return entran
  assert.ok(styles.includes("KT-099 — the conveyor becomes the shared return entrance to the anthill"));
  assert.ok(styles.includes(".nest-mouth"));
 });
+
+
+test("KT-100 waits for all crate-loading animations before dispatching ants", () => {
+ const start=app.indexOf("async function onChoose(column){");
+ const end=app.indexOf("\nfunction updateMainMenu()",start);
+ assert.ok(start>=0&&end>start,"onChoose must remain a distinct async flow");
+ const choose=app.slice(start,end);
+ const lock=choose.indexOf("for(const flight of flights)loadingSlots.add(flight.slot)");
+ const wait=choose.indexOf("await Promise.all(flights.map(flight=>animateBoxLoading");
+ const unlock=choose.indexOf("for(const flight of flights)loadingSlots.delete(flight.slot)");
+ const dispatch=choose.indexOf("kickColony()");
+ const settle=choose.indexOf("settleColony()",dispatch);
+ assert.ok(lock>=0,"reserve every destination slot before animation starts");
+ assert.ok(wait>lock,"wait for the complete set of crate flights");
+ assert.ok(unlock>wait,"keep slots reserved until every flight has settled");
+ assert.ok(dispatch>unlock,"ants must not leave before crates reach their slots");
+ assert.ok(settle>dispatch,"evaluate win/loss only after dispatch resumes");
+ assert.equal((choose.match(/kickColony\\(\\)/g)||[]).length,1,"dispatch resumes exactly once from the loading cleanup path");
+});
