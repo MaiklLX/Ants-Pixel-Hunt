@@ -489,7 +489,7 @@ test("KT-115 removes nested queue cards and renders reserve entries as miniature
  const app=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
  const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
  const visual=styles.slice(styles.indexOf("KT-115 —"));
- assert.match(html,/app-version" content="KT-119"/);
+ assert.match(html,/app-version" content="KT-120"/);
  assert.match(visual,/\.queue-lane\s*\{[\s\S]*?border:0!important/);
  assert.match(visual,/\.choice-card,\.choice-card\.locked,\.choice-card\.empty-box\s*\{[\s\S]*?background:transparent!important/);
  assert.match(visual,/\.queue-peek \.peek-crate::before/);
@@ -526,7 +526,7 @@ test("KT-117 makes ant counts prominent and consistently legible across active s
  assert.match(visual,/\.queue-peek \.peek-count\{[\s\S]*?font-variant-numeric:tabular-nums/);
  assert.match(visual,/\.section-line #queue-count\{[\s\S]*?border-radius:999px/);
  assert.match(visual,/@media\(max-width:599px\)/);
- assert.match(html,/app-version" content="KT-119"/);
+ assert.match(html,/app-version" content="KT-120"/);
 });
 
 
@@ -549,7 +549,7 @@ test("KT-118 gives queue handoff a slower cascading motion and respects reduced 
 test("KT-119 exposes the current meadow as the main menu quick-play action",async()=>{
  const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
  const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
- assert.match(html,/app-version" content="KT-119"/);
+ assert.match(html,/app-version" content="KT-120"/);
  assert.match(html,/id="menu-current-level" aria-label="Начать текущую полянку"/);
  assert.doesNotMatch(html,/id="menu-current-level" hidden/);
  assert.match(html,/id="map-open"/);
