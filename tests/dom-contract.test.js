@@ -415,7 +415,7 @@ test("KT-109 keeps the arena on the dark woodland palette and refreshes the PWA 
   const worker = await readFile(new URL("../public/service-worker.js", import.meta.url), "utf8");
   assert.match(styles, /KT-109 — polished woodland arena/);
   assert.match(styles, /\.choice-card\.selectable:not\(:disabled\)/);
-  assert.match(worker, /ants-pixel-hunt-shell-v\\d+-kt\\d+/);
+  assert.match(worker, /ants-pixel-hunt-shell-v\d+-kt\d+/);
 });
 
 
