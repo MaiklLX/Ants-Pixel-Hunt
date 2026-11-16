@@ -2753,7 +2753,7 @@ button:not(:disabled):active{filter:brightness(.96)}
 }
 
 /* KT-099 — the conveyor becomes the shared return entrance to the anthill. */
-.nest-return-section{order:2;display:flex;justify-content:center;align-items:center;min-height:42px;margin-top:-5px;margin-bottom:-1px}
+.nest-return-section{order:1;display:flex;justify-content:center;align-items:center;min-height:42px;margin-top:-5px;margin-bottom:-1px}
 .nest-entrance{position:relative;width:112px;height:39px;display:flex;align-items:flex-end;justify-content:center;isolation:isolate}
 .nest-mouth{position:absolute;z-index:1;left:50%;bottom:3px;transform:translateX(-50%);width:43px;height:22px;border-radius:50% 50% 45% 45%;background:radial-gradient(ellipse at 50% 28%,#17251d 0 42%,#0b1711 75%);box-shadow:0 3px 0 #536746,0 0 0 3px #263d2d,0 0 14px #b3a16a35}
 .nest-rim{position:absolute;z-index:2;left:50%;bottom:18px;transform:translateX(-50%);width:63px;height:13px;border-radius:50%;border-top:4px solid #82935c;border-bottom:2px solid #3c583c;filter:drop-shadow(0 2px 1px #0a140f)}
