@@ -951,3 +951,12 @@ KT-097: создать одну авторскую седьмую полянку
 - Added dark rounded count badges with tabular numerals, subtle warm outlines, and a small ant glyph for active slots.
 - Strengthened the remaining-queue indicator into a compact badge.
 - Added responsive rules for narrow phones and short screens. No gameplay, layout geometry, animation timing, or ant speed changes.
+
+
+# KT-118 — мягкая каскадная смена боксов
+- Дата: 17 ноября 2026; база: KT-117, `5a82113099a7a7bbdfc4eeb51f2345569ec38d85`.
+- Увеличена длительность FLIP-перехода очереди с 460 до 760 ms; easing делает старт и остановку менее резкими.
+- Боксы второго ряда получают дополнительную задержку 55 ms относительно первого сдвигающегося ряда, создавая последовательную передачу позиций внутри каждой колонки.
+- Сохранены геометрия очереди, размеры и стили ящиков, игровые правила и все тайминги движения муравьёв. Системная настройка reduced motion продолжает отключать переходы.
+- App version KT-118; Service Worker cache v86 в обоих файлах. Добавлен DOM-contract тест.
+- CI/Pages deploy ожидаются; физический телефон и ручной visual QA не заявляются.
