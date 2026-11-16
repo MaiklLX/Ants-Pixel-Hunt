@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {COLORS,createGame,LEVELS,getLevel,getIncoming,createArtworkBoard,resolveAll,INITIAL_BOARD,INCOMING,isAccessible,getExposedPixels,findAccessiblePixel,findAccessiblePixels,findAntWave,chooseTopColumn,findNextMove,applyAntMove,applyAntPickup,completeBoxDeparture,freeSlotCount,isDefeat,SIZE,GRID_SIZE,BLOCK_SIZE,BOX_CAPACITY,SLOT_COUNT,TRAY_SIZE,canChoose,restoreGame,serializeGame,countOutboundBySlot,countQueuedBySlot,countSlotWorkers,canDepartSlot,isLockedBox,getLinkedPair,LOCKED_BOX_INDEX,LOCKED_BOX_COLUMN} from "../src/game.js";
+import {COLORS,createGame,LEVELS,getLevel,getIncoming,createArtworkBoard,resolveAll,INITIAL_BOARD,INCOMING,isAccessible,getExposedPixels,findAccessiblePixel,findAccessiblePixels,findAntWave,chooseTopColumn,findNextMove,applyAntMove,applyAntPickup,completeBoxDeparture,freeSlotCount,isDefeat,SIZE,GRID_SIZE,BLOCK_SIZE,BOX_CAPACITY,SLOT_COUNT,TRAY_SIZE,canChoose,restoreGame,serializeGame,countOutboundBySlot,countQueuedBySlot,countSlotWorkers,canDepartSlot,isLockedBox,getLinkedPair,normalizeLinkedTray,LOCKED_BOX_INDEX,LOCKED_BOX_COLUMN} from "../src/game.js";
 const smallBoard=()=>Array.from({length:5},()=>Array(5).fill("green"));
 
 test("the authored frog is built from large collectible blocks on a 350x350 display grid",()=>{
@@ -434,4 +434,36 @@ test("only ants still waiting to leave a box count against its undispatched supp
  const queued=countQueuedBySlot(workers);
  assert.equal(queued.get(2),1);assert.equal(queued.get(1),1);
  assert.equal(countOutboundBySlot(workers).get(2),1);
+});
+
+
+test("linked pair is promoted into two different top-row lanes when either member reaches the top",()=>{
+ const s=createGame(),pair=getLinkedPair(s.levelId);
+ s.tray=Array.from({length:TRAY_SIZE},(_,r)=>Array.from({length:TRAY_SIZE},(_,c)=>r*TRAY_SIZE+c));
+ s.tray[0][1]=pair[0];s.tray[2][1]=pair[1];
+ const displaced=s.tray[0][0],moved=normalizeLinkedTray(s);
+ assert.equal(moved,true);
+ const first=s.tray[0].indexOf(pair[0]),second=s.tray[0].indexOf(pair[1]);
+ assert.ok(first>=0&&second>=0);assert.notEqual(first,second);
+ assert.equal(s.tray[2][1],displaced,"the displaced crate stays in the queue instead of being lost");
+});
+test("linked pair stays side-by-side when it reaches the top row",()=>{
+ const s=createGame(),pair=getLinkedPair(s.levelId);
+ s.tray[0][0]=pair[0];s.tray[2][0]=pair[1];
+ assert.equal(normalizeLinkedTray(s),true);
+ assert.ok(s.tray[0].includes(pair[0])&&s.tray[0].includes(pair[1]));
+ assert.notEqual(s.tray[0].indexOf(pair[0]),s.tray[0].indexOf(pair[1]));
+});
+test("a zero-ant linked box is removed if its partner is already absent",()=>{
+ const s=createGame(),pair=getLinkedPair(s.levelId);
+ s.slots[0]={...getIncoming(s.levelId)[pair[0]],pairId:"orphan-pair",ants:0,status:"waiting-linked"};
+ assert.equal(completeBoxDeparture(s,0),true);
+ assert.equal(s.slots[0],null);assert.equal(s.sortedBoxes,1);
+});
+test("two empty linked boxes are removed together even if the partner status was stale",()=>{
+ const s=createGame(),pair=getLinkedPair(s.levelId);
+ s.slots[0]={...getIncoming(s.levelId)[pair[0]],pairId:"stale-pair",ants:0,status:"waiting-linked"};
+ s.slots[1]={...getIncoming(s.levelId)[pair[1]],pairId:"stale-pair",ants:0,status:"waiting-linked"};
+ assert.equal(completeBoxDeparture(s,0),true);
+ assert.equal(s.slots[0],null);assert.equal(s.slots[1],null);assert.equal(s.sortedBoxes,2);
 });
