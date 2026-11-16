@@ -593,3 +593,10 @@
 - Стабильный ключ сохраняет идентичность бокса между рендерами. При выборе верхнего бокса оставшиеся элементы получают FLIP-переход по фактической разнице координат и плавно переезжают вверх.
 - Анимация не меняет механику выбора и отключается при системном reduced motion. Размеры адаптированы для мобильных экранов и низкой высоты.
 - App version KT-116; оба Service Worker cache используют v84. Добавлен DOM-contract тест. Скорость и правила муравьёв не менялись.
+
+
+## KT-117 — readable ant counters
+- Increased the visual hierarchy of all ant counts: filled start slots, the selectable top queue boxes, and the two preview rows.
+- Start-slot counts now use bold tabular numerals inside dark, color-accented capsules with a small ant marker; box and preview counts use matching capsules.
+- Queue remaining count is now a compact amber/forest badge.
+- Kept the woodland palette, queue geometry, box sizes, game rules, ant movement and timings unchanged. Responsive sizing and reduced-motion behavior are preserved.
