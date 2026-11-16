@@ -350,6 +350,26 @@ export function canChoose(state){
 export function isLockedBox(state,index){
  return index===LOCKED_BOX_INDEX&&!state.lockedBoxOpen;
 }
+export function normalizeLinkedTray(state){
+ if(!state?.tray)return false;
+ const pair=getLinkedPair(state.levelId);if(pair.length!==2)return false;
+ const locate=index=>{
+  for(let row=0;row<TRAY_SIZE;row++)for(let col=0;col<TRAY_SIZE;col++)if(state.tray[row][col]===index)return{row,col,index};
+  return null;
+ };
+ const first=locate(pair[0]),second=locate(pair[1]);
+ if(!first||!second)return false;
+ if(first.row!==0&&second.row!==0)return false;
+ if(first.row===0&&second.row===0)return first.col!==second.col;
+ const anchor=first.row===0?first:second;
+ const moving=first.row===0?second:first;
+ const targetCol=[0,1,2].find(col=>col!==anchor.col);
+ if(targetCol===undefined)return false;
+ const displaced=state.tray[0][targetCol];
+ state.tray[0][targetCol]=moving.index;
+ state.tray[moving.row][moving.col]=displaced;
+ return true;
+}
 export function chooseTopColumn(state,column){
  if(!canChoose(state)||!Number.isInteger(column)||column<0||column>=TRAY_SIZE)return false;
  const selectedIndex=state.tray[0][column],incoming=getIncoming(state.levelId);
@@ -368,7 +388,7 @@ export function chooseTopColumn(state,column){
   if(!partnerBox||partnerBox.special!=="linked"||partnerBox.pairId!==box.pairId)return false;
   const placements=[{slot:freeSlots[0],index:selectedIndex,crate:box},{slot:freeSlots[1],index:partnerIndex,crate:partnerBox}];
   for(const item of placements)state.slots[item.slot]={...item.crate,sourceIndex:item.index};
-  shiftColumn(column);shiftColumn(partnerColumn);state.pendingLinkedIndex=null;
+  shiftColumn(column);shiftColumn(partnerColumn);normalizeLinkedTray(state);state.pendingLinkedIndex=null;
   state.message="Связанная пара отправлена вместе — оба бокса заняли стартовые отсеки!";
   return true;
  }
@@ -380,7 +400,7 @@ export function chooseTopColumn(state,column){
   const openedFrom=[...new Set(state.lockProgressColumns||[])];if(!openedFrom.includes(column))openedFrom.push(column);
   state.lockProgressColumns=openedFrom;if(openedFrom.length>=2){state.lockedBoxOpen=true;state.message="Щёлк! Пломба снята — закрытый бокс открыт!";}
  }
- shiftColumn(column);state.pendingLinkedIndex=null;
+ shiftColumn(column);normalizeLinkedTray(state);state.pendingLinkedIndex=null;
  state.message=`${COLORS[box.color].name}: бокс отправлен в стартовый отсек ${freeSlot+1}`;
  return true;
 }
@@ -425,10 +445,13 @@ export function applyAntPickup(state,slot,target,color){
  return true;
 }
 export function completeBoxDeparture(state,slot){
- const box=state.slots[slot];if(!box||box.status!=="departing")return false;
+ const box=state.slots[slot];if(!box||box.ants>0)return false;
  if(box.pairId){
   const partnerSlot=state.slots.findIndex((other,index)=>index!==slot&&other?.pairId===box.pairId);
-  if(partnerSlot<0||state.slots[partnerSlot]?.status!=="departing")return false;
+  if(partnerSlot<0){state.slots[slot]=null;state.sortedBoxes=(state.sortedBoxes||0)+1;return true;}
+  const partner=state.slots[partnerSlot];
+  if(!partner||partner.ants>0)return false;
+  box.status="departing";partner.status="departing";
   state.slots[slot]=null;state.slots[partnerSlot]=null;state.sortedBoxes=(state.sortedBoxes||0)+2;
   return true;
  }
