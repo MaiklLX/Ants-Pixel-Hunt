@@ -443,3 +443,15 @@ test("KT-111 adds restrained deterministic forest-floor texture and restores it 
  assert.match(source,/for\(let y=0;y<SIZE;y\+\+\)for\(let x=0;x<SIZE;x\+\+\)drawBoardGroundCell\(x,y,cell\)/);
  assert.match(source,/drawBoardGroundCell\(target\.x,target\.y,cell\)/);
 });
+
+
+test("KT-112 gives the anthill entrance layered woodland materials without changing its layout", async()=>{
+ const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
+ const entrance=styles.slice(styles.indexOf("KT-112 — a more tactile"));
+ assert.match(entrance,/\.nest-entrance::before/);
+ assert.match(entrance,/\.nest-mouth::before/);
+ assert.match(entrance,/\.nest-mouth::after/);
+ assert.match(entrance,/\.nest-leaf::after/);
+ assert.match(entrance,/@media\(prefers-reduced-motion:reduce\)/);
+ assert.doesNotMatch(entrance,/\.nest-return-section\s*\{/);
+});
