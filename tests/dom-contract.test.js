@@ -432,3 +432,14 @@ test("KT-110 adds subtle ant body highlights and a clearly outlined carried pixe
   assert.match(app, /Three clearly separated, softly highlighted body segments/);
   assert.match(app, /ctx\.strokeRect\(-9\.5,-\.5,5\.8,5\.8\)/);
 });
+
+
+test("KT-111 adds restrained deterministic forest-floor texture and restores it after pickup", async()=>{
+ const source=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
+ const helper=source.slice(source.indexOf("function drawBoardGroundCell"),source.indexOf("function drawBoardTile"));
+ assert.match(helper,/seed=\(x\*374761393\+y\*668265263\)>>>0/);
+ assert.match(helper,/globalAlpha=\.12/);
+ assert.doesNotMatch(helper,/Math\.random/);
+ assert.match(source,/for\(let y=0;y<SIZE;y\+\+\)for\(let x=0;x<SIZE;x\+\+\)drawBoardGroundCell\(x,y,cell\)/);
+ assert.match(source,/drawBoardGroundCell\(target\.x,target\.y,cell\)/);
+});
