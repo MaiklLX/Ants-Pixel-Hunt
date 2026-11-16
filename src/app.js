@@ -502,32 +502,6 @@ async function animateBoxLoading(source,slot,color){
   requestAnimationFrame(frame);
  };requestAnimationFrame(frame);});
 }
-async function animateBoxDepartures(slotIndices,simultaneous=false){
- const shellRect=shell.getBoundingClientRect(),dpr=Math.min(1.5,window.devicePixelRatio||1);
- const layer=document.createElement("canvas");layer.className="flight-layer";
- layer.width=Math.max(1,Math.round(shellRect.width*dpr));layer.height=Math.max(1,Math.round(shellRect.height*dpr));
- layer.style.width=shellRect.width+"px";layer.style.height=shellRect.height+"px";shell.append(layer);
- const ctx=layer.getContext("2d");ctx.setTransform(dpr,0,0,dpr,0,0);
- const starts=slotIndices.map(slot=>({slot,start:slotCenter(slot),color:state.slots[slot]?.color||"yellow"}));
- const belt=pointFor(conveyorEl),startTime=animationClock.now(),duration=1900;let lastFrame=0;const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
- return new Promise(resolve=>{
-  const frame=timestamp=>{
-   if(timestamp-lastFrame<1000/30){requestAnimationFrame(frame);return;}lastFrame=timestamp;
-   const elapsed=animationClock.fromFrame(timestamp)-startTime;ctx.clearRect(0,0,shellRect.width,shellRect.height);
-   let finished=0;
-   starts.forEach((item,index)=>{
-    const delay=simultaneous?0:index*170,t=Math.max(0,Math.min(1,(elapsed-delay)/duration));
-    if(elapsed<delay){finished++;return;}if(t>=1){finished++;return;}
-    const lift=quadPoint(item.start,{x:item.start.x-24,y:(item.start.y+belt.y)/2},{x:item.start.x,y:belt.y},ease(Math.min(1,t*2.1)));
-    const progress=ease(Math.max(0,(t-.38)/.62));
-    const travelX=lift.x+(shellRect.width+35-lift.x)*progress,travelY=lift.y+(belt.y-lift.y)*progress,rock=Math.sin(progress*Math.PI*5+index*.7)*.018*(1-progress);drawTransportBox(ctx,{x:travelX,y:travelY},item.color,1+Math.sin(progress*Math.PI)*.035,rock);
-   });
-   if(finished===starts.length){layer.remove();resolve();return;}
-   requestAnimationFrame(frame);
-  };
-  requestAnimationFrame(frame);
- });
-}
 async function runSlotWorker(move,workerId){
  const {slot,target,color}=move,key=target.x+","+target.y;
  try{
