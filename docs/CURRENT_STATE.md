@@ -576,3 +576,13 @@
 ### KT-108 publication correction
 - The first Pages run for KT-108 failed at a stale test assertion expecting app-version KT-107; deploy was skipped. The code was not published in that run.
 - Follow-up updates the stale assertion and adds a direct gameplay-state regression for freeing a compartment and immediately enabling queue selection. Awaiting successful Pages CI/deploy on the new SHA.
+
+
+### KT-115 — настоящие боксы вместо карточек в резервной очереди
+- Убраны рамки, скруглённые подложки и тени у трёх колонок очереди: колонки больше не выглядят отдельными карточками.
+- У основного выбираемого бокса убрана внешняя карточная оболочка; объём, цвет и крышка самого деревянного ящика остаются главным визуальным объектом.
+- Следующие боксы в каждой колонке получили более выраженный миниатюрный корпус с крышкой, центральной рейкой, цветными стенками и нижней тенью. Номер и количество муравьёв оставлены вторичной подписью.
+- Сохранены три колонки, порядок очереди, размеры касаний, выбор верхнего бокса, связанная пара и закрытый ящик.
+- Механика, скорости и анимация муравьёв не менялись. App version KT-115; оба Service Worker используют cache v83.
+- Добавлен DOM-contract тест визуального контракта KT-115.
+- Изменения опубликованы после успешных Pages, Android debug APK и Godot checks; ручной visual QA и проверка на физическом телефоне не заявляются.

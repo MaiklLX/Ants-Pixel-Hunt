@@ -3144,3 +3144,111 @@ button:not(:disabled):active{filter:brightness(.96)}
 }
 .nest-leaf,.nest-entrance-label{display:none!important}
 @media(prefers-reduced-motion:reduce){.nest-mouth{animation:none!important}}
+
+
+/* KT-115 — let every reserve box read as a small physical crate, not a card. */
+.choices{column-gap:clamp(7px,1.3vw,12px)}
+.queue-lane{
+ padding:0!important;
+ border:0!important;
+ border-radius:0!important;
+ background:transparent!important;
+ box-shadow:none!important;
+ gap:5px;
+}
+.choice-card,.choice-card.locked,.choice-card.empty-box{
+ min-height:clamp(66px,8.2dvh,82px);
+ padding:5px 2px 4px;
+ border:0!important;
+ border-radius:4px!important;
+ background:transparent!important;
+ box-shadow:none!important;
+}
+.choice-card.selectable::before,.choice-card.selectable::after{display:none!important}
+.choice-card .choice-crate{
+ filter:drop-shadow(0 3px 2px #07130d88);
+}
+.choice-card.linked-box{box-shadow:none!important}
+.choice-card.linked-box::after{right:0;bottom:1px}
+.choice-card.sealed-box{
+ border:0!important;
+ border-radius:4px!important;
+ background:transparent!important;
+ box-shadow:none!important;
+}
+.choice-card.sealed-box .sealed-crate{
+ filter:drop-shadow(0 3px 2px #07130d99);
+}
+.choice-card:focus-visible{outline:2px solid #d7bd7d;outline-offset:1px}
+.queue-preview{
+ padding:1px 0 0!important;
+ gap:3px;
+}
+.queue-peek:not(.empty){
+ height:clamp(24px,3.2dvh,30px);
+ padding:2px 0;
+ gap:4px;
+ border:0!important;
+ border-radius:0!important;
+ background:transparent!important;
+ box-shadow:none!important;
+}
+.queue-peek .peek-order{
+ width:10px;height:12px;flex:0 0 10px;
+ border:0!important;border-radius:0!important;
+ background:transparent!important;
+ color:#9eaf98!important;
+ font-size:7px;font-weight:800;
+}
+.queue-peek .peek-crate{
+ flex:0 0 23px;width:23px;height:16px;
+ border:1px solid color-mix(in srgb,var(--peek-color) 78%,#d9c58a);
+ border-radius:3px 3px 4px 4px;
+ background:linear-gradient(180deg,
+  color-mix(in srgb,var(--peek-color) 94%,#fff) 0%,
+  var(--peek-color) 48%,
+  color-mix(in srgb,var(--peek-color) 65%,#17271f) 100%);
+ box-shadow:inset 0 1px 2px #ffffff66,inset 0 -2px 2px #101b1a66,0 2px 0 #14241b;
+}
+.queue-peek .peek-crate::before{
+ left:-2px;right:-2px;top:-4px;height:4px;
+ border:1px solid color-mix(in srgb,var(--peek-color) 74%,#e1d09b);
+ border-radius:3px 3px 2px 2px;
+ background:linear-gradient(180deg,#f5e6b9aa,color-mix(in srgb,var(--peek-color) 78%,#6b7955));
+ box-shadow:0 1px 1px #07130d88;
+}
+.queue-peek .peek-crate::after{
+ content:"";position:absolute;left:50%;top:2px;bottom:2px;width:2px;
+ transform:translateX(-50%);background:#ffffff42;box-shadow:-7px 0 #17271f20,7px 0 #17271f20;
+}
+.queue-peek .peek-meta{flex-direction:column;align-items:flex-start;gap:1px;line-height:1}
+.queue-peek .peek-color-name{font-size:6px;letter-spacing:.35px;color:#d8c58e}
+.queue-peek .peek-count{font-size:8px;line-height:1;color:#e0e8d4}
+.queue-peek.linked-peek::after{right:0;font-size:9px}
+.queue-peek.sealed-peek{
+ border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;
+}
+.queue-peek.sealed-peek .peek-lock{
+ width:23px;height:16px;flex:0 0 23px;border-radius:3px;
+ background:repeating-linear-gradient(0deg,#9b7449 0 4px,#684a30 4px 7px);
+ border:1px solid #c49c69;color:#f0d8a6;font-size:8px;
+ box-shadow:inset 0 1px #f7dfb455,0 2px 0 #382b20;
+}
+.queue-peek.empty{height:12px;border:0!important;background:transparent!important;box-shadow:none!important}
+.queue-peek.empty .peek-order{color:#637a65!important}
+@media(max-width:599px){
+ .queue-lane{gap:4px}
+ .choice-card,.choice-card.locked,.choice-card.empty-box{min-height:clamp(58px,7.6dvh,74px);padding:4px 1px 3px}
+ .queue-peek:not(.empty){height:clamp(23px,3dvh,27px);gap:3px}
+ .queue-peek .peek-crate{width:19px;height:14px;flex-basis:19px}
+ .queue-peek .peek-color-name{font-size:5.5px}
+ .queue-peek .peek-count{font-size:7px}
+ .queue-peek .peek-order{font-size:6px}
+}
+@media(max-height:680px){
+ .choice-card,.choice-card.locked,.choice-card.empty-box{min-height:clamp(49px,6.8dvh,62px)}
+ .queue-peek:not(.empty){height:clamp(20px,2.8dvh,24px)}
+}
+@media(prefers-reduced-motion:reduce){
+ .choice-card,.queue-peek .peek-crate{transition:none!important}
+}

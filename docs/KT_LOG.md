@@ -926,3 +926,13 @@ KT-097: создать одну авторскую седьмую полянку
 - KT-108 browser deployment was blocked because a legacy DOM-contract test still asserted app-version KT-107. The source fix itself and the new queue-refresh contract passed; the stale assertion caused the Pages test job to fail and skipped deployment.
 - Updated the legacy assertion to KT-108 and added a state-level regression verifying that after an ordinary compartment is physically freed, `freeSlotCount` and `canChoose` immediately permit another top-row box.
 - The release is not considered published until Pages build, tests, and deploy all pass on the same main SHA.
+
+
+# KT-115 — боксы без карточных рамок
+- Дата: 17 ноября 2026; база: KT-114, `f05c79a45e6dddf24ebe69afc41e9478ef86c2e9`.
+- Резервная очередь очищена от вложенных карточных контейнеров: убраны рамки, фоны и тени у колонок и у внешних кнопок-боксов.
+- Следующие элементы очереди теперь читаются как отдельные миниатюрные ящики: цветной корпус, отдельная крышка, центральная рейка и собственная нижняя тень. Номер позиции и содержимое не конкурируют с изображением.
+- Основной выбираемый бокс сохраняет свою крупную физическую форму; связанная пара и запечатанный ящик сохраняют специальные обозначения.
+- Сетка, три колонки, порядок очереди, механика выбора, мобильные размеры и скорость муравьёв не менялись.
+- App version KT-115; Service Worker cache v83 в обоих файлах.
+- Добавлен регрессионный DOM-contract тест на отсутствие карточных рамок и наличие миниатюрных ящиков.

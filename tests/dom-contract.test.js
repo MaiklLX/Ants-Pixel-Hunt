@@ -482,3 +482,18 @@ test("KT-114 presents a simple readable burrow entrance without an overlapping c
  assert.match(entrance,/.nest-entrance::before/);
  assert.match(entrance,/nest-entrance-label\{display:none!important\}/);
 });
+
+
+test("KT-115 removes nested queue cards and renders reserve entries as miniature crates",async()=>{
+ const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
+ const app=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
+ const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
+ const visual=styles.slice(styles.indexOf("KT-115 —"));
+ assert.match(html,/app-version" content="KT-115"/);
+ assert.match(visual,/\.queue-lane\s*\{[\s\S]*?border:0!important/);
+ assert.match(visual,/\.choice-card,\.choice-card\.locked,\.choice-card\.empty-box\s*\{[\s\S]*?background:transparent!important/);
+ assert.match(visual,/\.queue-peek \.peek-crate::before/);
+ assert.match(visual,/\.queue-peek \.peek-crate::after/);
+ assert.match(app,/miniCrate\.className="peek-crate"/);
+ assert.match(app,/className="choice-crate"/);
+});
