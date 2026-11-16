@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {createPausableClock,getAntLaunchDelay,getAntQueueDelay,getAntTripFrame,getTrailPose} from "../src/ant-animation.js";
+import {createPausableClock,getAntLaunchDelay,getAntQueueDelay,getAntTripFrame,getTrailPose,getAntTravelDurations} from "../src/ant-animation.js";
 
 test("ant trip waits for its staggered launch without starting motion early",()=>{
  assert.deepEqual(getAntTripFrame(120,150,2000,1800),{
@@ -163,4 +163,14 @@ test("animation clock accepts only the supported speed presets",()=>{
  let now=0;const clock=createPausableClock(()=>now);
  clock.setSpeed(3);assert.equal(clock.getSpeed(),1);
  clock.setSpeed(4);assert.equal(clock.getSpeed(),4);
+});
+
+
+test("ant journeys use a noticeably slower relaxed baseline in both directions",()=>{
+ const short=getAntTravelDurations(0,0);
+ assert.deepEqual(short,{outbound:5200,returning:4800});
+ const typical=getAntTravelDurations(1000,1000);
+ assert.deepEqual(typical,{outbound:6450,returning:5950});
+ const long=getAntTravelDurations(2400,1800);
+ assert.deepEqual(long,{outbound:8200,returning:6870});
 });
