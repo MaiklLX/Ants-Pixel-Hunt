@@ -276,14 +276,19 @@ function createAntSprite(color,carrying,gait){
  const key=color+":"+Number(carrying)+":"+gait;
  if(antSpriteCache.has(key))return antSpriteCache.get(key);
  const sprite=document.createElement("canvas");sprite.width=28;sprite.height=24;
- const ctx=sprite.getContext("2d"),step=[-1.2,0,1.2,0][gait];
+ const ctx=sprite.getContext("2d"),gaitPhase=gait*Math.PI/4;
  const body=COLORS[color].hex;
  ctx.translate(13,12);ctx.lineCap="round";ctx.lineJoin="round";
- // Six legs are baked into four gait poses; the animation loop only blits sprites.
- ctx.strokeStyle="#24352c";ctx.lineWidth=1.15;
+ // Six legs alternate in a slow tripod rhythm instead of moving in lockstep.
+ ctx.strokeStyle="#24352c";ctx.lineWidth=1.05;
  for(const side of [-1,1])for(let leg=0;leg<3;leg++){
   const x=-1.2+leg*1.35,y=side*1.2;
-  ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+(leg-1)*1.5+step*side,y+side*(2.3+Math.abs(step)*.3));ctx.lineTo(x+(leg-1)*2.2+step*side,y+side*4.1);ctx.stroke();
+  const groupPhase=(side===-1?0:Math.PI)+(leg===1?Math.PI:0);
+  const swing=Math.sin(gaitPhase+groupPhase)*1.45;
+  const lift=Math.max(0,Math.cos(gaitPhase+groupPhase))*.42;
+  ctx.beginPath();ctx.moveTo(x,y);
+  ctx.lineTo(x+(leg-1)*1.5+swing*.38,y+side*(2.3-lift));
+  ctx.lineTo(x+(leg-1)*2.2+swing,y+side*(4.1-lift));ctx.stroke();
  }
  ctx.fillStyle="#26372d";ctx.beginPath();ctx.ellipse(-3.1,0,3.15,2.55,0,0,Math.PI*2);ctx.fill();
  ctx.fillStyle=body;ctx.beginPath();ctx.ellipse(-3.1,-.25,2.45,1.9,0,0,Math.PI*2);ctx.fill();
@@ -292,7 +297,8 @@ function createAntSprite(color,carrying,gait){
  ctx.fillStyle="#26372d";ctx.beginPath();ctx.arc(3.1,-.1,2.25,0,Math.PI*2);ctx.fill();
  ctx.fillStyle=body;ctx.beginPath();ctx.arc(3.1,-.35,1.7,0,Math.PI*2);ctx.fill();
  ctx.strokeStyle="#26372d";ctx.lineWidth=.85;
- ctx.beginPath();ctx.moveTo(3.7,-1.6);ctx.quadraticCurveTo(4.2,-4.3,6.3,-4.1);ctx.moveTo(2.4,-1.8);ctx.quadraticCurveTo(1.8,-4.4,3.4,-5);ctx.stroke();
+ const feeler=Math.sin(gaitPhase)*.42;
+ ctx.beginPath();ctx.moveTo(3.7,-1.6);ctx.quadraticCurveTo(4.2,-4.3+feeler,6.3,-4.1+feeler);ctx.moveTo(2.4,-1.8);ctx.quadraticCurveTo(1.8,-4.4-feeler,3.4,-5-feeler);ctx.stroke();
  ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(3.8,-.8,.72,0,Math.PI*2);ctx.fill();
  ctx.fillStyle="#24352c";ctx.beginPath();ctx.arc(4.02,-.8,.28,0,Math.PI*2);ctx.fill();
  ctx.fillStyle="#f3a29a";ctx.globalAlpha=.82;ctx.beginPath();ctx.arc(4.45,1.05,.62,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
@@ -306,11 +312,11 @@ function createAntSprite(color,carrying,gait){
  antSpriteCache.set(key,sprite);return sprite;
 }
 function drawAnt(ctx,point,color,carrying,index,direction=0,timestamp=animationClock.now()){
- const phase=timestamp*.008+index*1.73,gait=Math.floor(phase/1.7)%4;
- const bob=Math.sin(phase*1.7+index*.31)*.8;
+ const gaitState=getAntGaitFrame(timestamp,index),phase=gaitState.phase,gait=gaitState.frame;
+ const bob=Math.sin(phase*2+index*.31)*.34;
  ctx.save();ctx.translate(point.x,point.y+bob);
  ctx.fillStyle="#36523d26";ctx.beginPath();ctx.ellipse(0,7,8,2.6,0,0,Math.PI*2);ctx.fill();
- ctx.rotate(direction+Math.sin(phase*.31+index)*.055);
+ ctx.rotate(direction+Math.sin(phase*.5+index)*.018);
  ctx.drawImage(createAntSprite(color,carrying,gait),-13,-12);
  if(carrying){ctx.globalAlpha=.32+.18*Math.sin(phase*2);ctx.fillStyle=COLORS[color].hex;ctx.beginPath();ctx.arc(-8,-7,4.2,0,Math.PI*2);ctx.fill();}
  ctx.restore();
