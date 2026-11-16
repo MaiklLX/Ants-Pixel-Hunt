@@ -489,7 +489,7 @@ test("KT-115 removes nested queue cards and renders reserve entries as miniature
  const app=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
  const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
  const visual=styles.slice(styles.indexOf("KT-115 —"));
- assert.match(html,/app-version" content="KT-117"/);
+ assert.match(html,/app-version" content="KT-118"/);
  assert.match(visual,/\.queue-lane\s*\{[\s\S]*?border:0!important/);
  assert.match(visual,/\.choice-card,\.choice-card\.locked,\.choice-card\.empty-box\s*\{[\s\S]*?background:transparent!important/);
  assert.match(visual,/\.queue-peek \.peek-crate::before/);
@@ -511,7 +511,7 @@ test("KT-116 gives queue crates descending sizes and animates stable boxes upwar
  const visual=styles.slice(styles.indexOf("KT-116 —"));
  assert.match(visual,/\.queue-peek\[data-queue-step="1"\] \.peek-crate/);
  assert.match(visual,/\.queue-peek\[data-queue-step="2"\] \.peek-crate/);
- assert.match(visual,/transition:transform 460ms/);
+ assert.match(visual,/transition:transform 760ms/);
  assert.match(visual,/@media\(prefers-reduced-motion:reduce\)/);
 });
 
@@ -526,5 +526,21 @@ test("KT-117 makes ant counts prominent and consistently legible across active s
  assert.match(visual,/\.queue-peek \.peek-count\{[\s\S]*?font-variant-numeric:tabular-nums/);
  assert.match(visual,/\.section-line #queue-count\{[\s\S]*?border-radius:999px/);
  assert.match(visual,/@media\(max-width:599px\)/);
- assert.match(html,/app-version" content="KT-117"/);
+ assert.match(html,/app-version" content="KT-118"/);
+});
+
+
+test("KT-118 gives queue handoff a slower cascading motion and respects reduced motion",async()=>{
+ const app=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
+ const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
+ const source=app.slice(app.indexOf("function captureQueuePositions"),app.indexOf("function render(){"));
+ assert.match(source,/step:Number\(element\.dataset\.queueStep\|\|0\)/);
+ assert.match(source,/previous\.step-1\)\*55/);
+ assert.match(source,/transitionDelay=delay\+"ms"/);
+ assert.match(source,/transform 760ms cubic-bezier\(\.22,\.72,\.18,1\)/);
+ const visual=styles.slice(styles.indexOf("KT-118 —"));
+ assert.match(visual,/transition:transform 760ms cubic-bezier\(\.22,\.72,\.18,1\)/);
+ assert.match(visual,/will-change:transform/);
+ assert.match(visual,/@media\(prefers-reduced-motion:reduce\)/);
+ assert.match(visual,/transition:none!important/);
 });
