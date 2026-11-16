@@ -604,7 +604,7 @@ async function onChoose(column){
  if(flights.some(flight=>!flight)||!chooseTopColumn(state,column))return;
  for(const flight of flights)loadingSlots.add(flight.slot);
  state.message=placements.length===2?"Связанная пара направляется вместе в два стартовых отсека":"Бокс направляется прямо в стартовый отсек "+(freeSlots[0]+1);
- render();kickColony();
+ render();
  try{await Promise.all(flights.map(flight=>animateBoxLoading(flight.source,slotCenter(flight.slot),flight.color)));}
  finally{
   for(const flight of flights)loadingSlots.delete(flight.slot);renderSlots();
