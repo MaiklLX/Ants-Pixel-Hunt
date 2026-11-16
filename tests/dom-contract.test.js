@@ -346,7 +346,7 @@ test("KT-104 draws a restrained delivery ripple at the anthill without changing 
   assert.match(app, /nestPoint:nest/);
   assert.match(app, /ant\.onPickup\(\);ant\.delivered=true/);
   assert.match(app, /#b9a56c/);
-  assert.match(html, /app-version" content="KT-\\d+"/);
+  assert.match(html, /app-version" content="KT-[0-9]+"/);
 });
 
 
