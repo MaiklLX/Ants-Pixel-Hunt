@@ -80,7 +80,7 @@ function renderMap(){
   const chapterTrack=document.createElement("div");chapterTrack.className="map-chapter-track";chapterTrack.setAttribute("aria-label","Прогресс главы: "+chapterDone+" из "+chapter.levels.length);
   const chapterFill=document.createElement("span");chapterFill.style.width=(chapterDone/chapter.levels.length*100)+"%";chapterTrack.append(chapterFill);
   section.append(heading,chapterTrack);
-  const grid=document.createElement("div");grid.className="campaign-levels map-levels";
+  const grid=document.createElement("div");grid.className="campaign-levels map-levels map-trail";
   for(const item of chapter.levels){
    const unlocked=isLevelUnlocked(item),completed=done.has(item.id),button=document.createElement("button");button.type="button";
    const isNext=nextPlayable?.id===item.id;
