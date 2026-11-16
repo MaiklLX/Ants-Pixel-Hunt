@@ -3828,6 +3828,7 @@ button:not(:disabled):active{filter:brightness(.96)}
 
 
 /* KT-123 — campaign map becomes a scrollable journey with chapter shortcuts and a clear next stop. */
+.map-overlay[hidden]{display:none!important}
 .map-overlay{
  display:block!important;
  overflow-x:hidden;
