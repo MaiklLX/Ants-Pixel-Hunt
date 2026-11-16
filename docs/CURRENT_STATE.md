@@ -570,3 +570,8 @@
 - После подбора блока `kickColony` может отправить следующих муравьёв, не дожидаясь завершения обратного пути предыдущих. Это ускоряет опустошение стартовых боксов и освобождение сектора.
 - Скорость путешествия, походка и интервал выпуска 340 ms не менялись.
 - App version KT-107; PWA shell cache v75 в обоих Service Worker. CI запускается.
+
+
+### KT-108 publication correction
+- The first Pages run for KT-108 failed at a stale test assertion expecting app-version KT-107; deploy was skipped. The code was not published in that run.
+- Follow-up updates the stale assertion and adds a direct gameplay-state regression for freeing a compartment and immediately enabling queue selection. Awaiting successful Pages CI/deploy on the new SHA.
