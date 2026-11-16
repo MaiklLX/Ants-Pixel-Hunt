@@ -385,7 +385,7 @@ test("KT-105 renders fully colored supply crates, visible chain hardware and a b
  assert.match(styles,/\.choice-card \.choice-crate \.sealed-plank\{/);
  assert.match(styles,/\.choice-card\.linked-box::after/);
  assert.match(styles,/@keyframes queue-crate-drop/);
- assert.match(html,/app-version" content="KT-107"/);
+ assert.match(html,/app-version" content="KT-108"/);
 });
 
 test("KT-108 immediately refreshes queue choices when a starting slot is physically freed",()=>{
@@ -394,4 +394,20 @@ test("KT-108 immediately refreshes queue choices when a starting slot is physica
  assert.match(worker,/if\(slotFreed\)renderChoices\(\)/);
  assert.ok(worker.indexOf("if(slotFreed)renderChoices()")<worker.indexOf("renderSlots()"));
  assert.match(app,/button\.disabled=!box\|\|sealed\|\|resetting\|\|resetAfterMenu\|\|state\.won\|\|state\.lost\|\|!canChoose\(state\)/);
+});
+
+test("a freed ordinary start compartment immediately makes the top queue selectable",async()=>{
+ const game=await import("../src/game.js");
+ const state=game.createGame();
+ const incoming=game.getIncoming(state.levelId);
+ const selected=state.tray[0].find(index=>index!==null&&index!==undefined&&!game.isLockedBox(state,index)&&incoming[index]?.special!=="linked");
+ assert.notEqual(selected,undefined);
+ const column=state.tray[0].indexOf(selected);
+ assert.equal(game.chooseTopColumn(state,column),true);
+ const slot=state.slots.findIndex(box=>box!==null);
+ assert.notEqual(slot,-1);
+ state.slots[slot].ants=0;
+ assert.equal(game.completeBoxDeparture(state,slot),true);
+ assert.equal(game.freeSlotCount(state),1);
+ assert.equal(game.canChoose(state),true);
 });
