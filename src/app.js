@@ -196,7 +196,35 @@ function renderSlots(){
  });
 }
 function renderConveyor(){}
+function captureQueuePositions(){
+ const positions=new Map();
+ choicesEl.querySelectorAll("[data-queue-key]").forEach(element=>{
+  const rect=element.getBoundingClientRect();
+  positions.set(element.dataset.queueKey,{top:rect.top,left:rect.left});
+ });
+ return positions;
+}
+function animateQueueReflow(previousPositions){
+ if(!previousPositions.size||window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+ const moving=[];
+ choicesEl.querySelectorAll("[data-queue-key]").forEach(element=>{
+  const previous=previousPositions.get(element.dataset.queueKey);
+  if(!previous)return;
+  const rect=element.getBoundingClientRect(),dy=previous.top-rect.top,dx=previous.left-rect.left;
+  if(Math.abs(dx)<1&&Math.abs(dy)<1)return;
+  element.style.transition="none";
+  element.style.transform=`translate(${dx}px,${dy}px)`;
+  moving.push(element);
+ });
+ if(!moving.length)return;
+ choicesEl.getBoundingClientRect();
+ requestAnimationFrame(()=>moving.forEach(element=>{
+  element.style.transition="transform 460ms cubic-bezier(.2,.78,.24,1)";
+  element.style.transform="";
+ }));
+}
 function renderChoices(){
+ const previousPositions=captureQueuePositions();
  choicesEl.replaceChildren();
  for(let col=0;col<TRAY_SIZE;col++){
   const lane=document.createElement("div");lane.className="queue-lane";
@@ -204,7 +232,7 @@ function renderChoices(){
   const sealed=box&&isLockedBox(state,index),reveal=box&&state.lockedBoxOpen&&!state.lockedBoxRevealPlayed&&index===8;
   const button=document.createElement("button");button.type="button";button.className="choice-card"+(sealed?" sealed-box":box?" selectable":" empty-box")+(reveal?" sealed-reveal":"");
   if(reveal)state.lockedBoxRevealPlayed=true;
-  if(index!==null&&index!==undefined)button.dataset.boxIndex=String(index);
+  if(index!==null&&index!==undefined){button.dataset.boxIndex=String(index);button.dataset.queueKey=`${col}:${index}`;}
   const linked=box?.special==="linked",partner=linked?getLinkedPartner(state.levelId,index):null;
   const waitingForPartner=linked&&state.pendingLinkedIndex!==index&&!state.tray[0].includes(partner),needsPairSlots=linked&&(state.pendingLinkedIndex===null||state.pendingLinkedIndex===undefined)&&state.slots.filter(slot=>slot===null).length<2;
   const blockedByPair=state.pendingLinkedIndex!==null&&state.pendingLinkedIndex!==undefined&&index!==state.pendingLinkedIndex;
@@ -228,7 +256,7 @@ function renderChoices(){
   button.addEventListener("click",()=>onChoose(col));lane.append(button);
   const preview=document.createElement("div");preview.className="queue-preview";preview.setAttribute("aria-label","Следующие боксы в колонке");
   for(let row=1;row<TRAY_SIZE;row++){const nextIndex=state.tray[row][col],nextBox=nextIndex===null||nextIndex===undefined?null:getIncoming(state.levelId)[nextIndex];
-   const peek=document.createElement("span");peek.className="queue-peek"+(nextBox?"":" empty");peek.dataset.queueStep=String(row);
+   const peek=document.createElement("span");peek.className="queue-peek"+(nextBox?"":" empty");peek.dataset.queueStep=String(row);if(nextIndex!==null&&nextIndex!==undefined)peek.dataset.queueKey=`${col}:${nextIndex}`;
    const order=document.createElement("span");order.className="peek-order";order.textContent=String(row);peek.append(order);
    const sealedPreview=nextBox&&isLockedBox(state,nextIndex),revealPreview=nextBox&&state.lockedBoxOpen&&!state.lockedBoxRevealPlayed&&nextIndex===8;
    if(revealPreview){peek.classList.add("sealed-reveal");state.lockedBoxRevealPlayed=true;}
@@ -254,6 +282,7 @@ function renderChoices(){
   lane.append(preview);choicesEl.append(lane);
  }
  $("queue-count").textContent=`${Math.max(0,getIncoming(state.levelId).length-state.nextContainer)} ещё`;
+ animateQueueReflow(previousPositions);
 }
 function render(){
  const level=getLevel(state.levelId);

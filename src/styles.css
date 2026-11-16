@@ -3252,3 +3252,24 @@ button:not(:disabled):active{filter:brightness(.96)}
 @media(prefers-reduced-motion:reduce){
  .choice-card,.queue-peek .peek-crate{transition:none!important}
 }
+
+
+/* KT-116 — aligned crate stack with a gentle upward queue handoff. */
+.choice-card,.queue-peek{transition:transform 460ms cubic-bezier(.2,.78,.24,1)}
+.choice-card .choice-crate{width:clamp(36px,5.1dvh,43px);height:clamp(27px,3.9dvh,33px);transition:width 360ms ease,height 360ms ease}
+.queue-preview{display:flex;flex-direction:column;align-items:center;gap:3px;width:100%;padding:2px 0 0!important}
+.queue-peek:not(.empty){display:flex;align-items:center;justify-content:center;width:100%;min-height:clamp(28px,3.7dvh,34px);height:clamp(28px,3.7dvh,34px);padding:2px 0;gap:5px}
+.queue-peek .peek-crate{width:clamp(33px,4.7dvh,40px);height:clamp(25px,3.5dvh,30px);flex-basis:clamp(33px,4.7dvh,40px);transition:width 360ms ease,height 360ms ease,flex-basis 360ms ease}
+.queue-peek[data-queue-step="1"] .peek-crate{width:clamp(33px,4.7dvh,40px);height:clamp(25px,3.5dvh,30px);flex-basis:clamp(33px,4.7dvh,40px)}
+.queue-peek[data-queue-step="2"] .peek-crate{width:clamp(30px,4.3dvh,37px);height:clamp(23px,3.2dvh,28px);flex-basis:clamp(30px,4.3dvh,37px)}
+.queue-peek[data-queue-step="2"] .peek-meta{transform:scale(.94);transform-origin:left center}
+.queue-peek .peek-meta{transition:transform 360ms ease}
+@media(max-width:599px){
+ .choice-card .choice-crate{width:clamp(32px,5dvh,39px);height:clamp(24px,3.7dvh,29px)}
+ .queue-preview{gap:2px}
+ .queue-peek:not(.empty){min-height:clamp(27px,3.6dvh,32px);height:clamp(27px,3.6dvh,32px);gap:4px}
+ .queue-peek[data-queue-step="1"] .peek-crate{width:clamp(29px,4.6dvh,36px);height:clamp(22px,3.4dvh,27px);flex-basis:clamp(29px,4.6dvh,36px)}
+ .queue-peek[data-queue-step="2"] .peek-crate{width:clamp(27px,4.2dvh,33px);height:clamp(20px,3.1dvh,25px);flex-basis:clamp(27px,4.2dvh,33px)}
+}
+@media(max-height:680px){.queue-peek:not(.empty){min-height:25px;height:25px}}
+@media(prefers-reduced-motion:reduce){.choice-card,.queue-peek,.choice-card .choice-crate,.queue-peek .peek-crate,.queue-peek .peek-meta{transition:none!important}}

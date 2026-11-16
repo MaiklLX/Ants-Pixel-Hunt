@@ -497,3 +497,19 @@ test("KT-115 removes nested queue cards and renders reserve entries as miniature
  assert.match(app,/miniCrate\.className="peek-crate"/);
  assert.match(app,/className="choice-crate"/);
 });
+
+
+test("KT-116 gives queue crates descending sizes and animates stable boxes upward",async()=>{
+ const app=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
+ const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
+ const source=app.slice(app.indexOf("function captureQueuePositions"),app.indexOf("function render(){"));
+ assert.match(source,/data-queue-key/);
+ assert.match(source,/previous\.top-rect\.top/);
+ assert.match(source,/requestAnimationFrame/);
+ assert.match(source,/animateQueueReflow\(previousPositions\)/);
+ const visual=styles.slice(styles.indexOf("KT-116 —"));
+ assert.match(visual,/\.queue-peek\[data-queue-step="1"\] \.peek-crate/);
+ assert.match(visual,/\.queue-peek\[data-queue-step="2"\] \.peek-crate/);
+ assert.match(visual,/transition:transform 460ms/);
+ assert.match(visual,/@media\(prefers-reduced-motion:reduce\)/);
+});
