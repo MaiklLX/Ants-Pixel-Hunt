@@ -944,3 +944,10 @@ KT-097: создать одну авторскую седьмую полянку
 - Стабильные ключи по колонке и индексу и FLIP-анимация: после выбора верхнего бокса следующие плавно перемещаются вверх на освободившиеся позиции.
 - Порядок, правила выбора и скорость муравьёв не менялись; учитывается prefers-reduced-motion.
 - App version KT-116; Service Worker cache v84; добавлен регрессионный DOM-contract тест.
+
+
+## KT-117 — readable ant counters
+- Made ant quantities immediately scannable across active slots and all three queue depths.
+- Added dark rounded count badges with tabular numerals, subtle warm outlines, and a small ant glyph for active slots.
+- Strengthened the remaining-queue indicator into a compact badge.
+- Added responsive rules for narrow phones and short screens. No gameplay, layout geometry, animation timing, or ant speed changes.
