@@ -316,3 +316,14 @@ test("KT-100 waits for all crate-loading animations before dispatching ants", ()
  assert.ok(settle>dispatch,"evaluate win/loss only after dispatch resumes");
  assert.equal(choose.split("kickColony()").length-1,1,"dispatch resumes exactly once from the loading cleanup path");
 });
+
+test("game speed controls expose the three supported presets and accessible pressed state",()=>{
+ for(const speed of [1,2,4]){
+  const button=html.match(new RegExp('<button[^>]*data-game-speed="'+speed+'"[^>]*>'));
+  assert.ok(button,"missing "+speed+"x speed control");
+  assert.match(button[0],/aria-pressed=/);
+ }
+ assert.match(html,/class=["']speed-control["']/);
+ assert.match(app,/animationClock\.setSpeed\(value\)/);
+ assert.match(app,/document\.querySelectorAll\(["']\[data-game-speed\]["']\)/);
+});
