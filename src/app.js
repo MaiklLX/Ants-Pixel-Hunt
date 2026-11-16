@@ -413,7 +413,7 @@ function drawDeliveryEffects(timestamp){
   antCtx.shadowColor="#b9a56c";antCtx.shadowBlur=7*breath;
   antCtx.strokeStyle="#b9a56c";antCtx.lineWidth=1.5*fade;
   for(let ring=0;ring<2;ring++){
-   const radius=5+t*({14,21}[ring]);
+   const radius=5+t*([14,21][ring]);
    antCtx.beginPath();antCtx.ellipse(effect.x,effect.y+ring*1.5,radius,radius*.48,0,0,Math.PI*2);antCtx.stroke();
   }
   antCtx.fillStyle="#c3ae72";antCtx.globalAlpha=fade*.55;
