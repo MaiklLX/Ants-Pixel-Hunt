@@ -467,3 +467,18 @@ test("KT-113 gives the playfield frame a restrained carved-wood and moss finish"
  assert.match(frame,/@media\(prefers-reduced-motion:reduce\)/);
  assert.doesNotMatch(frame,/\.board\s*\{/);
 });
+
+
+test("KT-114 presents a simple readable burrow entrance without an overlapping caption",async()=>{
+ const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
+ const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
+ const section=html.slice(html.indexOf('<section class="nest-return-section"'),html.indexOf('<section class="choices-section"'));
+ assert.match(section,/class="nest-mouth"/);
+ assert.match(section,/class="nest-rim"/);
+ assert.doesNotMatch(section,/nest-entrance-label|nest-leaf/);
+ const entrance=styles.slice(styles.indexOf("KT-114 —"));
+ assert.match(entrance,/.nest-mouth\{/);
+ assert.match(entrance,/.nest-rim\{/);
+ assert.match(entrance,/.nest-entrance::before/);
+ assert.match(entrance,/nest-entrance-label\{display:none!important\}/);
+});
