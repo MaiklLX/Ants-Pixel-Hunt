@@ -560,3 +560,20 @@ test("KT-119 exposes the current meadow as the main menu quick-play action",asyn
  assert.match(visual,/@media\(max-width:599px\)/);
  assert.match(visual,/@media\(prefers-reduced-motion:reduce\)/);
 });
+
+
+test("KT-120 removes visual queue numbers and preserves fixed five-slot and three-lane geometry",async()=>{
+ const app=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
+ const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
+ const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
+ assert.doesNotMatch(app,/number\.className="slot-number"/);
+ assert.doesNotMatch(app,/order\.className="peek-order"/);
+ assert.match(app,/Бокс в резервной очереди, цвет/);
+ const visual=styles.slice(styles.indexOf("KT-120 —"));
+ assert.match(visual,/grid-template-columns:repeat\(5,minmax\(0,1fr\))!important/);
+ assert.match(visual,/grid-template-columns:repeat\(3,minmax\(0,1fr\))!important/);
+ assert.match(visual,/\.queue-peek,\.queue-peek\.empty\{[\s\S]*?flex:0 0/);
+ assert.match(visual,/\.queue-lane\{[\s\S]*?height:clamp/);
+ assert.match(visual,/\.slots \.slot-number,\.queue-peek \.peek-order\{display:none!important\}/);
+ assert.match(html,/app-version" content="KT-120"/);
+});
