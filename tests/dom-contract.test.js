@@ -402,12 +402,9 @@ test("a freed ordinary start compartment immediately makes the top queue selecta
  const incoming=game.getIncoming(state.levelId);
  const selected=state.tray[0].find(index=>index!==null&&index!==undefined&&!game.isLockedBox(state,index)&&incoming[index]?.special!=="linked");
  assert.notEqual(selected,undefined);
- const column=state.tray[0].indexOf(selected);
- assert.equal(game.chooseTopColumn(state,column),true);
- const slot=state.slots.findIndex(box=>box!==null);
- assert.notEqual(slot,-1);
- state.slots[slot].ants=0;
- assert.equal(game.completeBoxDeparture(state,slot),true);
+ for(let slot=0;slot<state.slots.length;slot++)state.slots[slot]={ants:0,color:incoming[selected].color};
+ assert.equal(game.canChoose(state),false);
+ assert.equal(game.completeBoxDeparture(state,0),true);
  assert.equal(game.freeSlotCount(state),1);
  assert.equal(game.canChoose(state),true);
 });
