@@ -119,6 +119,21 @@ function drawBoardGridCell(x,y,cell){
  boardCtx.save();boardCtx.strokeStyle="#a6c3a044";boardCtx.lineWidth=.65;
  boardCtx.strokeRect(px+.35,py+.35,cell-.7,cell-.7);boardCtx.restore();
 }
+function drawBoardGroundCell(x,y,cell){
+ const px=x*cell,py=y*cell,seed=(x*374761393+y*668265263)>>>0,span=Math.max(1,cell-4);
+ const fx=px+2+(seed%997)/997*span,fy=py+2+((seed>>>8)%991)/991*span;
+ boardCtx.save();boardCtx.globalAlpha=.12;boardCtx.fillStyle=(seed&1)?"#a9bd83":"#c2a777";
+ boardCtx.beginPath();boardCtx.ellipse(fx,fy,.55+(seed%3)*.12,.34+((seed>>>4)%3)*.08,((seed>>>7)%9)*.19,0,Math.PI*2);boardCtx.fill();
+ if((seed>>>4)%3===0){
+  boardCtx.globalAlpha=.075;boardCtx.fillStyle="#d8c58e";
+  boardCtx.beginPath();boardCtx.ellipse(px+cell*.7,py+cell*.3,.42,.28,-.55,0,Math.PI*2);boardCtx.fill();
+ }
+ if(seed%7===0){
+  boardCtx.globalAlpha=.065;boardCtx.strokeStyle="#b9c58b";boardCtx.lineWidth=.45;
+  boardCtx.beginPath();boardCtx.moveTo(px+cell*.28,py+cell*.72);boardCtx.lineTo(px+cell*.42,py+cell*.63);boardCtx.stroke();
+ }
+ boardCtx.restore();
+}
 function drawBoardTile(x,y,exposed,cell){
  const color=state.board[y][x];if(!color)return;
  const px=x*cell,py=y*cell,size=cell-1.25,rgb=COLORS[color].hex;
@@ -141,6 +156,7 @@ function renderBoard(){
  boardEmptyGradient=boardCtx.createLinearGradient(0,0,width,height);
  boardEmptyGradient.addColorStop(0,"#263e32");boardEmptyGradient.addColorStop(.55,"#20372c");boardEmptyGradient.addColorStop(1,"#182b23");
  boardCtx.fillStyle=boardEmptyGradient;boardCtx.fillRect(0,0,width,height);
+ for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)drawBoardGroundCell(x,y,cell);
  boardCtx.save();boardCtx.strokeStyle="#a6c3a02a";boardCtx.lineWidth=.55;
  for(let i=0;i<=SIZE;i++){const p=i*cell+.5;boardCtx.beginPath();boardCtx.moveTo(p,0);boardCtx.lineTo(p,height);boardCtx.stroke();boardCtx.beginPath();boardCtx.moveTo(0,p);boardCtx.lineTo(width,p);boardCtx.stroke();}
  boardCtx.restore();
@@ -152,6 +168,7 @@ function renderBoardAfterPickup(target){
  const cell=boardEl.width/SIZE,px=target.x*cell,py=target.y*cell;
  boardCtx.save();boardCtx.beginPath();boardCtx.rect(px-2,py-2,cell+4,cell+4);boardCtx.clip();
  boardCtx.fillStyle=boardEmptyGradient||"#20372c";boardCtx.fillRect(px-2,py-2,cell+4,cell+4);boardCtx.restore();
+ drawBoardGroundCell(target.x,target.y,cell);
  drawBoardGridCell(target.x,target.y,cell);
  const nextExposed=new Set(getExposedPixels(state.board).map(point=>point.x+","+point.y));
  for(const key of nextExposed){
