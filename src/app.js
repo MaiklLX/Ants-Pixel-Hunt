@@ -55,6 +55,7 @@ function renderNest(){
 function openNest(){renderNest();$("nest-overlay").hidden=false;}
 function closeNest(){$("nest-overlay").hidden=true;}
 function openMap(){renderMap();$("map-overlay").hidden=false;const nextStop=$("campaign-levels").querySelector(".next-stop");if(nextStop)requestAnimationFrame(()=>nextStop.scrollIntoView({block:"center",behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"}));}
+let mapChapterObserver=null;
 function renderMap(){
  const done=completedLevels(),summary=$("map-summary"),list=$("campaign-levels");
  const finished=LEVELS.filter(level=>done.has(level.id)).length,open=LEVELS.filter(level=>isLevelUnlocked(level)).length;
@@ -66,16 +67,17 @@ function renderMap(){
  const track=document.createElement("div");track.className="map-summary-track";const fill=document.createElement("span");fill.style.width=(finished/LEVELS.length*100)+"%";track.append(fill);
  const next=document.createElement("small");next.className="map-summary-next";next.textContent=finished===LEVELS.length?"Все маршруты пройдены — можно вернуться на любимую полянку":nextPlayable?"Следующая остановка · "+nextPlayable.name:"Доступно "+open+" из "+LEVELS.length+" полянок";
  const continueButton=document.createElement("button");continueButton.type="button";continueButton.className="map-continue";continueButton.textContent=nextPlayable?"Продолжить путь · "+nextPlayable.name:"Выбрать полянку";continueButton.disabled=!nextPlayable;continueButton.setAttribute("aria-label",nextPlayable?"Начать следующую доступную полянку: "+nextPlayable.name:"Все полянки пройдены");if(nextPlayable)continueButton.addEventListener("click",()=>{closeMap();void startFreshGame(nextPlayable.id);});summary.append(stat,track,next,continueButton);
- list.replaceChildren();const chapterNav=$("map-chapter-nav");chapterNav.replaceChildren();
+ list.replaceChildren();const chapterNav=$("map-chapter-nav");chapterNav.replaceChildren();if(mapChapterObserver){mapChapterObserver.disconnect();mapChapterObserver=null;}
  const chapters=[];for(const level of LEVELS){let group=chapters.find(item=>item.name===level.chapter);if(!group){group={name:level.chapter,levels:[]};chapters.push(group);}group.levels.push(level);}
  for(let index=0;index<chapters.length;index++){
-  const chapter=chapters[index],section=document.createElement("section");section.className="map-chapter";section.id="campaign-chapter-"+index;
-   const jump=document.createElement("button");jump.type="button";jump.className="map-chapter-jump";jump.textContent=chapter.name;jump.addEventListener("click",()=>{chapterNav.querySelectorAll("[aria-current]").forEach(active=>active.removeAttribute("aria-current"));jump.setAttribute("aria-current","location");section.scrollIntoView({block:"start",behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});});if(nextPlayable&&chapter.levels.some(level=>level.id===nextPlayable.id))jump.setAttribute("aria-current","location");chapterNav.append(jump);
+  const chapter=chapters[index],section=document.createElement("section");section.className="map-chapter";section.id="campaign-chapter-"+index;section.dataset.chapterIndex=String(index);
+   const jump=document.createElement("button");jump.type="button";jump.className="map-chapter-jump";jump.dataset.chapterIndex=String(index);jump.textContent=chapter.name;jump.addEventListener("click",()=>{chapterNav.querySelectorAll("[aria-current]").forEach(active=>active.removeAttribute("aria-current"));jump.setAttribute("aria-current","location");section.scrollIntoView({block:"start",behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});});if(nextPlayable&&chapter.levels.some(level=>level.id===nextPlayable.id))jump.setAttribute("aria-current","location");chapterNav.append(jump);
   const heading=document.createElement("header");heading.className="map-chapter-heading";
+  const marker=document.createElement("span");marker.className="map-chapter-mark";marker.textContent=String(index+1).padStart(2,"0");marker.setAttribute("aria-hidden","true");
   const title=document.createElement("strong");title.textContent=chapter.name;
   const chapterDone=chapter.levels.filter(level=>done.has(level.id)).length;
   const meta=document.createElement("small");meta.textContent=chapterDone===chapter.levels.length?"ГЛАВА ПРОЙДЕНА":chapterDone?`${chapterDone} / ${chapter.levels.length} · В ПУТИ`:`0 / ${chapter.levels.length} · ВПЕРЕДИ`;
-  heading.append(title,meta);
+  heading.append(marker,title,meta);
   section.classList.add(chapterDone===chapter.levels.length?"chapter-complete":chapterDone?"chapter-active":"chapter-locked");
   const chapterTrack=document.createElement("div");chapterTrack.className="map-chapter-track";chapterTrack.setAttribute("aria-label","Прогресс главы: "+chapterDone+" из "+chapter.levels.length);
   const chapterFill=document.createElement("span");chapterFill.style.width=(chapterDone/chapter.levels.length*100)+"%";chapterTrack.append(chapterFill);
@@ -97,6 +99,7 @@ function renderMap(){
   }
   section.append(grid);list.append(section);
  }
+ if("IntersectionObserver" in window){mapChapterObserver=new IntersectionObserver(entries=>{const visible=entries.filter(entry=>entry.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];if(!visible)return;const active=chapterNav.querySelector(`[data-chapter-index="${visible.target.dataset.chapterIndex}"]`);if(!active)return;chapterNav.querySelectorAll("[aria-current]").forEach(item=>item.removeAttribute("aria-current"));active.setAttribute("aria-current","location");},{root:$("map-overlay"),rootMargin:"-18% 0px -58% 0px",threshold:[0,.15,.35,.6]});list.querySelectorAll(".map-chapter").forEach(section=>mapChapterObserver.observe(section));}
 }
 function closeMap(){$("map-overlay").hidden=true;}
 function completedLevels(){try{return new Set(JSON.parse(localStorage.getItem(CAMPAIGN_KEY)||"[]"));}catch{return new Set();}}
