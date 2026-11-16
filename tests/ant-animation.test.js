@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {createPausableClock,getAntLaunchDelay,getAntTripFrame,getTrailPose} from "../src/ant-animation.js";
+import {createPausableClock,getAntLaunchDelay,getAntQueueDelay,getAntTripFrame,getTrailPose} from "../src/ant-animation.js";
 
 test("ant trip waits for its staggered launch without starting motion early",()=>{
  assert.deepEqual(getAntTripFrame(120,150,2000,1800),{
@@ -134,7 +134,33 @@ test("trail pose reuses its output object and resets it for degenerate paths",()
 test("per-box ant queue spaces departures without waiting for earlier workers to return",async()=>{
  const {getAntQueueDelay}=await import("../src/ant-animation.js");
  assert.equal(getAntQueueDelay(0,0),0);
- assert.equal(getAntQueueDelay(1,0),118);
- assert.equal(getAntQueueDelay(2,0),236);
+ assert.equal(getAntQueueDelay(1,0),145);
+ assert.equal(getAntQueueDelay(2,0),290);
  assert.ok(getAntQueueDelay(30,1)<3600);
+});
+
+test("animation clock scales continuously at 1x, 2x and 4x",()=>{
+ let now=1000;
+ const clock=createPausableClock(()=>now);
+ assert.equal(clock.getSpeed(),1);
+ now=1500;assert.equal(clock.now(),500);
+ clock.setSpeed(2);
+ now=1750;assert.equal(clock.now(),1000);
+ clock.setSpeed(4);
+ now=2000;assert.equal(clock.now(),2000);
+ clock.setSpeed(1);
+ now=2250;assert.equal(clock.now(),2250);
+});
+test("animation clock keeps the selected speed across pause and resume",()=>{
+ let now=0;
+ const clock=createPausableClock(()=>now);
+ clock.setSpeed(4);now=100;assert.equal(clock.now(),400);
+ clock.pause();now=1000;assert.equal(clock.now(),400);
+ clock.setSpeed(2);now=2000;assert.equal(clock.now(),400);
+ clock.resume();now=2200;assert.equal(clock.now(),800);
+});
+test("animation clock accepts only the supported speed presets",()=>{
+ let now=0;const clock=createPausableClock(()=>now);
+ clock.setSpeed(3);assert.equal(clock.getSpeed(),1);
+ clock.setSpeed(4);assert.equal(clock.getSpeed(),4);
 });
