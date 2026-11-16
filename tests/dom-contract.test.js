@@ -326,15 +326,25 @@ test("KT-103 draws a slower alternating tripod gait with subtle antennae and bod
  assert.ok(source.includes("Math.sin(phase*2+index*.31)*.34"));
 });
 
-test("game speed controls expose the three supported presets and accessible pressed state",()=>{
- for(const speed of [1,2,4]){
-  const button=html.match(new RegExp('<button[^>]*data-game-speed="'+speed+'"[^>]*>'));
-  assert.ok(button,"missing "+speed+"x speed control");
-  assert.match(button[0],/aria-pressed=/);
- }
- assert.match(html,/class=["']speed-control["']/);
+test("game speed uses one accessible button cycling from 1x through 4x",()=>{
+ assert.match(html,/<button[^>]*id=["']speed-toggle["'][^>]*aria-valuetext=["']1×["']/);
+ assert.match(html,/id=["']speed-current["']/);
+ assert.match(app,/function cycleGameSpeed\(\)/);
+ assert.match(app,/current>=4\?1:current\+1/);
  assert.match(app,/animationClock\.setSpeed\(value\)/);
- assert.match(app,/document\.querySelectorAll\(["']\[data-game-speed\]["']\)/);
+ assert.match(anim,/\[1,2,3,4\]\.includes/);
+});
+
+
+test("KT-106 keeps the reserve queue still while ants leave active boxes",()=>{
+ assert.ok(app.includes("function renderChoices(){\n choicesEl.replaceChildren();"));
+ assert.doesNotMatch(app,/oldPositions/);
+ assert.doesNotMatch(app,/button\.animate\(\[\{transform:/);
+ const worker=app.slice(app.indexOf("async function runSlotWorker"),app.indexOf("function updateResultOverlay"));
+ assert.doesNotMatch(worker,/renderSlots\(\);renderChoices\(\)/);
+ assert.ok(styles.includes("KT-106 —"));
+ assert.match(styles,/\.choice-card\{min-height:[^}]*animation:none!important/);
+ assert.match(styles,/\.slot\.active\{transform:none/);
 });
 
 

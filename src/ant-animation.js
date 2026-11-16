@@ -39,7 +39,7 @@ export function getAntLaunchDelay(sequence,seed=0){
 export function getAntQueueDelay(order,seed=0){
  const position=Math.max(0,Math.floor(Number(order)||0));
  const jitter=Math.max(0,Math.min(1,Number(seed)||0))*24;
- return position*145+jitter;
+ return position*340+jitter;
 }
 
 
@@ -48,7 +48,7 @@ export function createPausableClock(readNow=()=>performance.now()){
  let pausedAt=null,realStart=readNow(),activeStart=0,speed=1;
  const activeTime=timestamp=>pausedAt===null?activeStart+(timestamp-realStart)*speed:activeStart;
  const setSpeed=(next,timestamp=readNow())=>{
-  const value=[1,2,4].includes(Number(next))?Number(next):1;
+  const value=[1,2,3,4].includes(Number(next))?Number(next):1;
   if(value===speed)return speed;
   if(pausedAt===null){activeStart=activeTime(timestamp);realStart=timestamp;}
   speed=value;

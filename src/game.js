@@ -319,12 +319,19 @@ export function findAntWave(state,reservedTargets=new Set(),pendingBySlot=new Ma
    byColor.get(color).push({x,y});
   }
  }
- for(let slot=0;slot<state.slots.length;slot++){
-  const box=state.slots[slot];if(!box||box.ants<=0||box.status==="departing")continue;
-  const targets=byColor.get(box.color)||[];
-  let index=cursor.get(box.color)||0,assigned=0;
-  while(index<targets.length&&assigned<Math.max(0,box.ants-(pendingBySlot.get(slot)||0))&&wave.length<maxMoves){wave.push({slot,color:box.color,target:targets[index++]});assigned++;}
-  cursor.set(box.color,index);
+ const supplies=state.slots.map((box,slot)=>({slot,color:box?.color,remaining:box&&box.ants>0&&box.status!=="departing"?Math.max(0,box.ants-(pendingBySlot.get(slot)||0)):0,assigned:0}));
+ // Round-robin by slot prevents one large box from starving other colours.
+ while(wave.length<maxMoves){
+  let scheduled=false;
+  for(const supply of supplies){
+   if(wave.length>=maxMoves)break;
+   if(!supply.remaining||supply.assigned>=supply.remaining)continue;
+   const targets=byColor.get(supply.color)||[],index=cursor.get(supply.color)||0;
+   if(index>=targets.length)continue;
+   wave.push({slot:supply.slot,color:supply.color,target:targets[index]});
+   cursor.set(supply.color,index+1);supply.assigned++;scheduled=true;
+  }
+  if(!scheduled)break;
  }
  return wave;
 }

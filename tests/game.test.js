@@ -471,3 +471,16 @@ test("two empty linked boxes are removed together even if the partner status was
  assert.equal(completeBoxDeparture(s,0),true);
  assert.equal(s.slots[0],null);assert.equal(s.slots[1],null);assert.equal(s.sortedBoxes,2);
 });
+
+
+test("ant dispatch shares each wave fairly across active colours",()=>{
+ const s=createGame();
+ s.board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
+ s.board[0][0]="red";s.board[0][1]="red";s.board[0][2]="blue";s.board[0][3]="blue";
+ s.remaining=4;
+ const red=getIncoming(s.levelId).find(box=>box.color==="red");
+ const blue=getIncoming(s.levelId).find(box=>box.color==="blue");
+ s.slots[0]={...red,ants:8};s.slots[1]={...blue,ants:8};
+ const wave=findAntWave(s,new Set(),new Map(),4);
+ assert.deepEqual(wave.map(move=>move.color),["red","blue","red","blue"]);
+});

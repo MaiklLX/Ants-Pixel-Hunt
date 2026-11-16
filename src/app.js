@@ -102,7 +102,7 @@ function completedLevels(){try{return new Set(JSON.parse(localStorage.getItem(CA
 function markLevelComplete(levelId){const done=completedLevels();done.add(levelId);try{localStorage.setItem(CAMPAIGN_KEY,JSON.stringify([...done]));}catch{}}
 function isLevelUnlocked(level){return isCampaignLevelUnlocked(LEVELS,completedLevels(),level.id);}
 function nextLevel(){return getNextCampaignLevel(LEVELS,state.levelId);}
-const loadingSlots=new Set(),workerPromises=new Map(),reservedTargets=new Set(),activeAnts=new Map(),pickupEffects=[],deliveryEffects=[];
+const loadingSlots=new Set(),workerPromises=new Map(),reservedTargets=new Set(),slotNextLaunchAt=new Map(),activeAnts=new Map(),pickupEffects=[],deliveryEffects=[];
 let workerSequence=0,lastAntFrameAt=0,lastExposedPixels=new Set();
 const MAX_ACTIVE_ANTS=36,ANT_FRAME_INTERVAL=1000/60;
 const colorRGB=Object.fromEntries(Object.entries(COLORS).map(([key,value])=>[key,value.hex.match(/[\da-f]{2}/gi).map(v=>parseInt(v,16))]));
@@ -180,8 +180,6 @@ function renderSlots(){
 }
 function renderConveyor(){}
 function renderChoices(){
- const oldPositions=new Map();
- for(const node of choicesEl.querySelectorAll(".choice-card[data-box-index]")){const r=node.getBoundingClientRect();oldPositions.set(node.dataset.boxIndex,{left:r.left,top:r.top});}
  choicesEl.replaceChildren();
  for(let col=0;col<TRAY_SIZE;col++){
   const lane=document.createElement("div");lane.className="queue-lane";
@@ -237,8 +235,6 @@ function renderChoices(){
    preview.append(peek);
   }
   lane.append(preview);choicesEl.append(lane);
-  const old=oldPositions.get(button.dataset.boxIndex);
-  if(old&&button.dataset.boxIndex!==undefined){const r=button.getBoundingClientRect(),dx=old.left-r.left,dy=old.top-r.top;if((dx||dy)&&!window.matchMedia("(prefers-reduced-motion: reduce)").matches)button.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:"translate(0,0)"}],{duration:320,easing:"cubic-bezier(.2,.75,.25,1)"});}
  }
  $("queue-count").textContent=`${Math.max(0,getIncoming(state.levelId).length-state.nextContainer)} ещё`;
 }
@@ -549,7 +545,7 @@ async function runSlotWorker(move,workerId){
      completeBoxDeparture(state,slot);
     }
     state.activeSlots=[...new Set([...workerPromises.values()].map(worker=>worker.slot))];
-    renderSlots();renderChoices();
+    renderSlots();
    }
   });
  }catch(error){console.error("Ant worker interrupted",slot,error);}
@@ -590,13 +586,13 @@ function kickColony(){
  const pendingBySlot=countQueuedBySlot(workerPromises);
  const dispatchCapacity=Math.max(0,MAX_ACTIVE_ANTS-workerPromises.size);
  const wave=findAntWave(state,reservedTargets,pendingBySlot,dispatchCapacity);
- const queuedOrder=new Map();
- for(const [slot,count] of pendingBySlot)queuedOrder.set(slot,count);
+ const now=animationClock.now();
  for(const move of wave){
   const workerId=++workerSequence,key=move.target.x+","+move.target.y;
-  const order=queuedOrder.get(move.slot)||0;queuedOrder.set(move.slot,order+1);
+  const nextLaunchAt=Math.max(now,slotNextLaunchAt.get(move.slot)??now);
   const seed=(workerId*9301+move.target.x*49297+move.target.y*233)%9973/9973;
-  move.launchDelay=getAntQueueDelay(order,seed);
+  move.launchDelay=nextLaunchAt-now+getAntQueueDelay(0,seed);
+  slotNextLaunchAt.set(move.slot,nextLaunchAt+340);
   reservedTargets.add(key);
   workerPromises.set(workerId,{slot:move.slot,phase:"queued"});
   void runSlotWorker(move,workerId);
@@ -635,12 +631,13 @@ async function onChoose(column){
 }
 function updateGameSpeed(value){
  const speed=animationClock.setSpeed(value);
- for(const button of document.querySelectorAll("[data-game-speed]")){
-  const active=Number(button.dataset.gameSpeed)===speed;
-  button.classList.toggle("active",active);
-  button.setAttribute("aria-pressed",String(active));
- }
- const label=$("speed-current");if(label)label.textContent=speed+"×";
+ const label=$("speed-current"),button=$("speed-toggle");
+ if(label)label.textContent=speed+"×";
+ if(button){button.setAttribute("aria-label",`Скорость муравьишек: ${speed}×. Нажми, чтобы переключить скорость`);button.setAttribute("aria-valuetext",speed+"×");}
+}
+function cycleGameSpeed(){
+ const current=animationClock.getSpeed();
+ updateGameSpeed(current>=4?1:current+1);
 }
 function updateMainMenu(){
  const primary=$("start-game"),fresh=$("new-game"),progress=$("menu-progress"),level=getLevel(state.levelId);
@@ -679,7 +676,7 @@ function showMainMenu(){
 }
 function maybeFinalizeMenuExit(){
  if(!resetAfterMenu||workerPromises.size||loadingSlots.size||resetting)return;
- resetting=true;cancelAnimationFrame(antFrame);antFrame=0;activeAnts.clear();pickupEffects.length=0;deliveryEffects.length=0;reservedTargets.clear();
+ resetting=true;cancelAnimationFrame(antFrame);antFrame=0;activeAnts.clear();pickupEffects.length=0;deliveryEffects.length=0;reservedTargets.clear();slotNextLaunchAt.clear();
  state=createGame(state.levelId);totalBlocks=state.remaining;gameStarted=false;resetAfterMenu=false;resetting=false;
  render();$("save-status").textContent="Партия сброшена · открытые полянки сохранены";updateMainMenu();
 }
@@ -690,7 +687,7 @@ function startGame(){
 }
 async function startFreshGame(levelId=state.levelId){
  if(workerPromises.size>0||loadingSlots.size>0||resetAfterMenu)return;
- resetting=true;cancelAnimationFrame(antFrame);activeAnts.clear();pickupEffects.length=0;deliveryEffects.length=0;reservedTargets.clear();state=createGame(levelId);totalBlocks=state.remaining;resetting=false;
+ resetting=true;cancelAnimationFrame(antFrame);activeAnts.clear();pickupEffects.length=0;deliveryEffects.length=0;reservedTargets.clear();slotNextLaunchAt.clear();state=createGame(levelId);totalBlocks=state.remaining;resetting=false;
  gameStarted=true;render();$("save-status").textContent="Новая партия · прогресс уровня не сохраняется";shell.classList.remove("menu-open");updateMainMenu();kickColony();
 }
 async function boot(){
@@ -709,7 +706,7 @@ async function boot(){
  $("save-status").textContent="Партия не сохраняется · прогресс колонии сохраняется";
  updateEconomy();
 }
-document.querySelectorAll("[data-game-speed]").forEach(button=>button.addEventListener("click",()=>updateGameSpeed(button.dataset.gameSpeed)));
+$("speed-toggle").addEventListener("click",cycleGameSpeed);
 updateGameSpeed(1);
 $("menu-toggle").addEventListener("click",showMainMenu);
 $("start-game").addEventListener("click",startGame);
