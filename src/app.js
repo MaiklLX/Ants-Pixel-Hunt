@@ -1,9 +1,9 @@
-import {COLORS,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,LEVELS,getLevel,getIncoming,createGame,canChoose,chooseTopColumn,isLockedBox,getLinkedPartner,findAntWave,applyAntMove,completeBoxDeparture,isDefeat,getExposedPixels,countOutboundBySlot,countSlotWorkers,canDepartSlot} from "./game.js";
-import {getAntTripFrame,getAntLaunchDelay,createPausableClock,getTrailPose} from "./ant-animation.js";
+import {COLORS,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,LEVELS,getLevel,getIncoming,createGame,canChoose,chooseTopColumn,isLockedBox,getLinkedPartner,findAntWave,applyAntPickup,completeBoxDeparture,isDefeat,getExposedPixels,countQueuedBySlot,countSlotWorkers} from "./game.js";
+import {getAntTripFrame,getAntLaunchDelay,getAntQueueDelay,createPausableClock,getTrailPose} from "./ant-animation.js";
 import {isCampaignLevelUnlocked,getNextCampaignLevel} from "./campaign.js";
 import {BUILDINGS,createEconomy,normalizeEconomy,collectCube,completeMeadow,purchaseBuilding,buildingCost} from "./economy.js";
 const $=id=>document.getElementById(id);
-const shell=$("app-shell"),boardEl=$("board"),slotsEl=$("slots"),choicesEl=$("choices"),antLayer=$("ant-layer"),conveyorEl=$("conveyor");
+const shell=$("app-shell"),boardEl=$("board"),slotsEl=$("slots"),choicesEl=$("choices"),antLayer=$("ant-layer"),nestEntrance=$("nest-entrance");
 const boardCtx=boardEl.getContext("2d"),antCtx=antLayer.getContext("2d");
 let state=createGame(),resolverRunning=false,resetting=false,resetAfterMenu=false,antFrame=0,antCanvasWidth=0,antCanvasHeight=0,gameStarted=false,totalBlocks=state.remaining;
 const animationClock=createPausableClock(()=>performance.now());
@@ -337,6 +337,49 @@ function makeAntTrail(start,end,seed,spread=1){
  }
  points.push(end);return points;
 }
+function makePerimeterTrail(start,end,seed){
+ const shellRect=shell.getBoundingClientRect(),boardRect=boardEl.getBoundingClientRect();
+ const left=boardRect.left-shellRect.left+12,top=boardRect.top-shellRect.top+12;
+ const right=boardRect.right-shellRect.left-12,bottom=boardRect.bottom-shellRect.top-12;
+ const width=right-left,height=bottom-top,perimeter=2*(width+height);
+ const project=point=>{
+  const distances=[Math.abs(point.y-top),Math.abs(point.x-right),Math.abs(point.y-bottom),Math.abs(point.x-left)];
+  const side=distances.indexOf(Math.min(...distances));
+  if(side===0)return{x:Math.max(left,Math.min(right,point.x)),y:top,s:Math.max(0,Math.min(width,point.x-left))};
+  if(side===1)return{x:right,y:Math.max(top,Math.min(bottom,point.y)),s:width+Math.max(0,Math.min(height,point.y-top))};
+  if(side===2)return{x:Math.max(left,Math.min(right,point.x)),y:bottom,s:width+height+(right-Math.max(left,Math.min(right,point.x)))};
+  return{x:left,y:Math.max(top,Math.min(bottom,point.y)),s:2*width+height+(bottom-Math.max(top,Math.min(bottom,point.y)))};
+ };
+ const pointAt=s=>{
+  const p=((s%perimeter)+perimeter)%perimeter;
+  if(p<=width)return{x:left+p,y:top};
+  if(p<=width+height)return{x:right,y:top+(p-width)};
+  if(p<=2*width+height)return{x:right-(p-width-height),y:bottom};
+  return{x:left,y:bottom-(p-2*width-height)};
+ };
+ const a=project(start),b=project(end),clockwise=((b.s-a.s)%perimeter+perimeter)%perimeter;
+ const counter=(perimeter-clockwise)%perimeter,forward=(clockwise<counter)||(Math.abs(clockwise-counter)<1&&seed<.5);
+ const distance=forward?clockwise:counter,step=forward?1:-1;
+ const corners=[width,width+height,2*width+height,perimeter,0];
+ const points=[start,a];
+ for(let travelled=0;travelled<distance;){
+  let next=Infinity;
+  for(const corner of corners){
+   const delta=forward?((corner-a.s)%perimeter+perimeter)%perimeter:((a.s-corner)%perimeter+perimeter)%perimeter;
+   if(delta>travelled+.5&&delta<next&&delta<distance-.5)next=delta;
+  }
+  if(!Number.isFinite(next))break;
+  points.push(pointAt(a.s+step*next));travelled=next;
+ }
+ points.push(b,end);
+ const trail=[];
+ for(let i=1;i<points.length;i++){
+  const segment=makeAntTrail(points[i-1],points[i],(seed+i*.173)%1,.22);
+  if(i>1)segment.shift();
+  trail.push(...segment);
+ }
+ return trail;
+}
 function drawPickupEffects(timestamp){
  for(let i=pickupEffects.length-1;i>=0;i--){
   const effect=pickupEffects[i],t=(timestamp-effect.startedAt)/460;
@@ -363,16 +406,19 @@ function renderAntFrame(timestamp){
  for(const [workerId,ant] of activeAnts){
   const phase=getAntTripFrame(clockTime-ant.startTime,ant.delay,ant.outbound,ant.returning,ant.phaseFrame);
   if(phase.waiting)continue;
+  if(!ant.launched){
+   ant.launched=true;ant.onLaunch();
+  }
   if(phase.picked&&!ant.picked){
    ant.picked=true;
-   if(applyAntMove(state,ant.move.slot,ant.move.target)){
+   if(applyAntPickup(state,ant.move.slot,ant.move.target,ant.move.color)){
     ant.onPickup();
     const pickupPoint=cellCenter(ant.move.target.x,ant.move.target.y);
     pickupEffects.push({x:pickupPoint.x,y:pickupPoint.y,color:ant.move.color,startedAt:clockTime,seed:workerId*.618});
+    renderBoardAfterPickup(ant.move.target);
+    $("message").textContent="Муравьишки несут добычу в муравейник";
+    kickColony();
    }
-   renderBoardAfterPickup(ant.move.target);
-   $("message").textContent="Муравьишки собирают кубики по извилистым тропинкам";
-   kickColony();
   }
   if(phase.finished){
    activeAnts.delete(workerId);
@@ -387,15 +433,15 @@ function renderAntFrame(timestamp){
  if(activeAnts.size||pickupEffects.length)antFrame=requestAnimationFrame(renderAntFrame);
  else antFrame=0;
 }
-function animateAntTrip(move,index,onPickup=()=>{}){
- const shellRect=shell.getBoundingClientRect();
- const start=slotCenter(move.slot),end=cellCenter(move.target.x,move.target.y);
+function animateAntTrip(move,index,onPickup=()=>{},onLaunch=()=>{}){
+ const start=slotCenter(move.slot),end=cellCenter(move.target.x,move.target.y),nest=pointFor(nestEntrance);
  const seed=(index*9301+move.target.x*49297+move.target.y*233)%9973/9973;
- const outboundTrail=makeAntTrail(start,end,seed,1),returnTrail=makeAntTrail(end,start,(seed+.371)%1,.72);
- const distance=Math.hypot(end.x-start.x,end.y-start.y);
- const delay=getAntLaunchDelay(index,seed),outbound=2050+distance*.82,returning=1800+distance*.68;
+ const outboundTrail=makePerimeterTrail(start,end,seed),returnTrail=makePerimeterTrail(end,nest,(seed+.371)%1);
+ const distance=outboundTrail.reduce((sum,point,i)=>i?sum+Math.hypot(point.x-outboundTrail[i-1].x,point.y-outboundTrail[i-1].y):0,0);
+ const returnDistance=returnTrail.reduce((sum,point,i)=>i?sum+Math.hypot(point.x-returnTrail[i-1].x,point.y-returnTrail[i-1].y):0,0);
+ const delay=move.launchDelay??getAntLaunchDelay(index,seed),outbound=2300+distance*.62,returning=2100+returnDistance*.58;
  return new Promise(resolve=>{
-  activeAnts.set(index,{move,onPickup,resolve,startTime:animationClock.now(),delay,outbound,returning,outboundTrail,returnTrail,phaseFrame:{},pose:{x:0,y:0,angle:0}});
+  activeAnts.set(index,{move,onPickup,onLaunch,resolve,startTime:animationClock.now(),delay,outbound,returning,outboundTrail,returnTrail,phaseFrame:{},pose:{x:0,y:0,angle:0},launched:false});
   if(!antFrame)antFrame=requestAnimationFrame(renderAntFrame);
  });
 }
@@ -482,40 +528,37 @@ async function animateBoxDepartures(slotIndices,simultaneous=false){
   requestAnimationFrame(frame);
  });
 }
-async function runSlotWorker(slot,target,workerId){
- const key=target.x+","+target.y;
+async function runSlotWorker(move,workerId){
+ const {slot,target,color}=move,key=target.x+","+target.y;
  try{
-  await animateAntTrip({slot,color:state.slots[slot]?.color,target},workerId,()=>{
+  await animateAntTrip(move,workerId,()=>{
    const worker=workerPromises.get(workerId);if(worker)worker.phase="returning";
    colony=collectCube(colony);updateEconomy();
    reservedTargets.delete(key);
+  },()=>{
+   const worker=workerPromises.get(workerId);if(worker)worker.phase="outbound";
+   const box=state.slots[slot];
+   if(box&&box.ants>0){
+    box.ants--;
+    if(box.ants===0){
+     if(box.pairId){
+      box.status="waiting-linked";
+      const partnerSlot=state.slots.findIndex((other,index)=>index!==slot&&other?.pairId===box.pairId);
+      if(partnerSlot>=0&&state.slots[partnerSlot]?.ants===0){
+       state.slots[partnerSlot].status="departing";box.status="departing";
+       completeBoxDeparture(state,slot);
+      }
+     }else{
+      box.status="departing";completeBoxDeparture(state,slot);
+     }
+    }
+    state.activeSlots=[...new Set([...workerPromises.values()].map(worker=>worker.slot))];
+    renderSlots();renderChoices();
+   }
   });
  }catch(error){console.error("Ant worker interrupted",slot,error);}
  finally{
   reservedTargets.delete(key);workerPromises.delete(workerId);
-  const completedBox=state.slots[slot];
-  if(!resetting&&completedBox?.status==="departing"){
-   if(completedBox.pairId){
-    const partnerSlot=state.slots.findIndex((other,index)=>index!==slot&&other?.pairId===completedBox.pairId);
-    const pairReady=partnerSlot>=0&&state.slots[partnerSlot]?.status==="departing"&&canDepartSlot(workerPromises,slot)&&canDepartSlot(workerPromises,partnerSlot);
-    if(pairReady){
-     // Both crates stay in their cells until both ant teams return, then depart as one unit.
-     const departureAnimation=animateBoxDepartures([slot,partnerSlot],true);
-     completeBoxDeparture(state,slot);
-     resolverRunning=workerPromises.size>0;
-     state.activeSlots=[...new Set([...workerPromises.values()].map(worker=>worker.slot))];
-     renderSlots();renderChoices();renderConveyor();
-     await departureAnimation;
-    }
-   }else if(canDepartSlot(workerPromises,slot)){
-    const departureAnimation=animateBoxDepartures([slot]);
-    completeBoxDeparture(state,slot);
-    resolverRunning=workerPromises.size>0;
-    state.activeSlots=[...new Set([...workerPromises.values()].map(worker=>worker.slot))];
-    renderSlots();renderChoices();renderConveyor();
-    await departureAnimation;
-   }
-  }
   resolverRunning=workerPromises.size>0;
   state.activeSlots=[...new Set([...workerPromises.values()].map(worker=>worker.slot))];
   renderSlots();
@@ -548,14 +591,19 @@ function settleColony(){
 }
 function kickColony(){
  if(resetting||resetAfterMenu||state.won||state.lost)return;
- const pendingBySlot=countOutboundBySlot(workerPromises);
+ const pendingBySlot=countQueuedBySlot(workerPromises);
  const dispatchCapacity=Math.max(0,MAX_ACTIVE_ANTS-workerPromises.size);
  const wave=findAntWave(state,reservedTargets,pendingBySlot,dispatchCapacity);
+ const queuedOrder=new Map();
+ for(const [slot,count] of pendingBySlot)queuedOrder.set(slot,count);
  for(const move of wave){
   const workerId=++workerSequence,key=move.target.x+","+move.target.y;
+  const order=queuedOrder.get(move.slot)||0;queuedOrder.set(move.slot,order+1);
+  const seed=(workerId*9301+move.target.x*49297+move.target.y*233)%9973/9973;
+  move.launchDelay=getAntQueueDelay(order,seed);
   reservedTargets.add(key);
-  workerPromises.set(workerId,{slot:move.slot,phase:"outbound"});
-  void runSlotWorker(move.slot,move.target,workerId);
+  workerPromises.set(workerId,{slot:move.slot,phase:"queued"});
+  void runSlotWorker(move,workerId);
  }
  resolverRunning=workerPromises.size>0;
  state.activeSlots=[...new Set([...workerPromises.values()].map(worker=>worker.slot))];
