@@ -130,3 +130,11 @@ test("trail pose reuses its output object and resets it for degenerate paths",()
  assert.strictEqual(getTrailPose([{x:7,y:9}],0.5,buffer),buffer);
  assert.deepEqual(buffer,{x:7,y:9,angle:0});
 });
+
+test("per-box ant queue spaces departures without waiting for earlier workers to return",async()=>{
+ const {getAntQueueDelay}=await import("../src/ant-animation.js");
+ assert.equal(getAntQueueDelay(0,0),0);
+ assert.equal(getAntQueueDelay(1,0),118);
+ assert.equal(getAntQueueDelay(2,0),236);
+ assert.ok(getAntQueueDelay(30,1)<3600);
+});
