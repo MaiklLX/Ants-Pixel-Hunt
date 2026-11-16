@@ -314,5 +314,5 @@ test("KT-100 waits for all crate-loading animations before dispatching ants", ()
  assert.ok(unlock>wait,"keep slots reserved until every flight has settled");
  assert.ok(dispatch>unlock,"ants must not leave before crates reach their slots");
  assert.ok(settle>dispatch,"evaluate win/loss only after dispatch resumes");
- assert.equal((choose.match(/kickColony\\(\\)/g)||[]).length,1,"dispatch resumes exactly once from the loading cleanup path");
+ assert.equal(choose.split("kickColony()").length-1,1,"dispatch resumes exactly once from the loading cleanup path");
 });
