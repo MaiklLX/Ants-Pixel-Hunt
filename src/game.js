@@ -350,6 +350,7 @@ export function canChoose(state){
 export function isLockedBox(state,index){
  return index===LOCKED_BOX_INDEX&&!state.lockedBoxOpen;
 }
+// Correct only a vertical-lane collision; never promote a crate or change its queue depth.
 export function normalizeLinkedTray(state){
  if(!state?.tray)return false;
  const pair=getLinkedPair(state.levelId);if(pair.length!==2)return false;
