@@ -348,3 +348,20 @@ test("KT-104 draws a restrained delivery ripple at the anthill without changing 
   assert.match(app, /#b9a56c/);
   assert.match(html, /app-version" content="KT-104"/);
 });
+
+
+test("KT-105 renders fully colored supply crates, visible chain hardware and a boarded sealed crate",async()=>{
+ const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
+ const source=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
+ assert.match(source,/className="choice-crate sealed-crate"/);
+ assert.match(source,/className="sealed-plank"/);
+ assert.match(source,/className="sealed-wrap"/);
+ assert.match(source,/chain\.textContent="⛓"/);
+ assert.match(source,/className="box-color-name"/);
+ assert.match(source,/className="peek-crate"/);
+ assert.match(styles,/\.choice-card\.selectable\{[\s\S]*?background:linear-gradient\(155deg,color-mix/);
+ assert.match(styles,/\.choice-card \.choice-crate \.sealed-plank\{/);
+ assert.match(styles,/\.choice-card\.linked-box::after/);
+ assert.match(styles,/@keyframes queue-crate-drop/);
+ assert.match(html,/app-version" content="KT-105"/);
+});
