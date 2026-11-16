@@ -387,3 +387,11 @@ test("KT-105 renders fully colored supply crates, visible chain hardware and a b
  assert.match(styles,/@keyframes queue-crate-drop/);
  assert.match(html,/app-version" content="KT-107"/);
 });
+
+test("KT-108 immediately refreshes queue choices when a starting slot is physically freed",()=>{
+ const worker=app.slice(app.indexOf("async function runSlotWorker"),app.indexOf("function updateResultOverlay"));
+ assert.match(worker,/const slotFreed=completeBoxDeparture\(state,slot\)/);
+ assert.match(worker,/if\(slotFreed\)renderChoices\(\)/);
+ assert.ok(worker.indexOf("if(slotFreed)renderChoices()")<worker.indexOf("renderSlots()"));
+ assert.match(app,/button\.disabled=!box\|\|sealed\|\|resetting\|\|resetAfterMenu\|\|state\.won\|\|state\.lost\|\|!canChoose\(state\)/);
+});
