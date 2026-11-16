@@ -286,3 +286,14 @@ test("KT-095 reuses per-ant phase and pose buffers inside the shared renderer", 
   assert.ok(app.includes("getTrailPose(trail,phase.progress,ant.pose)"));
   assert.ok(app.includes("phaseFrame:{},pose:{x:0,y:0,angle:0}"));
 });
+
+
+test("KT-099 replaces the conveyor with a clearly labelled anthill return entrance",async()=>{
+ const markup=await readFile(new URL("../index.html",import.meta.url),"utf8");
+ const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
+ assert.match(markup,/id=["']nest-entrance["']/);
+ assert.match(markup,/aria-label=["']Нора — муравьишки приносят сюда собранные блоки["']/);
+ assert.doesNotMatch(markup,/class=["']conveyor-section["']/);
+ assert.ok(styles.includes("KT-099 — the conveyor becomes the shared return entrance to the anthill"));
+ assert.ok(styles.includes(".nest-mouth"));
+});
