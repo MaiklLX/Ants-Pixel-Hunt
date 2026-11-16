@@ -422,12 +422,12 @@ test("the seventh firefly meadow has five exact color budgets and a fully solvab
 });
 
 test("runtime pickup removes the block without consuming another ant from the source box",()=>{
- const s=createGame();const box=getIncoming(s.levelId).find(item=>item.color==="green");
- const slot=0,target=getExposedPixels(s.board).find(({x,y})=>s.board[y][x]===box.color);s.slots[slot]={...box,ants:7};
+ const s=createGame(),slot=0,target=getExposedPixels(s.board)[0],color=s.board[target.y][target.x];
+ const box=getIncoming(s.levelId).find(item=>item.color===color);s.slots[slot]={...box,ants:7};
  const before=s.remaining;
- assert.equal(applyAntPickup(s,slot,target,box.color),true);
+ assert.equal(applyAntPickup(s,slot,target,color),true);
  assert.equal(s.remaining,before-1);assert.equal(s.slots[slot].ants,7);
- assert.equal(applyAntPickup(s,slot,target,box.color),false,"a block can only be carried once");
+ assert.equal(applyAntPickup(s,slot,target,color),false,"a block can only be carried once");
 });
 test("only ants still waiting to leave a box count against its undispatched supply",()=>{
  const workers=new Map([[1,{slot:2,phase:"queued"}],[2,{slot:2,phase:"outbound"}],[3,{slot:2,phase:"returning"}],[4,{slot:1,phase:"queued"}]]);
