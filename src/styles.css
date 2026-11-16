@@ -2856,7 +2856,9 @@ button:not(:disabled):active{filter:brightness(.96)}
 .choices-section{order:5;width:100%;gap:4px;padding:5px 6px 6px}
 .choices{grid-template-rows:auto;gap:5px}
 .queue-lane{gap:4px;padding:4px}
-.choice-card{min-height:clamp(64px,8.5dvh,80px);animation:none!important}
+.choice-card{order:1;min-height:clamp(64px,8.5dvh,80px);animation:none!important}
+.queue-preview{order:2;flex-direction:column}
+.queue-lane{justify-content:flex-start}
 .message{order:6;min-height:0;padding:2px 5px;font-size:9px}
 .bottom-actions{order:7}
 @media(max-width:599px){

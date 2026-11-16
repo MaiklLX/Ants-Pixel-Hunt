@@ -345,7 +345,8 @@ test("KT-106 keeps the reserve queue still while ants leave active boxes",async(
  assert.doesNotMatch(worker,/renderSlots\(\);renderChoices\(\)/);
  const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
  assert.ok(styles.includes("KT-106 —"));
- assert.match(styles,/\.choice-card\{min-height:[^}]*animation:none!important/);
+ assert.match(styles,/\.choice-card\{order:1;min-height:[^}]*animation:none!important/);
+ assert.match(styles,/\.queue-preview\{order:2;flex-direction:column/);
  assert.match(styles,/\.slot\.active\{transform:none/);
 });
 
