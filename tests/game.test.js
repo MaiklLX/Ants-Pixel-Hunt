@@ -493,3 +493,16 @@ test("ant dispatch shares each wave fairly across active colours",()=>{
  const wave=findAntWave(s,new Set(),new Map(),4);
  assert.deepEqual(wave.map(move=>move.color),["red","blue","red","blue"]);
 });
+
+
+test("same-colour starter boxes each receive an independent first dispatch in the same wave",()=>{
+ const s=createGame();
+ s.board=Array.from({length:5},()=>Array(5).fill(""));
+ s.board[0][0]="red";s.board[0][1]="red";s.board[0][2]="red";
+ s.remaining=3;
+ const red=getIncoming(s.levelId).find(box=>box.color==="red");
+ s.slots[0]={...red,ants:3};s.slots[4]={...red,ants:3};
+ const firstWave=findAntWave(s,new Set(),new Map(),2);
+ assert.deepEqual(firstWave.map(move=>move.slot),[0,4]);
+ assert.equal(new Set(firstWave.map(move=>move.target.x+","+move.target.y)).size,2);
+});
