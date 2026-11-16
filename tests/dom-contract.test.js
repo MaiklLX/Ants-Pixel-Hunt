@@ -385,7 +385,7 @@ test("KT-105 renders fully colored supply crates, visible chain hardware and a b
  assert.match(styles,/\.choice-card \.choice-crate \.sealed-plank\{/);
  assert.match(styles,/\.choice-card\.linked-box::after/);
  assert.match(styles,/@keyframes queue-crate-drop/);
- assert.match(html,/app-version" content="KT-109"/);
+ assert.match(html,/app-version" content="KT-110"/);
 });
 
 test("KT-108 immediately refreshes queue choices when a starting slot is physically freed",()=>{
@@ -416,4 +416,19 @@ test("KT-109 keeps the arena on the dark woodland palette and refreshes the PWA 
   assert.match(styles, /KT-109 — polished woodland arena/);
   assert.match(styles, /\.choice-card\.selectable:not\(:disabled\)/);
   assert.match(worker, /ants-pixel-hunt-shell-v77-kt109/);
+});
+
+
+test("KT-110 preserves each occupied starter crate's real color and readable counter", async () => {
+  const app = await readFile(new URL("../src/app.js", import.meta.url), "utf8");
+  const styles = await readFile(new URL("../src/styles.css", import.meta.url), "utf8");
+  assert.match(app, /slot\.style\.setProperty\("--box-color",box\?COLORS\[box\.color\]\.hex/);
+  assert.match(styles, /\.slots \.slot\.filled \.slot-color\{[\s\S]*?background:var\(--box-color\)!important/);
+  assert.match(styles, /\.slots \.slot\.filled\{[\s\S]*?var\(--box-color\) 84%/);
+  assert.match(styles, /\.slots \.slot\.filled \.ant-count\{[\s\S]*?color:#fff8df/);
+});
+test("KT-110 adds subtle ant body highlights and a clearly outlined carried pixel", async () => {
+  const app = await readFile(new URL("../src/app.js", import.meta.url), "utf8");
+  assert.match(app, /Three clearly separated, softly highlighted body segments/);
+  assert.match(app, /ctx\.strokeRect\(-9\.5,-\.5,5\.8,5\.8\)/);
 });
