@@ -437,22 +437,26 @@ test("only ants still waiting to leave a box count against its undispatched supp
 });
 
 
-test("linked pair is promoted into two different top-row lanes when either member reaches the top",()=>{
+test("linked pair is moved sideways at the same queue depth instead of sharing a lane",()=>{
  const s=createGame(),pair=getLinkedPair(s.levelId);
  s.tray=Array.from({length:TRAY_SIZE},(_,r)=>Array.from({length:TRAY_SIZE},(_,c)=>r*TRAY_SIZE+c));
  s.tray[0][1]=pair[0];s.tray[2][1]=pair[1];
- const displaced=s.tray[0][0],moved=normalizeLinkedTray(s);
- assert.equal(moved,true);
- const first=s.tray[0].indexOf(pair[0]),second=s.tray[0].indexOf(pair[1]);
- assert.ok(first>=0&&second>=0);assert.notEqual(first,second);
+ const displaced=s.tray[2][0];
+ assert.equal(normalizeLinkedTray(s),true);
+ const first=s.tray.flat().indexOf(pair[0]),second=s.tray.flat().indexOf(pair[1]);
+ assert.ok(first>=0&&second>=0);
+ assert.notEqual(first%TRAY_SIZE,second%TRAY_SIZE,"linked crates must occupy different vertical lanes");
+ assert.equal(Math.floor(first/TRAY_SIZE),0);
+ assert.equal(Math.floor(second/TRAY_SIZE),2,"the partner must not be promoted out of its queue depth");
  assert.equal(s.tray[2][1],displaced,"the displaced crate stays in the queue instead of being lost");
 });
-test("linked pair stays side-by-side when it reaches the top row",()=>{
+test("linked pair stays in separate columns when one member is already at the top",()=>{
  const s=createGame(),pair=getLinkedPair(s.levelId);
  s.tray[0][0]=pair[0];s.tray[2][0]=pair[1];
  assert.equal(normalizeLinkedTray(s),true);
- assert.ok(s.tray[0].includes(pair[0])&&s.tray[0].includes(pair[1]));
- assert.notEqual(s.tray[0].indexOf(pair[0]),s.tray[0].indexOf(pair[1]));
+ const first=s.tray.flat().indexOf(pair[0]),second=s.tray.flat().indexOf(pair[1]);
+ assert.notEqual(first%TRAY_SIZE,second%TRAY_SIZE);
+ assert.equal(Math.floor(second/TRAY_SIZE),2,"lane correction must not change queue order");
 });
 test("a zero-ant linked box is removed if its partner is already absent",()=>{
  const s=createGame(),pair=getLinkedPair(s.levelId);
