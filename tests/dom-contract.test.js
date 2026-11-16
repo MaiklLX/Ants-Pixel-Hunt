@@ -489,7 +489,7 @@ test("KT-115 removes nested queue cards and renders reserve entries as miniature
  const app=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
  const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
  const visual=styles.slice(styles.indexOf("KT-115 —"));
- assert.match(html,/app-version" content="KT-116"/);
+ assert.match(html,/app-version" content="KT-117"/);
  assert.match(visual,/\.queue-lane\s*\{[\s\S]*?border:0!important/);
  assert.match(visual,/\.choice-card,\.choice-card\.locked,\.choice-card\.empty-box\s*\{[\s\S]*?background:transparent!important/);
  assert.match(visual,/\.queue-peek \.peek-crate::before/);
