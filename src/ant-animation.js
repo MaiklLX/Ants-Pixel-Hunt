@@ -10,7 +10,7 @@ export function getAntTripFrame(elapsed,delay,outbound,returning,out={}){
  out.waiting=false;
  out.picked=tripElapsed>=outbound;
  out.returningNow=returningNow;
- out.progress=raw*raw*(3-2*raw);
+ out.progress=raw*raw*raw*(raw*(raw*6-15)+10);
  out.finished=tripElapsed>=outbound+returning;
  return out;
 }
@@ -25,20 +25,31 @@ export function getAntLaunchDelay(sequence,seed=0){
 export function getAntQueueDelay(order,seed=0){
  const position=Math.max(0,Math.floor(Number(order)||0));
  const jitter=Math.max(0,Math.min(1,Number(seed)||0))*24;
- return position*118+jitter;
+ return position*145+jitter;
 }
 
 
 /** A monotonic animation clock that stops advancing while the document is hidden. */
 export function createPausableClock(readNow=()=>performance.now()){
- let pausedAt=null,pausedDuration=0;
- const toActiveTime=timestamp=>timestamp-pausedDuration-(pausedAt===null?0:Math.max(0,timestamp-pausedAt));
+ let pausedAt=null,realStart=readNow(),activeStart=0,speed=1;
+ const activeTime=timestamp=>pausedAt===null?activeStart+(timestamp-realStart)*speed:activeStart;
+ const setSpeed=(next,timestamp=readNow())=>{
+  const value=[1,2,4].includes(Number(next))?Number(next):1;
+  if(value===speed)return speed;
+  if(pausedAt===null){activeStart=activeTime(timestamp);realStart=timestamp;}
+  speed=value;
+  return speed;
+ };
  return{
-  now(){return toActiveTime(readNow());},
-  fromFrame(timestamp){return toActiveTime(timestamp);},
-  pause(timestamp=readNow()){if(pausedAt===null)pausedAt=timestamp;},
+  now(){return activeTime(readNow());},
+  fromFrame(timestamp){return activeTime(timestamp);},
+  getSpeed(){return speed;},
+  setSpeed,
+  pause(timestamp=readNow()){
+   if(pausedAt===null){activeStart=activeTime(timestamp);pausedAt=timestamp;}
+  },
   resume(timestamp=readNow()){
-   if(pausedAt!==null){pausedDuration+=Math.max(0,timestamp-pausedAt);pausedAt=null;}
+   if(pausedAt!==null){realStart=timestamp;pausedAt=null;}
   }
  };
 }
