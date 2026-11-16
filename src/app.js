@@ -104,7 +104,7 @@ function isLevelUnlocked(level){return isCampaignLevelUnlocked(LEVELS,completedL
 function nextLevel(){return getNextCampaignLevel(LEVELS,state.levelId);}
 const loadingSlots=new Set(),workerPromises=new Map(),reservedTargets=new Set(),activeAnts=new Map(),pickupEffects=[];
 let workerSequence=0,lastAntFrameAt=0,lastExposedPixels=new Set();
-const MAX_ACTIVE_ANTS=36,ANT_FRAME_INTERVAL=1000/30;
+const MAX_ACTIVE_ANTS=36,ANT_FRAME_INTERVAL=1000/60;
 const colorRGB=Object.fromEntries(Object.entries(COLORS).map(([key,value])=>[key,value.hex.match(/[\da-f]{2}/gi).map(v=>parseInt(v,16))]));
 let boardEmptyGradient=null;
 function updateBoardProgress(){
@@ -439,7 +439,7 @@ function animateAntTrip(move,index,onPickup=()=>{},onLaunch=()=>{}){
  const outboundTrail=makePerimeterTrail(start,end,seed),returnTrail=makePerimeterTrail(end,nest,(seed+.371)%1);
  const distance=outboundTrail.reduce((sum,point,i)=>i?sum+Math.hypot(point.x-outboundTrail[i-1].x,point.y-outboundTrail[i-1].y):0,0);
  const returnDistance=returnTrail.reduce((sum,point,i)=>i?sum+Math.hypot(point.x-returnTrail[i-1].x,point.y-returnTrail[i-1].y):0,0);
- const delay=move.launchDelay??getAntLaunchDelay(index,seed),outbound=2300+distance*.62,returning=2100+returnDistance*.58;
+ const delay=move.launchDelay??getAntLaunchDelay(index,seed),outbound=2900+distance*.76,returning=2650+returnDistance*.7;
  return new Promise(resolve=>{
   activeAnts.set(index,{move,onPickup,onLaunch,resolve,startTime:animationClock.now(),delay,outbound,returning,outboundTrail,returnTrail,phaseFrame:{},pose:{x:0,y:0,angle:0},launched:false});
   if(!antFrame)antFrame=requestAnimationFrame(renderAntFrame);
@@ -489,10 +489,10 @@ async function animateBoxLoading(source,slot,color){
  flightLayer.style.width=shellRect.width+"px";flightLayer.style.height=shellRect.height+"px";shell.append(flightLayer);
  const ctx=flightLayer.getContext("2d");ctx.setTransform(dpr,0,0,dpr,0,0);
  const control=curveControl(source,slot,Math.min(46,Math.max(24,Math.abs(slot.y-source.y)*.16)));
- const duration=1120,startTime=animationClock.now();let lastFrame=0;
- const ease=t=>t*t*(3-2*t);
+ const duration=1380,startTime=animationClock.now();let lastFrame=0;
+ const ease=t=>t*t*t*(t*(t*6-15)+10);
  return new Promise(resolve=>{const frame=timestamp=>{
-  if(timestamp-lastFrame<1000/30){requestAnimationFrame(frame);return;}lastFrame=timestamp;
+  if(timestamp-lastFrame<1000/60){requestAnimationFrame(frame);return;}lastFrame=timestamp;
   const clockTime=animationClock.fromFrame(timestamp),t=Math.min(1,(clockTime-startTime)/duration),progress=ease(t),point=quadPoint(source,control,slot,progress);
   ctx.clearRect(0,0,shellRect.width,shellRect.height);
   const tilt=(1-progress)*-.055+Math.sin(progress*Math.PI)*.012,lift=Math.sin(progress*Math.PI)*5,scale=1+Math.sin(progress*Math.PI)*.035;
@@ -611,6 +611,15 @@ async function onChoose(column){
   if(resetting||resetAfterMenu)maybeFinalizeMenuExit();else{kickColony();settleColony();}
  }
 }
+function updateGameSpeed(value){
+ const speed=animationClock.setSpeed(value);
+ for(const button of document.querySelectorAll("[data-game-speed]")){
+  const active=Number(button.dataset.gameSpeed)===speed;
+  button.classList.toggle("active",active);
+  button.setAttribute("aria-pressed",String(active));
+ }
+ const label=$("speed-current");if(label)label.textContent=speed+"×";
+}
 function updateMainMenu(){
  const primary=$("start-game"),fresh=$("new-game"),progress=$("menu-progress"),level=getLevel(state.levelId);
  const completed=completedLevels(),completedCount=LEVELS.filter(item=>completed.has(item.id)).length;
@@ -678,6 +687,8 @@ async function boot(){
  $("save-status").textContent="Партия не сохраняется · прогресс колонии сохраняется";
  updateEconomy();
 }
+document.querySelectorAll("[data-game-speed]").forEach(button=>button.addEventListener("click",()=>updateGameSpeed(button.dataset.gameSpeed)));
+updateGameSpeed(1);
 $("menu-toggle").addEventListener("click",showMainMenu);
 $("start-game").addEventListener("click",startGame);
  $("menu-current-level").addEventListener("click",startGame);
