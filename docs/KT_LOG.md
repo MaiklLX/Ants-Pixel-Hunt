@@ -894,3 +894,9 @@ KT-097: создать одну авторскую седьмую полянку
 - Добавлен DOM-contract регрессионный тест на немедленное обновление очереди при освобождении отсека.
 - App version KT-108; PWA shell cache v76.
 - CI нового SHA ожидается; физическое устройство и ручной visual QA не заявляются.
+
+
+## KT-108 follow-up — CI gate correction
+- KT-108 browser deployment was blocked because a legacy DOM-contract test still asserted app-version KT-107. The source fix itself and the new queue-refresh contract passed; the stale assertion caused the Pages test job to fail and skipped deployment.
+- Updated the legacy assertion to KT-108 and added a state-level regression verifying that after an ordinary compartment is physically freed, `freeSlotCount` and `canChoose` immediately permit another top-row box.
+- The release is not considered published until Pages build, tests, and deploy all pass on the same main SHA.
