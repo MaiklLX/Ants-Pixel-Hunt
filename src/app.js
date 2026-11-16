@@ -195,16 +195,20 @@ function renderChoices(){
   const blockedByPair=state.pendingLinkedIndex!==null&&state.pendingLinkedIndex!==undefined&&index!==state.pendingLinkedIndex;
   button.disabled=!box||sealed||resetting||resetAfterMenu||state.won||state.lost||!canChoose(state)||blockedByPair||waitingForPartner||needsPairSlots;
   if(sealed){
-   const crate=document.createElement("span");crate.className="choice-crate sealed-crate";crate.textContent="🔒";
+   const crate=document.createElement("span");crate.className="choice-crate sealed-crate";crate.setAttribute("aria-hidden","true");
+    for(let plank=0;plank<3;plank++){const board=document.createElement("i");board.className="sealed-plank";crate.append(board);}
+    const wrap=document.createElement("b");wrap.className="sealed-wrap";crate.append(wrap);
+    const lock=document.createElement("span");lock.className="sealed-lock";lock.textContent="●";crate.append(lock);
    const count=document.createElement("small");count.className="sealed-progress";count.textContent=`${(state.lockProgressColumns||[]).length}/2`;
    button.append(crate,count);button.title="Закрытый бокс откроется после размещения обычных боксов из двух других колонок";
    button.setAttribute("aria-label",`Закрытый бокс, прогресс открытия ${(state.lockProgressColumns||[]).length} из 2`);
   }else if(box){button.style.setProperty("--ant-color",COLORS[box.color].hex);
-   if(linked){button.classList.add("linked-box");const chain=document.createElement("span");chain.className="linked-mark";chain.textContent="↔";button.append(chain);button.title=blockedByPair?"Сначала выбери первый связанный бокс":waitingForPartner?"Связанный бокс появится в верхнем ряду позже":needsPairSlots?"Для пары нужны два свободных отсека":"Связанная пара: после этого бокса выбери второй";}
+   if(linked){button.classList.add("linked-box");const chain=document.createElement("span");chain.className="linked-mark";chain.textContent="⛓";button.append(chain);button.title=blockedByPair?"Сначала выбери первый связанный бокс":waitingForPartner?"Связанный бокс появится в верхнем ряду позже":needsPairSlots?"Для пары нужны два свободных отсека":"Связанная пара: после этого бокса выбери второй";}
    const crate=document.createElement("span");crate.className="choice-crate";crate.setAttribute("aria-hidden","true");
    const gem=document.createElement("i");gem.style.setProperty("--gem-color",COLORS[box.color].hex);crate.append(gem);
-   const count=document.createElement("small");count.textContent=`${box.ants.toLocaleString("ru-RU")} 🐜`;
-   button.append(crate,count);button.setAttribute("aria-label",`${linked?"Связанный бокс. ":""}Выбрать бокс: ${box.ants} муравьёв`);
+   const colorName=document.createElement("span");colorName.className="box-color-name";colorName.textContent=COLORS[box.color].name;
+   const count=document.createElement("small");count.className="box-count";count.textContent=`${box.ants.toLocaleString("ru-RU")} 🐜`;
+   button.append(crate,colorName,count);button.setAttribute("aria-label",`${linked?"Связанный бокс. ":""}Выбрать бокс: ${box.ants} муравьёв`);
   }else{button.textContent="Очередь закончилась";button.setAttribute("aria-label","В этой колонке больше нет боксов");}
   button.addEventListener("click",()=>onChoose(col));lane.append(button);
   const preview=document.createElement("div");preview.className="queue-preview";preview.setAttribute("aria-label","Следующие боксы в колонке");
@@ -220,10 +224,11 @@ function renderChoices(){
    }else if(nextBox){
     if(nextBox.special==="linked")peek.classList.add("linked-peek");
     const color=COLORS[nextBox.color];peek.style.setProperty("--peek-color",color.hex);
-    const chip=document.createElement("i");chip.className="peek-color-chip";chip.setAttribute("aria-hidden","true");
+    const miniCrate=document.createElement("i");miniCrate.className="peek-crate";miniCrate.setAttribute("aria-hidden","true");
     const meta=document.createElement("span");meta.className="peek-meta";
+    const colorName=document.createElement("small");colorName.className="peek-color-name";colorName.textContent=color.short;
     const count=document.createElement("small");count.className="peek-count";count.textContent=String(nextBox.ants)+" 🐜";
-    meta.append(count);peek.append(chip,meta);
+    meta.append(colorName,count);peek.append(miniCrate,meta);
     peek.title=`Следующий бокс №${row}: ${nextBox.ants} муравьёв`;peek.setAttribute("aria-label",`Бокс в очереди номер ${row}, цвет ${color.name}, ${nextBox.ants} муравьёв`);
    }else{
     const empty=document.createElement("span");empty.className="peek-empty-mark";empty.textContent="—";peek.append(empty);
@@ -539,16 +544,9 @@ async function runSlotWorker(move,workerId){
    if(box&&box.ants>0){
     box.ants--;
     if(box.ants===0){
-     if(box.pairId){
-      box.status="waiting-linked";
-      const partnerSlot=state.slots.findIndex((other,index)=>index!==slot&&other?.pairId===box.pairId);
-      if(partnerSlot>=0&&state.slots[partnerSlot]?.ants===0){
-       state.slots[partnerSlot].status="departing";box.status="departing";
-       completeBoxDeparture(state,slot);
-      }
-     }else{
-      box.status="departing";completeBoxDeparture(state,slot);
-     }
+     if(box.pairId)box.status="waiting-linked";
+     else box.status="departing";
+     completeBoxDeparture(state,slot);
     }
     state.activeSlots=[...new Set([...workerPromises.values()].map(worker=>worker.slot))];
     renderSlots();renderChoices();
