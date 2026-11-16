@@ -326,22 +326,24 @@ test("KT-103 draws a slower alternating tripod gait with subtle antennae and bod
  assert.ok(source.includes("Math.sin(phase*2+index*.31)*.34"));
 });
 
-test("game speed uses one accessible button cycling from 1x through 4x",()=>{
+test("game speed uses one accessible button cycling from 1x through 4x",async()=>{
  assert.match(html,/<button[^>]*id=["']speed-toggle["'][^>]*aria-valuetext=["']1×["']/);
  assert.match(html,/id=["']speed-current["']/);
  assert.match(app,/function cycleGameSpeed\(\)/);
  assert.match(app,/current>=4\?1:current\+1/);
  assert.match(app,/animationClock\.setSpeed\(value\)/);
- assert.match(anim,/\[1,2,3,4\]\.includes/);
+ const antAnimation=await readFile(new URL("../src/ant-animation.js",import.meta.url),"utf8");
+ assert.match(antAnimation,/\[1,2,3,4\]\.includes/);
 });
 
 
-test("KT-106 keeps the reserve queue still while ants leave active boxes",()=>{
+test("KT-106 keeps the reserve queue still while ants leave active boxes",async()=>{
  assert.ok(app.includes("function renderChoices(){\n choicesEl.replaceChildren();"));
  assert.doesNotMatch(app,/oldPositions/);
  assert.doesNotMatch(app,/button\.animate\(\[\{transform:/);
  const worker=app.slice(app.indexOf("async function runSlotWorker"),app.indexOf("function updateResultOverlay"));
  assert.doesNotMatch(worker,/renderSlots\(\);renderChoices\(\)/);
+ const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
  assert.ok(styles.includes("KT-106 —"));
  assert.match(styles,/\.choice-card\{min-height:[^}]*animation:none!important/);
  assert.match(styles,/\.slot\.active\{transform:none/);
@@ -373,5 +375,5 @@ test("KT-105 renders fully colored supply crates, visible chain hardware and a b
  assert.match(styles,/\.choice-card \.choice-crate \.sealed-plank\{/);
  assert.match(styles,/\.choice-card\.linked-box::after/);
  assert.match(styles,/@keyframes queue-crate-drop/);
- assert.match(html,/app-version" content="KT-105"/);
+ assert.match(html,/app-version" content="KT-106"/);
 });

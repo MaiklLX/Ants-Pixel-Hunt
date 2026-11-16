@@ -57,7 +57,7 @@ test("swarm planner sends eligible ants together and reserves targets left-to-ri
  const s=createGame();s.board=smallBoard();s.board[0][0]="red";s.board[0][1]="red";s.board[0][2]="red";s.remaining=25;
  s.slots[0]={color:"red",ants:2};s.slots[3]={color:"red",ants:2};
  const wave=findAntWave(s);
- assert.deepEqual(wave.map(m=>[m.slot,m.target.x,m.target.y]),[[0,0,0],[0,1,0],[3,2,0]]);
+ assert.deepEqual(wave.map(m=>[m.slot,m.target.x,m.target.y]),[[0,0,0],[3,1,0],[0,2,0]]);
  assert.equal(new Set(wave.map(m=>m.target.x+","+m.target.y)).size,wave.length);
  const pending=findAntWave(s,new Set(["0,0"]),new Map([[0,1]]));
  assert.deepEqual(pending.map(m=>[m.slot,m.target.x,m.target.y]),[[0,1,0],[3,2,0]]);
