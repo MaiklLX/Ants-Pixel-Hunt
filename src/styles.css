@@ -3423,3 +3423,85 @@ button:not(:disabled):active{filter:brightness(.96)}
 @media(max-width:599px){.main-menu .menu-level-card:not([hidden]){min-height:68px;padding:8px 10px;gap:9px;border-radius:14px}.main-menu .level-thumb{flex-basis:48px;width:48px;height:48px;font-size:28px}.main-menu .level-card-copy strong{font-size:12px}.main-menu .level-card-copy small{font-size:9px}.main-menu .level-play-mark{padding:7px 8px;font-size:9px}}
 @media(max-height:700px){.main-menu .menu-level-card:not([hidden]){min-height:62px;padding:7px 10px}}
 @media(prefers-reduced-motion:reduce){.main-menu .menu-level-card{transition:none}}
+
+
+/* KT-120 — fixed arena geometry and unnumbered, independent starter boxes. */
+.slots{
+ display:grid!important;
+ grid-template-columns:repeat(5,minmax(0,1fr))!important;
+ grid-auto-flow:column;
+ align-items:stretch;
+ width:100%;
+ min-width:0;
+}
+.slots>.slot{
+ width:100%;
+ min-width:0;
+ min-height:clamp(43px,6.4dvh,52px);
+ height:clamp(43px,6.4dvh,52px);
+ flex:none;
+}
+.slots .slot-number,.queue-peek .peek-order{display:none!important}
+.choices{
+ display:grid!important;
+ grid-template-columns:repeat(3,minmax(0,1fr))!important;
+ grid-template-rows:minmax(0,1fr);
+ align-items:start;
+ width:100%;
+ min-width:0;
+ min-height:clamp(142px,19dvh,164px);
+}
+.queue-lane{
+ display:flex;
+ flex-direction:column;
+ align-items:stretch;
+ justify-content:flex-start;
+ min-width:0;
+ min-height:clamp(142px,19dvh,164px);
+ height:clamp(142px,19dvh,164px);
+}
+.choice-card,.choice-card.empty-box{
+ box-sizing:border-box;
+ width:100%;
+ min-width:0;
+ min-height:clamp(76px,9dvh,82px);
+ height:clamp(76px,9dvh,82px);
+ flex:0 0 clamp(76px,9dvh,82px);
+}
+.queue-preview{
+ display:flex;
+ flex:1 0 auto;
+ flex-direction:column;
+ justify-content:flex-start;
+ align-items:stretch;
+ min-height:0;
+ height:clamp(58px,8dvh,72px);
+ gap:3px;
+}
+.queue-peek,.queue-peek.empty{
+ display:flex;
+ flex:0 0 clamp(26px,3.7dvh,34px);
+ align-items:center;
+ justify-content:center;
+ box-sizing:border-box;
+ width:100%;
+ min-width:0;
+ min-height:clamp(26px,3.7dvh,34px);
+ height:clamp(26px,3.7dvh,34px);
+}
+.queue-peek.empty{visibility:visible}
+@media(max-width:599px){
+ .slots{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:5px}
+ .slots>.slot{height:clamp(43px,6.4dvh,52px);min-height:clamp(43px,6.4dvh,52px)}
+ .choices{grid-template-columns:repeat(3,minmax(0,1fr))!important;min-height:clamp(136px,18dvh,154px)}
+ .queue-lane{height:clamp(136px,18dvh,154px);min-height:clamp(136px,18dvh,154px)}
+ .choice-card,.choice-card.empty-box{height:clamp(72px,8.8dvh,78px);min-height:clamp(72px,8.8dvh,78px);flex-basis:clamp(72px,8.8dvh,78px)}
+ .queue-preview{height:clamp(58px,8dvh,70px)}
+ .queue-peek,.queue-peek.empty{height:clamp(25px,3.5dvh,32px);min-height:clamp(25px,3.5dvh,32px);flex-basis:clamp(25px,3.5dvh,32px)}
+}
+@media(max-height:680px){
+ .choices,.queue-lane{height:clamp(124px,19dvh,140px);min-height:clamp(124px,19dvh,140px)}
+ .choice-card,.choice-card.empty-box{height:clamp(66px,9dvh,74px);min-height:clamp(66px,9dvh,74px);flex-basis:clamp(66px,9dvh,74px)}
+ .queue-preview{height:clamp(52px,8dvh,62px)}
+ .queue-peek,.queue-peek.empty{height:clamp(23px,3.4dvh,27px);min-height:clamp(23px,3.4dvh,27px);flex-basis:clamp(23px,3.4dvh,27px)}
+}
