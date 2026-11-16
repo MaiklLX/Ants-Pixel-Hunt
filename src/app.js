@@ -66,7 +66,7 @@ function renderMap(){
  const track=document.createElement("div");track.className="map-summary-track";const fill=document.createElement("span");fill.style.width=(finished/LEVELS.length*100)+"%";track.append(fill);
  const next=document.createElement("small");next.className="map-summary-next";next.textContent=finished===LEVELS.length?"Все маршруты пройдены — можно вернуться на любимую полянку":nextPlayable?"Следующая остановка · "+nextPlayable.name:"Доступно "+open+" из "+LEVELS.length+" полянок";
  const continueButton=document.createElement("button");continueButton.type="button";continueButton.className="map-continue";continueButton.textContent=nextPlayable?"Продолжить путь · "+nextPlayable.name:"Выбрать полянку";continueButton.disabled=!nextPlayable;continueButton.setAttribute("aria-label",nextPlayable?"Начать следующую доступную полянку: "+nextPlayable.name:"Все полянки пройдены");if(nextPlayable)continueButton.addEventListener("click",()=>{closeMap();void startFreshGame(nextPlayable.id);});summary.append(stat,track,next,continueButton);
- list.replaceChildren();
+ list.replaceChildren();const chapterNav=$("map-chapter-nav");chapterNav.replaceChildren();
  const chapters=[];for(const level of LEVELS){let group=chapters.find(item=>item.name===level.chapter);if(!group){group={name:level.chapter,levels:[]};chapters.push(group);}group.levels.push(level);}
  for(let index=0;index<chapters.length;index++){
   const chapter=chapters[index],section=document.createElement("section");section.className="map-chapter";section.id="campaign-chapter-"+index;
