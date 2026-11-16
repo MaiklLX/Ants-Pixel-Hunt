@@ -358,16 +358,14 @@ export function normalizeLinkedTray(state){
   return null;
  };
  const first=locate(pair[0]),second=locate(pair[1]);
- if(!first||!second)return false;
- if(first.row!==0&&second.row!==0)return false;
- if(first.row===0&&second.row===0)return first.col!==second.col;
- const anchor=first.row===0?first:second;
- const moving=first.row===0?second:first;
- const targetCol=[0,1,2].find(col=>col!==anchor.col);
+ if(!first||!second||first.col!==second.col)return false;
+ // Keep each crate at its existing queue depth; only move the partner sideways
+ // when both linked crates would otherwise share one vertical lane.
+ const targetCol=[0,1,2].find(col=>col!==first.col);
  if(targetCol===undefined)return false;
- const displaced=state.tray[0][targetCol];
- state.tray[0][targetCol]=moving.index;
- state.tray[moving.row][moving.col]=displaced;
+ const moving=second,displaced=state.tray[moving.row][targetCol];
+ state.tray[moving.row][targetCol]=moving.index;
+ state.tray[moving.row][first.col]=displaced;
  return true;
 }
 export function chooseTopColumn(state,column){
