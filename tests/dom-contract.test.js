@@ -612,3 +612,22 @@ test("KT-122 reshapes the main menu into an organic forest hub with a two-column
  assert.match(html,/id="map-open"/);
  assert.match(html,/id="nest-open"/);
 });
+
+
+test("KT-123 makes the campaign map scrollable and adds chapter shortcuts plus a continue action",async()=>{
+ const app=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
+ const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
+ const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
+ const visual=styles.slice(styles.indexOf("KT-123 —"));
+ assert.match(html,/app-version" content="KT-123"/);
+ assert.match(html,/id="map-chapter-nav"[^>]*aria-label="Переход к главе кампании"/);
+ assert.match(visual,/.map-overlay{[\s\S]*?overflow-y:auto[\s\S]*?touch-action:pan-y/);
+ assert.match(visual,/.map-card{[\s\S]*?max-height:none[\s\S]*?overflow:visible/);
+ assert.match(visual,/.map-chapter-nav{[\s\S]*?overflow-x:auto/);
+ assert.match(visual,/.map-continue{/);
+ assert.match(app,/continueButton.addEventListener\("click"/);
+ assert.match(app,/chapterNav.append\(jump\)/);
+ assert.match(app,/nextStop.scrollIntoView/);
+ assert.match(app,/data-level-id/);
+ assert.match(visual,/@media\(prefers-reduced-motion:reduce\)/);
+});
