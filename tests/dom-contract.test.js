@@ -578,3 +578,20 @@ test("KT-120 removes visual queue numbers and preserves fixed five-slot and thre
  assert.match(visual,/\.slots \.slot-number,\.queue-peek \.peek-order\{display:none!important\}/);
  assert.match(html,/app-version" content="KT-120"/);
 });
+
+
+test("KT-121 gives the main menu a layered forest atmosphere while preserving its navigation",async()=>{
+ const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
+ const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
+ const visual=styles.slice(styles.indexOf("KT-121 —"));
+ assert.match(html,/app-version" content="KT-121"/);
+ assert.match(visual,/.main-menu::after\{[\s\S]*?pointer-events:none/);
+ assert.match(visual,/.menu-garden::before\{[\s\S]*?linear-gradient/);
+ assert.match(visual,/.menu-garden::after\{[\s\S]*?border:1px solid/);
+ assert.match(visual,/.menu-level-card\{[\s\S]*?box-shadow/);
+ assert.match(visual,/.hub-location\{[\s\S]*?background:linear-gradient/);
+ assert.match(visual,/@media\(prefers-reduced-motion:reduce\)/);
+ assert.match(html,/id="menu-current-level"/);
+ assert.match(html,/id="map-open"/);
+ assert.match(html,/id="nest-open"/);
+});
