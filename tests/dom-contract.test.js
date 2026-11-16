@@ -455,3 +455,15 @@ test("KT-112 gives the anthill entrance layered woodland materials without chang
  assert.match(entrance,/@media\(prefers-reduced-motion:reduce\)/);
  assert.doesNotMatch(entrance,/\.nest-return-section\s*\{/);
 });
+
+
+test("KT-113 gives the playfield frame a restrained carved-wood and moss finish", async()=>{
+ const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
+ const frame=styles.slice(styles.indexOf("KT-113 —"));
+ assert.match(frame,/repeating-linear-gradient\(101deg/);
+ assert.match(frame,/radial-gradient\(ellipse at 18% 12%/);
+ assert.match(frame,/\.board-wrap::after/);
+ assert.match(frame,/pointer-events:none/);
+ assert.match(frame,/@media\(prefers-reduced-motion:reduce\)/);
+ assert.doesNotMatch(frame,/\.board\s*\{/);
+});

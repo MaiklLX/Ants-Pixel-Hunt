@@ -3092,3 +3092,27 @@ button:not(:disabled):active{filter:brightness(.96)}
 @media(prefers-reduced-motion:reduce){
  .nest-mouth{animation:none!important}
 }
+
+
+/* KT-113 — a quiet carved-wood and moss finish around the playfield. */
+.board-wrap{
+ background:
+  repeating-linear-gradient(101deg,transparent 0 13px,#d6c28a0a 13px 14px,#0a160d12 14px 20px),
+  radial-gradient(ellipse at 18% 12%,#b7c68a20,transparent 34%),
+  radial-gradient(ellipse at 82% 88%,#b68f5940,transparent 38%),
+  linear-gradient(145deg,#52664a 0%,#344b39 22%,#263d30 54%,#40543c 82%,#263a2e 100%);
+ box-shadow:
+  0 1px 0 #82916a,
+  0 7px 0 #14241b,
+  0 13px 28px #07130dcc,
+  inset 0 1px 0 #ffffff2b,
+  inset 0 -3px 5px #0a180f66;
+}
+.board-wrap::after{
+ content:"";position:absolute;z-index:2;inset:3px;border:1px solid #d7c58a35;
+ border-radius:12px;pointer-events:none;
+ box-shadow:inset 0 1px 2px #ffffff18,inset 0 -2px 3px #07150d33;
+}
+@media(prefers-reduced-motion:reduce){
+ .board-wrap::before,.board-wrap::after{animation:none!important}
+}
