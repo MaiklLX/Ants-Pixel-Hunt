@@ -514,3 +514,17 @@ test("KT-116 gives queue crates descending sizes and animates stable boxes upwar
  assert.match(visual,/transition:transform 460ms/);
  assert.match(visual,/@media\(prefers-reduced-motion:reduce\)/);
 });
+
+
+test("KT-117 makes ant counts prominent and consistently legible across active slots and both queue depths",async()=>{
+ const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
+ const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
+ const visual=styles.slice(styles.indexOf("KT-117 —"));
+ assert.match(visual,/\.slots \.slot\.filled \.ant-count\{[\s\S]*?font-size:clamp\(12px/);
+ assert.match(visual,/\.slots \.slot\.filled \.ant-count::after\{[\s\S]*?content:"🐜"/);
+ assert.match(visual,/\.choice-card \.box-count\{[\s\S]*?border-radius:999px/);
+ assert.match(visual,/\.queue-peek \.peek-count\{[\s\S]*?font-variant-numeric:tabular-nums/);
+ assert.match(visual,/\.section-line #queue-count\{[\s\S]*?border-radius:999px/);
+ assert.match(visual,/@media\(max-width:599px\)/);
+ assert.match(html,/app-version" content="KT-117"/);
+});
