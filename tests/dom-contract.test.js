@@ -337,6 +337,14 @@ test("game speed uses one accessible button cycling from 1x through 4x",async()=
 });
 
 
+test("KT-107 releases dispatch capacity as soon as an ant starts returning",()=>{
+ assert.match(app,/countDispatchingWorkers\(workerPromises\)/);
+ assert.match(app,/worker\.phase="returning"/);
+ assert.match(app,/worker\.phase="outbound"/);
+ assert.match(game,/worker\.phase==="queued"\|\|worker\.phase==="outbound"/);
+});
+
+
 test("KT-106 keeps the reserve queue still while ants leave active boxes",async()=>{
  assert.ok(app.includes("function renderChoices(){\n choicesEl.replaceChildren();"));
  assert.doesNotMatch(app,/oldPositions/);
@@ -376,5 +384,5 @@ test("KT-105 renders fully colored supply crates, visible chain hardware and a b
  assert.match(styles,/\.choice-card \.choice-crate \.sealed-plank\{/);
  assert.match(styles,/\.choice-card\.linked-box::after/);
  assert.match(styles,/@keyframes queue-crate-drop/);
- assert.match(html,/app-version" content="KT-106"/);
+ assert.match(html,/app-version" content="KT-107"/);
 });

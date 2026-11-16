@@ -1,4 +1,4 @@
-import {COLORS,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,LEVELS,getLevel,getIncoming,createGame,canChoose,chooseTopColumn,isLockedBox,getLinkedPartner,findAntWave,applyAntPickup,completeBoxDeparture,isDefeat,getExposedPixels,countQueuedBySlot,countSlotWorkers} from "./game.js";
+import {COLORS,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,LEVELS,getLevel,getIncoming,createGame,canChoose,chooseTopColumn,isLockedBox,getLinkedPartner,findAntWave,applyAntPickup,completeBoxDeparture,isDefeat,getExposedPixels,countQueuedBySlot,countDispatchingWorkers,countSlotWorkers} from "./game.js";
 import {getAntTripFrame,getAntLaunchDelay,getAntQueueDelay,createPausableClock,getTrailPose,getAntTravelDurations,getAntGaitFrame} from "./ant-animation.js";
 import {isCampaignLevelUnlocked,getNextCampaignLevel} from "./campaign.js";
 import {BUILDINGS,createEconomy,normalizeEconomy,collectCube,completeMeadow,purchaseBuilding,buildingCost} from "./economy.js";
@@ -584,7 +584,7 @@ function settleColony(){
 function kickColony(){
  if(resetting||resetAfterMenu||state.won||state.lost)return;
  const pendingBySlot=countQueuedBySlot(workerPromises);
- const dispatchCapacity=Math.max(0,MAX_ACTIVE_ANTS-workerPromises.size);
+ const dispatchCapacity=Math.max(0,MAX_ACTIVE_ANTS-countDispatchingWorkers(workerPromises));
  const wave=findAntWave(state,reservedTargets,pendingBySlot,dispatchCapacity);
  const now=animationClock.now();
  for(const move of wave){

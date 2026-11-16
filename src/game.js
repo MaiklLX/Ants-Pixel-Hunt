@@ -345,6 +345,12 @@ export function countQueuedBySlot(workers){
  for(const worker of workers.values())if(worker.phase==="queued")pending.set(worker.slot,(pending.get(worker.slot)||0)+1);
  return pending;
 }
+/** Queued and outbound ants occupy dispatch capacity; returning ants do not. */
+export function countDispatchingWorkers(workers){
+ let count=0;
+ for(const worker of workers.values())if(worker.phase==="queued"||worker.phase==="outbound")count++;
+ return count;
+}
 export function countSlotWorkers(workers,slot){
  let count=0;for(const worker of workers.values())if(worker.slot===slot)count++;
  return count;
