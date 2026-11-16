@@ -200,7 +200,7 @@ function captureQueuePositions(){
  const positions=new Map();
  choicesEl.querySelectorAll("[data-queue-key]").forEach(element=>{
   const rect=element.getBoundingClientRect();
-  positions.set(element.dataset.queueKey,{top:rect.top,left:rect.left});
+  positions.set(element.dataset.queueKey,{top:rect.top,left:rect.left,step:Number(element.dataset.queueStep||0)});
  });
  return positions;
 }
@@ -213,13 +213,15 @@ function animateQueueReflow(previousPositions){
   const rect=element.getBoundingClientRect(),dy=previous.top-rect.top,dx=previous.left-rect.left;
   if(Math.abs(dx)<1&&Math.abs(dy)<1)return;
   element.style.transition="none";
+  element.style.transitionDelay="0ms";
   element.style.transform=`translate(${dx}px,${dy}px)`;
-  moving.push(element);
+  moving.push({element,delay:Math.max(0,(previous.step-1)*55)});
  });
  if(!moving.length)return;
  choicesEl.getBoundingClientRect();
- requestAnimationFrame(()=>moving.forEach(element=>{
-  element.style.transition="transform 460ms cubic-bezier(.2,.78,.24,1)";
+ requestAnimationFrame(()=>moving.forEach(({element,delay})=>{
+  element.style.transition="transform 760ms cubic-bezier(.22,.72,.18,1)";
+  element.style.transitionDelay=delay+"ms";
   element.style.transform="";
  }));
 }
