@@ -54,7 +54,7 @@ function renderNest(){
 }
 function openNest(){renderNest();$("nest-overlay").hidden=false;}
 function closeNest(){$("nest-overlay").hidden=true;}
-function openMap(){renderMap();$("map-overlay").hidden=false;}
+function openMap(){renderMap();$("map-overlay").hidden=false;const nextStop=$("campaign-levels").querySelector(".next-stop");if(nextStop)requestAnimationFrame(()=>nextStop.scrollIntoView({block:"center",behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"}));}
 function renderMap(){
  const done=completedLevels(),summary=$("map-summary"),list=$("campaign-levels");
  const finished=LEVELS.filter(level=>done.has(level.id)).length,open=LEVELS.filter(level=>isLevelUnlocked(level)).length;
@@ -65,7 +65,7 @@ function renderMap(){
  const copy=document.createElement("span");copy.textContent="полянок пройдено";stat.append(count,copy);
  const track=document.createElement("div");track.className="map-summary-track";const fill=document.createElement("span");fill.style.width=(finished/LEVELS.length*100)+"%";track.append(fill);
  const next=document.createElement("small");next.className="map-summary-next";next.textContent=finished===LEVELS.length?"Все маршруты пройдены — можно вернуться на любимую полянку":nextPlayable?"Следующая остановка · "+nextPlayable.name:"Доступно "+open+" из "+LEVELS.length+" полянок";
- summary.append(stat,track,next);
+ const continueButton=document.createElement("button");continueButton.type="button";continueButton.className="map-continue";continueButton.textContent=nextPlayable?"Продолжить путь · "+nextPlayable.name:"Выбрать полянку";continueButton.disabled=!nextPlayable;continueButton.setAttribute("aria-label",nextPlayable?"Начать следующую доступную полянку: "+nextPlayable.name:"Все полянки пройдены");if(nextPlayable)continueButton.addEventListener("click",()=>{closeMap();void startFreshGame(nextPlayable.id);});summary.append(stat,track,next,continueButton);
  list.replaceChildren();
  const chapters=[];for(const level of LEVELS){let group=chapters.find(item=>item.name===level.chapter);if(!group){group={name:level.chapter,levels:[]};chapters.push(group);}group.levels.push(level);}
  for(let index=0;index<chapters.length;index++){
@@ -85,7 +85,7 @@ function renderMap(){
    const isNext=nextPlayable?.id===item.id;
    button.className="campaign-level"+(item.id===state.levelId?" current":"")+(completed?" completed":"")+(isNext?" next-stop":"")+(unlocked?"":" locked");button.disabled=!unlocked;
    button.setAttribute("aria-label",`Полянка ${item.number}: ${item.name}. ${completed?"Пройдена":unlocked?(isNext?"Следующая доступная полянка":"Доступна"):"Пока закрыта"}`);
-   const icon=document.createElement("span");icon.className="campaign-emoji";icon.textContent=completed?"✓":unlocked?item.emoji:"🔒";
+   button.dataset.levelId=String(item.id);const icon=document.createElement("span");icon.className="campaign-emoji";icon.textContent=completed?"✓":unlocked?item.emoji:"🔒";
    const copy=document.createElement("span");copy.className="campaign-copy";
    const number=document.createElement("small");number.textContent=`ПОЛЯНКА ${String(item.number).padStart(2,"0")}`;
    const name=document.createElement("strong");name.textContent=item.name;
