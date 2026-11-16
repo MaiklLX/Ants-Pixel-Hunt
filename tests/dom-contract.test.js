@@ -506,7 +506,8 @@ test("KT-116 gives queue crates descending sizes and animates stable boxes upwar
  assert.match(source,/data-queue-key/);
  assert.match(source,/previous\.top-rect\.top/);
  assert.match(source,/requestAnimationFrame/);
- assert.match(source,/animateQueueReflow\(previousPositions\)/);\n assert.match(source,/peek\.dataset\.queueStep=String\(row\)/);
+ assert.match(source,/animateQueueReflow\(previousPositions\)/);
+ assert.match(source,/peek\.dataset\.queueStep=String\(row\)/);
  const visual=styles.slice(styles.indexOf("KT-116 —"));
  assert.match(visual,/\.queue-peek\[data-queue-step="1"\] \.peek-crate/);
  assert.match(visual,/\.queue-peek\[data-queue-step="2"\] \.peek-crate/);
