@@ -423,7 +423,7 @@ test("the seventh firefly meadow has five exact color budgets and a fully solvab
 
 test("runtime pickup removes the block without consuming another ant from the source box",()=>{
  const s=createGame();const box=getIncoming(s.levelId).find(item=>item.color==="green");
- const slot=0,target=getExposedPixels(s.board)[0];s.slots[slot]={...box,ants:7};
+ const slot=0,target=getExposedPixels(s.board).find(({x,y})=>s.board[y][x]===box.color);s.slots[slot]={...box,ants:7};
  const before=s.remaining;
  assert.equal(applyAntPickup(s,slot,target,box.color),true);
  assert.equal(s.remaining,before-1);assert.equal(s.slots[slot].ants,7);
