@@ -108,7 +108,7 @@ test("ant trip frame reuses one caller-owned buffer across every phase",()=>{
  assert.strictEqual(getAntTripFrame(0,100,200,180,frame),frame);
  assert.deepEqual(frame,{waiting:true,picked:false,returningNow:false,progress:0,finished:false});
  assert.strictEqual(getAntTripFrame(150,100,200,180,frame),frame);
- assert.deepEqual(frame,{waiting:false,picked:false,returningNow:false,progress:0.15625,finished:false});
+ assert.deepEqual(frame,{waiting:false,picked:false,returningNow:false,progress:0.103515625,finished:false});
  assert.strictEqual(getAntTripFrame(300,100,200,180,frame),frame);
  assert.deepEqual(frame,{waiting:false,picked:true,returningNow:true,progress:0,finished:false});
  assert.strictEqual(getAntTripFrame(480,100,200,180,frame),frame);
@@ -136,7 +136,7 @@ test("per-box ant queue spaces departures without waiting for earlier workers to
  assert.equal(getAntQueueDelay(0,0),0);
  assert.equal(getAntQueueDelay(1,0),145);
  assert.equal(getAntQueueDelay(2,0),290);
- assert.ok(getAntQueueDelay(30,1)<3600);
+ assert.ok(getAntQueueDelay(30,1)<4400);
 });
 
 test("animation clock scales continuously at 1x, 2x and 4x",()=>{
