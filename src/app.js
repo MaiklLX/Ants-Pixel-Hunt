@@ -1,5 +1,5 @@
 import {COLORS,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,LEVELS,getLevel,getIncoming,createGame,canChoose,chooseTopColumn,isLockedBox,getLinkedPartner,findAntWave,applyAntPickup,completeBoxDeparture,isDefeat,getExposedPixels,countQueuedBySlot,countSlotWorkers} from "./game.js";
-import {getAntTripFrame,getAntLaunchDelay,getAntQueueDelay,createPausableClock,getTrailPose} from "./ant-animation.js";
+import {getAntTripFrame,getAntLaunchDelay,getAntQueueDelay,createPausableClock,getTrailPose,getAntTravelDurations} from "./ant-animation.js";
 import {isCampaignLevelUnlocked,getNextCampaignLevel} from "./campaign.js";
 import {BUILDINGS,createEconomy,normalizeEconomy,collectCube,completeMeadow,purchaseBuilding,buildingCost} from "./economy.js";
 const $=id=>document.getElementById(id);
@@ -439,7 +439,7 @@ function animateAntTrip(move,index,onPickup=()=>{},onLaunch=()=>{}){
  const outboundTrail=makePerimeterTrail(start,end,seed),returnTrail=makePerimeterTrail(end,nest,(seed+.371)%1);
  const distance=outboundTrail.reduce((sum,point,i)=>i?sum+Math.hypot(point.x-outboundTrail[i-1].x,point.y-outboundTrail[i-1].y):0,0);
  const returnDistance=returnTrail.reduce((sum,point,i)=>i?sum+Math.hypot(point.x-returnTrail[i-1].x,point.y-returnTrail[i-1].y):0,0);
- const delay=move.launchDelay??getAntLaunchDelay(index,seed),outbound=2900+distance*.76,returning=2650+returnDistance*.7;
+ const delay=move.launchDelay??getAntLaunchDelay(index,seed),{outbound,returning}=getAntTravelDurations(distance,returnDistance);
  return new Promise(resolve=>{
   activeAnts.set(index,{move,onPickup,onLaunch,resolve,startTime:animationClock.now(),delay,outbound,returning,outboundTrail,returnTrail,phaseFrame:{},pose:{x:0,y:0,angle:0},launched:false});
   if(!antFrame)antFrame=requestAnimationFrame(renderAntFrame);
