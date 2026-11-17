@@ -1,11 +1,11 @@
-import {COLORS,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,LEVELS,getLevel,getIncoming,createGame,canChoose,chooseTopColumn,isLockedBox,getLinkedPartner,findAntWave,applyAntPickup,completeBoxDeparture,isDefeat,getExposedPixels,countQueuedBySlot,countDispatchingWorkers,countSlotWorkers} from "./game.js";
+import {COLORS,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,LEVELS,getLevel,getIncoming,createGame,canChoose,chooseTopColumn,isLockedBox,getLinkedPartner,findAntWave,applyAntPickup,completeBoxDeparture,isDefeat,isGameComplete,getExposedTargets,getExposedPixels,countQueuedBySlot,countDispatchingWorkers,countSlotWorkers} from "./game.js";
 import {getAntTripFrame,getAntLaunchDelay,getAntQueueDelay,createPausableClock,getTrailPose,getAntTravelDurations,getAntGaitFrame} from "./ant-animation.js";
 import {isCampaignLevelUnlocked,getNextCampaignLevel} from "./campaign.js";
 import {BUILDINGS,createEconomy,normalizeEconomy,collectCube,completeMeadow,purchaseBuilding,buildingCost} from "./economy.js";
 const $=id=>document.getElementById(id);
 const shell=$("app-shell"),boardEl=$("board"),slotsEl=$("slots"),choicesEl=$("choices"),antLayer=$("ant-layer"),nestEntrance=$("nest-entrance");
 const boardCtx=boardEl.getContext("2d"),antCtx=antLayer.getContext("2d");
-let state=createGame(),resolverRunning=false,resetting=false,resetAfterMenu=false,antFrame=0,antCanvasWidth=0,antCanvasHeight=0,gameStarted=false,totalBlocks=state.remaining;
+let state=createGame(),resolverRunning=false,resetting=false,resetAfterMenu=false,antFrame=0,antCanvasWidth=0,antCanvasHeight=0,gameStarted=false,totalBlocks=state.remaining+(state.obstacles||[]).reduce((sum,item)=>sum+item.hp,0);
 const animationClock=createPausableClock(()=>performance.now());
 if(document.hidden)animationClock.pause();
 document.addEventListener("visibilitychange",()=>{
@@ -112,9 +112,15 @@ let workerSequence=0,lastAntFrameAt=0,lastExposedPixels=new Set();
 const MAX_ACTIVE_ANTS=36,ANT_FRAME_INTERVAL=1000/60;
 const colorRGB=Object.fromEntries(Object.entries(COLORS).map(([key,value])=>[key,value.hex.match(/[\da-f]{2}/gi).map(v=>parseInt(v,16))]));
 let boardEmptyGradient=null;
+function tasksRemaining(){
+ return state.remaining+(state.obstacles||[]).reduce((sum,item)=>sum+item.hp,0);
+}
 function updateBoardProgress(){
- $("board-status").textContent=`Осталось: ${state.remaining.toLocaleString("ru-RU")}`;
- const collected=totalBlocks-state.remaining,percent=Math.round(collected/totalBlocks*100);
+ const obstacleCount=(state.obstacles||[]).length;
+ $("board-status").textContent=obstacleCount
+  ? `Осталось: ${state.remaining.toLocaleString("ru-RU")} блоков · преград: ${obstacleCount}`
+  : `Осталось: ${state.remaining.toLocaleString("ru-RU")}`;
+ const collected=totalBlocks-tasksRemaining(),percent=Math.round(collected/Math.max(1,totalBlocks)*100);
  const progress=$("progress-fill"),track=progress?.parentElement;
  if(progress)progress.style.width=percent+"%";
  if(track)track.setAttribute("aria-valuenow",String(percent));
@@ -139,8 +145,11 @@ function drawBoardGroundCell(x,y,cell){
  }
  boardCtx.restore();
 }
+function obstacleAt(x,y){
+ return (state.obstacles||[]).find(item=>item.x===x&&item.y===y)||null;
+}
 function drawBoardTile(x,y,exposed,cell){
- const color=state.board[y][x];if(!color)return;
+ const color=state.board[y][x];if(!color||obstacleAt(x,y))return;
  const px=x*cell,py=y*cell,size=cell-1.25,rgb=COLORS[color].hex;
  boardCtx.save();
  boardCtx.shadowColor="#07150f66";boardCtx.shadowBlur=2.3;boardCtx.shadowOffsetY=1.4;
@@ -155,6 +164,28 @@ function drawBoardTile(x,y,exposed,cell){
  if(exposed){boardCtx.strokeStyle="#d6bd78cc";boardCtx.lineWidth=.85;boardCtx.beginPath();boardCtx.roundRect(px+1.25,py+1.1,size-2.3,size-2.3,1.5);boardCtx.stroke();}
  boardCtx.restore();
 }
+function drawBoardObstacle(obstacle,exposed,cell){
+ const px=obstacle.x*cell,py=obstacle.y*cell,remaining=obstacle.hp;
+ boardCtx.save();
+ if(obstacle.role==="builder"){
+  boardCtx.fillStyle="#8b6240";boardCtx.strokeStyle="#d7b47a";boardCtx.lineWidth=.8;
+  boardCtx.beginPath();boardCtx.roundRect(px+1,py+1,cell-2,cell-2,2);boardCtx.fill();boardCtx.stroke();
+  boardCtx.strokeStyle="#5b3d2a";boardCtx.lineWidth=1;
+  boardCtx.beginPath();boardCtx.moveTo(px+2,py+cell*.34);boardCtx.lineTo(px+cell-2,py+cell*.34);boardCtx.moveTo(px+2,py+cell*.68);boardCtx.lineTo(px+cell-2,py+cell*.68);boardCtx.stroke();
+  boardCtx.fillStyle="#f3d8a3";boardCtx.font=`bold ${Math.max(6,cell*.68)}px system-ui`;boardCtx.textAlign="center";boardCtx.textBaseline="middle";boardCtx.fillText("⚒",px+cell/2,py+cell/2);
+ }else{
+  boardCtx.fillStyle="#283b2d";boardCtx.strokeStyle="#d8a65c";boardCtx.lineWidth=.8;
+  boardCtx.beginPath();boardCtx.ellipse(px+cell/2,py+cell/2,cell*.39,cell*.43,-.15,0,Math.PI*2);boardCtx.fill();boardCtx.stroke();
+  boardCtx.fillStyle="#bd5949";boardCtx.beginPath();boardCtx.ellipse(px+cell/2,py+cell*.47,cell*.27,cell*.31,-.15,0,Math.PI*2);boardCtx.fill();
+  boardCtx.strokeStyle="#1a2a20";boardCtx.lineWidth=.65;boardCtx.beginPath();boardCtx.moveTo(px+cell/2,py+cell*.2);boardCtx.lineTo(px+cell/2,py+cell*.76);boardCtx.stroke();
+  boardCtx.fillStyle="#f6e2a7";boardCtx.beginPath();boardCtx.arc(px+cell*.38,py+cell*.38,.8,0,Math.PI*2);boardCtx.arc(px+cell*.62,py+cell*.38,.8,0,Math.PI*2);boardCtx.fill();
+ }
+ if(remaining<obstacle.maxHp){
+  boardCtx.strokeStyle="#f4e5c4";boardCtx.lineWidth=.8;boardCtx.beginPath();boardCtx.moveTo(px+cell*.2,py+cell*.18);boardCtx.lineTo(px+cell*.45,py+cell*.45);boardCtx.lineTo(px+cell*.34,py+cell*.7);boardCtx.stroke();
+ }
+ if(exposed){boardCtx.strokeStyle="#f0c66f";boardCtx.lineWidth=1;boardCtx.strokeRect(px+.8,py+.8,cell-1.6,cell-1.6);}
+ boardCtx.restore();
+}
 function renderBoard(){
  const width=boardEl.width,height=boardEl.height,cell=width/SIZE;
  boardCtx.clearRect(0,0,width,height);
@@ -165,17 +196,21 @@ function renderBoard(){
  boardCtx.save();boardCtx.strokeStyle="#a6c3a02a";boardCtx.lineWidth=.55;
  for(let i=0;i<=SIZE;i++){const p=i*cell+.5;boardCtx.beginPath();boardCtx.moveTo(p,0);boardCtx.lineTo(p,height);boardCtx.stroke();boardCtx.beginPath();boardCtx.moveTo(0,p);boardCtx.lineTo(width,p);boardCtx.stroke();}
  boardCtx.restore();
- lastExposedPixels=new Set(getExposedPixels(state.board).map(point=>point.x+","+point.y));
+ const targets=getExposedTargets(state);
+ lastExposedPixels=new Set(targets.filter(item=>item.kind==="pixel").map(point=>point.x+","+point.y));
  for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)drawBoardTile(x,y,lastExposedPixels.has(x+","+y),cell);
+ const exposedObstacles=new Set(targets.filter(item=>item.kind==="obstacle").map(item=>item.x+","+item.y));
+ for(const obstacle of state.obstacles||[])drawBoardObstacle(obstacle,exposedObstacles.has(obstacle.x+","+obstacle.y),cell);
  updateBoardProgress();
 }
 function renderBoardAfterPickup(target){
+ if(target.kind==="obstacle"){renderBoard();return;}
  const cell=boardEl.width/SIZE,px=target.x*cell,py=target.y*cell;
  boardCtx.save();boardCtx.beginPath();boardCtx.rect(px-2,py-2,cell+4,cell+4);boardCtx.clip();
  boardCtx.fillStyle=boardEmptyGradient||"#20372c";boardCtx.fillRect(px-2,py-2,cell+4,cell+4);boardCtx.restore();
  drawBoardGroundCell(target.x,target.y,cell);
  drawBoardGridCell(target.x,target.y,cell);
- const nextExposed=new Set(getExposedPixels(state.board).map(point=>point.x+","+point.y));
+ const nextExposed=new Set(getExposedTargets(state).filter(item=>item.kind==="pixel").map(point=>point.x+","+point.y));
  for(const key of nextExposed){
   if(lastExposedPixels.has(key))continue;
   const [x,y]=key.split(",").map(Number);drawBoardTile(x,y,true,cell);
@@ -186,8 +221,9 @@ function renderSlots(){
  slotsEl.replaceChildren();
  state.slots.forEach((box,index)=>{
   const slot=document.createElement("div");
+  const roleName=box?.role==="builder"?"строители":box?.role==="warrior"?"военные":null;
   slot.setAttribute("aria-label",box
-   ? `Отсек ${index+1}: ${box.status==="departing"?"бокс отправляется":box.ants+" муравьёв, цвет "+box.color}`
+   ? `Отсек ${index+1}: ${box.status==="departing"?"бокс отправляется":box.ants+" муравьёв, "+(roleName||("цвет "+box.color))}`
    : `Отсек ${index+1}: свободен`);
   slot.style.setProperty("--box-color",box?COLORS[box.color].hex:"#d8e5d2");
   slot.className="slot"+(box?" filled":"")+(box?.status==="departing"?" departing":"")+(box?.status==="waiting-linked"?" linked-waiting":"")+(box?.special==="linked"?" linked-member":"")+(loadingSlots.has(index)?" loading":"")+((state.activeSlots?.includes(index))?" active":"");
@@ -253,11 +289,12 @@ function renderChoices(){
    button.setAttribute("aria-label",`Закрытый бокс, прогресс открытия ${(state.lockProgressColumns||[]).length} из 2`);
   }else if(box){button.style.setProperty("--ant-color",COLORS[box.color].hex);
    if(linked){button.classList.add("linked-box");const chain=document.createElement("span");chain.className="linked-mark";chain.textContent="⛓";button.append(chain);button.title=blockedByPair?"Сначала выбери первый связанный бокс":waitingForPartner?"Связанный бокс появится в верхнем ряду позже":needsPairSlots?"Для пары нужны два свободных отсека":"Связанная пара: после этого бокса выбери второй";}
-   const crate=document.createElement("span");crate.className="choice-crate";crate.setAttribute("aria-hidden","true");
-   const gem=document.createElement("i");gem.style.setProperty("--gem-color",COLORS[box.color].hex);crate.append(gem);
-   const colorName=document.createElement("span");colorName.className="box-color-name";colorName.textContent=COLORS[box.color].name;
+   const crate=document.createElement("span");crate.className="choice-crate"+(box.role?" specialist-crate":"");crate.setAttribute("aria-hidden","true");
+   if(box.role){const mark=document.createElement("b");mark.textContent=box.role==="builder"?"⚒":"⚔";crate.append(mark);}
+   else{const gem=document.createElement("i");gem.style.setProperty("--gem-color",COLORS[box.color].hex);crate.append(gem);}
+   const colorName=document.createElement("span");colorName.className="box-color-name";colorName.textContent=box.role==="builder"?"Строители":box.role==="warrior"?"Военные":COLORS[box.color].name;
    const count=document.createElement("small");count.className="box-count";count.textContent=`${box.ants.toLocaleString("ru-RU")} 🐜`;
-   button.append(crate,colorName,count);button.setAttribute("aria-label",`${linked?"Связанный бокс. ":""}Выбрать бокс: ${box.ants} муравьёв`);
+   button.append(crate,colorName,count);button.setAttribute("aria-label",`${linked?"Связанный бокс. ":""}${box.role?"Бокс: "+colorName.textContent+". ":"Выбрать бокс: "}${box.ants} муравьёв`);
   }else{button.textContent="Очередь закончилась";button.setAttribute("aria-label","В этой колонке больше нет боксов");}
   button.addEventListener("click",()=>onChoose(col));lane.append(button);
   const preview=document.createElement("div");preview.className="queue-preview";preview.setAttribute("aria-label","Следующие боксы в колонке");
@@ -493,7 +530,7 @@ function renderAntFrame(timestamp){
   }
   if(phase.picked&&!ant.picked){
    ant.picked=true;
-   if(applyAntPickup(state,ant.move.slot,ant.move.target,ant.move.color)){
+   if(applyAntPickup(state,ant.move.slot,ant.move.target,ant.move.color,ant.move.role)){
     ant.onPickup();ant.delivered=true;
     const pickupPoint=cellCenter(ant.move.target.x,ant.move.target.y);
     pickupEffects.push({x:pickupPoint.x,y:pickupPoint.y,color:ant.move.color,startedAt:clockTime,seed:workerId*.618});
@@ -635,7 +672,7 @@ function updateResultOverlay(){
 }
 function settleColony(){
  if(resolverRunning||workerPromises.size||loadingSlots.size||resetting)return;
- if(state.remaining===0){if(!state.won){markLevelComplete(state.levelId);colony=completeMeadow(colony);updateEconomy();}state.won=true;state.message="Победа! Портрет собран ✨";}
+ if(isGameComplete(state)){if(!state.won){markLevelComplete(state.levelId);colony=completeMeadow(colony);updateEconomy();}state.won=true;state.message="Победа! Портрет собран ✨";}
  else if(isDefeat(state)){state.lost=true;state.message="Поражение: все пять стартовых отсеков заняты, доступных пикселей нет.";}
  else state.message=`Колония ждёт подходящий цвет · свободно отсеков: ${state.slots.filter(box=>!box).length}`;
  render();
@@ -746,11 +783,11 @@ function startGame(){
 }
 async function startFreshGame(levelId=state.levelId){
  if(workerPromises.size>0||loadingSlots.size>0||resetAfterMenu)return;
- resetting=true;cancelAnimationFrame(antFrame);activeAnts.clear();pickupEffects.length=0;deliveryEffects.length=0;reservedTargets.clear();slotNextLaunchAt.clear();state=createGame(levelId);totalBlocks=state.remaining;resetting=false;
+ resetting=true;cancelAnimationFrame(antFrame);activeAnts.clear();pickupEffects.length=0;deliveryEffects.length=0;reservedTargets.clear();slotNextLaunchAt.clear();state=createGame(levelId);totalBlocks=tasksRemaining();resetting=false;
  gameStarted=true;render();$("save-status").textContent="Новая партия · прогресс уровня не сохраняется";shell.classList.remove("menu-open");updateMainMenu();kickColony();
 }
 async function boot(){
- totalBlocks=state.remaining;
+ totalBlocks=tasksRemaining();
  render();resizeAntLayer();updateMainMenu();
  if("serviceWorker"in navigator){
   try{
