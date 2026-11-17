@@ -365,7 +365,7 @@ export function createArtworkBoard(levelId="meadow-01"){
 }
 
 export const INITIAL_BOARD=createArtworkBoard();
-function buildIncoming(board,levelNumber=1){
+export function buildIncoming(board,levelNumber=1){
  const totals={red:0,blue:0,yellow:0,green:0,purple:0};
  let boardSeed=2166136261;
  for(const row of board)for(const color of row){
@@ -377,7 +377,7 @@ function buildIncoming(board,levelNumber=1){
  for(const color of colors){
   const total=totals[color];
   if(!total){queues[color]=[];continue;}
-  const count=Math.max(1,Math.ceil(total/(levelNumber>=8?18:36))),base=Math.floor(total/count),minimum=Math.min(10,total);
+  const count=Math.max(1,Math.ceil(total/(levelNumber>=8?18:36))),base=Math.floor(total/count),minimum=Math.min(10,Math.max(1,Math.floor(total/count)));
   let seed=(boardSeed^color.charCodeAt(0)*2654435761)>>>0;
   const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
   const spread=Math.max(6,Math.min(22,Math.round(base*.58)));

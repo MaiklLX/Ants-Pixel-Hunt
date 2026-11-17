@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {COLORS,createGame,LEVELS,getLevel,getIncoming,createArtworkBoard,resolveAll,INITIAL_BOARD,INCOMING,isAccessible,getExposedPixels,findAccessiblePixel,findAccessiblePixels,findAntWave,chooseTopColumn,findNextMove,applyAntMove,applyAntPickup,completeBoxDeparture,freeSlotCount,isDefeat,SIZE,GRID_SIZE,BLOCK_SIZE,BOX_CAPACITY,SLOT_COUNT,TRAY_SIZE,canChoose,restoreGame,serializeGame,countOutboundBySlot,countQueuedBySlot,countDispatchingWorkers,countSlotWorkers,canDepartSlot,isLockedBox,getLinkedPair,normalizeLinkedTray,LOCKED_BOX_INDEX,LOCKED_BOX_COLUMN} from "../src/game.js";
+import {COLORS,createGame,LEVELS,getLevel,getIncoming,createArtworkBoard,resolveAll,INITIAL_BOARD,INCOMING,isAccessible,getExposedPixels,findAccessiblePixel,findAccessiblePixels,findAntWave,chooseTopColumn,findNextMove,applyAntMove,applyAntPickup,completeBoxDeparture,freeSlotCount,isDefeat,SIZE,GRID_SIZE,BLOCK_SIZE,BOX_CAPACITY,SLOT_COUNT,TRAY_SIZE,canChoose,restoreGame,serializeGame,countOutboundBySlot,countQueuedBySlot,countDispatchingWorkers,countSlotWorkers,canDepartSlot,isLockedBox,getLinkedPair,normalizeLinkedTray,buildIncoming,LOCKED_BOX_INDEX,LOCKED_BOX_COLUMN} from "../src/game.js";
 const smallBoard=()=>Array.from({length:5},()=>Array(5).fill("green"));
 
 test("the authored frog is built from large collectible blocks on a 350x350 display grid",()=>{
@@ -178,6 +178,13 @@ test("a box cannot depart while any ant assigned to its slot is still travelling
  assert.equal(countOutboundBySlot(workers).get(1),1);
 });
 
+test("incoming deck balances a color total of 19 without an impossible minimum",()=>{
+ const board=[Array(19).fill("red")];
+ const deck=buildIncoming(board,8);
+ assert.equal(deck.length,2);
+ assert.equal(deck.reduce((sum,box)=>sum+box.ants,0),19);
+ assert.ok(deck.every(box=>box.color==="red"&&box.ants>0&&box.ants<=BOX_CAPACITY));
+});
 test("all campaign levels have distinct deterministic artwork and exact matching box decks",()=>{
  assert.ok(LEVELS.length>0);
  const signatures=new Set();
