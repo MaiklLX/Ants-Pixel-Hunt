@@ -700,7 +700,7 @@ test("KT-128 visually connects chapter biomes into one continuous campaign route
  const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
  const visual=styles.slice(styles.indexOf("KT-128 —"));
  assert.match(html,/app-version" content="KT-128"/);
- assert.match(visual,/\.map-chapter\+\.map-chapter\{margin-top:/);
+ assert.match(visual,/\\.map-chapter\\s*\\+\\s*\\.map-chapter\\{margin-top:/);
  assert.match(visual,/\.map-chapter\+\.map-chapter::after/);
  assert.match(visual,/repeating-linear-gradient\(to bottom/);
  assert.match(visual,/\.map-chapter\.chapter-active/);
