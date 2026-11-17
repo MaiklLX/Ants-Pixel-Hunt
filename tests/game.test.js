@@ -251,13 +251,16 @@ test("all campaign drawings remain solvable when only the true outer layer is co
     if(target){board[target.y][target.x]="";box.ants--;remaining--;progressed=true;if(box.ants<=0)active[slot]=null;}
    }
    if(remaining===0)break;
+   let loadedNewBox=false;
    for(let slot=0;slot<active.length;slot++){
     if(active[slot])continue;
     const available=new Set(getExposedPixels(board).map(({x,y})=>board[y][x]).filter(Boolean));
     const index=deck.findIndex(box=>available.has(box.color)&&!active.some(other=>other?.color===box.color));
-    if(index>=0)active[slot]=deck.splice(index,1)[0];
+    if(index>=0){active[slot]=deck.splice(index,1)[0];loadedNewBox=true;}
    }
-   if(!progressed&&!active.some(Boolean))break;
+   // No progress and no newly loaded box means this board/deck state is deadlocked.
+   // Stop immediately instead of spinning up to 20,000 identical iterations.
+   if(!progressed&&!loadedNewBox)break;
   }
   assert.equal(remaining,0,level.name+" must be solvable with its authored color deck");
  }
