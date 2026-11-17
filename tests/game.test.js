@@ -9,7 +9,7 @@ test("the authored frog is built from large collectible blocks on a 350x350 disp
  assert.equal(INITIAL_BOARD.length,SIZE);assert.ok(INITIAL_BOARD.every(r=>r.length===SIZE));
  assert.equal(s.board.length,SIZE);assert.equal(s.slots.length,SLOT_COUNT);
  assert.equal(s.tray.length,TRAY_SIZE);assert.ok(s.tray.every(r=>r.length===TRAY_SIZE));
- const colors=new Set(INITIAL_BOARD.flat().filter(Boolean));assert.deepEqual([...colors].sort(),["blue","green","purple","red","yellow"]);
+ const colors=new Set(INITIAL_BOARD.flat().filter(Boolean));assert.ok(colors.has("black"));assert.ok(colors.size>=4&&colors.size<=6,"starter artwork should use a black contour and up to five natural tones");
  assert.ok(s.remaining>400&&s.remaining<900);assert.ok(INITIAL_BOARD.some(row=>row.includes("")));
 });
 test("the box deck contains exactly enough ants to collect every pixel by color",()=>{
@@ -599,7 +599,8 @@ test("campaign contains 500 distinct, authored-first and procedurally composed i
   assert.ok(board.every(row=>row.length===SIZE),level.id+" must remain 35×35");
   const colors=new Set(board.flat().filter(Boolean));
   assert.ok(colors.size>=3,level.id+" needs a readable multi-colour image");
-  assert.ok(colors.size>=3&&colors.size<=9,level.id+" must use the expanded nine-colour palette");
+  assert.ok(colors.size>=3&&colors.size<=6,level.id+" must use a black outline and no more than five illustration tones");
+  assert.ok(colors.has("black"),level.id+" must have a dark pixel-art contour");
   assert.ok(board.flat().filter(Boolean).length>35,level.id+" should contain a visible illustration");
   signatures.add(board.flat().join(","));
  }
