@@ -364,7 +364,7 @@ function createComposedArtworkBoard(number){
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
  const count=generatedPartCount(number),layoutVariant=(number+Math.floor(number/11))%3;
  const primaryMotifIndex=(number*7+Math.floor(number/13))%GENERATED_MOTIFS.length;
- const scenePalette=ART_PALETTES[GENERATED_MOTIFS[primaryMotifIndex].type]||ART_PALETTES.frog;
+ const scenePalette=GENERATED_ART_PALETTES[GENERATED_MOTIFS[primaryMotifIndex].type]||GENERATED_ART_PALETTES.flower;
  const placements=generatedSceneLayout(count,layoutVariant);
  for(let part=0;part<count;part++){
   const motifIndex=(number*7+part*5+Math.floor(number/13))%GENERATED_MOTIFS.length;
