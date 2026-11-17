@@ -4307,3 +4307,37 @@ button:not(:disabled):active{filter:brightness(.96)}
 @media(prefers-reduced-motion:reduce){
  .map-chapter::before{animation:none}
 }
+
+
+/* KT-128 — join chapter biomes into one continuous campaign trail. */
+.map-chapter{position:relative;overflow:visible}
+.map-chapter + .map-chapter{margin-top:22px}
+.map-chapter + .map-chapter::after{
+ content:"";
+ position:absolute;
+ z-index:0;
+ top:-22px;
+ left:50%;
+ width:4px;
+ height:22px;
+ transform:translateX(-50%);
+ border-radius:99px;
+ background:
+  radial-gradient(circle at 50% 18%,var(--chapter-accent,#a7b97b) 0 2px,transparent 2.5px),
+  repeating-linear-gradient(to bottom,color-mix(in srgb,var(--chapter-accent,#a7b97b) 82%,transparent) 0 4px,transparent 4px 8px);
+ filter:drop-shadow(0 0 4px color-mix(in srgb,var(--chapter-glow,#91a86b) 42%,transparent));
+ pointer-events:none;
+}
+.map-chapter.chapter-active{
+ box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--chapter-accent,#a7b97b) 26%,transparent),0 8px 20px #07140f2b;
+}
+.map-chapter.chapter-complete .map-chapter-track span{
+ filter:drop-shadow(0 0 4px color-mix(in srgb,var(--chapter-glow,#91a86b) 45%,transparent));
+}
+@media(max-width:599px){
+ .map-chapter + .map-chapter{margin-top:18px}
+ .map-chapter + .map-chapter::after{top:-18px;height:18px}
+}
+@media(prefers-reduced-motion:reduce){
+ .map-chapter + .map-chapter::after{filter:none}
+}
