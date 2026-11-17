@@ -614,7 +614,8 @@ export function findAntWave(state,reservedTargets=new Set(),pendingBySlot=new Ma
   if(!supply.remaining||supply.assigned>=supply.remaining)return false;
   const targets=supply.role?byRole.get(supply.role)||[]:byColor.get(supply.color)||[],key=supply.role||supply.color,index=cursor.get(key)||0;
   if(index>=targets.length)return false;
-  wave.push({slot:supply.slot,color:supply.color,role:supply.role,target:targets[index]});
+  const target=targets[index];
+  wave.push({slot:supply.slot,color:supply.color,role:supply.role,target:target.kind==="pixel"?{x:target.x,y:target.y}:target});
   cursor.set(key,index+1);supply.assigned++;
   return true;
  };
