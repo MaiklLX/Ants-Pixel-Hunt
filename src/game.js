@@ -222,7 +222,7 @@ const GENERATED_ART_PALETTES={
  rocket:["orange","cream","red","blue","sky","yellow","brown","turquoise","purple","gray","pink","green","lime","forest","olive"],
  bird:["brown","sky","blue","orange","yellow","cream","forest","red","turquoise","gray","lime","olive","pink","purple","green"],
  acorn:["brown","green","orange","yellow","cream","forest","red","olive","lime","gray","pink","purple","sky","turquoise","blue"],
- bee:["yellow","black","cream","orange","brown","green","red","forest","olive","sky","lime","pink","turquoise","blue","gray"],
+ bee:["yellow","brown","cream","orange","forest","green","red","forest","olive","sky","lime","pink","turquoise","blue","gray"],
  cloud:["sky","cream","yellow","orange","blue","turquoise","gray","pink","purple","lime","green","forest","red","olive","brown"]
 };
 function generatedMotifDetail(type,zone,u,v,variant){
@@ -463,6 +463,47 @@ function generatedMotifZone(type,u,v,variant){
  }
  return -1;
 }
+function applyGeneratedDepthPalette(source,palette){
+ const depth=Array.from({length:SIZE},()=>Array(SIZE).fill(0));
+ const outside=Array.from({length:SIZE},()=>Array(SIZE).fill(false)),air=[];
+ const addAir=(x,y)=>{
+  if(x<0||y<0||x>=SIZE||y>=SIZE||outside[y][x]||source[y][x])return;
+  outside[y][x]=true;air.push([x,y]);
+ };
+ for(let x=0;x<SIZE;x++){addAir(x,0);addAir(x,SIZE-1);}
+ for(let y=0;y<SIZE;y++){addAir(0,y);addAir(SIZE-1,y);}
+ const occupied=[];
+ const expose=(x,y)=>{
+  if(x<0||y<0||x>=SIZE||y>=SIZE||!source[y][x]||depth[y][x])return;
+  depth[y][x]=1;occupied.push([x,y]);
+ };
+ for(let head=0;head<air.length;head++){
+  const [x,y]=air[head];
+  for(const [nx,ny] of [[x-1,y],[x+1,y],[x,y-1],[x,y+1]]){
+   if(nx<0||ny<0||nx>=SIZE||ny>=SIZE)continue;
+   if(source[ny][nx])expose(nx,ny);else addAir(nx,ny);
+  }
+ }
+ for(let head=0;head<occupied.length;head++){
+  const [x,y]=occupied[head],next=depth[y][x]+1;
+  for(const [nx,ny] of [[x-1,y],[x+1,y],[x,y-1],[x,y+1]]){
+   if(nx<0||ny<0||nx>=SIZE||ny>=SIZE||!source[ny][nx]||depth[ny][nx])continue;
+   depth[ny][nx]=next;occupied.push([nx,ny]);
+  }
+ }
+ const result=source.map(row=>row.slice()),colorOrder=Object.keys(COLORS);
+ for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){
+  const original=source[y][x];if(!original)continue;
+  const layer=depth[y][x];
+  if(layer<=1){result[y][x]="black";continue;}
+  const sourceIndex=palette.indexOf(original);
+  const role=(sourceIndex>=0?sourceIndex:colorOrder.indexOf(original))%5;
+  const band=Math.min(2,Math.floor((layer-2)/3));
+  result[y][x]=palette[band*5+role]||palette[role]||original;
+ }
+ return result;
+}
+
 function generatedSceneLayout(count,variant){
  const layouts={
   1:[[[5,3,25,29]]],
@@ -503,7 +544,7 @@ function createComposedArtworkBoard(number){
    board[y][x]=generatedMotifColor(motif.type,zone,(px+.5)/width,(py+.5)/height,variant,scenePalette);
   }
  }
- return board;
+ return applyGeneratedDepthPalette(board,scenePalette);
 }
 
 export const LEVELS=[
