@@ -70,7 +70,7 @@ function renderMap(){
  list.replaceChildren();const chapterNav=$("map-chapter-nav");chapterNav.replaceChildren();if(mapChapterObserver){mapChapterObserver.disconnect();mapChapterObserver=null;}
  const chapters=[];for(const level of LEVELS){let group=chapters.find(item=>item.name===level.chapter);if(!group){group={name:level.chapter,levels:[]};chapters.push(group);}group.levels.push(level);}
  for(let index=0;index<chapters.length;index++){
-  const chapter=chapters[index],section=document.createElement("section");section.className="map-chapter";section.id="campaign-chapter-"+index;section.dataset.chapterIndex=String(index);
+  const chapter=chapters[index],section=document.createElement("section");section.className="map-chapter";section.id="campaign-chapter-"+index;section.dataset.chapterIndex=String(index);section.dataset.biomeIndex=String(index%4);
    const jump=document.createElement("button");jump.type="button";jump.className="map-chapter-jump";jump.dataset.chapterIndex=String(index);jump.textContent=chapter.name;jump.addEventListener("click",()=>{chapterNav.querySelectorAll("[aria-current]").forEach(active=>active.removeAttribute("aria-current"));jump.setAttribute("aria-current","location");section.scrollIntoView({block:"start",behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});});if(nextPlayable&&chapter.levels.some(level=>level.id===nextPlayable.id))jump.setAttribute("aria-current","location");chapterNav.append(jump);
   const heading=document.createElement("header");heading.className="map-chapter-heading";
   const marker=document.createElement("span");marker.className="map-chapter-mark";marker.textContent=String(index+1).padStart(2,"0");marker.setAttribute("aria-hidden","true");
