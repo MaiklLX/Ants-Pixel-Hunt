@@ -196,6 +196,15 @@ test("all campaign levels have distinct deterministic artwork and exact matching
  assert.equal(signatures.size,LEVELS.length,"each campaign level must have its own pixel artwork");
  assert.equal(getLevel("unknown").id,"meadow-01");
 });
+test("cached campaign artwork is deterministic but callers receive independent mutable boards",()=>{
+ const first=createArtworkBoard("meadow-008"),second=createArtworkBoard("meadow-008");
+ assert.notEqual(first,second);
+ assert.notEqual(first[0],second[0]);
+ const signature=second.map(row=>row.join(",")).join(";");
+ first[0][0]="mutated";
+ assert.equal(second.map(row=>row.join(",")).join(";"),signature);
+ assert.equal(createArtworkBoard("meadow-008").map(row=>row.join(",")).join(";"),signature);
+});
 test("campaign level identity survives save and restore",()=>{
  const s=createGame("garden-02");
  chooseTopColumn(s,0);
