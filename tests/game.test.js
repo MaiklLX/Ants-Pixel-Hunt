@@ -287,6 +287,11 @@ test("all campaign drawings and specialist obstacles remain solvable",()=>{
    while(index<list.length&&!valid(list[index]))index++;
    cursor.set(key,index);return index<list.length?index:-1;
   };
+  const exposedCount=box=>{
+   const list=queues.get(boxKey(box))||[],start=cursor.get(boxKey(box))||0;
+   let count=0;for(let i=start;i<list.length;i++)if(valid(list[i]))count++;
+   return count;
+  };
   while((remaining>0||obstacles.length>0)&&steps++<30000){
    let progressed=false;
    for(let slot=0;slot<active.length;slot++){
@@ -310,7 +315,7 @@ test("all campaign drawings and specialist obstacles remain solvable",()=>{
    let loadedNewBox=false;
    for(let slot=0;slot<active.length;slot++){
     if(active[slot])continue;
-    const index=deck.findIndex(box=>accessibleIndex(box)>=0&&!active.some(other=>other&&boxKey(other)===boxKey(box)));
+    const index=deck.findIndex(box=>exposedCount(box)>=box.ants&&!active.some(other=>other&&boxKey(other)===boxKey(box)));
     if(index>=0){active[slot]=deck.splice(index,1)[0];loadedNewBox=true;}
    }
    if(!progressed&&!loadedNewBox)break;
