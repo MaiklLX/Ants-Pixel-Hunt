@@ -242,24 +242,41 @@ test("choosing a butterfly box refills from the butterfly deck, not the frog dec
 test("all campaign drawings remain solvable when only the true outer layer is collectible",()=>{
  for(const level of LEVELS){
   const board=createArtworkBoard(level.id),deck=getIncoming(level.id).map(box=>({...box}));
-  const active=Array(SLOT_COUNT).fill(null);let remaining=board.flat().filter(Boolean).length,steps=0;
+  const active=Array(SLOT_COUNT).fill(null);
+  let remaining=board.flat().filter(Boolean).length,steps=0;
+  const queues=new Map(),cursor=new Map(),queued=new Set();
+  const enqueue=(x,y)=>{
+   const color=board[y]?.[x];if(!color)return;
+   const key=x+","+y;if(queued.has(key))return;
+   queued.add(key);if(!queues.has(color))queues.set(color,[]);
+   queues.get(color).push({x,y});
+  };
+  for(const point of getExposedPixels(board))enqueue(point.x,point.y);
+  const hasAccessible=color=>{
+   const list=queues.get(color)||[];let index=cursor.get(color)||0;
+   while(index<list.length&&board[list[index].y][list[index].x]!==color)index++;
+   cursor.set(color,index);return index<list.length;
+  };
   while(remaining>0&&steps++<20000){
    let progressed=false;
    for(let slot=0;slot<active.length;slot++){
     const box=active[slot];if(!box)continue;
-    const target=findAccessiblePixel(board,box.color);
-    if(target){board[target.y][target.x]="";box.ants--;remaining--;progressed=true;if(box.ants<=0)active[slot]=null;}
+    const list=queues.get(box.color)||[];let index=cursor.get(box.color)||0;
+    while(index<list.length&&board[list[index].y][list[index].x]!==box.color)index++;
+    const target=list[index];cursor.set(box.color,index+(target?1:0));
+    if(target){
+     board[target.y][target.x]="";box.ants--;remaining--;progressed=true;
+     for(const [dx,dy] of [[-1,0],[1,0],[0,-1],[0,1]])enqueue(target.x+dx,target.y+dy);
+     if(box.ants<=0)active[slot]=null;
+    }
    }
    if(remaining===0)break;
    let loadedNewBox=false;
    for(let slot=0;slot<active.length;slot++){
     if(active[slot])continue;
-    const available=new Set(getExposedPixels(board).map(({x,y})=>board[y][x]).filter(Boolean));
-    const index=deck.findIndex(box=>available.has(box.color)&&!active.some(other=>other?.color===box.color));
+    const index=deck.findIndex(box=>hasAccessible(box.color)&&!active.some(other=>other?.color===box.color));
     if(index>=0){active[slot]=deck.splice(index,1)[0];loadedNewBox=true;}
    }
-   // No progress and no newly loaded box means this board/deck state is deadlocked.
-   // Stop immediately instead of spinning up to 20,000 identical iterations.
    if(!progressed&&!loadedNewBox)break;
   }
   assert.equal(remaining,0,level.name+" must be solvable with its authored color deck");
