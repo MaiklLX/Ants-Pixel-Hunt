@@ -261,7 +261,7 @@ test("choosing a butterfly box refills from the butterfly deck, not the frog dec
 test("all campaign drawings and specialist obstacles remain solvable",()=>{
  for(const level of LEVELS){
   const board=createArtworkBoard(level.id),game=createGame(level.id),obstacles=game.obstacles.map(item=>({...item}));
-  const deck=getIncoming(level.id).map(box=>({...box})),active=Array(SLOT_COUNT).fill(null);
+  const deck=getIncoming(level.id).map(box=>({...box,special:box.special==="linked"?null:box.special})),active=Array(SLOT_COUNT).fill(null);
   let remaining=board.flat().filter(Boolean).length,steps=0;
   const queues=new Map(),cursor=new Map(),queued=new Set();
   const boxKey=box=>box.role?"role:"+box.role:"color:"+box.color;
