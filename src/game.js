@@ -329,20 +329,26 @@ function generatedMotifDetail(type,zone,u,v,variant){
  }
  return -1;
 }
-function generatedMotifColor(type,zone,u,v,variant){
+function generatedMotifColor(type,zone,u,v,variant,scenePalette){
  const palette=GENERATED_ART_PALETTES[type]||GENERATED_ART_PALETTES.flower;
- const detail=generatedMotifDetail(type,zone,u,v,variant);
- if(detail>=0&&palette[detail])return palette[detail];
- const x=Math.floor(u*35),y=Math.floor(v*35),phase=variant%5;
- // Broad, intentional shade planes add volume without noisy checkerboard pixels.
- const light=(u<.28&&v<.48)||(u>.62&&v<.28);
- const shadow=(u>.72&&v>.68)||(u<.25&&v>.76);
- if(light&&palette[9])return palette[9];
- if(shadow&&palette[10])return palette[10];
- if(zone===1&&((Math.floor(u*8)+Math.floor(v*8)+phase)%7===0)&&palette[11])return palette[11];
- if(zone===2&&((Math.floor(u*9)-Math.floor(v*7)+phase)%6===0)&&palette[12])return palette[12];
- if(zone===3&&((x+y+phase)%11===0)&&palette[13])return palette[13];
- return palette[zone]||palette[0];
+ const base=scenePalette||palette;
+ // Keep the outer structural layers on one coherent five-tone scene palette.
+ // Rich object-specific pigments are reserved for inner details so the five
+ // starter slots never get flooded by unrelated surface colors.
+ const interior=u>.16&&u<.84&&v>.16&&v<.84;
+ if(interior){
+  const detail=generatedMotifDetail(type,zone,u,v,variant);
+  if(detail>=0&&palette[detail])return palette[detail];
+  const x=Math.floor(u*35),y=Math.floor(v*35),phase=variant%5;
+  const light=(u<.34&&v<.48)||(u>.58&&v<.30);
+  const shadow=(u>.68&&v>.68)||(u<.32&&v>.72);
+  if(light&&palette[9])return palette[9];
+  if(shadow&&palette[10])return palette[10];
+  if(zone===1&&((Math.floor(u*8)+Math.floor(v*8)+phase)%7===0)&&palette[11])return palette[11];
+  if(zone===2&&((Math.floor(u*9)-Math.floor(v*7)+phase)%6===0)&&palette[12])return palette[12];
+  if(zone===3&&((x+y+phase)%11===0)&&palette[13])return palette[13];
+ }
+ return base[zone]||base[0];
 }
 const GENERATED_CHAPTERS=[
  "Светлячковая роща","Тихий ручей","Солнечная опушка","Старый дуб",
@@ -483,6 +489,8 @@ function createComposedArtworkBoard(number){
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
  const count=generatedPartCount(number),layoutVariant=(number+Math.floor(number/11))%3;
  const placements=generatedSceneLayout(count,layoutVariant);
+ const primaryIndex=(number*7+Math.floor(number/13))%GENERATED_MOTIFS.length;
+ const scenePalette=GENERATED_ART_PALETTES[GENERATED_MOTIFS[primaryIndex].type]||GENERATED_ART_PALETTES.flower;
  for(let part=0;part<count;part++){
   const motifIndex=(number*7+part*5+Math.floor(number/13))%GENERATED_MOTIFS.length;
   const motif=GENERATED_MOTIFS[motifIndex],variant=number*37+part*113;
@@ -492,7 +500,7 @@ function createComposedArtworkBoard(number){
    if(zone<0)continue;
    const x=ox+px,y=oy+py;
    if(x<0||y<0||x>=SIZE||y>=SIZE)continue;
-   board[y][x]=generatedMotifColor(motif.type,zone,(px+.5)/width,(py+.5)/height,variant);
+   board[y][x]=generatedMotifColor(motif.type,zone,(px+.5)/width,(py+.5)/height,variant,scenePalette);
   }
  }
  return board;
