@@ -167,12 +167,27 @@ function drawBoardTile(x,y,exposed,cell){
 function drawBoardObstacle(obstacle,exposed,cell){
  const px=obstacle.x*cell,py=obstacle.y*cell,remaining=obstacle.hp;
  boardCtx.save();
- if(obstacle.role==="builder"){
+ if(obstacle.role==="builder"&&obstacle.kind==="stone"){
+  boardCtx.fillStyle="#78847a";boardCtx.strokeStyle="#c1c9b6";boardCtx.lineWidth=.8;
+  boardCtx.beginPath();boardCtx.moveTo(px+1,py+cell*.28);boardCtx.lineTo(px+cell*.28,py+1);boardCtx.lineTo(px+cell*.78,py+1);boardCtx.lineTo(px+cell-1,py+cell*.42);boardCtx.lineTo(px+cell*.78,py+cell-1);boardCtx.lineTo(px+cell*.18,py+cell-1);boardCtx.closePath();boardCtx.fill();boardCtx.stroke();
+  boardCtx.strokeStyle="#46564b";boardCtx.lineWidth=.8;boardCtx.beginPath();boardCtx.moveTo(px+cell*.35,py+cell*.18);boardCtx.lineTo(px+cell*.5,py+cell*.48);boardCtx.lineTo(px+cell*.36,py+cell*.77);boardCtx.stroke();
+ }else if(obstacle.role==="builder"){
   boardCtx.fillStyle="#8b6240";boardCtx.strokeStyle="#d7b47a";boardCtx.lineWidth=.8;
   boardCtx.beginPath();boardCtx.roundRect(px+1,py+1,cell-2,cell-2,2);boardCtx.fill();boardCtx.stroke();
   boardCtx.strokeStyle="#5b3d2a";boardCtx.lineWidth=1;
   boardCtx.beginPath();boardCtx.moveTo(px+2,py+cell*.34);boardCtx.lineTo(px+cell-2,py+cell*.34);boardCtx.moveTo(px+2,py+cell*.68);boardCtx.lineTo(px+cell-2,py+cell*.68);boardCtx.stroke();
-  boardCtx.fillStyle="#f3d8a3";boardCtx.font=`bold ${Math.max(6,cell*.68)}px system-ui`;boardCtx.textAlign="center";boardCtx.textBaseline="middle";boardCtx.fillText("⚒",px+cell/2,py+cell/2);
+ }else if(obstacle.kind==="spider"){
+  boardCtx.strokeStyle="#202b28";boardCtx.lineWidth=1;
+  for(const side of [-1,1])for(let leg=0;leg<4;leg++){
+   const y=py+cell*(.25+leg*.17);boardCtx.beginPath();boardCtx.moveTo(px+cell/2,py+cell*.5);boardCtx.lineTo(px+cell*(.5+side*.28),y);boardCtx.lineTo(px+cell*(.5+side*.43),y+side*.8);boardCtx.stroke();
+  }
+  boardCtx.fillStyle="#38423c";boardCtx.beginPath();boardCtx.arc(px+cell*.5,py+cell*.5,cell*.24,0,Math.PI*2);boardCtx.fill();
+  boardCtx.fillStyle="#d6bd78";boardCtx.beginPath();boardCtx.arc(px+cell*.42,py+cell*.44,.8,0,Math.PI*2);boardCtx.arc(px+cell*.58,py+cell*.44,.8,0,Math.PI*2);boardCtx.fill();
+ }else if(obstacle.kind==="wasp"){
+  boardCtx.fillStyle="#d9b64d";boardCtx.strokeStyle="#473d27";boardCtx.lineWidth=.8;
+  boardCtx.beginPath();boardCtx.ellipse(px+cell*.5,py+cell*.53,cell*.26,cell*.4,0,0,Math.PI*2);boardCtx.fill();boardCtx.stroke();
+  boardCtx.strokeStyle="#3d3729";boardCtx.lineWidth=1.1;boardCtx.beginPath();boardCtx.moveTo(px+cell*.31,py+cell*.4);boardCtx.lineTo(px+cell*.69,py+cell*.4);boardCtx.moveTo(px+cell*.29,py+cell*.61);boardCtx.lineTo(px+cell*.71,py+cell*.61);boardCtx.stroke();
+  boardCtx.fillStyle="#d7e3d3aa";boardCtx.beginPath();boardCtx.ellipse(px+cell*.25,py+cell*.31,cell*.2,cell*.11,-.5,0,Math.PI*2);boardCtx.ellipse(px+cell*.75,py+cell*.31,cell*.2,cell*.11,.5,0,Math.PI*2);boardCtx.fill();
  }else{
   boardCtx.fillStyle="#283b2d";boardCtx.strokeStyle="#d8a65c";boardCtx.lineWidth=.8;
   boardCtx.beginPath();boardCtx.ellipse(px+cell/2,py+cell/2,cell*.39,cell*.43,-.15,0,Math.PI*2);boardCtx.fill();boardCtx.stroke();
