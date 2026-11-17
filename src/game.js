@@ -459,7 +459,7 @@ function generatedMotifZone(type,u,v,variant){
 }
 function generatedSceneLayout(count,variant){
  const layouts={
-  1:[[[0,0,35,35]]],
+  1:[[[5,3,25,29]]],
   2:[
    [[1,5,23,28],[23,15,12,17]],
    [[2,2,18,24],[19,15,15,18]],
