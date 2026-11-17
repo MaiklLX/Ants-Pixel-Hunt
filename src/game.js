@@ -652,11 +652,11 @@ export function buildIncoming(board,levelNumber=1){
   if(!total){queues[color]=[];continue;}
   // Smaller color squads turn over faster, freeing the five starter cells
   // as detailed artwork reveals new shades and color groups.
-  const targetSquad=levelNumber>=8?8:18;
+  const targetSquad=5;
   const count=Math.max(1,Math.ceil(total/targetSquad)),base=Math.floor(total/count),minimum=Math.min(2,Math.max(1,Math.floor(total/count)));
   let seed=(boardSeed^color.charCodeAt(0)*2654435761)>>>0;
   const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
-  const spread=Math.max(2,Math.min(5,Math.round(base*.42)));
+  const spread=Math.max(1,Math.min(2,Math.round(base*.3)));
   const sizes=Array.from({length:count},()=>Math.max(minimum,Math.min(BOX_CAPACITY,base+Math.round((random()*2-1)*spread))));
   let difference=total-sizes.reduce((sum,value)=>sum+value,0),cursor=Math.floor(random()*count);
   while(difference!==0){
