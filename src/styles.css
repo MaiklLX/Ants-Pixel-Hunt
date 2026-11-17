@@ -4400,3 +4400,44 @@ button:not(:disabled):active{filter:brightness(.96)}
 @media(prefers-reduced-motion:reduce){
  .map-chapter .map-trail .campaign-level .campaign-emoji{transition:none}
 }
+
+
+/* KT-133 — the short links between level stops bend like a woodland footpath. */
+.map-trail .campaign-level::after{
+ height:22px;
+ top:calc(50% - 11px);
+ border-top:0;
+ border-bottom:2px dotted #a5ae7188;
+ border-radius:0 0 58% 42%;
+ filter:drop-shadow(0 1px 2px #07140f66);
+}
+.map-trail .campaign-level:nth-child(even)::after{
+ border-radius:58% 0 42% 0;
+ transform:translateY(1px);
+}
+.map-trail .campaign-level:nth-child(odd)::after{
+ border-radius:0 58% 0 42%;
+ transform:translateY(-1px);
+}
+.map-trail .campaign-level.completed::after{
+ border-bottom-color:#b4b17b;
+}
+.map-trail .campaign-level.next-stop::after{
+ border-bottom-color:#d6c58b;
+ filter:drop-shadow(0 0 3px #d6c58b77);
+}
+.map-trail::before{
+ width:5px;
+ background:
+  radial-gradient(ellipse at 35% 12%,#9eaa6a28 0 28%,transparent 32%),
+  radial-gradient(ellipse at 70% 38%,#9eaa6a20 0 24%,transparent 29%),
+  radial-gradient(ellipse at 30% 66%,#9eaa6a24 0 26%,transparent 31%),
+  repeating-linear-gradient(to bottom,#9eaa6a99 0 4px,#9eaa6a00 4px 12px);
+ box-shadow:0 0 12px #9eaa6a24;
+}
+@media(max-width:420px){
+ .map-trail .campaign-level::after{height:16px;top:calc(50% - 8px)}
+}
+@media(prefers-reduced-motion:reduce){
+ .map-trail .campaign-level::after{filter:none}
+}
