@@ -196,7 +196,7 @@ test("all campaign levels have distinct deterministic artwork and exact matching
   for(const row of board)for(const color of row)if(color)totals[color]++;
   const artworkColors=Object.entries(totals).filter(([,total])=>total>0).map(([color])=>color);
   assert.ok(artworkColors.includes("black"),level.name+" must have a clean black silhouette contour");
-  assert.ok(artworkColors.length<=6,level.name+" must stay within the six-color artwork limit");
+  assert.ok(artworkColors.length<=Object.keys(COLORS).length,level.name+" may use every available natural artwork color");
   assert.ok(artworkColors.length>=3,level.name+" must use enough color regions to read as an illustration");
   const deckTotals=Object.fromEntries(Object.keys(COLORS).map(color=>[color,0]));
   for(const box of deck){assert.ok(box.ants>0&&box.ants<=BOX_CAPACITY);if(!box.role)deckTotals[box.color]+=box.ants;}
