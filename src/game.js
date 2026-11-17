@@ -323,7 +323,7 @@ function createComposedArtworkBoard(number){
   for(let py=0;py<height;py++)for(let px=0;px<width;px++){
    const zone=generatedMotifZone(motif.type,(px+.5)/width,(py+.5)/height,variant);
    if(zone<0)continue;
-   const colorIndex=(zone+part+Math.floor(number/5))%paletteCount;
+   const colorIndex=(zone+part+Math.floor(number/5)+Math.floor(py/7))%paletteCount;
    board[oy+py][ox+px]=palette[colorIndex];
   }
  }
@@ -357,7 +357,7 @@ export function createArtworkBoard(levelId="meadow-01"){
 }
 
 export const INITIAL_BOARD=createArtworkBoard();
-function buildIncoming(board){
+function buildIncoming(board,levelNumber=1){
  const totals={red:0,blue:0,yellow:0,green:0,purple:0};
  let boardSeed=2166136261;
  for(const row of board)for(const color of row){
@@ -369,7 +369,7 @@ function buildIncoming(board){
  for(const color of colors){
   const total=totals[color];
   if(!total){queues[color]=[];continue;}
-  const count=Math.max(1,Math.ceil(total/36)),base=Math.floor(total/count),minimum=Math.min(10,total);
+  const count=Math.max(1,Math.ceil(total/(levelNumber>=8?18:36))),base=Math.floor(total/count),minimum=Math.min(10,total);
   let seed=(boardSeed^color.charCodeAt(0)*2654435761)>>>0;
   const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
   const spread=Math.max(6,Math.min(22,Math.round(base*.58)));
@@ -380,6 +380,7 @@ function buildIncoming(board){
    if(difference>0&&sizes[index]<BOX_CAPACITY){sizes[index]++;difference--;}
    else if(difference<0&&sizes[index]>minimum){sizes[index]--;difference++;}
   }
+  if(sizes.length>=3&&new Set(sizes).size===1){sizes[0]++;sizes[1]--;}
   queues[color]=sizes.map(ants=>({color,ants}));
  }
  const deck=[];
@@ -396,7 +397,7 @@ const incomingCache=new Map();
 export function getIncoming(levelId="meadow-01"){
  const id=getLevel(levelId).id;
  if(!incomingCache.has(id)){
-  const deck=buildIncoming(createArtworkBoard(id));
+  const deck=buildIncoming(createArtworkBoard(id),getLevel(id).number);
   const start=deck.length>=14?LINKED_BOX_START:deck.length>=11?9:3;
   if(deck.length>start+1){
    deck[start]={...deck[start],special:"linked",pairId:id+"-linked"};
