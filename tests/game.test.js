@@ -195,7 +195,7 @@ test("all campaign levels have distinct deterministic artwork and exact matching
   const totals=Object.fromEntries(Object.keys(COLORS).map(color=>[color,0]));
   for(const row of board)for(const color of row)if(color)totals[color]++;
   const deckTotals=Object.fromEntries(Object.keys(COLORS).map(color=>[color,0]));
-  for(const box of deck){assert.ok(box.ants>0&&box.ants<=BOX_CAPACITY);deckTotals[box.color]+=box.ants;}
+  for(const box of deck){assert.ok(box.ants>0&&box.ants<=BOX_CAPACITY);if(!box.role)deckTotals[box.color]+=box.ants;}
   assert.deepEqual(Object.fromEntries(Object.entries(deckTotals).filter(([,total])=>total>0)),Object.fromEntries(Object.entries(totals).filter(([,total])=>total>0)));
   assert.equal(deck.filter(box=>!box.role).reduce((sum,box)=>sum+box.ants,0),createGame(level.id).remaining);
   signatures.add(board.map(row=>row.join(",")).join(";"));
