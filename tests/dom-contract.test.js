@@ -490,7 +490,7 @@ test("KT-115 removes nested queue cards and renders reserve entries as miniature
  const app=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
  const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
  const visual=styles.slice(styles.indexOf("KT-115 —"));
- assert.match(html,/app-version" content="KT-133"/);
+ assert.match(html,/app-version" content="KT-134"/);
  assert.match(visual,/\.queue-lane\s*\{[\s\S]*?border:0!important/);
  assert.match(visual,/\.choice-card,\.choice-card\.locked,\.choice-card\.empty-box\s*\{[\s\S]*?background:transparent!important/);
  assert.match(visual,/\.queue-peek \.peek-crate::before/);
@@ -527,7 +527,7 @@ test("KT-117 makes ant counts prominent and consistently legible across active s
  assert.match(visual,/\.queue-peek \.peek-count\{[\s\S]*?font-variant-numeric:tabular-nums/);
  assert.match(visual,/\.section-line #queue-count\{[\s\S]*?border-radius:999px/);
  assert.match(visual,/@media\(max-width:599px\)/);
- assert.match(html,/app-version" content="KT-133"/);
+ assert.match(html,/app-version" content="KT-134"/);
 });
 
 
@@ -550,7 +550,7 @@ test("KT-118 gives queue handoff a slower cascading motion and respects reduced 
 test("KT-119 exposes the current meadow as the main menu quick-play action",async()=>{
  const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
  const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
- assert.match(html,/app-version" content="KT-133"/);
+ assert.match(html,/app-version" content="KT-134"/);
  assert.match(html,/id="menu-current-level" aria-label="Начать текущую полянку"/);
  assert.doesNotMatch(html,/id="menu-current-level" hidden/);
  assert.match(html,/id="map-open"/);
@@ -576,7 +576,7 @@ test("KT-120 removes visual queue numbers and preserves fixed five-slot and thre
  assert.match(visual,/\.queue-peek,\.queue-peek\.empty\{[\s\S]*?flex:0 0/);
  assert.match(visual,/\.queue-lane\{[\s\S]*?height:clamp/);
  assert.match(visual,/\.slots \.slot-number,\.queue-peek \.peek-order\{display:none!important\}/);
- assert.match(html,/app-version" content="KT-133"/);
+ assert.match(html,/app-version" content="KT-134"/);
 });
 
 
@@ -584,7 +584,7 @@ test("KT-121 gives the main menu a layered forest atmosphere while preserving it
  const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
  const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
  const visual=styles.slice(styles.indexOf("KT-121 —"));
- assert.match(html,/app-version" content="KT-133"/);
+ assert.match(html,/app-version" content="KT-134"/);
  assert.match(visual,/.main-menu::after\{[\s\S]*?pointer-events:none/);
  assert.match(visual,/.menu-garden::before\{[\s\S]*?linear-gradient/);
  assert.match(visual,/.menu-garden::after\{[\s\S]*?border:1px solid/);
@@ -601,7 +601,7 @@ test("KT-122 reshapes the main menu into an organic forest hub with a two-column
  const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
  const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
  const visual=styles.slice(styles.indexOf("KT-122 —"));
- assert.match(html,/app-version" content="KT-133"/);
+ assert.match(html,/app-version" content="KT-134"/);
  assert.match(visual,/border-radius:34px 18px 34px 18px/);
  assert.match(visual,/border-radius:17px 28px 17px 28px/);
  assert.match(visual,/grid-template-areas:[\s\S]*?"garden progress"[\s\S]*?"garden level"/);
@@ -619,7 +619,7 @@ test("KT-123 makes the campaign map scrollable and adds chapter shortcuts plus a
  const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
  const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
  const visual=styles.slice(styles.indexOf("KT-123 —"));
- assert.match(html,/app-version" content="KT-133"/);
+ assert.match(html,/app-version" content="KT-134"/);
  assert.match(html,/id="map-chapter-nav"[^>]*aria-label="Переход к главе кампании"/);
  assert.match(visual,/.map-overlay{[\s\S]*?overflow-y:auto[\s\S]*?touch-action:pan-y/);
  assert.match(visual,/.map-card{[\s\S]*?max-height:none[\s\S]*?overflow:visible/);
@@ -638,7 +638,7 @@ test("KT-124 renders campaign levels as an accessible winding forest trail",asyn
  const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
  const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
  const visual=styles.slice(styles.indexOf("KT-124 —"));
- assert.match(html,/app-version" content="KT-133"/);
+ assert.match(html,/app-version" content="KT-134"/);
  assert.match(html,/id="map-chapter-nav"[^>]*aria-label="Переход к главе кампании"/);
  assert.match(app,/grid\.className="campaign-levels map-levels map-trail"/);
  assert.match(visual,/\.map-trail\{[\s\S]*?display:flex!important[\s\S]*?flex-direction:column/);
@@ -667,7 +667,7 @@ test("KT-126 adds chapter signposts and keeps the chapter shortcut synced to the
  const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
  const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
  const visual=styles.slice(styles.indexOf("KT-126 —"));
- assert.match(html,/app-version" content="KT-133"/);
+ assert.match(html,/app-version" content="KT-134"/);
  assert.match(app,/mapChapterObserver=new IntersectionObserver/);
  assert.match(app,/root:\$\("map-overlay"\)/);
  assert.match(app,/section\.dataset\.chapterIndex=String\(index\)/);
@@ -684,7 +684,7 @@ test("KT-127 gives campaign chapters restrained biome accents and reduced-motion
  const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
  const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
  const visual=styles.slice(styles.indexOf("KT-127 —"));
- assert.match(html,/app-version" content="KT-133"/);
+ assert.match(html,/app-version" content="KT-134"/);
  for(const index of [0,1,2,3])assert.match(visual,new RegExp('\\.map-chapter\\[data-chapter-index="'+index+'"\\]'));
  assert.match(visual,/--chapter-accent/);
  assert.match(visual,/\.map-chapter::before/);
@@ -699,7 +699,7 @@ test("KT-128 visually connects chapter biomes into one continuous campaign route
  const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
  const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
  const visual=styles.slice(styles.indexOf("KT-128 —"));
- assert.match(html,/app-version" content="KT-133"/);
+ assert.match(html,/app-version" content="KT-134"/);
  assert.match(visual, /\.map-chapter\s*\+\s*\.map-chapter\{margin-top:/);
  assert.match(visual, /\.map-chapter\s*\+\s*\.map-chapter::after/);
  assert.match(visual,/repeating-linear-gradient\(to bottom/);
@@ -714,7 +714,7 @@ test("KT-129 exposes distinct accessible campaign stop states",async()=>{
  const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
  const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
  const visual=styles.slice(styles.indexOf("KT-129 —"));
- assert.match(html,/app-version" content="KT-133"/);
+ assert.match(html,/app-version" content="KT-134"/);
  assert.match(app,/dataset\.levelState=completed\?"completed":isNext\?"next":unlocked\?"available":"locked"/);
  assert.match(app,/button\.setAttribute\("aria-current","step"\)/);
  assert.match(visual,/\.campaign-level\.completed\{/);
@@ -739,7 +739,7 @@ test("KT-130 exposes campaign and chapter completion as accessible progress bars
  assert.ok(app.includes('chapterTrack.setAttribute("aria-valuenow",String(chapterDone))'));
  assert.ok(app.includes('track.setAttribute("aria-valuetext"'));
  assert.ok(app.includes('chapterTrack.setAttribute("aria-valuetext"'));
- assert.match(html,/app-version" content="KT-133"/);
+ assert.match(html,/app-version" content="KT-134"/);
 });
 
 
@@ -747,7 +747,7 @@ test("KT-131 gives campaign chapters semantic headings and labelled sections",as
  const app=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
  const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
  const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
- assert.match(html,/app-version" content="KT-133"/);
+ assert.match(html,/app-version" content="KT-134"/);
  assert.match(app,/document\.createElement\("h3"\);title\.className="map-chapter-title"/);
  assert.match(app,/title\.id="campaign-chapter-title-"\+index;title\.textContent=chapter\.name;section\.setAttribute\("aria-labelledby",title\.id\)/);
  assert.match(styles,/\.map-chapter-title\{display:flex/);
@@ -758,7 +758,7 @@ test("KT-132 gives each campaign biome a distinct stop accent without changing t
  const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
  const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
  const visual=styles.slice(styles.indexOf("KT-132 —"));
- assert.match(html,/app-version" content="KT-133"/);
+ assert.match(html,/app-version" content="KT-134"/);
  for(const index of [0,1,2,3])assert.match(visual,new RegExp('\\.map-chapter\\[data-chapter-index="'+index+'"\\]'));
  assert.match(visual,/\.campaign-level \.campaign-emoji/);
  assert.match(visual,/\.campaign-level\.next-stop \.campaign-emoji/);
@@ -766,11 +766,11 @@ test("KT-132 gives each campaign biome a distinct stop accent without changing t
 });
 
 
-test("KT-133 gives campaign trail links organic curved connectors",async()=>{
+test("KT-134 gives campaign trail links organic curved connectors",async()=>{
  const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
  const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
- const visual=styles.slice(styles.indexOf("KT-133 —"));
- assert.match(html,/app-version" content="KT-133"/);
+ const visual=styles.slice(styles.indexOf("KT-134 —"));
+ assert.match(html,/app-version" content="KT-134"/);
  assert.match(visual,/\.campaign-level::after\{[\s\S]*border-bottom:2px dotted/);
  assert.match(visual,/\.campaign-level:nth-child\(even\)::after/);
  assert.match(visual,/\.campaign-level:nth-child\(odd\)::after/);
@@ -778,4 +778,20 @@ test("KT-133 gives campaign trail links organic curved connectors",async()=>{
  assert.match(visual,/\.campaign-level\.next-stop::after/);
  assert.match(visual,/\.map-trail::before\{/);
  assert.match(visual,/prefers-reduced-motion:reduce/);
+});
+
+
+test("KT-134 keeps the main menu brand compact and adds a restrained future-content slot",async()=>{
+ const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
+ const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
+ assert.match(html,/app-version" content="KT-134"/);
+ assert.match(html,/menu-brand-kicker/);
+ assert.match(html,/class="menu-future"/);
+ assert.match(html,/Сезонные поляны и особые события/);
+ const visual=styles.slice(styles.indexOf("KT-134 —"));
+ assert.match(visual,/grid-template-areas:"brand" "garden" "level" "progress" "hubs" "future" "actions" "how"/);
+ assert.match(visual,/font-size:clamp\(20px,4vw,25px\)/);
+ assert.match(visual,/height:clamp\(132px,22dvh,178px\)/);
+ assert.match(visual,/grid-template-areas:[\s\S]*"garden level"[\s\S]*"garden actions"/);
+ assert.match(visual,/@media\(prefers-reduced-motion:reduce\)/);
 });
