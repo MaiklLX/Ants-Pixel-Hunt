@@ -4366,3 +4366,37 @@ button:not(:disabled):active{filter:brightness(.96)}
 .map-chapter-title::before{content:"";width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:#c8d7c0;box-shadow:0 0 0 3px #edf4e9}
 .map-chapter.chapter-active .map-chapter-title::before{background:#83b879;box-shadow:0 0 0 3px #e6f2df}
 .map-chapter.chapter-complete .map-chapter-title::before{background:#d0ad57;box-shadow:0 0 0 3px #f7f0dc}
+
+
+/* KT-132 — each biome gives its trail stops a distinct, restrained natural accent. */
+.map-chapter[data-chapter-index="0"] .map-trail .campaign-level .campaign-emoji{
+ border-color:#9fb47b;
+ background:radial-gradient(circle at 32% 24%,#a6bd7b66,transparent 52%),linear-gradient(145deg,#40583b,#293f31);
+ box-shadow:inset 0 1px #ffffff20,0 2px 5px #101e1655;
+}
+.map-chapter[data-chapter-index="1"] .map-trail .campaign-level .campaign-emoji{
+ border-color:#c39a86;
+ background:radial-gradient(circle at 32% 24%,#d4a18b66,transparent 52%),linear-gradient(145deg,#59443d,#3b302d);
+ box-shadow:inset 0 1px #ffffff20,0 2px 5px #101e1655;
+}
+.map-chapter[data-chapter-index="2"] .map-trail .campaign-level .campaign-emoji{
+ border-color:#c3a36d;
+ background:radial-gradient(circle at 32% 24%,#d2b47766,transparent 52%),linear-gradient(145deg,#594a35,#3d352b);
+ box-shadow:inset 0 1px #ffffff20,0 2px 5px #101e1655;
+}
+.map-chapter[data-chapter-index="3"] .map-trail .campaign-level .campaign-emoji{
+ border-color:#91b4a5;
+ background:radial-gradient(circle at 32% 24%,#9ac7b466,transparent 52%),linear-gradient(145deg,#36544b,#293e38);
+ box-shadow:inset 0 1px #ffffff20,0 2px 5px #101e1655;
+}
+.map-chapter[data-chapter-index="0"] .map-trail .campaign-level:not(.locked) .campaign-copy strong{ text-shadow:0 0 12px #a7b97b20 }
+.map-chapter[data-chapter-index="1"] .map-trail .campaign-level:not(.locked) .campaign-copy strong{ text-shadow:0 0 12px #c2a17b20 }
+.map-chapter[data-chapter-index="2"] .map-trail .campaign-level:not(.locked) .campaign-copy strong{ text-shadow:0 0 12px #c3a66f20 }
+.map-chapter[data-chapter-index="3"] .map-trail .campaign-level:not(.locked) .campaign-copy strong{ text-shadow:0 0 12px #9fb8a020 }
+.map-chapter .map-trail .campaign-level.next-stop .campaign-emoji{
+ border-color:var(--chapter-accent,#d0bd79);
+ box-shadow:inset 0 1px #ffffff35,0 0 0 2px color-mix(in srgb,var(--chapter-accent,#d0bd79) 22%,transparent),0 0 13px color-mix(in srgb,var(--chapter-glow,#91a86b) 35%,transparent);
+}
+@media(prefers-reduced-motion:reduce){
+ .map-chapter .map-trail .campaign-level .campaign-emoji{transition:none}
+}
