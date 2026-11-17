@@ -320,7 +320,7 @@ test("all campaign drawings and specialist obstacles remain solvable",()=>{
    }
    if(!progressed&&!loadedNewBox)break;
   }
-  assert.equal(remaining,0,level.name+" must clear every artwork block");
+  assert.equal(remaining,0,level.name+" must clear every artwork block; active="+JSON.stringify(active)+" deckLeft="+deck.length+" exposed="+JSON.stringify(getExposedTargets({board,obstacles}).slice(0,14)));
   assert.equal(obstacles.length,0,level.name+" must clear every specialist obstacle");
  }
 });
