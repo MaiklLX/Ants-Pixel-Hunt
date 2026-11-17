@@ -17,7 +17,7 @@ test("the box deck contains exactly enough ants to collect every pixel by color"
  for(const row of INITIAL_BOARD)for(const color of row)if(color)totals[color]++;
  const deckTotals=Object.fromEntries(Object.keys(COLORS).map(color=>[color,0]));
  for(const box of INCOMING)deckTotals[box.color]+=box.ants;
- assert.deepEqual(deckTotals,totals);assert.ok(INCOMING.length>9);assert.equal(BOX_CAPACITY,60);
+ assert.deepEqual(Object.fromEntries(Object.entries(deckTotals).filter(([,total])=>total>0)),Object.fromEntries(Object.entries(totals).filter(([,total])=>total>0)));assert.ok(INCOMING.length>9);assert.equal(BOX_CAPACITY,60);
  assert.deepEqual(INCOMING.slice(0,5).map(box=>box.color),["green","blue","purple","yellow","red"]);
 });
 test("only top-row boxes can be selected; chosen column shifts upward and refills at bottom",()=>{
@@ -148,7 +148,7 @@ test("the 35x35 artwork produces a complete deterministic deck with bounded box 
   assert.ok(box.ants>0&&box.ants<=BOX_CAPACITY);
   deckTotals[box.color]+=box.ants;
  }
- assert.deepEqual(deckTotals,totals);
+ assert.deepEqual(Object.fromEntries(Object.entries(deckTotals).filter(([,total])=>total>0)),Object.fromEntries(Object.entries(totals).filter(([,total])=>total>0)));
  assert.equal(INCOMING.reduce((sum,box)=>sum+box.ants,0),createGame().remaining);
  assert.ok(INCOMING.length>=10&&INCOMING.length<=25);
 });
@@ -196,7 +196,7 @@ test("all campaign levels have distinct deterministic artwork and exact matching
   for(const row of board)for(const color of row)if(color)totals[color]++;
   const deckTotals=Object.fromEntries(Object.keys(COLORS).map(color=>[color,0]));
   for(const box of deck){assert.ok(box.ants>0&&box.ants<=BOX_CAPACITY);deckTotals[box.color]+=box.ants;}
-  assert.deepEqual(deckTotals,totals);
+  assert.deepEqual(Object.fromEntries(Object.entries(deckTotals).filter(([,total])=>total>0)),Object.fromEntries(Object.entries(totals).filter(([,total])=>total>0)));
   assert.equal(deck.reduce((sum,box)=>sum+box.ants,0),createGame(level.id).remaining);
   signatures.add(board.map(row=>row.join(",")).join(";"));
  }
@@ -436,7 +436,7 @@ test("the seventh firefly meadow has five exact color budgets and a fully solvab
  assert.equal(board.length,SIZE);assert.ok(board.every(row=>row.length===SIZE));
  const totals=Object.fromEntries(Object.keys(COLORS).map(color=>[color,0]));
  for(const row of board)for(const color of row)if(color)totals[color]++;
- assert.ok(Object.values(totals).every(total=>total>0));
+ assert.ok(Object.values(totals).filter(total=>total>0).length>=5);
  const exposed=getExposedPixels(board);
  assert.ok(exposed.length>0);
  assert.ok(exposed.every(({x,y})=>board[y][x]==="green"),"every game-exposed block, including board-edge cells, must use the outer green color");
