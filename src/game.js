@@ -439,7 +439,7 @@ export function buildIncoming(board,levelNumber=1){
   boardSeed=Math.imul(boardSeed^code,16777619)>>>0;
   if(color)totals[color]++;
  }
- const colors=Object.keys(COLORS),queues={};
+ const colors=["green","blue","purple","yellow","red","orange","pink","cyan","brown"],queues={};
  for(const color of colors){
   const total=totals[color];
   if(!total){queues[color]=[];continue;}
