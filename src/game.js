@@ -211,6 +211,20 @@ const GENERATED_MOTIFS=[
  {type:"bee",name:"Пчёлка",emoji:"🐝"},
  {type:"cloud",name:"Облачко",emoji:"☁️"}
 ];
+const GENERATED_ART_PALETTES={
+ flower:["green","pink","yellow","lime","orange"],
+ tree:["brown","green","lime","yellow","red"],
+ mushroom:["cream","red","cream","brown","green"],
+ butterfly:["brown","blue","pink","yellow","purple"],
+ house:["cream","red","brown","sky","green"],
+ fish:["brown","turquoise","orange","yellow","black"],
+ snail:["green","brown","orange","cream","black"],
+ rocket:["orange","cream","red","blue","sky"],
+ bird:["brown","sky","blue","orange","black"],
+ acorn:["brown","brown","orange","green","yellow"],
+ bee:["black","yellow","cream","black","brown"],
+ cloud:["sky","sky","yellow","orange","cream"]
+};
 const GENERATED_CHAPTERS=[
  "Светлячковая роща","Тихий ручей","Солнечная опушка","Старый дуб",
  "Мшистые холмы","Лунный сад","Долина огоньков","Затерянная тропа",
@@ -347,62 +361,25 @@ function generatedSceneLayout(count,variant){
  return choices[variant%choices.length];
 }
 function createComposedArtworkBoard(number){
- const occupied=Array.from({length:SIZE},()=>Array(SIZE).fill(false));
- const zones=Array.from({length:SIZE},()=>Array(SIZE).fill(-1));
- const count=generatedPartCount(number);
- // A broad, illustration-friendly palette is available from the very first generated levels.
- const palette=["green","blue","purple","yellow","red"]; // recolored per motif after composition
- const layoutVariant=(number+Math.floor(number/11))%3;
+ const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
+ const count=generatedPartCount(number),layoutVariant=(number+Math.floor(number/11))%3;
  const placements=generatedSceneLayout(count,layoutVariant);
  for(let part=0;part<count;part++){
   const motifIndex=(number*7+part*5+Math.floor(number/13))%GENERATED_MOTIFS.length;
   const motif=GENERATED_MOTIFS[motifIndex],variant=number*37+part*113;
+  const palette=GENERATED_ART_PALETTES[motif.type]||GENERATED_ART_PALETTES.flower;
   const [ox,oy,width,height]=placements[part];
   for(let py=0;py<height;py++)for(let px=0;px<width;px++){
    const zone=generatedMotifZone(motif.type,(px+.5)/width,(py+.5)/height,variant);
    if(zone<0)continue;
    const x=ox+px,y=oy+py;
    if(x<0||y<0||x>=SIZE||y>=SIZE)continue;
-   occupied[y][x]=true;
-   zones[y][x]=zone;
+   board[y][x]=palette[zone]||palette[0];
   }
- }
- // Build the same outside-connected empty region used by gameplay. Then
- // calculate inward layers through occupied cells only, so every new layer
- // becomes collectible after the previous one is cleared.
- const outside=Array.from({length:SIZE},()=>Array(SIZE).fill(false)),air=[];
- const addAir=(x,y)=>{
-  if(x<0||y<0||x>=SIZE||y>=SIZE||outside[y][x]||occupied[y][x])return;
-  outside[y][x]=true;air.push([x,y]);
- };
- for(let x=0;x<SIZE;x++){addAir(x,0);addAir(x,SIZE-1);}
- for(let y=0;y<SIZE;y++){addAir(0,y);addAir(SIZE-1,y);}
- for(let head=0;head<air.length;head++){
-  const [x,y]=air[head];
-  addAir(x-1,y);addAir(x+1,y);addAir(x,y-1);addAir(x,y+1);
- }
- const depth=Array.from({length:SIZE},()=>Array(SIZE).fill(Infinity)),queue=[];
- for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)if(occupied[y][x]&&(
-  x===0||y===0||x===SIZE-1||y===SIZE-1||
-  [[x-1,y],[x+1,y],[x,y-1],[x,y+1]].some(([nx,ny])=>nx>=0&&ny>=0&&nx<SIZE&&ny<SIZE&&outside[ny][nx])
- )){
-  depth[y][x]=1;queue.push([x,y]);
- }
- for(let head=0;head<queue.length;head++){
-  const [x,y]=queue[head],next=depth[y][x]+1;
-  for(const [nx,ny] of [[x-1,y],[x+1,y],[x,y-1],[x,y+1]]){
-   if(nx<0||ny<0||nx>=SIZE||ny>=SIZE||!occupied[ny][nx]||depth[ny][nx]<=next)continue;
-   depth[ny][nx]=next;queue.push([nx,ny]);
-  }
- }
- const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
- for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)if(occupied[y][x]){
-  const layer=Number.isFinite(depth[y][x])?depth[y][x]:9;
-  const colorIndex=layer<=1?0:layer<=3?1:layer<=5?2:layer<=7?3:4;
-  board[y][x]=palette[colorIndex];
  }
  return board;
 }
+
 export const LEVELS=[
 
  {id:"meadow-01",number:1,chapter:"Зелёная поляна",name:"Портрет лягушонка",emoji:"🐸",hint:"Знакомство с цветными боксами и пятью отсеками"},
@@ -446,42 +423,20 @@ function artworkPaletteForLevel(level){
  const motifIndex=(level.number*7+Math.floor(level.number/13))%GENERATED_MOTIFS.length;
  return ART_PALETTES[GENERATED_MOTIFS[motifIndex].type]||ART_PALETTES.frog;
 }
-function recolorArtworkByLayers(source,palette){
- const occupied=source.map(row=>row.map(Boolean)),depth=Array.from({length:SIZE},()=>Array(SIZE).fill(Infinity)),queue=[];
- const outside=Array.from({length:SIZE},()=>Array(SIZE).fill(false)),air=[];
- const addAir=(x,y)=>{
-  if(x<0||y<0||x>=SIZE||y>=SIZE||outside[y][x]||occupied[y][x])return;
-  outside[y][x]=true;air.push([x,y]);
- };
- for(let x=0;x<SIZE;x++){addAir(x,0);addAir(x,SIZE-1);}
- for(let y=0;y<SIZE;y++){addAir(0,y);addAir(SIZE-1,y);}
- for(let head=0;head<air.length;head++){
-  const [x,y]=air[head];addAir(x-1,y);addAir(x+1,y);addAir(x,y-1);addAir(x,y+1);
- }
- for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)if(occupied[y][x]&&(
-  x===0||y===0||x===SIZE-1||y===SIZE-1||
-  [[x-1,y],[x+1,y],[x,y-1],[x,y+1]].some(([nx,ny])=>nx>=0&&ny>=0&&nx<SIZE&&ny<SIZE&&outside[ny][nx])
- )){
-  depth[y][x]=1;queue.push([x,y]);
- }
- for(let head=0;head<queue.length;head++){
-  const [x,y]=queue[head],next=depth[y][x]+1;
-  for(const [nx,ny] of [[x-1,y],[x+1,y],[x,y-1],[x,y+1]]){
-   if(nx<0||ny<0||nx>=SIZE||ny>=SIZE||!occupied[ny][nx]||depth[ny][nx]<=next)continue;
-   depth[ny][nx]=next;queue.push([nx,ny]);
-  }
- }
- const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
- for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)if(occupied[y][x]){
-  const layer=Number.isFinite(depth[y][x])?depth[y][x]:10;
-  if(layer===1)board[y][x]="black";
-  else{
-   const index=layer<=3?0:layer<=5?1:layer<=7?2:layer<=9?3:4;
-   board[y][x]=palette[index];
-  }
+function applyPixelArtOutlines(source){
+ const board=source.map(row=>row.slice());
+ // One deliberate dark contour around the silhouette; interior color clusters
+ // remain intact so each object reads as a hand-built pixel illustration.
+ for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){
+  if(!source[y][x])continue;
+  const edge=[[x-1,y],[x+1,y],[x,y-1],[x,y+1]].some(([nx,ny])=>
+   nx<0||ny<0||nx>=SIZE||ny>=SIZE||!source[ny][nx]
+  );
+  if(edge)board[y][x]="black";
  }
  return board;
 }
+
 export function createArtworkBoard(levelId="meadow-01"){
  const level=getLevel(levelId);
  if(!artworkBoardCache.has(level.id)){
@@ -494,7 +449,7 @@ export function createArtworkBoard(levelId="meadow-01"){
   else if(level.id==="forest-06")board=createSnailBoard();
   else if(level.id==="forest-07")board=createFireflyBoard();
   else board=createFrogBoard();
-  board=recolorArtworkByLayers(board,artworkPaletteForLevel(level));
+  board=applyPixelArtOutlines(board);
   artworkBoardCache.set(level.id,board);
  }
  // Return a fresh mutable board: gameplay clears cells in place, so cached
