@@ -4341,3 +4341,21 @@ button:not(:disabled):active{filter:brightness(.96)}
 @media(prefers-reduced-motion:reduce){
  .map-chapter + .map-chapter::after{filter:none}
 }
+
+
+/* KT-129 — make each stop's progress state immediately readable. */
+.map-trail .campaign-level{isolation:isolate;transition:transform .24s ease,border-color .24s ease,filter .24s ease,box-shadow .24s ease}
+.map-trail .campaign-level.completed{border-color:#a7ad72;background:linear-gradient(135deg,#40513a,#2b3d2e);box-shadow:inset 3px 0 #b8b47b,inset 0 1px #ffffff1c,0 4px 0 #17291f,0 8px 15px #07140f44}
+.map-trail .campaign-level.completed .campaign-copy strong{color:#e2e5c8}
+.map-trail .campaign-level.completed .map-level-hint{color:#c0c99b}
+.map-trail .campaign-level.available:not(.next-stop){border-color:#637d58;background:linear-gradient(140deg,#354b39,#293e31)}
+.map-trail .campaign-level.available:not(.next-stop) .campaign-state{color:#c0c994}
+.map-trail .campaign-level.current:not(.next-stop){outline:1px solid #aab783;outline-offset:2px}
+.map-trail .campaign-level.locked{border-color:#465347;background:linear-gradient(145deg,#29382e,#202f28);filter:saturate(.38);opacity:.72}
+.map-trail .campaign-level.locked .campaign-copy strong{color:#aeb9a6}
+.map-trail .campaign-level.next-stop{z-index:1;animation:next-stop-breathe 3.2s ease-in-out infinite}
+.map-trail .campaign-level.next-stop .campaign-state{color:#f0dfa0;letter-spacing:.35px}
+.map-trail .campaign-level:not(:disabled):hover{transform:translateY(-2px);filter:brightness(1.08)}
+@keyframes next-stop-breathe{0%,100%{box-shadow:inset 0 1px #ffffff2b,0 0 0 2px #d0bd7925,0 5px 0 #17291f,0 10px 18px #07140f55}50%{box-shadow:inset 0 1px #ffffff35,0 0 0 3px #d0bd7940,0 5px 0 #17291f,0 10px 20px #07140f66}}
+@media(max-width:420px){.map-trail .campaign-level{min-height:74px}.map-trail .campaign-level .campaign-copy{align-items:flex-start;text-align:left}.map-trail .campaign-level .campaign-copy small{white-space:normal}}
+@media(prefers-reduced-motion:reduce){.map-trail .campaign-level,.map-trail .campaign-level.next-stop{animation:none!important;transition:none!important}.map-trail .campaign-level:not(:disabled):hover{transform:none}}
