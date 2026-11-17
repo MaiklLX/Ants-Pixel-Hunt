@@ -74,7 +74,7 @@ function renderMap(){
    const jump=document.createElement("button");jump.type="button";jump.className="map-chapter-jump";jump.dataset.chapterIndex=String(index);jump.textContent=chapter.name;jump.addEventListener("click",()=>{chapterNav.querySelectorAll("[aria-current]").forEach(active=>active.removeAttribute("aria-current"));jump.setAttribute("aria-current","location");section.scrollIntoView({block:"start",behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});});if(nextPlayable&&chapter.levels.some(level=>level.id===nextPlayable.id))jump.setAttribute("aria-current","location");chapterNav.append(jump);
   const heading=document.createElement("header");heading.className="map-chapter-heading";
   const marker=document.createElement("span");marker.className="map-chapter-mark";marker.textContent=String(index+1).padStart(2,"0");marker.setAttribute("aria-hidden","true");
-  const title=document.createElement("strong");title.textContent=chapter.name;
+  const title=document.createElement("h3");title.className="map-chapter-title";title.id="campaign-chapter-title-"+index;title.textContent=chapter.name;section.setAttribute("aria-labelledby",title.id);
   const chapterDone=chapter.levels.filter(level=>done.has(level.id)).length;
   const meta=document.createElement("small");meta.textContent=chapterDone===chapter.levels.length?"ГЛАВА ПРОЙДЕНА":chapterDone?`${chapterDone} / ${chapter.levels.length} · В ПУТИ`:`0 / ${chapter.levels.length} · ВПЕРЕДИ`;
   heading.append(marker,title,meta);
