@@ -658,11 +658,12 @@ export function buildIncoming(board,levelNumber=1){
   let seed=(boardSeed^color.charCodeAt(0)*2654435761)>>>0;
   const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
   const spread=detailedLevel?1:Math.max(6,Math.min(22,Math.round(base*.58)));
-  const sizes=Array.from({length:count},()=>Math.max(minimum,Math.min(BOX_CAPACITY,base+Math.round((random()*2-1)*spread))));
+  const maxSquad=detailedLevel?targetSquad:BOX_CAPACITY;
+  const sizes=Array.from({length:count},()=>Math.max(minimum,Math.min(maxSquad,base+Math.round((random()*2-1)*spread))));
   let difference=total-sizes.reduce((sum,value)=>sum+value,0),cursor=Math.floor(random()*count);
   while(difference!==0){
    const index=cursor++%count;
-   if(difference>0&&sizes[index]<BOX_CAPACITY){sizes[index]++;difference--;}
+   if(difference>0&&sizes[index]<maxSquad){sizes[index]++;difference--;}
    else if(difference<0&&sizes[index]>minimum){sizes[index]--;difference++;}
   }
   if(sizes.length>=3&&new Set(sizes).size===1){sizes[0]++;sizes[1]--;}
