@@ -13,10 +13,15 @@
 
 ### Последний этап: KT-130 — доступная семантика прогресса кампании
 - База: HEAD main 02107ca9b67c74d8877fadf73218f72a25fd3de4 (KT-129); прямые изменения только в этом репозитории.
-- Общий индикатор кампании и индикатор каждой главы теперь имеют роль progressbar, минимальное/максимальное/текущее значения и понятный aria-valuetext на русском.
-- Визуальная композиция, размеры, цвета, правила разблокировки и сохранение прогресса не меняются.
-- Добавлен DOM-contract regression test для обоих типов индикаторов; App version KT-130; оба Service Worker используют cache v98.
-- Кодовый commit и CI/Pages фиксируются после подтверждения GitHub Actions.
+- Общий индикатор кампании и индикатор каждой главы теперь имеют роль progressbar, aria-valuemin, фактические aria-valuemax/aria-valuenow и понятный aria-valuetext на русском.
+- Визуальная композиция, размеры, цвета, правила разблокировки и сохранение прогресса не меняются. App version KT-130; оба Service Worker используют cache v98.
+- Кодовый commit: b85463c39d691d3f5a835f0195429b057374a626. Исправление неточного тестового matcher и финальный проверенный SHA: 31564820b1fa2f9afd99f90a109db237b8a767e6.
+- Pages run [#44055693646](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/44055693646): success — npm test 135/135, npm run build, upload artifact и GitHub Pages deploy.
+- Godot run [#44055693444](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/44055693444): success — import, gameplay rules tests и project smoke test.
+- Android run [#44055693603](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/44055693603): success — npm test 135/135, production build, Capacitor sync, debug APK; artifact [#14315274358](https://github.com/MaiklLX/Ants-Pixel-Hunt/actions/runs/44055693603/artifacts/14315274358), 3,850,431 bytes. APK не тестировался на устройстве.
+- Первый прогон для b85463c завершился 134/135: ошибка была только в новом matcher, который считал ещё существующий aria-valuetext индикатора скорости. Исправление сузило проверку до двух нужных progressbar; финальный SHA 31564820 прошёл все три workflow.
+- Локальные npm test/build, ручной visual QA, тест экранным диктором и физические Android/iOS устройства не проверялись. Прямое открытие публичного URL инструментом браузера не удалось; успешный Pages deploy подтверждён GitHub Actions.
+- Следующий безопасный шаг: аудит клавиатурного фокуса и возврата фокуса после закрытия карты, затем продолжение авторской кампании с отдельными тестами цветового бюджета и решаемости.
 
  
 ### Историческая контрольная точка KT-123 — интерактивная карта кампании

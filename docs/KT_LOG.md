@@ -1075,5 +1075,8 @@ KT-097: создать одну авторскую седьмую полянку
 - Добавлен DOM-contract тест на семантику общего и главных индикаторов; все исторические проверки версии синхронизированы с KT-130.
 - App version KT-130; оба Service Worker используют cache v98.
 - Изменённые файлы: src/app.js, tests/dom-contract.test.js, index.html, service-worker.js, public/service-worker.js, README.md, docs/CURRENT_STATE.md, docs/KT_LOG.md, docs/KT-130_ACCESSIBLE_CAMPAIGN_PROGRESS.md.
-- Кодовый commit SHA, npm test/build, GitHub Actions IDs и Pages deploy: будут внесены после фактического завершения workflow. Локальный npm test/build и тестирование экранным диктором/на физическом устройстве не заявляются.
+- Первый кодовый commit b85463c39d691d3f5a835f0195429b057374a626: Pages/Android тесты остановились на 134/135 из-за слишком широкого matcher, который захватывал третий уже существовавший aria-valuetext у индикатора скорости. Это была ошибка нового теста, не runtime-дефект.
+- Финальный проверенный code/test SHA: 31564820b1fa2f9afd99f90a109db237b8a767e6; matcher сужен до campaign track и chapterTrack.
+- Pages run #44055693646: success — npm test 135/135, npm run build, artifact upload и deploy. Godot run #44055693444: success — import, gameplay rules и project smoke. Android run #44055693603: success — npm test 135/135, npm run build, Capacitor sync и debug APK; artifact #14315274358, 3,850,431 bytes (устройство не тестировалось).
+- Локальные npm test/build, ручной visual QA, тест экранным диктором и физические Android/iOS устройства не проверялись. Прямой запрос публичной страницы браузерным инструментом не сработал; Pages deploy подтверждён workflow.
 

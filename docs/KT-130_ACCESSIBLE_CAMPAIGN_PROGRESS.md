@@ -39,7 +39,9 @@
 
 - Первый Pages прогон #44055497489 и Android прогон #44055497485: 134/135 тестов; единственный отказ был в новом контрактном тесте — он считал все aria-valuetext в app.js и захватил ещё существующий индикатор скорости. Это ошибка точности matcher, не дефект приложения.
 - Исправление сужает проверки до двух конкретных элементов: общего track и chapterTrack. Повторный прогон ожидается.
-- Кодовый commit SHA: будет записан после создания commit.
-- npm test / npm run build: ожидаются GitHub Actions для нового SHA; локальный запуск не заявляется.
-- GitHub Pages / Godot / Android workflows: ожидают завершения.
-- Экранный диктор, физические телефоны и ручной визуальный QA не проверялись.
+- Первый кодовый commit: b85463c39d691d3f5a835f0195429b057374a626; первый прогон выявил только ошибку тестового matcher (134/135), затем он был сужен.
+- Финальный проверенный code/test SHA: 31564820b1fa2f9afd99f90a109db237b8a767e6.
+- Pages run #44055693646: success; npm test 135/135; npm run build; Pages artifact upload и deploy success.
+- Godot run #44055693444: success; import, gameplay rules tests и project smoke test success.
+- Android run #44055693603: success; npm test 135/135, npm run build, Capacitor sync, debug APK artifact #14315274358 (3,850,431 bytes).
+- Локальный npm test/build, экранный диктор, ручной visual QA и физические устройства не проверялись. Прямое открытие публичного URL браузерным инструментом не удалось, но Pages deploy workflow завершился success.
