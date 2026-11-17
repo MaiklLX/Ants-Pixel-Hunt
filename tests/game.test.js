@@ -319,7 +319,9 @@ test("all campaign drawings and specialist obstacles remain solvable",()=>{
     let index=-1,bestAntCount=Infinity;
     for(let candidate=0;candidate<deck.length;candidate++){
      const box=deck[candidate];
-     if((level.number>=8?exposedCount(box)>=box.ants:accessibleIndex(box)>=0)&&box.ants<bestAntCount){index=candidate;bestAntCount=box.ants;}
+     const alreadyAssigned=active.reduce((sum,other)=>other&&boxKey(other)===boxKey(box)?sum+other.ants:sum,0);
+     const canClearBatch=level.number>=8?exposedCount(box)>=box.ants+alreadyAssigned:accessibleIndex(box)>=0;
+     if(canClearBatch&&box.ants<bestAntCount){index=candidate;bestAntCount=box.ants;}
     }
     if(index>=0){active[slot]=deck.splice(index,1)[0];loadedNewBox=true;}
    }
