@@ -363,18 +363,19 @@ function generatedSceneLayout(count,variant){
 function createComposedArtworkBoard(number){
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
  const count=generatedPartCount(number),layoutVariant=(number+Math.floor(number/11))%3;
+ const primaryMotifIndex=(number*7+Math.floor(number/13))%GENERATED_MOTIFS.length;
+ const scenePalette=ART_PALETTES[GENERATED_MOTIFS[primaryMotifIndex].type]||ART_PALETTES.frog;
  const placements=generatedSceneLayout(count,layoutVariant);
  for(let part=0;part<count;part++){
   const motifIndex=(number*7+part*5+Math.floor(number/13))%GENERATED_MOTIFS.length;
   const motif=GENERATED_MOTIFS[motifIndex],variant=number*37+part*113;
-  const palette=GENERATED_ART_PALETTES[motif.type]||GENERATED_ART_PALETTES.flower;
   const [ox,oy,width,height]=placements[part];
   for(let py=0;py<height;py++)for(let px=0;px<width;px++){
    const zone=generatedMotifZone(motif.type,(px+.5)/width,(py+.5)/height,variant);
    if(zone<0)continue;
    const x=ox+px,y=oy+py;
    if(x<0||y<0||x>=SIZE||y>=SIZE)continue;
-   board[y][x]=palette[zone]||palette[0];
+   board[y][x]=scenePalette[zone]||scenePalette[0];
   }
  }
  return board;
