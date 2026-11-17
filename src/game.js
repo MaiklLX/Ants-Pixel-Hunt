@@ -212,19 +212,34 @@ const GENERATED_MOTIFS=[
  {type:"cloud",name:"Облачко",emoji:"☁️"}
 ];
 const GENERATED_ART_PALETTES={
- flower:["green","pink","yellow","lime","orange"],
- tree:["brown","green","lime","yellow","red"],
- mushroom:["cream","red","cream","brown","green"],
- butterfly:["brown","blue","pink","yellow","purple"],
- house:["cream","red","brown","sky","green"],
- fish:["brown","turquoise","orange","yellow","black"],
- snail:["green","brown","orange","cream","black"],
- rocket:["orange","cream","red","blue","sky"],
- bird:["brown","sky","blue","orange","black"],
- acorn:["brown","brown","orange","green","yellow"],
- bee:["black","yellow","cream","black","brown"],
- cloud:["sky","sky","yellow","orange","cream"]
+ flower:["forest","pink","yellow","lime","orange","green","red","cream","olive","purple"],
+ tree:["brown","green","lime","yellow","red","forest","olive","orange","cream","gray"],
+ mushroom:["cream","red","brown","green","yellow","orange","pink","forest","olive","gray"],
+ butterfly:["purple","blue","pink","yellow","orange","forest","turquoise","sky","red","cream"],
+ house:["cream","red","brown","sky","green","orange","yellow","blue","forest","gray"],
+ fish:["turquoise","blue","orange","yellow","cream","sky","red","purple","green","brown"],
+ snail:["green","brown","orange","cream","yellow","forest","red","olive","lime","gray"],
+ rocket:["red","cream","orange","blue","sky","yellow","brown","turquoise","purple","gray"],
+ bird:["brown","sky","blue","orange","yellow","cream","forest","red","turquoise","gray"],
+ acorn:["brown","green","orange","yellow","cream","forest","red","olive","lime","gray"],
+ bee:["yellow","black","cream","orange","brown","green","red","forest","olive","sky"],
+ cloud:["sky","cream","yellow","orange","blue","turquoise","gray","pink","purple","lime"]
 };
+function generatedMotifColor(type,zone,u,v,variant){
+ const palette=GENERATED_ART_PALETTES[type]||GENERATED_ART_PALETTES.flower;
+ const x=Math.floor(u*20),y=Math.floor(v*20),phase=variant%5;
+ // Large, deliberate highlight and shadow clusters follow the shape of each
+ // semantic region; these are not random per-tile speckles.
+ const accents=[
+  (v>.68&&u>.25&&u<.75)||(u<.24&&v>.35),
+  (u<.27&&v>.24)||(v>.72&&u>.25&&u<.75),
+  ((x+y+phase)%7===0&&u>.18&&u<.82&&v>.18&&v<.82),
+  (u>.62&&v<.48)||(u<.38&&v>.62),
+  (v<.34&&u>.3&&u<.7)||(u>.76&&v>.38&&v<.68)
+ ];
+ const accentIndex=[5,6,7,8,9][zone];
+ return accents[zone]&&palette[accentIndex]?palette[accentIndex]:palette[zone]||palette[0];
+}
 const GENERATED_CHAPTERS=[
  "Светлячковая роща","Тихий ручей","Солнечная опушка","Старый дуб",
  "Мшистые холмы","Лунный сад","Долина огоньков","Затерянная тропа",
@@ -363,8 +378,6 @@ function generatedSceneLayout(count,variant){
 function createComposedArtworkBoard(number){
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
  const count=generatedPartCount(number),layoutVariant=(number+Math.floor(number/11))%3;
- const primaryMotifIndex=(number*7+Math.floor(number/13))%GENERATED_MOTIFS.length;
- const scenePalette=GENERATED_ART_PALETTES[GENERATED_MOTIFS[primaryMotifIndex].type]||GENERATED_ART_PALETTES.flower;
  const placements=generatedSceneLayout(count,layoutVariant);
  for(let part=0;part<count;part++){
   const motifIndex=(number*7+part*5+Math.floor(number/13))%GENERATED_MOTIFS.length;
@@ -375,7 +388,7 @@ function createComposedArtworkBoard(number){
    if(zone<0)continue;
    const x=ox+px,y=oy+py;
    if(x<0||y<0||x>=SIZE||y>=SIZE)continue;
-   board[y][x]=scenePalette[zone]||scenePalette[0];
+   board[y][x]=generatedMotifColor(motif.type,zone,(px+.5)/width,(py+.5)/height,variant);
   }
  }
  return board;
