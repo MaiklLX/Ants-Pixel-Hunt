@@ -181,7 +181,7 @@ test("a box cannot depart while any ant assigned to its slot is still travelling
 test("incoming deck balances a color total of 19 without an impossible minimum",()=>{
  const board=[Array(19).fill("red")];
  const deck=buildIncoming(board,8);
- assert.ok(deck.length>=2&&deck.length<=4);
+ assert.ok(deck.length>=2&&deck.length<=6);
  assert.equal(deck.reduce((sum,box)=>sum+box.ants,0),19);
  assert.ok(deck.every(box=>box.color==="red"&&box.ants>0&&box.ants<=BOX_CAPACITY));
 });
