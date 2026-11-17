@@ -311,21 +311,82 @@ function generatedMotifZone(type,u,v,variant){
  }
  return -1;
 }
+function generatedSceneLayout(count,variant){
+ const layouts={
+  1:[[[5,3,25,29]]],
+  2:[
+   [[1,5,23,28],[23,15,12,17]],
+   [[2,2,18,24],[19,15,15,18]],
+   [[1,15,16,18],[16,2,18,25]]
+  ],
+  3:[
+   [[8,7,19,24],[0,0,13,14],[22,0,13,14]],
+   [[1,7,18,23],[20,0,15,14],[21,20,14,14]],
+   [[16,7,18,23],[0,0,14,14],[0,20,14,14]]
+  ],
+  4:[
+   [[9,7,17,21],[0,0,13,14],[22,0,13,14],[1,23,13,11]],
+   [[1,7,18,23],[20,0,15,14],[21,20,14,14],[0,0,10,10]],
+   [[9,7,18,22],[0,14,12,16],[23,14,12,16],[12,0,11,10]]
+  ]
+ };
+ const choices=layouts[count]||layouts[4];
+ return choices[variant%choices.length];
+}
 function createComposedArtworkBoard(number){
- const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
+ const occupied=Array.from({length:SIZE},()=>Array(SIZE).fill(false));
+ const zones=Array.from({length:SIZE},()=>Array(SIZE).fill(-1));
  const count=generatedPartCount(number),paletteCount=number<26?3:number<76?4:5;
  const palette=["green","blue","purple","yellow","red"].slice(0,paletteCount);
- const tiles=count===1?[[4,3,27,29]]:count===2?[[2,7,15,21],[18,7,15,21]]:count===3?[[1,2,15,15],[19,2,15,15],[10,19,15,15]]:[[2,2,15,15],[18,2,15,15],[2,18,15,15],[18,18,15,15]];
+ const layoutVariant=(number+Math.floor(number/11))%3;
+ const placements=generatedSceneLayout(count,layoutVariant);
  for(let part=0;part<count;part++){
   const motifIndex=(number*7+part*5+Math.floor(number/13))%GENERATED_MOTIFS.length;
   const motif=GENERATED_MOTIFS[motifIndex],variant=number*37+part*113;
-  const [ox,oy,width,height]=tiles[part];
+  const [ox,oy,width,height]=placements[part];
   for(let py=0;py<height;py++)for(let px=0;px<width;px++){
    const zone=generatedMotifZone(motif.type,(px+.5)/width,(py+.5)/height,variant);
    if(zone<0)continue;
-   const colorIndex=(zone+part+Math.floor(number/5)+Math.floor(py/7))%paletteCount;
-   board[oy+py][ox+px]=palette[colorIndex];
+   const x=ox+px,y=oy+py;
+   if(x<0||y<0||x>=SIZE||y>=SIZE)continue;
+   occupied[y][x]=true;
+   zones[y][x]=zone;
   }
+ }
+ // Build the same outside-connected empty region used by gameplay. Then
+ // calculate inward layers through occupied cells only, so every new layer
+ // becomes collectible after the previous one is cleared.
+ const outside=Array.from({length:SIZE},()=>Array(SIZE).fill(false)),air=[];
+ const addAir=(x,y)=>{
+  if(x<0||y<0||x>=SIZE||y>=SIZE||outside[y][x]||occupied[y][x])return;
+  outside[y][x]=true;air.push([x,y]);
+ };
+ for(let x=0;x<SIZE;x++){addAir(x,0);addAir(x,SIZE-1);}
+ for(let y=0;y<SIZE;y++){addAir(0,y);addAir(SIZE-1,y);}
+ for(let head=0;head<air.length;head++){
+  const [x,y]=air[head];
+  addAir(x-1,y);addAir(x+1,y);addAir(x,y-1);addAir(x,y+1);
+ }
+ const depth=Array.from({length:SIZE},()=>Array(SIZE).fill(Infinity)),queue=[];
+ for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)if(occupied[y][x]&&(
+  x===0||y===0||x===SIZE-1||y===SIZE-1||
+  [[x-1,y],[x+1,y],[x,y-1],[x,y+1]].some(([nx,ny])=>nx>=0&&ny>=0&&nx<SIZE&&ny<SIZE&&outside[ny][nx])
+ )){
+  depth[y][x]=1;queue.push([x,y]);
+ }
+ for(let head=0;head<queue.length;head++){
+  const [x,y]=queue[head],next=depth[y][x]+1;
+  for(const [nx,ny] of [[x-1,y],[x+1,y],[x,y-1],[x,y+1]]){
+   if(nx<0||ny<0||nx>=SIZE||ny>=SIZE||!occupied[ny][nx]||depth[ny][nx]<=next)continue;
+   depth[ny][nx]=next;queue.push([nx,ny]);
+  }
+ }
+ const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
+ for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)if(occupied[y][x]){
+  const layer=Number.isFinite(depth[y][x])?depth[y][x]:1;
+  const zone=Math.max(0,zones[y][x]);
+  const colorIndex=(layer-1+zone+Math.floor(number/5))%paletteCount;
+  board[y][x]=palette[colorIndex];
  }
  return board;
 }
