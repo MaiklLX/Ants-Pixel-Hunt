@@ -592,12 +592,23 @@ function artworkPaletteForLevel(level){
 }
 function applyPixelArtOutlines(source){
  const board=source.map(row=>row.slice());
- // One deliberate dark contour around the silhouette; interior color clusters
- // remain intact so each object reads as a hand-built pixel illustration.
+ const outside=Array.from({length:SIZE},()=>Array(SIZE).fill(false)),queue=[];
+ const add=(x,y)=>{
+  if(x<0||y<0||x>=SIZE||y>=SIZE||outside[y][x]||source[y][x])return;
+  outside[y][x]=true;queue.push([x,y]);
+ };
+ for(let x=0;x<SIZE;x++){add(x,0);add(x,SIZE-1);}
+ for(let y=0;y<SIZE;y++){add(0,y);add(SIZE-1,y);}
+ for(let head=0;head<queue.length;head++){
+  const [x,y]=queue[head];
+  for(const [nx,ny] of [[x-1,y],[x+1,y],[x,y-1],[x,y+1]])add(nx,ny);
+ }
+ // Outline only the exterior-connected silhouette. Internal cavities are not
+ // recolored black, so a contour color cannot reappear after its box is empty.
  for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){
   if(!source[y][x])continue;
   const edge=[[x-1,y],[x+1,y],[x,y-1],[x,y+1]].some(([nx,ny])=>
-   nx<0||ny<0||nx>=SIZE||ny>=SIZE||!source[ny][nx]
+   nx<0||ny<0||nx>=SIZE||ny>=SIZE||outside[ny][nx]
   );
   if(edge)board[y][x]="black";
  }
