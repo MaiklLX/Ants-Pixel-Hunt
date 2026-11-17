@@ -287,11 +287,7 @@ test("all campaign drawings and specialist obstacles remain solvable",()=>{
    while(index<list.length&&!valid(list[index]))index++;
    cursor.set(key,index);return index<list.length?index:-1;
   };
-  const exposedCount=box=>{
-   const list=queues.get(boxKey(box))||[],start=cursor.get(boxKey(box))||0;
-   let count=0;for(let i=start;i<list.length;i++)if(valid(list[i]))count++;
-   return count;
-  };
+
   while((remaining>0||obstacles.length>0)&&steps++<30000){
    let progressed=false;
    for(let slot=0;slot<active.length;slot++){
@@ -315,12 +311,16 @@ test("all campaign drawings and specialist obstacles remain solvable",()=>{
    let loadedNewBox=false;
    for(let slot=0;slot<active.length;slot++){
     if(active[slot])continue;
-    const index=deck.findIndex(box=>(level.number>=8?exposedCount(box)>=box.ants:accessibleIndex(box)>=0)&&!active.some(other=>other&&boxKey(other)===boxKey(box)));
+    let index=-1,bestAntCount=Infinity;
+    for(let candidate=0;candidate<deck.length;candidate++){
+     const box=deck[candidate];
+     if(accessibleIndex(box)>=0&&box.ants<bestAntCount){index=candidate;bestAntCount=box.ants;}
+    }
     if(index>=0){active[slot]=deck.splice(index,1)[0];loadedNewBox=true;}
    }
    if(!progressed&&!loadedNewBox)break;
   }
-  assert.equal(remaining,0,level.name+" must clear every artwork block; active="+JSON.stringify(active)+" deckLeft="+deck.length+" exposed="+JSON.stringify(getExposedTargets({board,obstacles}).slice(0,14)));
+  assert.equal(remaining,0,level.name+" must clear every artwork block");
   assert.equal(obstacles.length,0,level.name+" must clear every specialist obstacle");
  }
 });
