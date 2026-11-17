@@ -652,7 +652,7 @@ export function buildIncoming(board,levelNumber=1){
   if(!total){queues[color]=[];continue;}
   // Smaller color squads turn over faster, freeing the five starter cells
   // as detailed artwork reveals new shades and color groups.
-  const detailedLevel=levelNumber>=8,targetSquad=detailedLevel?12:36;
+  const detailedLevel=levelNumber>=8,targetSquad=detailedLevel?8:36;
   const count=Math.max(1,Math.ceil(total/targetSquad)),base=Math.floor(total/count);
   const minimum=detailedLevel?Math.min(2,Math.max(1,Math.floor(total/count))):Math.min(10,Math.max(1,Math.floor(total/count)));
   let seed=(boardSeed^color.charCodeAt(0)*2654435761)>>>0;
