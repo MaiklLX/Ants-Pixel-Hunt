@@ -225,7 +225,9 @@ const GENERATED_LEVELS=Array.from({length:493},(_,index)=>{
  const motifs=Array.from({length:count},(_,part)=>GENERATED_MOTIFS[(number*7+part*5+Math.floor(number/13))%GENERATED_MOTIFS.length]);
  const names=motifs.map(item=>item.name);
  const name=names.length===1?names[0]+" на полянке":names.slice(0,-1).join(", ")+" и "+names[names.length-1];
- return {id:"meadow-"+String(number).padStart(3,"0"),number,chapter:generatedChapter(number),name,emoji:motifs[0].emoji,hint:count===1?"Знакомимся с новым силуэтом и цветовыми слоями":count===2?"Две самостоятельные картинки на одном поле — следи за цветами обоих рисунков":count===3?"Три части общей картины: планируй очередь для каждой": "Четыре объекта на одном поле и пять цветов — продумывай порядок открытия"};
+ const artworkHint=count===1?"Знакомимся с новым силуэтом и цветовыми слоями":count===2?"Две самостоятельные картинки на одном поле — следи за цветами обоих рисунков":count===3?"Три части общей картины: планируй очередь для каждой":"Четыре объекта на одном поле — продумывай порядок открытия";
+ const obstacleHint=number>=301?"Корни, камни и осы: чередуй строителей и военных, у преград несколько уровней прочности":number>=151?"Корневые завалы и пауки-стражи: сначала расчисти путь специалистами":number>=51?"На рисунке есть жук-страж — военные прогонят его, строители разбирают корни":number>=26?"Корневой завал закрывает цветной блок — отправь к нему муравьёв-строителей":"";
+ return {id:"meadow-"+String(number).padStart(3,"0"),number,chapter:generatedChapter(number),name,emoji:motifs[0].emoji,hint:obstacleHint?artworkHint+" · "+obstacleHint:artworkHint};
 });
 function inTriangle(px,py,ax,ay,bx,by,cx,cy){
  const sign=(x1,y1,x2,y2,x3,y3)=>(x1-x3)*(y2-y3)-(x2-x3)*(y1-y3);
@@ -492,7 +494,7 @@ function createLevelObstacles(levelId,board){
  return selected.map((point,index)=>({
   id:"obstacle-"+getLevel(levelId).number+"-"+(index+1),
   x:point.x,y:point.y,role:roles[index],hp,maxHp:hp,
-  kind:roles[index]==="builder"?"roots":"guard"
+  kind:roles[index]==="builder"?(number>=301?"stone":"roots"):number>=301?"wasp":number>=151?"spider":"beetle"
  }));
 }
 const incomingCache=new Map();
