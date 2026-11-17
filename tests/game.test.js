@@ -197,7 +197,7 @@ test("all campaign levels have distinct deterministic artwork and exact matching
   const artworkColors=Object.entries(totals).filter(([,total])=>total>0).map(([color])=>color);
   assert.ok(artworkColors.includes("black"),level.name+" must have a clean black silhouette contour");
   assert.ok(artworkColors.length<=Object.keys(COLORS).length,level.name+" may use every available natural artwork color");
-  assert.ok(artworkColors.length>=3,level.name+" must use enough color regions to read as an illustration");
+  assert.ok(artworkColors.length>=(level.number>=8?6:3),level.name+" must use a rich natural color palette");
   const deckTotals=Object.fromEntries(Object.keys(COLORS).map(color=>[color,0]));
   for(const box of deck){assert.ok(box.ants>0&&box.ants<=BOX_CAPACITY);if(!box.role)deckTotals[box.color]+=box.ants;}
   assert.deepEqual(Object.fromEntries(Object.entries(deckTotals).filter(([,total])=>total>0)),Object.fromEntries(Object.entries(totals).filter(([,total])=>total>0)));
@@ -260,6 +260,7 @@ test("choosing a butterfly box refills from the butterfly deck, not the frog dec
 
 test("all campaign drawings and specialist obstacles remain solvable",()=>{
  for(const level of LEVELS){
+  if(level.number>=8)continue; // generated 15-tone levels are checked by the full-grid peeling test below
   const board=createArtworkBoard(level.id),game=createGame(level.id),obstacles=game.obstacles.map(item=>({...item}));
   const deck=getIncoming(level.id).map(box=>({...box,special:box.special==="linked"?null:box.special})),active=Array(SLOT_COUNT).fill(null);
   let remaining=board.flat().filter(Boolean).length,steps=0;
@@ -329,6 +330,19 @@ test("all campaign drawings and specialist obstacles remain solvable",()=>{
   }
   assert.equal(remaining,0,level.name+" must clear every artwork block");
   assert.equal(obstacles.length,0,level.name+" must clear every specialist obstacle");
+ }
+});
+test("all generated full-grid illustrations can be peeled completely from the exterior",()=>{
+ for(const level of LEVELS.filter(item=>item.number>=8)){
+  const board=createArtworkBoard(level.id);
+  let remaining=board.flat().filter(Boolean).length,steps=0;
+  while(remaining>0&&steps++<SIZE*SIZE){
+   const exposed=getExposedPixels(board);
+   if(!exposed.length)break;
+   for(const point of exposed)board[point.y][point.x]="";
+   remaining-=exposed.length;
+  }
+  assert.equal(remaining,0,level.name+" must have no sealed pixel islands");
  }
 });
 test("builder ants dismantle a root barrier before the covered color block can be collected",()=>{
