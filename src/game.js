@@ -495,10 +495,12 @@ function applyGeneratedDepthPalette(source,palette){
  for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){
   const original=source[y][x];if(!original)continue;
   const layer=depth[y][x];
-  if(layer<=1){result[y][x]="black";continue;}
+  if(layer===1){result[y][x]="black";continue;}
   const sourceIndex=palette.indexOf(original);
   const role=(sourceIndex>=0?sourceIndex:colorOrder.indexOf(original))%5;
-  const band=Math.min(2,Math.floor((layer-2)/3));
+  // Enclosed pockets are intentionally assigned to the deepest shade group;
+  // they must not become a second black contour when the pocket is opened.
+  const band=layer===0?2:Math.min(2,Math.floor((layer-2)/3));
   result[y][x]=palette[band*5+role]||palette[role]||original;
  }
  return result;
