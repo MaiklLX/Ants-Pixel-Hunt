@@ -737,6 +737,7 @@ test("KT-130 exposes campaign and chapter completion as accessible progress bars
  assert.ok(app.includes('chapterTrack.setAttribute("aria-valuemin","0")'));
  assert.ok(app.includes('chapterTrack.setAttribute("aria-valuemax",String(chapter.levels.length))'));
  assert.ok(app.includes('chapterTrack.setAttribute("aria-valuenow",String(chapterDone))'));
- assert.equal((app.match(/setAttribute\("aria-valuetext"/g)||[]).length,2);
+ assert.ok(app.includes('track.setAttribute("aria-valuetext"'));
+ assert.ok(app.includes('chapterTrack.setAttribute("aria-valuetext"'));
  assert.match(html,/app-version" content="KT-130"/);
 });
