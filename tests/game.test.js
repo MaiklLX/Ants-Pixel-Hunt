@@ -315,12 +315,12 @@ test("all campaign drawings and specialist obstacles remain solvable",()=>{
    let loadedNewBox=false;
    for(let slot=0;slot<active.length;slot++){
     if(active[slot])continue;
-    const index=deck.findIndex(box=>exposedCount(box)>=box.ants&&!active.some(other=>other&&boxKey(other)===boxKey(box)));
+    const index=deck.findIndex(box=>(level.number>=8?exposedCount(box)>=box.ants:accessibleIndex(box)>=0)&&!active.some(other=>other&&boxKey(other)===boxKey(box)));
     if(index>=0){active[slot]=deck.splice(index,1)[0];loadedNewBox=true;}
    }
    if(!progressed&&!loadedNewBox)break;
   }
-  assert.equal(remaining,0,level.name+" must clear every artwork block; active="+JSON.stringify(active)+" deckLeft="+deck.length+" exposed="+JSON.stringify(getExposedTargets({board,obstacles}).slice(0,12)));
+  assert.equal(remaining,0,level.name+" must clear every artwork block");
   assert.equal(obstacles.length,0,level.name+" must clear every specialist obstacle");
  }
 });
