@@ -342,7 +342,11 @@ function createComposedArtworkBoard(number){
  const zones=Array.from({length:SIZE},()=>Array(SIZE).fill(-1));
  const count=generatedPartCount(number);
  // A broad, illustration-friendly palette is available from the very first generated levels.
- const palette=["green","blue","purple","yellow","red","orange","pink","cyan","brown"];
+ const fullPalette=["green","blue","purple","yellow","red","orange","pink","cyan","brown"];
+ // Keep five ordered accessibility bands per level so simultaneous open
+ // colors never overwhelm the five starter slots. Rotate the selected colors
+ // between levels so the full nine-color palette appears from the beginning.
+ const palette=Array.from({length:5},(_,index)=>fullPalette[(number-8+index)%fullPalette.length]);
  const layoutVariant=(number+Math.floor(number/11))%3;
  const placements=generatedSceneLayout(count,layoutVariant);
  for(let part=0;part<count;part++){
@@ -388,8 +392,8 @@ function createComposedArtworkBoard(number){
  }
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
  for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)if(occupied[y][x]){
-  const layer=Number.isFinite(depth[y][x])?depth[y][x]:palette.length;
-  const colorIndex=Math.min(palette.length-1,layer-1);
+  const layer=Number.isFinite(depth[y][x])?depth[y][x]:9;
+  const colorIndex=layer<=1?0:layer<=3?1:layer<=5?2:layer<=7?3:4;
   board[y][x]=palette[colorIndex];
  }
  return board;
