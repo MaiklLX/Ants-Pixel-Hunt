@@ -12,7 +12,11 @@ export const COLORS={
  blue:{hex:"#68b5e8",name:"Голубые",short:"ГЛ"},
  yellow:{hex:"#f2c95e",name:"Солнечные",short:"ЖЛ"},
  green:{hex:"#78b982",name:"Зелёные",short:"ЗЛ"},
- purple:{hex:"#9878d4",name:"Сиреневые",short:"СР"}
+ purple:{hex:"#9878d4",name:"Сиреневые",short:"СР"},
+ orange:{hex:"#e99a55",name:"Мандариновые",short:"МД"},
+ pink:{hex:"#df88b6",name:"Розовые",short:"РЗ"},
+ cyan:{hex:"#69c9c5",name:"Бирюзовые",short:"БР"},
+ brown:{hex:"#a77b59",name:"Карамельные",short:"КР"}
 };
 const ellipse=(x,y,cx,cy,rx,ry)=>((x-cx)/rx)**2+((y-cy)/ry)**2<=1;
 const circle=(x,y,cx,cy,r)=>(x-cx)**2+(y-cy)**2<=r*r;
@@ -336,8 +340,9 @@ function generatedSceneLayout(count,variant){
 function createComposedArtworkBoard(number){
  const occupied=Array.from({length:SIZE},()=>Array(SIZE).fill(false));
  const zones=Array.from({length:SIZE},()=>Array(SIZE).fill(-1));
- const count=generatedPartCount(number),paletteCount=number<26?3:number<76?4:5;
- const palette=["green","blue","purple","yellow","red"].slice(0,paletteCount);
+ const count=generatedPartCount(number);
+ // A broad, illustration-friendly palette is available from the very first generated levels.
+ const palette=["green","blue","purple","yellow","red","orange","pink","cyan","brown"];
  const layoutVariant=(number+Math.floor(number/11))%3;
  const placements=generatedSceneLayout(count,layoutVariant);
  for(let part=0;part<count;part++){
@@ -427,14 +432,14 @@ export function createArtworkBoard(levelId="meadow-01"){
 
 export const INITIAL_BOARD=createArtworkBoard();
 export function buildIncoming(board,levelNumber=1){
- const totals={red:0,blue:0,yellow:0,green:0,purple:0};
+ const totals=Object.fromEntries(Object.keys(COLORS).map(color=>[color,0]));
  let boardSeed=2166136261;
  for(const row of board)for(const color of row){
-  const code=color?({red:1,blue:2,yellow:3,green:4,purple:5}[color]):0;
+  const code=color?Object.keys(COLORS).indexOf(color)+1:0;
   boardSeed=Math.imul(boardSeed^code,16777619)>>>0;
   if(color)totals[color]++;
  }
- const colors=["green","blue","purple","yellow","red"],queues={};
+ const colors=Object.keys(COLORS),queues={};
  for(const color of colors){
   const total=totals[color];
   if(!total){queues[color]=[];continue;}
