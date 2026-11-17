@@ -423,20 +423,25 @@ function createAntSprite(color,carrying,gait){
  }
  antSpriteCache.set(key,sprite);return sprite;
 }
-function drawAnt(ctx,point,color,carrying,index,direction=0,timestamp=animationClock.now(),role=null){
+function drawAnt(ctx,point,color,carrying,index,direction=0,timestamp=animationClock.now()){
  const gaitState=getAntGaitFrame(timestamp,index),phase=gaitState.phase,gait=gaitState.frame;
  const bob=Math.sin(phase*2+index*.31)*.34;
  ctx.save();ctx.translate(point.x,point.y+bob);
  ctx.fillStyle="#36523d26";ctx.beginPath();ctx.ellipse(0,7,8,2.6,0,0,Math.PI*2);ctx.fill();
  ctx.rotate(direction+Math.sin(phase*.5+index)*.018);
  ctx.drawImage(createAntSprite(color,carrying,gait),-13,-12);
+ if(carrying){ctx.globalAlpha=.32+.18*Math.sin(phase*2);ctx.fillStyle=COLORS[color].hex;ctx.beginPath();ctx.arc(-8,-7,4.2,0,Math.PI*2);ctx.fill();}
+ ctx.restore();
+}
+function drawSpecialistGear(ctx,point,role){
+ if(!role)return;
+ ctx.save();ctx.translate(point.x,point.y);ctx.rotate(point.angle||0);
  if(role==="builder"){
   ctx.strokeStyle="#e6c17a";ctx.lineWidth=1.5;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(7,-3);ctx.lineTo(10,-8);ctx.stroke();
   ctx.fillStyle="#d6b16d";ctx.fillRect(8,-10,5,2.5);
  }else if(role==="warrior"){
   ctx.fillStyle="#b7c5a0";ctx.strokeStyle="#344b3b";ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(8,-10);ctx.lineTo(13,-8);ctx.lineTo(12,-2);ctx.lineTo(9,-.5);ctx.lineTo(6,-3);ctx.lineTo(6,-8);ctx.closePath();ctx.fill();ctx.stroke();
  }
- if(carrying){ctx.globalAlpha=.32+.18*Math.sin(phase*2);ctx.fillStyle=COLORS[color].hex;ctx.beginPath();ctx.arc(-8,-7,4.2,0,Math.PI*2);ctx.fill();}
  ctx.restore();
 }
 function makeAntTrail(start,end,seed,spread=1){
@@ -569,7 +574,7 @@ function renderAntFrame(timestamp){
   }
   const trail=phase.returningNow?ant.returnTrail:ant.outboundTrail;
   const pose=getTrailPose(trail,phase.progress,ant.pose);
-  drawAnt(antCtx,pose,ant.move.color,phase.returningNow,workerId,pose.angle,clockTime,ant.move.role);
+  drawAnt(antCtx,pose,ant.move.color,phase.returningNow,workerId,pose.angle,clockTime);drawSpecialistGear(antCtx,pose,ant.move.role);
  }
  drawPickupEffects(clockTime);drawDeliveryEffects(clockTime);
  if(activeAnts.size||pickupEffects.length||deliveryEffects.length)antFrame=requestAnimationFrame(renderAntFrame);
