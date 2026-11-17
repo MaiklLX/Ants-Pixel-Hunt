@@ -151,21 +151,29 @@ function obstacleAt(x,y){
 
 function drawBoardTile(x,y,exposed,cell){
  const color=state.board[y][x];if(!color||obstacleAt(x,y))return;
- const px=x*cell,py=y*cell,size=cell-1.25,rgb=COLORS[color].hex;
+ const px=x*cell,py=y*cell,size=cell,rgb=COLORS[color].hex;
  boardCtx.save();
- boardCtx.shadowColor="#07150f66";boardCtx.shadowBlur=2.3;boardCtx.shadowOffsetY=1.4;
- const face=boardCtx.createLinearGradient(px,py,px+size,py+size);
- face.addColorStop(0,color==="black"?"#59605d": "#ffffffb8");face.addColorStop(.13,rgb);face.addColorStop(.76,rgb);face.addColorStop(1,color==="black"?"#080b0a":"#263b30");
- boardCtx.fillStyle=face;boardCtx.beginPath();boardCtx.roundRect(px+.7,py+.5,size,size,1.9);boardCtx.fill();
-
- boardCtx.shadowColor="transparent";boardCtx.shadowBlur=0;boardCtx.shadowOffsetY=0;
- boardCtx.strokeStyle=color==="black"?"#050908":"#d8e6d044";boardCtx.lineWidth=color==="black"?1.05:.65;boardCtx.stroke();
- boardCtx.strokeStyle="#14251d77";boardCtx.lineWidth=.7;
- boardCtx.beginPath();boardCtx.moveTo(px+2,py+size-1);boardCtx.lineTo(px+size-1,py+size-1);boardCtx.lineTo(px+size-1,py+2);boardCtx.stroke();
- boardCtx.fillStyle="#ffffff30";boardCtx.beginPath();boardCtx.roundRect(px+2,py+1.6,size-4,1.05,.7);boardCtx.fill();
- if(exposed){boardCtx.strokeStyle="#d6bd78cc";boardCtx.lineWidth=.85;boardCtx.beginPath();boardCtx.roundRect(px+1.25,py+1.1,size-2.3,size-2.3,1.5);boardCtx.stroke();}
+ // Food-Hunt-like flat square pixels: the artwork should read as a mosaic,
+ // not as rounded 3D buttons. Keep the grid crisp at phone scale.
+ boardCtx.fillStyle=rgb;
+ boardCtx.fillRect(px,py,size,size);
+ boardCtx.strokeStyle=color==="black"?"#080d0b":"#26352d88";
+ boardCtx.lineWidth=color==="black"?.9:.55;
+ boardCtx.strokeRect(px+.2,py+.2,size-.4,size-.4);
+ if(color!=="black"){
+  boardCtx.fillStyle="#ffffff24";
+  boardCtx.fillRect(px+1,py+1,Math.max(1,size*.16),Math.max(1,size*.16));
+  boardCtx.fillStyle="#101a1422";
+  boardCtx.fillRect(px+size-1.5,py+size-1.5,1,1);
+ }
+ if(exposed){
+  boardCtx.strokeStyle="#f2d58c";
+  boardCtx.lineWidth=.9;
+  boardCtx.strokeRect(px+1,py+1,size-2,size-2);
+ }
  boardCtx.restore();
 }
+
 function drawBoardObstacle(obstacle,exposed,cell){
  const px=obstacle.x*cell,py=obstacle.y*cell,remaining=obstacle.hp;
  boardCtx.save();
