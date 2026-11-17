@@ -766,10 +766,10 @@ test("KT-132 gives each campaign biome a distinct stop accent without changing t
 });
 
 
-test("KT-134 gives campaign trail links organic curved connectors",async()=>{
+test("KT-133 gives campaign trail links organic curved connectors",async()=>{
  const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
  const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
- const visual=styles.slice(styles.indexOf("KT-134 —"));
+ const visual=styles.slice(styles.indexOf("KT-133 —"));
  assert.match(html,/app-version" content="KT-134"/);
  assert.match(visual,/\.campaign-level::after\{[\s\S]*border-bottom:2px dotted/);
  assert.match(visual,/\.campaign-level:nth-child\(even\)::after/);
