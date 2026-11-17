@@ -315,7 +315,7 @@ function renderChoices(){
     const colorName=document.createElement("small");colorName.className="peek-color-name";colorName.textContent=roleName?roleName.slice(0,2).toUpperCase():color.short;
     const count=document.createElement("small");count.className="peek-count";count.textContent=String(nextBox.ants)+" 🐜";
     meta.append(colorName,count);peek.append(miniCrate,meta);
-    peek.title=`Бокс в резерве: ${roleName||color.name}, ${nextBox.ants} муравьёв`;peek.setAttribute("aria-label",`Бокс в резервной очереди: ${roleName||color.name}, ${nextBox.ants} муравьёв`);
+    peek.title=`Бокс в резерве: ${roleName||color.name}, ${nextBox.ants} муравьёв`;peek.setAttribute("aria-label",`Бокс в резервной очереди, цвет ${roleName||color.name}, ${nextBox.ants} муравьёв`);
    }else{
     const empty=document.createElement("span");empty.className="peek-empty-mark";empty.textContent="—";peek.append(empty);
     peek.title="Пустая позиция резервной очереди";peek.setAttribute("aria-label",peek.title);
