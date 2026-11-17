@@ -661,7 +661,8 @@ export function buildIncoming(board,levelNumber=1){
     let seed=(boardSeed^Math.imul(wave+1,2654435761)^Math.imul(color.charCodeAt(0),2246822519))>>>0;
     const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
     while(left>0){
-     const ants=Math.min(left,8+Math.floor(random()*5));
+     const squadTarget=5+((wave+color.charCodeAt(0))%5)+Math.floor(random()*2);
+     const ants=Math.min(left,squadTarget);
      queues[color].push({color,ants});left-=ants;
     }
    }
