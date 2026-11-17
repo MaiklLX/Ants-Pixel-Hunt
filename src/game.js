@@ -8,15 +8,22 @@ export const LOCKED_BOX_INDEX=8;
 export const LOCKED_BOX_COLUMN=2;
 export const LINKED_BOX_START=12;
 export const COLORS={
- red:{hex:"#e96f67",name:"Коралловые",short:"КР"},
- blue:{hex:"#68b5e8",name:"Голубые",short:"ГЛ"},
- yellow:{hex:"#f2c95e",name:"Солнечные",short:"ЖЛ"},
- green:{hex:"#78b982",name:"Зелёные",short:"ЗЛ"},
- purple:{hex:"#9878d4",name:"Сиреневые",short:"СР"},
- orange:{hex:"#e99a55",name:"Мандариновые",short:"МД"},
- pink:{hex:"#df88b6",name:"Розовые",short:"РЗ"},
- cyan:{hex:"#69c9c5",name:"Бирюзовые",short:"БР"},
- brown:{hex:"#a77b59",name:"Карамельные",short:"КР"}
+ black:{hex:"#171b1a",name:"Чёрные контуры",short:"ЧР"},
+ forest:{hex:"#315b3d",name:"Хвойные",short:"ХВ"},
+ green:{hex:"#4f8a50",name:"Листовые",short:"ЛС"},
+ lime:{hex:"#a5bd63",name:"Салатовые",short:"СЛ"},
+ olive:{hex:"#788746",name:"Оливковые",short:"ОЛ"},
+ sky:{hex:"#83c5e8",name:"Небесные",short:"НБ"},
+ blue:{hex:"#3977aa",name:"Синие",short:"СН"},
+ turquoise:{hex:"#55b8ad",name:"Бирюзовые",short:"БР"},
+ purple:{hex:"#8061b0",name:"Фиолетовые",short:"ФИ"},
+ pink:{hex:"#d77da8",name:"Розовые",short:"РЗ"},
+ red:{hex:"#c84f49",name:"Алые",short:"АЛ"},
+ orange:{hex:"#e58a3d",name:"Оранжевые",short:"ОР"},
+ yellow:{hex:"#f0c94f",name:"Жёлтые",short:"ЖЛ"},
+ cream:{hex:"#f0e1b8",name:"Кремовые",short:"КМ"},
+ brown:{hex:"#875a3e",name:"Коричневые",short:"КР"},
+ gray:{hex:"#9aa5a0",name:"Серые",short:"СР"}
 };
 const ellipse=(x,y,cx,cy,rx,ry)=>((x-cx)/rx)**2+((y-cy)/ry)**2<=1;
 const circle=(x,y,cx,cy,r)=>(x-cx)**2+(y-cy)**2<=r*r;
@@ -344,11 +351,7 @@ function createComposedArtworkBoard(number){
  const zones=Array.from({length:SIZE},()=>Array(SIZE).fill(-1));
  const count=generatedPartCount(number);
  // A broad, illustration-friendly palette is available from the very first generated levels.
- const fullPalette=["green","blue","purple","yellow","red","orange","pink","cyan","brown"];
- // Keep five ordered accessibility bands per level so simultaneous open
- // colors never overwhelm the five starter slots. Rotate the selected colors
- // between levels so the full nine-color palette appears from the beginning.
- const palette=Array.from({length:5},(_,index)=>fullPalette[(number-8+index)%fullPalette.length]);
+ const palette=["green","blue","purple","yellow","red"]; // recolored per motif after composition
  const layoutVariant=(number+Math.floor(number/11))%3;
  const placements=generatedSceneLayout(count,layoutVariant);
  for(let part=0;part<count;part++){
@@ -416,6 +419,70 @@ export function getLevel(levelId="meadow-01"){
  return LEVELS.find(level=>level.id===levelId)||LEVELS[0];
 }
 const artworkBoardCache=new Map();
+const ART_PALETTES={
+ frog:["green","lime","olive","yellow","forest"],
+ butterfly:["blue","turquoise","pink","yellow","purple"],
+ flower:["pink","red","orange","yellow","green"],
+ mushroom:["red","orange","cream","brown","olive"],
+ acorn:["brown","orange","cream","olive","forest"],
+ snail:["brown","orange","yellow","olive","green"],
+ firefly:["forest","purple","yellow","cream","sky"],
+ tree:["forest","green","lime","olive","brown"],
+ house:["red","brown","cream","gray","green"],
+ fish:["blue","turquoise","yellow","orange","red"],
+ rocket:["red","orange","yellow","blue","cream"],
+ bird:["sky","blue","yellow","orange","brown"],
+ bee:["yellow","orange","brown","cream","blue"],
+ cloud:["sky","blue","cream","yellow","turquoise"]
+};
+function artworkPaletteForLevel(level){
+ if(level.number===1)return ART_PALETTES.frog;
+ if(level.number===2)return ART_PALETTES.butterfly;
+ if(level.number===3)return ART_PALETTES.flower;
+ if(level.number===4)return ART_PALETTES.mushroom;
+ if(level.number===5)return ART_PALETTES.acorn;
+ if(level.number===6)return ART_PALETTES.snail;
+ if(level.number===7)return ART_PALETTES.firefly;
+ const motifIndex=(level.number*7+Math.floor(level.number/13))%GENERATED_MOTIFS.length;
+ return ART_PALETTES[GENERATED_MOTIFS[motifIndex].type]||ART_PALETTES.frog;
+}
+function recolorArtworkByLayers(source,palette){
+ const occupied=source.map(row=>row.map(Boolean)),depth=Array.from({length:SIZE},()=>Array(SIZE).fill(Infinity)),queue=[];
+ const outside=Array.from({length:SIZE},()=>Array(SIZE).fill(false)),air=[];
+ const addAir=(x,y)=>{
+  if(x<0||y<0||x>=SIZE||y>=SIZE||outside[y][x]||occupied[y][x])return;
+  outside[y][x]=true;air.push([x,y]);
+ };
+ for(let x=0;x<SIZE;x++){addAir(x,0);addAir(x,SIZE-1);}
+ for(let y=0;y<SIZE;y++){addAir(0,y);addAir(SIZE-1,y);}
+ for(let head=0;head<air.length;head++){
+  const [x,y]=air[head];addAir(x-1,y);addAir(x+1,y);addAir(x,y-1);addAir(x,y+1);
+ }
+ for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)if(occupied[y][x]&&(
+  x===0||y===0||x===SIZE-1||y===SIZE-1||
+  [[x-1,y],[x+1,y],[x,y-1],[x,y+1]].some(([nx,ny])=>nx>=0&&ny>=0&&nx<SIZE&&ny<SIZE&&outside[ny][nx])
+ )){
+  depth[y][x]=1;queue.push([x,y]);
+ }
+ for(let head=0;head<queue.length;head++){
+  const [x,y]=queue[head],next=depth[y][x]+1;
+  for(const [nx,ny] of [[x-1,y],[x+1,y],[x,y-1],[x,y+1]]){
+   if(nx<0||ny<0||nx>=SIZE||ny>=SIZE||!occupied[ny][nx]||depth[ny][nx]<=next)continue;
+   depth[ny][nx]=next;queue.push([nx,ny]);
+  }
+ }
+ const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
+ for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)if(occupied[y][x]){
+  const layer=Number.isFinite(depth[y][x])?depth[y][x]:10;
+  const neighbours=[[x-1,y],[x+1,y],[x,y-1],[x,y+1]].filter(([nx,ny])=>nx>=0&&ny>=0&&nx<SIZE&&ny<SIZE&&occupied[ny][nx]).length;
+  if(layer===1&&neighbours>=2)board[y][x]="black";
+  else{
+   const index=layer<=3?0:layer<=5?1:layer<=7?2:layer<=9?3:4;
+   board[y][x]=palette[index];
+  }
+ }
+ return board;
+}
 export function createArtworkBoard(levelId="meadow-01"){
  const level=getLevel(levelId);
  if(!artworkBoardCache.has(level.id)){
@@ -428,6 +495,7 @@ export function createArtworkBoard(levelId="meadow-01"){
   else if(level.id==="forest-06")board=createSnailBoard();
   else if(level.id==="forest-07")board=createFireflyBoard();
   else board=createFrogBoard();
+  board=recolorArtworkByLayers(board,artworkPaletteForLevel(level));
   artworkBoardCache.set(level.id,board);
  }
  // Return a fresh mutable board: gameplay clears cells in place, so cached
@@ -444,7 +512,7 @@ export function buildIncoming(board,levelNumber=1){
   boardSeed=Math.imul(boardSeed^code,16777619)>>>0;
   if(color)totals[color]++;
  }
- const colors=["green","blue","purple","yellow","red","orange","pink","cyan","brown"],queues={};
+ const colors=Object.keys(COLORS),queues={};
  for(const color of colors){
   const total=totals[color];
   if(!total){queues[color]=[];continue;}
