@@ -23,20 +23,17 @@ test("the save-status live region exists and is announced politely", () => {
 });
 
 
-test("the home illustration hooks match the styled markup and contain no stray escape text", async () => {
-  assert.match(html, /class=["']menu-garden-art["']/);
-  assert.match(html, /class=["']pixel-ant["']/);
-  assert.match(html, /viewBox=["']0 0 640 300["']/);
-  const styles = await readFile(new URL("../src/styles.css", import.meta.url), "utf8");
-  assert.match(styles, /\.menu-garden-art/);
-  assert.match(styles, /pixel-ant-breathe/);
-  assert.equal(html.includes(String.raw`\n    <p id="save-status"`), false);
-});
+test("KT-135 removes the oversized mascot illustration from the main menu",async()=>{
+ assert.doesNotMatch(html,/class=["']menu-garden-art["']/);
+ assert.doesNotMatch(html,/class=["']pixel-ant["']/);
+ assert.match(html,/class="menu-identity"/);
+ assert.equal(html.includes(String.raw\`\\n    <p id="save-status"\`),false);
+});;
 
-test("the pixel diorama is not covered by legacy garden overlays", async () => {
-  const styles = await readFile(new URL("../src/styles.css", import.meta.url), "utf8");
-  assert.match(styles, /\.menu-garden::before,\.menu-garden::after\{content:none\}/);
-});
+test("KT-135 main menu no longer depends on the garden diorama",()=>{
+ assert.doesNotMatch(html,/class=["']menu-garden["']/);
+ assert.doesNotMatch(html,/class=["']garden-stamp["']/);
+});;
 
 
 test("the home help disclosure exposes its controlled panel and expanded state", () => {
@@ -76,14 +73,14 @@ test("KT-074 forest plaque styling stays dark and includes icon sizing", async (
 });
 
 
-test("KT-075 main menu ties the title and diorama together with a forest scene label", () => {
-  const menuStart = html.indexOf('<section id="main-menu"');
-  const menuEnd = html.indexOf('<header class="topbar"', menuStart);
-  const menu = html.slice(menuStart, menuEnd);
-  assert.ok(menu.includes('<span class="garden-stamp">ЛЕСНАЯ ПОЛЯНКА</span>'));
-  assert.ok(menu.indexOf('class="menu-brand"') < menu.indexOf('class="menu-garden"'));
-  assert.ok(menu.indexOf('class="menu-garden"') < menu.indexOf('class="menu-progress-card"'));
-});
+test("KT-135 main menu uses a compact season identity instead of a logo hero",()=>{
+ const menuStart=html.indexOf('<section id="main-menu"');
+ const menuEnd=html.indexOf('<header class="topbar"',menuStart);
+ const menu=html.slice(menuStart,menuEnd);
+ assert.ok(menu.includes("ПИКСЕЛЬНАЯ ОХОТА"));
+ assert.ok(menu.includes("ПЕРВЫЙ СЕЗОН · 500 ПОЛЯНОК"));
+ assert.ok(menu.indexOf('class="menu-identity"')<menu.indexOf('class="menu-progress-card"'));
+});;
 
 test("KT-075 keeps the home menu compact and its scene label legible", async () => {
   const styles = await readFile(new URL("../src/styles.css", import.meta.url), "utf8");
@@ -106,17 +103,11 @@ test("KT-076 freezes ant, pickup and crate animation time while the page is hidd
 });
 
 
-test("KT-077 gives the forest diorama layered foreground and staggered fireflies", async () => {
-  const styles = await readFile(new URL("../src/styles.css", import.meta.url), "utf8");
-  assert.match(html, /class=["']firefly firefly-a["']/);
-  assert.match(html, /class=["']firefly firefly-b["']/);
-  assert.match(html, /class=["']firefly firefly-c["']/);
-  assert.match(html, /class=["']garden-foreground["']/);
-  assert.match(html, /garden-leaf-left/);
-  assert.ok(styles.includes("KT-077 — add quiet foreground depth"));
-  assert.ok(styles.includes("@keyframes meadow-leaf-sway"));
-  assert.match(styles, /prefers-reduced-motion:reduce[\s\S]*garden-leaf-sway\{animation:none/);
-});
+test("KT-135 removes the decorative ant scene from the menu markup",()=>{
+ assert.doesNotMatch(html,/class=["']firefly firefly-/);
+ assert.doesNotMatch(html,/class=["']garden-foreground["']/);
+ assert.doesNotMatch(html,/garden-leaf-left/);
+});;
 
 
 test("KT-078 maps the campaign as a dotted forest trail and keeps all map and nest surfaces dark", async () => {
