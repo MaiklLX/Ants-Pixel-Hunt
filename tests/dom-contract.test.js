@@ -27,8 +27,8 @@ test("KT-135 removes the oversized mascot illustration from the main menu",async
  assert.doesNotMatch(html,/class=["']menu-garden-art["']/);
  assert.doesNotMatch(html,/class=["']pixel-ant["']/);
  assert.match(html,/class="menu-identity"/);
- assert.equal(html.includes(String.raw\`\\n    <p id="save-status"\`),false);
-});;
+ assert.equal(html.includes("\\n    <p id=\\"save-status\\""),false);
+});
 
 test("KT-135 main menu no longer depends on the garden diorama",()=>{
  assert.doesNotMatch(html,/class=["']menu-garden["']/);
