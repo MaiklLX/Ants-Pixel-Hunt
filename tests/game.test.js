@@ -299,7 +299,9 @@ test("all campaign drawings and specialist obstacles remain solvable",()=>{
       if(obstacle.hp<=0){obstacles.splice(obstacles.indexOf(obstacle),1);cursor.set(key,index+1);enqueueCell(target.x,target.y);}
      }else{
       board[target.y][target.x]="";remaining--;cursor.set(key,index+1);
-      for(const [dx,dy] of [[-1,0],[1,0],[0,-1],[0,1]])enqueueCell(target.x+dx,target.y+dy);
+      // Re-scan the exterior-connected empty space: detailed pixel art can
+      // contain enclosed pockets that open through a multi-cell corridor.
+      for(const exposed of getExposedTargets({board,obstacles}))enqueueTarget(exposed);
      }
      box.ants--;progressed=true;if(box.ants<=0)active[slot]=null;
     }
@@ -313,7 +315,7 @@ test("all campaign drawings and specialist obstacles remain solvable",()=>{
    }
    if(!progressed&&!loadedNewBox)break;
   }
-  assert.equal(remaining,0,level.name+" must clear every artwork block; active="+JSON.stringify(active)+" deckLeft="+deck.length+" exposed="+JSON.stringify(getExposedTargets({board,obstacles}).slice(0,18)));
+  assert.equal(remaining,0,level.name+" must clear every artwork block");
   assert.equal(obstacles.length,0,level.name+" must clear every specialist obstacle");
  }
 });
