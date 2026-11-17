@@ -64,7 +64,7 @@ function renderMap(){
  const stat=document.createElement("div");stat.className="map-summary-main";
  const count=document.createElement("strong");count.textContent=`${finished} / ${LEVELS.length}`;
  const copy=document.createElement("span");copy.textContent="полянок пройдено";stat.append(count,copy);
- const track=document.createElement("div");track.className="map-summary-track";const fill=document.createElement("span");fill.style.width=(finished/LEVELS.length*100)+"%";track.append(fill);
+ const track=document.createElement("div");track.className="map-summary-track";track.setAttribute("role","progressbar");track.setAttribute("aria-label","Прогресс кампании");track.setAttribute("aria-valuemin","0");track.setAttribute("aria-valuemax",String(LEVELS.length));track.setAttribute("aria-valuenow",String(finished));track.setAttribute("aria-valuetext",`${finished} из ${LEVELS.length} полянок пройдено`);const fill=document.createElement("span");fill.style.width=(finished/LEVELS.length*100)+"%";track.append(fill);
  const next=document.createElement("small");next.className="map-summary-next";next.textContent=finished===LEVELS.length?"Все маршруты пройдены — можно вернуться на любимую полянку":nextPlayable?"Следующая остановка · "+nextPlayable.name:"Доступно "+open+" из "+LEVELS.length+" полянок";
  const continueButton=document.createElement("button");continueButton.type="button";continueButton.className="map-continue";continueButton.textContent=nextPlayable?"Продолжить путь · "+nextPlayable.name:"Выбрать полянку";continueButton.disabled=!nextPlayable;continueButton.setAttribute("aria-label",nextPlayable?"Начать следующую доступную полянку: "+nextPlayable.name:"Все полянки пройдены");if(nextPlayable)continueButton.addEventListener("click",()=>{closeMap();void startFreshGame(nextPlayable.id);});summary.append(stat,track,next,continueButton);
  list.replaceChildren();const chapterNav=$("map-chapter-nav");chapterNav.replaceChildren();if(mapChapterObserver){mapChapterObserver.disconnect();mapChapterObserver=null;}
@@ -79,7 +79,7 @@ function renderMap(){
   const meta=document.createElement("small");meta.textContent=chapterDone===chapter.levels.length?"ГЛАВА ПРОЙДЕНА":chapterDone?`${chapterDone} / ${chapter.levels.length} · В ПУТИ`:`0 / ${chapter.levels.length} · ВПЕРЕДИ`;
   heading.append(marker,title,meta);
   section.classList.add(chapterDone===chapter.levels.length?"chapter-complete":chapterDone?"chapter-active":"chapter-locked");
-  const chapterTrack=document.createElement("div");chapterTrack.className="map-chapter-track";chapterTrack.setAttribute("aria-label","Прогресс главы: "+chapterDone+" из "+chapter.levels.length);
+  const chapterTrack=document.createElement("div");chapterTrack.className="map-chapter-track";chapterTrack.setAttribute("role","progressbar");chapterTrack.setAttribute("aria-label","Прогресс главы "+chapter.name);chapterTrack.setAttribute("aria-valuemin","0");chapterTrack.setAttribute("aria-valuemax",String(chapter.levels.length));chapterTrack.setAttribute("aria-valuenow",String(chapterDone));chapterTrack.setAttribute("aria-valuetext",`${chapterDone} из ${chapter.levels.length} полянок пройдено`);
   const chapterFill=document.createElement("span");chapterFill.style.width=(chapterDone/chapter.levels.length*100)+"%";chapterTrack.append(chapterFill);
   section.append(heading,chapterTrack);
   const grid=document.createElement("div");grid.className="campaign-levels map-levels map-trail";

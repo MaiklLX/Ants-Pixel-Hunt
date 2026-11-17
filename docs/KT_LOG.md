@@ -1065,3 +1065,15 @@ KT-097: создать одну авторскую седьмую полянку
 - Добавлено деликатное дыхание подсветки следующей полянки; анимация отключается при prefers-reduced-motion. На узких экранах подписи читаются слева и могут переноситься.
 - Игровая механика, очередь, поле и скорость муравьёв не менялись. App version KT-129; оба Service Worker используют cache v97; добавлен DOM-contract тест.
 - CI/Pages ожидают подтверждения.
+
+
+# KT-130 — доступная семантика прогресса кампании
+
+- Дата: 17 ноября 2026; база: 02107ca9b67c74d8877fadf73218f72a25fd3de4 (KT-129).
+- Подтверждённый пробел: полосы общего прогресса карты и прогресса глав имели только aria-label, но не объявляли роль progressbar и числовые границы/значение.
+- Обе полосы теперь объявляют role="progressbar", aria-valuemin, aria-valuemax, aria-valuenow и русскоязычный aria-valuetext. Видимая графика и игровые правила не меняются.
+- Добавлен DOM-contract тест на семантику общего и главных индикаторов; все исторические проверки версии синхронизированы с KT-130.
+- App version KT-130; оба Service Worker используют cache v98.
+- Изменённые файлы: src/app.js, tests/dom-contract.test.js, index.html, service-worker.js, public/service-worker.js, README.md, docs/CURRENT_STATE.md, docs/KT_LOG.md, docs/KT-130_ACCESSIBLE_CAMPAIGN_PROGRESS.md.
+- Кодовый commit SHA, npm test/build, GitHub Actions IDs и Pages deploy: будут внесены после фактического завершения workflow. Локальный npm test/build и тестирование экранным диктором/на физическом устройстве не заявляются.
+
