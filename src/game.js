@@ -388,7 +388,7 @@ function createComposedArtworkBoard(number){
  }
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
  for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)if(occupied[y][x]){
-  const layer=Number.isFinite(depth[y][x])?depth[y][x]:1;
+  const layer=Number.isFinite(depth[y][x])?depth[y][x]:palette.length;
   const colorIndex=Math.min(palette.length-1,layer-1);
   board[y][x]=palette[colorIndex];
  }
