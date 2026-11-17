@@ -470,11 +470,43 @@ export function buildIncoming(board,levelNumber=1){
  }
  return deck;
 }
+function createLevelObstacles(levelId,board){
+ const number=getLevel(levelId).number;
+ if(number<26)return [];
+ const count=number<51?1:number<151?2:number<301?3:4;
+ const roles=count===1?["builder"]:count===2?["builder","warrior"]:count===3?["builder","warrior","builder"]:["builder","warrior","builder","warrior"];
+ const hp=number>=151?3:2;
+ const candidates=getExposedPixels(board).slice();
+ if(!candidates.length)return [];
+ const selected=[candidates[0]];
+ while(selected.length<Math.min(count,candidates.length)){
+  let best=null,bestDistance=-1;
+  for(const point of candidates){
+   if(selected.some(item=>item.x===point.x&&item.y===point.y))continue;
+   const distance=Math.min(...selected.map(item=>Math.abs(item.x-point.x)+Math.abs(item.y-point.y)));
+   if(distance>bestDistance){bestDistance=distance;best=point;}
+  }
+  if(!best)break;
+  selected.push(best);
+ }
+ return selected.map((point,index)=>({
+  id:"obstacle-"+getLevel(levelId).number+"-"+(index+1),
+  x:point.x,y:point.y,role:roles[index],hp,maxHp:hp,
+  kind:roles[index]==="builder"?"roots":"guard"
+ }));
+}
 const incomingCache=new Map();
 export function getIncoming(levelId="meadow-01"){
  const id=getLevel(levelId).id;
  if(!incomingCache.has(id)){
-  const deck=buildIncoming(createArtworkBoard(id),getLevel(id).number);
+  const board=createArtworkBoard(id),obstacles=createLevelObstacles(id,board);
+  const deck=buildIncoming(board,getLevel(id).number);
+  const roleBoxes=[];
+  for(const role of ["builder","warrior"]){
+   const ants=obstacles.filter(item=>item.role===role).reduce((sum,item)=>sum+item.hp,0);
+   if(ants)roleBoxes.push({color:role==="builder"?"orange":"red",ants,role,special:"specialist"});
+  }
+  deck.unshift(...roleBoxes);
   const start=deck.length>=14?LINKED_BOX_START:deck.length>=11?9:3;
   if(deck.length>start+1){
    deck[start]={...deck[start],special:"linked",pairId:id+"-linked"};
@@ -495,7 +527,7 @@ export function getLinkedPartner(levelId,index){
 export const INCOMING=getIncoming();
 export function createGame(levelId="meadow-01"){
  const board=createArtworkBoard(levelId);
- return {levelId:getLevel(levelId).id,board,slots:Array(SLOT_COUNT).fill(null),
+ return {levelId:getLevel(levelId).id,board,obstacles:createLevelObstacles(levelId,board),slots:Array(SLOT_COUNT).fill(null),
   tray:Array.from({length:TRAY_SIZE},(_,row)=>Array.from({length:TRAY_SIZE},(_,col)=>row*TRAY_SIZE+col)),
   nextContainer:TRAY_SIZE*TRAY_SIZE,remaining:board.reduce((sum,row)=>sum+row.filter(Boolean).length,0),won:false,lost:false,resolving:false,
   activeSlot:-1,activeTarget:null,activeSlots:[],sortedBoxes:0,
@@ -523,6 +555,35 @@ export function getExposedPixels(board){
  for(let y=0;y<height;y++)for(let x=0;x<width;x++)if(board[y]?.[x]&&(x===0||y===0||x===width-1||y===height-1))exposed.add(x+","+y);
  return [...exposed].map(key=>{const [x,y]=key.split(",").map(Number);return{x,y};});
 }
+export function getExposedTargets(state){
+ const board=state.board,obstacles=state.obstacles||[],height=board.length,width=Math.max(0,...board.map(row=>row.length));
+ const obstacleMap=new Map(obstacles.map(item=>[item.x+","+item.y,item]));
+ const visited=Array.from({length:height},()=>Array(width).fill(false)),queue=[],targets=new Map();
+ const occupied=(x,y)=>!!board[y]?.[x]||obstacleMap.has(x+","+y);
+ const addEmpty=(x,y)=>{
+  if(x<0||y<0||x>=width||y>=height||visited[y][x]||occupied(x,y))return;
+  visited[y][x]=true;queue.push([x,y]);
+ };
+ const expose=(x,y)=>{
+  const key=x+","+y,obstacle=obstacleMap.get(key);
+  if(obstacle)targets.set(key,{...obstacle,kind:"obstacle"});
+  else if(board[y]?.[x])targets.set(key,{x,y,kind:"pixel",color:board[y][x]});
+ };
+ for(let x=0;x<width;x++){addEmpty(x,0);addEmpty(x,height-1);}
+ for(let y=0;y<height;y++){addEmpty(0,y);addEmpty(width-1,y);}
+ for(let head=0;head<queue.length;head++){
+  const [x,y]=queue[head];
+  for(const [nx,ny] of [[x-1,y],[x+1,y],[x,y-1],[x,y+1]]){
+   if(nx<0||ny<0||nx>=width||ny>=height)continue;
+   if(occupied(nx,ny))expose(nx,ny);else addEmpty(nx,ny);
+  }
+ }
+ for(let y=0;y<height;y++)for(let x=0;x<width;x++)if(occupied(x,y)&&(x===0||y===0||x===width-1||y===height-1))expose(x,y);
+ return [...targets.values()];
+}
+export function isGameComplete(state){
+ return state.remaining<=0&&!(state.obstacles?.length);
+}
 export function isAccessible(board,x,y){
  if(!board[y]?.[x])return false;
  return getExposedPixels(board).some(point=>point.x===x&&point.y===y);
@@ -537,21 +598,24 @@ export function findAccessiblePixels(board,color,limit=Infinity){
 }
 export function findAntWave(state,reservedTargets=new Set(),pendingBySlot=new Map(),maxMoves=Infinity){
  if(maxMoves<=0)return[];
- const byColor=new Map(),wave=[],cursor=new Map(),exposed=new Set(getExposedPixels(state.board).map(point=>point.x+","+point.y));
- for(let y=0;y<state.board.length;y++)for(let x=0;x<state.board[y].length;x++){
-  const color=state.board[y][x];
-  if(color&&exposed.has(x+","+y)&&!reservedTargets.has(x+","+y)){
-   if(!byColor.has(color))byColor.set(color,[]);
-   byColor.get(color).push({x,y});
+ const byColor=new Map(),byRole=new Map(),wave=[],cursor=new Map(),exposed=getExposedTargets(state);
+ for(const target of exposed){
+  const key=target.x+","+target.y;if(reservedTargets.has(key))continue;
+  if(target.kind==="obstacle"){
+   if(!byRole.has(target.role))byRole.set(target.role,[]);
+   byRole.get(target.role).push(target);
+  }else{
+   if(!byColor.has(target.color))byColor.set(target.color,[]);
+   byColor.get(target.color).push(target);
   }
  }
- const supplies=state.slots.map((box,slot)=>({slot,color:box?.color,remaining:box&&box.ants>0&&box.status!=="departing"?Math.max(0,box.ants-(pendingBySlot.get(slot)||0)):0,assigned:0}));
+ const supplies=state.slots.map((box,slot)=>({slot,color:box?.color,role:box?.role,remaining:box&&box.ants>0&&box.status!=="departing"?Math.max(0,box.ants-(pendingBySlot.get(slot)||0)):0,assigned:0}));
  const scheduleOne=supply=>{
   if(!supply.remaining||supply.assigned>=supply.remaining)return false;
-  const targets=byColor.get(supply.color)||[],index=cursor.get(supply.color)||0;
+  const targets=supply.role?byRole.get(supply.role)||[]:byColor.get(supply.color)||[],key=supply.role||supply.color,index=cursor.get(key)||0;
   if(index>=targets.length)return false;
-  wave.push({slot:supply.slot,color:supply.color,target:targets[index]});
-  cursor.set(supply.color,index+1);supply.assigned++;
+  wave.push({slot:supply.slot,color:supply.color,role:supply.role,target:targets[index]});
+  cursor.set(key,index+1);supply.assigned++;
   return true;
  };
  // Every eligible starter box gets its own first dispatch before any box receives a second.
@@ -653,10 +717,11 @@ export function chooseTopColumn(state,column){
  return true;
 }
 export function findNextMove(state){
+ const targets=getExposedTargets(state);
  for(let slot=0;slot<SLOT_COUNT;slot++){
   const box=state.slots[slot];
   if(box&&box.ants>0&&box.status!=="departing"){
-   const target=findAccessiblePixel(state.board,box.color);
+   const target=targets.find(item=>box.role?item.kind==="obstacle"&&item.role===box.role:item.kind==="pixel"&&item.color===box.color);
    if(target)return{slot,target};
   }
  }
@@ -664,9 +729,18 @@ export function findNextMove(state){
 }
 export function applyAntMove(state,slot,target){
  const box=state.slots[slot];
- if(!box||box.ants<=0||box.status==="departing"||state.board[target.y]?.[target.x]!==box.color)return false;
- state.board[target.y][target.x]="";box.ants--;state.remaining--;
- state.resolutionLog.push({slot,color:box.color,x:target.x,y:target.y});
+ if(!box||box.ants<=0||box.status==="departing")return false;
+ if(target.kind==="obstacle"){
+  const obstacle=state.obstacles?.find(item=>item.x===target.x&&item.y===target.y&&item.role===box.role);
+  if(!obstacle)return false;
+  obstacle.hp--;
+  if(obstacle.hp<=0)state.obstacles=state.obstacles.filter(item=>item!==obstacle);
+ }else{
+  if(box.role||state.board[target.y]?.[target.x]!==box.color)return false;
+  state.board[target.y][target.x]="";state.remaining--;
+ }
+ box.ants--;
+ state.resolutionLog.push({slot,color:box.color,role:box.role||null,x:target.x,y:target.y,kind:target.kind||"pixel"});
  if(state.resolutionLog.length>300)state.resolutionLog.splice(0,100);
  if(box.ants<=0){
   if(box.pairId){
@@ -685,10 +759,18 @@ export function applyAntMove(state,slot,target){
  return true;
 }
 /** Browser runtime pickup: the ant count was already deducted when it left its box. */
-export function applyAntPickup(state,slot,target,color){
- if(state.board[target.y]?.[target.x]!==color)return false;
- state.board[target.y][target.x]="";state.remaining--;
- state.resolutionLog.push({slot,color,x:target.x,y:target.y});
+export function applyAntPickup(state,slot,target,color,role=null){
+ if(target.kind==="obstacle"){
+  const obstacle=state.obstacles?.find(item=>item.x===target.x&&item.y===target.y&&item.role===role);
+  if(!obstacle)return false;
+  obstacle.hp--;
+  if(obstacle.hp<=0)state.obstacles=state.obstacles.filter(item=>item!==obstacle);
+  state.resolutionLog.push({slot,color,role,x:target.x,y:target.y,kind:"obstacle"});
+ }else{
+  if(role||state.board[target.y]?.[target.x]!==color)return false;
+  state.board[target.y][target.x]="";state.remaining--;
+  state.resolutionLog.push({slot,color,x:target.x,y:target.y,kind:"pixel"});
+ }
  if(state.resolutionLog.length>300)state.resolutionLog.splice(0,100);
  return true;
 }
@@ -706,23 +788,23 @@ export function completeBoxDeparture(state,slot){
  state.slots[slot]=null;state.sortedBoxes=(state.sortedBoxes||0)+1;return true;
 }
 export function isDefeat(state){
- if(freeSlotCount(state)>0||state.remaining<=0)return false;
+ if(freeSlotCount(state)>0||isGameComplete(state))return false;
  return !findNextMove(state);
 }
 export function resolveAll(state){
  if(state.won||state.lost)return state;
  let move=findNextMove(state);
- while(move&&state.remaining>0){
+ while(move&&!isGameComplete(state)){
   applyAntMove(state,move.slot,move.target);
   const box=state.slots[move.slot];if(box?.status==="departing")completeBoxDeparture(state,move.slot);
   move=findNextMove(state);
  }
- if(state.remaining===0){state.won=true;state.message="Победа! Большой пиксельный портрет собран ✨";}
+ if(isGameComplete(state)){state.won=true;state.message="Победа! Большой пиксельный портрет собран ✨";}
  else if(isDefeat(state)){state.lost=true;state.message="Поражение: все пять стартовых отсеков заняты, ходов больше нет.";}
  return state;
 }
 export function serializeGame(state){
- return {levelId:state.levelId||"meadow-01",board:state.board,slots:state.slots,tray:state.tray,nextContainer:state.nextContainer,
+ return {levelId:state.levelId||"meadow-01",board:state.board,obstacles:state.obstacles||[],slots:state.slots,tray:state.tray,nextContainer:state.nextContainer,
   remaining:state.remaining,won:state.won,lost:state.lost,sortedBoxes:state.sortedBoxes||0,
   lockedBoxOpen:!!state.lockedBoxOpen,lockProgressColumns:[...(state.lockProgressColumns||[])],pendingLinkedIndex:state.pendingLinkedIndex??null,resolutionLog:state.resolutionLog.slice(-300)};
 }
@@ -738,7 +820,7 @@ export function restoreGame(saved){
    return next<incoming.length?next++:null;
   }));
  }
- return {...fresh,...saved,tray,sortedBoxes:saved.sortedBoxes||0,
+ return {...fresh,...saved,tray,obstacles:Array.isArray(saved.obstacles)?saved.obstacles.map(item=>({...item})):fresh.obstacles,sortedBoxes:saved.sortedBoxes||0,
   lockedBoxOpen:!!saved.lockedBoxOpen,lockProgressColumns:[...new Set((saved.lockProgressColumns||[]).filter(column=>column===0||column===1))],
   pendingLinkedIndex:null,
   slots:(()=>{const restored=saved.slots.map(box=>box?{...box}:null);for(let i=0;i<restored.length;i++){const box=restored[i];if(!box||box.ants>0)continue;if(box.pairId){const partner=restored.find((other,index)=>index!==i&&other?.pairId===box.pairId);if(partner&&partner.ants>0)box.status="waiting-linked";else{box.status="departing";if(partner&&partner.ants<=0)partner.status="departing";}}else box.status="departing";}return restored;})(),
