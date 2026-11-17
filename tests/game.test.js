@@ -396,7 +396,7 @@ test("every campaign deck places its linked pair outside the sealed-box position
 test("the seventh firefly meadow has five exact color budgets and a fully solvable queue",()=>{
  const level=LEVELS.find(item=>item.id==="forest-07");
  assert.ok(level);assert.equal(level.number,7);assert.equal(level.name,"Светлячок в сумерках");
- assert.equal(LEVELS.length,7);
+ assert.equal(LEVELS.length,500);
  const board=createArtworkBoard(level.id);
  assert.equal(board.length,SIZE);assert.ok(board.every(row=>row.length===SIZE));
  const totals={red:0,blue:0,yellow:0,green:0,purple:0};
@@ -505,4 +505,25 @@ test("same-colour starter boxes each receive an independent first dispatch in th
  const firstWave=findAntWave(s,new Set(),new Map(),2);
  assert.deepEqual(firstWave.map(move=>move.slot),[0,4]);
  assert.equal(new Set(firstWave.map(move=>move.target.x+","+move.target.y)).size,2);
+});
+
+
+test("campaign contains 500 distinct, authored-first and procedurally composed image levels",()=>{
+ assert.equal(LEVELS.length,500);
+ assert.equal(LEVELS[0].id,"meadow-01");
+ assert.equal(LEVELS[6].id,"forest-07");
+ assert.equal(LEVELS[7].number,8);
+ const signatures=new Set();
+ for(const level of LEVELS.slice(7)){
+  const board=createArtworkBoard(level.id);
+  assert.equal(board.length,SIZE,level.id);
+  assert.ok(board.every(row=>row.length===SIZE),level.id+" must remain 35×35");
+  const colors=new Set(board.flat().filter(Boolean));
+  assert.ok(colors.size>=3,level.id+" needs a readable multi-colour image");
+  assert.ok(colors.size<=5,level.id+" must use the current five-colour palette");
+  assert.ok(board.flat().filter(Boolean).length>35,level.id+" should contain a visible illustration");
+  signatures.add(board.flat().join(","));
+ }
+ assert.equal(signatures.size,493,"generated levels must not repeat the same pixel artwork");
+ assert.equal(new Set(LEVELS.map(level=>level.chapter)).size,13,"the 500 levels are grouped into progressive forest chapters");
 });
