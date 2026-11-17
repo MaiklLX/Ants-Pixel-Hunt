@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {COLORS,createGame,LEVELS,getLevel,getIncoming,createArtworkBoard,resolveAll,INITIAL_BOARD,INCOMING,isAccessible,getExposedPixels,findAccessiblePixel,findAccessiblePixels,findAntWave,chooseTopColumn,findNextMove,applyAntMove,applyAntPickup,completeBoxDeparture,freeSlotCount,isDefeat,SIZE,GRID_SIZE,BLOCK_SIZE,BOX_CAPACITY,SLOT_COUNT,TRAY_SIZE,canChoose,restoreGame,serializeGame,countOutboundBySlot,countQueuedBySlot,countDispatchingWorkers,countSlotWorkers,canDepartSlot,isLockedBox,getLinkedPair,normalizeLinkedTray,buildIncoming,LOCKED_BOX_INDEX,LOCKED_BOX_COLUMN} from "../src/game.js";
+import {COLORS,createGame,LEVELS,getLevel,getIncoming,createArtworkBoard,resolveAll,INITIAL_BOARD,INCOMING,isAccessible,getExposedPixels,getExposedTargets,findAccessiblePixel,findAccessiblePixels,findAntWave,chooseTopColumn,findNextMove,applyAntMove,applyAntPickup,completeBoxDeparture,freeSlotCount,isDefeat,SIZE,GRID_SIZE,BLOCK_SIZE,BOX_CAPACITY,SLOT_COUNT,TRAY_SIZE,canChoose,restoreGame,serializeGame,countOutboundBySlot,countQueuedBySlot,countDispatchingWorkers,countSlotWorkers,canDepartSlot,isLockedBox,getLinkedPair,normalizeLinkedTray,buildIncoming,LOCKED_BOX_INDEX,LOCKED_BOX_COLUMN} from "../src/game.js";
 const smallBoard=()=>Array.from({length:5},()=>Array(5).fill("green"));
 
 test("the authored frog is built from large collectible blocks on a 350x350 display grid",()=>{
@@ -197,7 +197,7 @@ test("all campaign levels have distinct deterministic artwork and exact matching
   const deckTotals=Object.fromEntries(Object.keys(COLORS).map(color=>[color,0]));
   for(const box of deck){assert.ok(box.ants>0&&box.ants<=BOX_CAPACITY);deckTotals[box.color]+=box.ants;}
   assert.deepEqual(Object.fromEntries(Object.entries(deckTotals).filter(([,total])=>total>0)),Object.fromEntries(Object.entries(totals).filter(([,total])=>total>0)));
-  assert.equal(deck.reduce((sum,box)=>sum+box.ants,0),createGame(level.id).remaining);
+  assert.equal(deck.filter(box=>!box.role).reduce((sum,box)=>sum+box.ants,0),createGame(level.id).remaining);
   signatures.add(board.map(row=>row.join(",")).join(";"));
  }
  assert.equal(signatures.size,LEVELS.length,"each campaign level must have its own pixel artwork");
@@ -254,56 +254,84 @@ test("choosing a butterfly box refills from the butterfly deck, not the frog dec
  assert.ok(s.tray.flat().every(index=>index===null||(index>=0&&index<deck.length)));
 });
 
-test("all campaign drawings remain solvable when only the true outer layer is collectible",()=>{
+test("all campaign drawings and specialist obstacles remain solvable",()=>{
  for(const level of LEVELS){
-  const board=createArtworkBoard(level.id),deck=getIncoming(level.id).map(box=>({...box}));
-  const active=Array(SLOT_COUNT).fill(null);
+  const board=createArtworkBoard(level.id),game=createGame(level.id),obstacles=game.obstacles.map(item=>({...item}));
+  const deck=getIncoming(level.id).map(box=>({...box})),active=Array(SLOT_COUNT).fill(null);
   let remaining=board.flat().filter(Boolean).length,steps=0;
   const queues=new Map(),cursor=new Map(),queued=new Set();
-  const enqueue=(x,y)=>{
-   const color=board[y]?.[x];if(!color)return;
-   const key=x+","+y;if(queued.has(key))return;
-   queued.add(key);if(!queues.has(color))queues.set(color,[]);
-   queues.get(color).push({x,y});
+  const boxKey=box=>box.role?"role:"+box.role:"color:"+box.color;
+  const targetKey=target=>target.kind+":"+target.x+","+target.y;
+  const enqueueTarget=target=>{
+   const key=targetKey(target);if(queued.has(key))return;
+   queued.add(key);const type=target.kind==="obstacle"?"role:"+target.role:"color:"+target.color;
+   if(!queues.has(type))queues.set(type,[]);
+   queues.get(type).push({...target});
   };
-  for(const point of getExposedPixels(board))enqueue(point.x,point.y);
-  const hasAccessible=color=>{
-   const list=queues.get(color)||[];let index=cursor.get(color)||0;
-   while(index<list.length&&board[list[index].y][list[index].x]!==color)index++;
-   cursor.set(color,index);return index<list.length;
+  const enqueueCell=(x,y)=>{
+   const obstacle=obstacles.find(item=>item.x===x&&item.y===y);
+   if(obstacle)enqueueTarget({...obstacle,kind:"obstacle"});
+   else if(board[y]?.[x])enqueueTarget({x,y,kind:"pixel",color:board[y][x]});
   };
-  while(remaining>0&&steps++<20000){
+  for(const target of getExposedTargets({board,obstacles}))enqueueTarget(target);
+  const valid=target=>{
+   if(target.kind==="obstacle")return obstacles.some(item=>item.x===target.x&&item.y===target.y&&item.role===target.role);
+   return !obstacles.some(item=>item.x===target.x&&item.y===target.y)&&board[target.y]?.[target.x]===target.color;
+  };
+  const accessibleIndex=box=>{
+   const key=boxKey(box),list=queues.get(key)||[];let index=cursor.get(key)||0;
+   while(index<list.length&&!valid(list[index]))index++;
+   cursor.set(key,index);return index<list.length?index:-1;
+  };
+  while((remaining>0||obstacles.length>0)&&steps++<30000){
    let progressed=false;
    for(let slot=0;slot<active.length;slot++){
     const box=active[slot];if(!box)continue;
-    const list=queues.get(box.color)||[];let index=cursor.get(box.color)||0;
-    while(index<list.length&&board[list[index].y][list[index].x]!==box.color)index++;
-    const target=list[index];cursor.set(box.color,index+(target?1:0));
+    const key=boxKey(box),index=accessibleIndex(box),target=index>=0?queues.get(key)[index]:null;
     if(target){
-     board[target.y][target.x]="";box.ants--;remaining--;progressed=true;
-     for(const [dx,dy] of [[-1,0],[1,0],[0,-1],[0,1]])enqueue(target.x+dx,target.y+dy);
-     if(box.ants<=0)active[slot]=null;
+     if(target.kind==="obstacle"){
+      const obstacle=obstacles.find(item=>item.x===target.x&&item.y===target.y);
+      obstacle.hp--;
+      if(obstacle.hp<=0){obstacles.splice(obstacles.indexOf(obstacle),1);cursor.set(key,index+1);enqueueCell(target.x,target.y);}
+     }else{
+      board[target.y][target.x]="";remaining--;cursor.set(key,index+1);
+      for(const [dx,dy] of [[-1,0],[1,0],[0,-1],[0,1]])enqueueCell(target.x+dx,target.y+dy);
+     }
+     box.ants--;progressed=true;if(box.ants<=0)active[slot]=null;
     }
    }
-   if(remaining===0)break;
+   if(remaining===0&&obstacles.length===0)break;
    let loadedNewBox=false;
    for(let slot=0;slot<active.length;slot++){
     if(active[slot])continue;
-    const index=deck.findIndex(box=>hasAccessible(box.color)&&!active.some(other=>other?.color===box.color));
+    const index=deck.findIndex(box=>accessibleIndex(box)>=0&&!active.some(other=>other&&boxKey(other)===boxKey(box)));
     if(index>=0){active[slot]=deck.splice(index,1)[0];loadedNewBox=true;}
    }
    if(!progressed&&!loadedNewBox)break;
   }
-  assert.equal(remaining,0,level.name+" must be solvable with its authored color deck");
+  assert.equal(remaining,0,level.name+" must clear every artwork block");
+  assert.equal(obstacles.length,0,level.name+" must clear every specialist obstacle");
  }
 });
-
+test("specialist crates provide exactly enough builders and warriors for each level's obstacles",()=>{
+ for(const level of LEVELS){
+  const game=createGame(level.id),deck=getIncoming(level.id);
+  for(const role of ["builder","warrior"]){
+   const required=game.obstacles.filter(item=>item.role===role).reduce((sum,item)=>sum+item.hp,0);
+   const supplied=deck.filter(box=>box.role===role).reduce((sum,box)=>sum+box.ants,0);
+   assert.equal(supplied,required,level.name+" "+role+" supply must match obstacle durability");
+  }
+  for(const obstacle of game.obstacles){
+   assert.ok(getExposedTargets(game).some(target=>target.kind==="obstacle"&&target.id===obstacle.id),level.name+" specialist obstacle must start exposed");
+  }
+ }
+});
 test("box capacities vary within each sufficiently large color deck but preserve exact ant totals",()=>{
  for(const level of LEVELS){
   const board=createArtworkBoard(level.id),deck=getIncoming(level.id);
   for(const color of Object.keys(COLORS)){
    const total=board.flat().filter(pixel=>pixel===color).length;
-   const sizes=deck.filter(box=>box.color===color).map(box=>box.ants);
+   const sizes=deck.filter(box=>!box.role&&box.color===color).map(box=>box.ants);
    assert.equal(sizes.reduce((sum,n)=>sum+n,0),total,level.name+" "+color+" ant budget");
    assert.ok(sizes.every(n=>n>0&&n<=BOX_CAPACITY));
    if(sizes.length>=3)assert.ok(new Set(sizes).size>=2,level.name+" "+color+" boxes should not all be identical");
@@ -442,7 +470,7 @@ test("the seventh firefly meadow has five exact color budgets and a fully solvab
  assert.ok(exposed.every(({x,y})=>board[y][x]==="green"),"every game-exposed block, including board-edge cells, must use the outer green color");
  assert.equal(exposed.length,totals.green,"the complete first band must be reachable from outside");
  const deck=getIncoming(level.id),deckTotals=Object.fromEntries(Object.keys(COLORS).map(color=>[color,0]));
- for(const box of deck){deckTotals[box.color]+=box.ants;assert.ok(box.ants>0&&box.ants<=BOX_CAPACITY);}
+ for(const box of deck){assert.ok(box.ants>0&&box.ants<=BOX_CAPACITY);if(!box.role)deckTotals[box.color]+=box.ants;}
  assert.deepEqual(deckTotals,totals,"the queue must contain exactly one ant per artwork block");
  assert.equal(getLinkedPair(level.id).length,2,"the authored queue must retain its linked pair");
  const state=createGame(level.id);
