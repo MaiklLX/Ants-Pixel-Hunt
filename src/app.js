@@ -87,6 +87,7 @@ function renderMap(){
    const unlocked=isLevelUnlocked(item),completed=done.has(item.id),button=document.createElement("button");button.type="button";
    const isNext=nextPlayable?.id===item.id;
    button.className="campaign-level"+(item.id===state.levelId?" current":"")+(completed?" completed":"")+(isNext?" next-stop":"")+(unlocked?"":" locked");button.disabled=!unlocked;
+   button.dataset.levelState=completed?"completed":isNext?"next":unlocked?"available":"locked";if(isNext)button.setAttribute("aria-current","step");
    button.setAttribute("aria-label",`Полянка ${item.number}: ${item.name}. ${completed?"Пройдена":unlocked?(isNext?"Следующая доступная полянка":"Доступна"):"Пока закрыта"}`);
    button.dataset.levelId=String(item.id);const icon=document.createElement("span");icon.className="campaign-emoji";icon.textContent=completed?"✓":unlocked?item.emoji:"🔒";
    const copy=document.createElement("span");copy.className="campaign-copy";
