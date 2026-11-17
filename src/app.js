@@ -229,8 +229,9 @@ function renderSlots(){
   slot.className="slot"+(box?" filled":"")+(box?.status==="departing"?" departing":"")+(box?.status==="waiting-linked"?" linked-waiting":"")+(box?.special==="linked"?" linked-member":"")+(loadingSlots.has(index)?" loading":"")+((state.activeSlots?.includes(index))?" active":"");
   if(box){
    const stripe=document.createElement("span");stripe.className="slot-color";stripe.style.background=COLORS[box.color].hex;
-   const count=document.createElement("strong");count.className="ant-count";count.textContent=box.status==="departing"?"…":box.ants.toLocaleString("ru-RU");
-   slot.append(stripe,count);
+   if(box.role){const roleMark=document.createElement("span");roleMark.className="slot-role";roleMark.textContent=box.role==="builder"?"⚒":"⚔";slot.append(stripe,roleMark);}
+   else slot.append(stripe);
+   const count=document.createElement("strong");count.className="ant-count";count.textContent=box.status==="departing"?"…":box.ants.toLocaleString("ru-RU");slot.append(count);
   }else{const plus=document.createElement("span");plus.className="slot-plus";plus.textContent="＋";slot.append(plus);}
   slotsEl.append(slot);
  });
