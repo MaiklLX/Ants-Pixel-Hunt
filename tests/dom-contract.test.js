@@ -707,3 +707,20 @@ test("KT-128 visually connects chapter biomes into one continuous campaign route
  assert.match(visual,/\.map-chapter\.chapter-complete \.map-chapter-track span/);
  assert.match(visual,/@media\(prefers-reduced-motion:reduce\)/);
 });
+
+
+test("KT-129 exposes distinct accessible campaign stop states",async()=>{
+ const app=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
+ const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
+ const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
+ const visual=styles.slice(styles.indexOf("KT-129 —"));
+ assert.match(html,/app-version" content="KT-129"/);
+ assert.match(app,/dataset\.levelState=completed\?"completed":isNext\?"next":unlocked\?"available":"locked"/);
+ assert.match(app,/button\.setAttribute\("aria-current","step"\)/);
+ assert.match(visual,/\.campaign-level\.completed\{/);
+ assert.match(visual,/\.campaign-level\.available:not\(\.next-stop\)/);
+ assert.match(visual,/\.campaign-level\.locked\{/);
+ assert.match(visual,/\.campaign-level\.next-stop\{/);
+ assert.match(visual,/next-stop-breathe/);
+ assert.match(visual,/prefers-reduced-motion:reduce/);
+});
