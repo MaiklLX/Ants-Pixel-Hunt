@@ -154,10 +154,10 @@ function drawBoardTile(x,y,exposed,cell){
  boardCtx.save();
  boardCtx.shadowColor="#07150f66";boardCtx.shadowBlur=2.3;boardCtx.shadowOffsetY=1.4;
  const face=boardCtx.createLinearGradient(px,py,px+size,py+size);
- face.addColorStop(0,"#ffffffb8");face.addColorStop(.13,rgb);face.addColorStop(.76,rgb);face.addColorStop(1,"#263b30");
+ face.addColorStop(0,color==="black"?"#59605d": "#ffffffb8");face.addColorStop(.13,rgb);face.addColorStop(.76,rgb);face.addColorStop(1,color==="black"?"#080b0a":"#263b30");
  boardCtx.fillStyle=face;boardCtx.beginPath();boardCtx.roundRect(px+.7,py+.5,size,size,1.9);boardCtx.fill();
  boardCtx.shadowColor="transparent";boardCtx.shadowBlur=0;boardCtx.shadowOffsetY=0;
- boardCtx.strokeStyle="#d8e6d044";boardCtx.lineWidth=.65;boardCtx.stroke();
+ boardCtx.strokeStyle=color==="black"?"#050908":"#d8e6d044";boardCtx.lineWidth=color==="black"?1.05:.65;boardCtx.stroke();
  boardCtx.strokeStyle="#14251d77";boardCtx.lineWidth=.7;
  boardCtx.beginPath();boardCtx.moveTo(px+2,py+size-1);boardCtx.lineTo(px+size-1,py+size-1);boardCtx.lineTo(px+size-1,py+2);boardCtx.stroke();
  boardCtx.fillStyle="#ffffff30";boardCtx.beginPath();boardCtx.roundRect(px+2,py+1.6,size-4,1.05,.7);boardCtx.fill();
