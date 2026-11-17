@@ -185,7 +185,152 @@ function createFireflyBoard(){
  return board;
 }
 
+
+const GENERATED_MOTIFS=[
+ {type:"flower",name:"Цветок",emoji:"🌼"},
+ {type:"tree",name:"Дерево",emoji:"🌳"},
+ {type:"mushroom",name:"Гриб",emoji:"🍄"},
+ {type:"butterfly",name:"Бабочка",emoji:"🦋"},
+ {type:"house",name:"Домик",emoji:"🏡"},
+ {type:"fish",name:"Рыбка",emoji:"🐟"},
+ {type:"snail",name:"Улитка",emoji:"🐌"},
+ {type:"rocket",name:"Ракета",emoji:"🚀"},
+ {type:"bird",name:"Птичка",emoji:"🐦"},
+ {type:"acorn",name:"Жёлудь",emoji:"🌰"},
+ {type:"bee",name:"Пчёлка",emoji:"🐝"},
+ {type:"cloud",name:"Облачко",emoji:"☁️"}
+];
+const GENERATED_CHAPTERS=[
+ "Светлячковая роща","Тихий ручей","Солнечная опушка","Старый дуб",
+ "Мшистые холмы","Лунный сад","Долина огоньков","Затерянная тропа",
+ "Сказочная чаща","Большой лес"
+];
+function generatedPartCount(number){
+ if(number<26)return 1;
+ if(number<76)return 2;
+ if(number<151)return number%3===0?3:2;
+ if(number<301)return 3;
+ return 4;
+}
+function generatedChapter(number){
+ if(number<=50)return "Светлячковая роща";
+ return GENERATED_CHAPTERS[Math.min(9,Math.floor((number-51)/50)+1)];
+}
+const GENERATED_LEVELS=Array.from({length:493},(_,index)=>{
+ const number=index+8,count=generatedPartCount(number);
+ const motifs=Array.from({length:count},(_,part)=>GENERATED_MOTIFS[(number*7+part*5+Math.floor(number/13))%GENERATED_MOTIFS.length]);
+ const names=motifs.map(item=>item.name);
+ const name=names.length===1?names[0]+" на полянке":names.slice(0,-1).join(", ")+" и "+names[names.length-1];
+ return {id:"meadow-"+String(number).padStart(3,"0"),number,chapter:generatedChapter(number),name,emoji:motifs[0].emoji,hint:count===1?"Знакомимся с новым силуэтом и цветовыми слоями":count===2?"Две самостоятельные картинки на одном поле — следи за цветами обоих рисунков":count===3?"Три части общей картины: планируй очередь для каждой": "Четыре объекта на одном поле и пять цветов — продумывай порядок открытия"};
+});
+function inTriangle(px,py,ax,ay,bx,by,cx,cy){
+ const sign=(x1,y1,x2,y2,x3,y3)=>(x1-x3)*(y2-y3)-(x2-x3)*(y1-y3);
+ const a=sign(px,py,ax,ay,bx,by),b=sign(px,py,bx,by,cx,cy),c=sign(px,py,cx,cy,ax,ay);
+ return (a>=0&&b>=0&&c>=0)||(a<=0&&b<=0&&c<=0);
+}
+function generatedMotifZone(type,u,v,variant){
+ const dx=((variant%7)-3)*.009,dy=((Math.floor(variant/7)%7)-3)*.009;
+ const sx=1+((Math.floor(variant/49)%5)-2)*.018,sy=1+((Math.floor(variant/245)%5)-2)*.018;
+ const x=.5+(u-.5)*sx+dx,y=.5+(v-.5)*sy+dy;
+ const E=(cx,cy,rx,ry)=>ellipse(x,y,cx,cy,rx,ry);
+ const R=(x1,y1,x2,y2)=>x>=x1&&x<=x2&&y>=y1&&y<=y2;
+ const T=(ax,ay,bx,by,cx,cy)=>inTriangle(x,y,ax,ay,bx,by,cx,cy);
+ const L=(x1,y1,x2,y2,w=.035)=>lineDistance(x,y,x1,y1,x2,y2)<=w;
+ switch(type){
+  case "flower":
+   if(R(.46,.48,.54,.96))return 0;
+   if(E(.34,.72,.17,.09)||E(.66,.79,.16,.08))return 3;
+   if(E(.5,.25,.18,.16)||E(.29,.36,.16,.15)||E(.71,.36,.16,.15)||E(.36,.13,.15,.14)||E(.64,.13,.15,.14))return 1;
+   if(E(.5,.29,.095,.09))return 2;
+   break;
+  case "tree":
+   if(R(.43,.56,.57,.98))return 0;
+   if(E(.5,.32,.37,.31)||E(.28,.43,.22,.2)||E(.72,.43,.22,.2))return 1;
+   if(E(.34,.25,.055,.06)||E(.63,.34,.06,.065)||E(.48,.48,.055,.06)||E(.72,.48,.05,.055))return 2;
+   break;
+  case "mushroom":
+   if(R(.39,.48,.61,.94))return 0;
+   if(E(.5,.34,.43,.28)&&y<.52)return 1;
+   if(E(.3,.31,.055,.06)||E(.51,.2,.06,.065)||E(.7,.34,.055,.06))return 2;
+   break;
+  case "butterfly":
+   if(R(.46,.28,.54,.78)||E(.5,.23,.09,.09))return 0;
+   if(E(.28,.34,.24,.25)||E(.72,.34,.24,.25))return 1;
+   if(E(.34,.68,.18,.19)||E(.66,.68,.18,.19))return 2;
+   if(E(.28,.34,.09,.1)||E(.72,.34,.09,.1)||L(.46,.2,.35,.04)||L(.54,.2,.65,.04))return 3;
+   break;
+  case "house":
+   if(R(.2,.42,.8,.92))return 0;
+   if(T(.12,.45,.5,.08,.88,.45)||R(.68,.16,.77,.4))return 1;
+   if(R(.43,.67,.58,.92))return 2;
+   if(R(.28,.52,.4,.65)||R(.61,.52,.73,.65))return 3;
+   break;
+  case "fish":
+   if(E(.47,.5,.34,.27))return 1;
+   if(T(.7,.5,.98,.28,.98,.72))return 2;
+   if(T(.42,.3,.55,.12,.63,.35)||T(.42,.7,.55,.88,.63,.65))return 3;
+   if(E(.27,.43,.045,.05))return 4;
+   break;
+  case "snail":
+   if(E(.48,.76,.4,.14)||R(.68,.25,.73,.69)||R(.83,.25,.88,.67))return 0;
+   if(E(.47,.44,.3,.3))return 1;
+   if(E(.47,.44,.17,.17)&&!E(.47,.44,.1,.1))return 2;
+   if(E(.7,.2,.065,.07)||E(.85,.2,.065,.07))return 3;
+   break;
+  case "rocket":
+   if(T(.5,.94,.38,.72,.62,.72))return 0;
+   if(E(.5,.47,.2,.38))return 1;
+   if(T(.5,.04,.31,.29,.69,.29))return 2;
+   if(T(.32,.62,.12,.83,.38,.79)||T(.68,.62,.88,.83,.62,.79))return 3;
+   if(E(.5,.4,.085,.09))return 4;
+   break;
+  case "bird":
+   if(E(.47,.53,.34,.25))return 1;
+   if(E(.48,.54,.2,.16))return 2;
+   if(T(.75,.48,.99,.56,.76,.64))return 3;
+   if(L(.42,.74,.39,.94)||L(.55,.74,.59,.94))return 0;
+   if(E(.65,.42,.04,.045))return 4;
+   break;
+  case "acorn":
+   if(E(.5,.59,.31,.37))return 1;
+   if(E(.5,.31,.34,.16)&&y<.48)return 2;
+   if(L(.5,.16,.55,.05))return 0;
+   break;
+  case "bee":
+   if(E(.5,.54,.31,.23))return 1;
+   if(E(.39,.52,.055,.24)||E(.61,.52,.055,.24))return 2;
+   if(E(.42,.23,.18,.14)||E(.65,.23,.18,.14))return 4;
+   if(E(.76,.5,.11,.13))return 0;
+   if(E(.79,.47,.025,.03))return 3;
+   break;
+  case "cloud":
+   if(E(.34,.57,.22,.2)||E(.53,.42,.25,.27)||E(.73,.58,.2,.18))return 1;
+   if(E(.79,.2,.13,.13))return 2;
+   if(L(.79,.02,.79,.07)||L(.95,.2,.99,.2)||L(.63,.2,.59,.2)||L(.79,.36,.79,.4))return 3;
+   break;
+ }
+ return -1;
+}
+function createComposedArtworkBoard(number){
+ const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
+ const count=generatedPartCount(number),paletteCount=number<26?3:number<76?4:5;
+ const palette=["green","blue","purple","yellow","red"].slice(0,paletteCount);
+ const tiles=count===1?[[4,3,27,29]]:count===2?[[2,7,15,21],[18,7,15,21]]:count===3?[[1,2,15,15],[19,2,15,15],[10,19,15,15]]:[[2,2,15,15],[18,2,15,15],[2,18,15,15],[18,18,15,15]];
+ for(let part=0;part<count;part++){
+  const motifIndex=(number*7+part*5+Math.floor(number/13))%GENERATED_MOTIFS.length;
+  const motif=GENERATED_MOTIFS[motifIndex],variant=number*37+part*113;
+  const [ox,oy,width,height]=tiles[part];
+  for(let py=0;py<height;py++)for(let px=0;px<width;px++){
+   const zone=generatedMotifZone(motif.type,(px+.5)/width,(py+.5)/height,variant);
+   if(zone<0)continue;
+   const colorIndex=(zone+part+Math.floor(number/5))%paletteCount;
+   board[oy+py][ox+px]=palette[colorIndex];
+  }
+ }
+ return board;
+}
 export const LEVELS=[
+
  {id:"meadow-01",number:1,chapter:"Зелёная поляна",name:"Портрет лягушонка",emoji:"🐸",hint:"Знакомство с цветными боксами и пятью отсеками"},
  {id:"garden-02",number:2,chapter:"Цветочный сад",name:"Бабочка на ветру",emoji:"🦋",hint:"Новые сочетания цветов и более длинная очередь"},
  {id:"garden-03",number:3,chapter:"Цветочный сад",name:"Солнечный цветок",emoji:"🌻",hint:"Учимся открывать центральные блоки постепенно"},
@@ -193,18 +338,21 @@ export const LEVELS=[
  {id:"forest-05",number:5,chapter:"Грибной лес",name:"Жёлудь для запаса",emoji:"🌰",hint:"Собираем осеннюю находку из пяти цветов"},
  {id:"forest-06",number:6,chapter:"Грибной лес",name:"Улитка-путешественница",emoji:"🐌",hint:"Финальная картинка первой маленькой главы"},
  {id:"forest-07",number:7,chapter:"Светлячковая роща",name:"Светлячок в сумерках",emoji:"✨",hint:"Снимаем пять мягких цветовых слоёв от крыльев к огоньку"}
+
+,...GENERATED_LEVELS
 ];
 export function getLevel(levelId="meadow-01"){
  return LEVELS.find(level=>level.id===levelId)||LEVELS[0];
 }
 export function createArtworkBoard(levelId="meadow-01"){
- const id=getLevel(levelId).id;
- if(id==="garden-02")return createButterflyBoard();
- if(id==="garden-03")return createFlowerBoard();
- if(id==="forest-04")return createMushroomBoard();
- if(id==="forest-05")return createAcornBoard();
- if(id==="forest-06")return createSnailBoard();
- if(id==="forest-07")return createFireflyBoard();
+ const level=getLevel(levelId);
+ if(level.number>=8)return createComposedArtworkBoard(level.number);
+ if(level.id==="garden-02")return createButterflyBoard();
+ if(level.id==="garden-03")return createFlowerBoard();
+ if(level.id==="forest-04")return createMushroomBoard();
+ if(level.id==="forest-05")return createAcornBoard();
+ if(level.id==="forest-06")return createSnailBoard();
+ if(level.id==="forest-07")return createFireflyBoard();
  return createFrogBoard();
 }
 
