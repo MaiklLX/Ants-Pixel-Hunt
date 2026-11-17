@@ -639,31 +639,65 @@ export function createArtworkBoard(levelId="meadow-01"){
 
 export const INITIAL_BOARD=createArtworkBoard();
 export function buildIncoming(board,levelNumber=1){
- const totals=Object.fromEntries(Object.keys(COLORS).map(color=>[color,0]));
+ const colors=Object.keys(COLORS);
  let boardSeed=2166136261;
  for(const row of board)for(const color of row){
-  const code=color?Object.keys(COLORS).indexOf(color)+1:0;
+  const code=color?colors.indexOf(color)+1:0;
   boardSeed=Math.imul(boardSeed^code,16777619)>>>0;
-  if(color)totals[color]++;
  }
- const colors=Object.keys(COLORS),queues={};
+ if(levelNumber>=8){
+  // Each batch mirrors one currently exposed color group. When that squad
+  // finishes, its slot is free before the next inner color wave is revealed.
+  const working=board.map(row=>row.slice()),deck=[];
+  let remaining=working.reduce((sum,row)=>sum+row.filter(Boolean).length,0),wave=0;
+  while(remaining>0){
+   const exposed=getExposedPixels(working);
+   if(!exposed.length)break;
+   const totals=Object.fromEntries(colors.map(color=>[color,0]));
+   for(const point of exposed){const color=working[point.y][point.x];if(color)totals[color]++;}
+   const queues={};
+   for(const color of colors){
+    let left=totals[color];queues[color]=[];
+    let seed=(boardSeed^Math.imul(wave+1,2654435761)^Math.imul(color.charCodeAt(0),2246822519))>>>0;
+    const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
+    while(left>0){
+     const ants=Math.min(left,8+Math.floor(random()*5));
+     queues[color].push({color,ants});left-=ants;
+    }
+   }
+   let pending=true,round=0;
+   while(pending){
+    pending=false;
+    const order=round%2?colors.slice().reverse():colors;
+    for(const color of order){const box=queues[color].shift();if(box){deck.push(box);pending=true;}}
+    round++;
+   }
+   for(const point of exposed)working[point.y][point.x]="";
+   remaining-=exposed.length;wave++;
+  }
+  // Preserve a complete exact deck even if an unusual artwork contains an
+  // isolated component that was not connected to the exterior flood.
+  if(remaining>0){
+   const totals=Object.fromEntries(colors.map(color=>[color,0]));
+   for(const row of working)for(const color of row)if(color)totals[color]++;
+   for(const color of colors)if(totals[color])deck.push({color,ants:totals[color]});
+  }
+  return deck;
+ }
+ const totals=Object.fromEntries(colors.map(color=>[color,0]));
+ for(const row of board)for(const color of row)if(color)totals[color]++;
+ const queues={};
  for(const color of colors){
-  const total=totals[color];
-  if(!total){queues[color]=[];continue;}
-  // Smaller color squads turn over faster, freeing the five starter cells
-  // as detailed artwork reveals new shades and color groups.
-  const detailedLevel=levelNumber>=8,targetSquad=detailedLevel?3:36;
-  const count=Math.max(1,Math.ceil(total/targetSquad)),base=Math.floor(total/count);
-  const minimum=detailedLevel?1:Math.min(10,Math.max(1,Math.floor(total/count)));
+  const total=totals[color];if(!total){queues[color]=[];continue;}
+  const count=Math.max(1,Math.ceil(total/36)),base=Math.floor(total/count),minimum=Math.min(10,Math.max(1,Math.floor(total/count)));
   let seed=(boardSeed^color.charCodeAt(0)*2654435761)>>>0;
   const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
-  const spread=detailedLevel?1:Math.max(6,Math.min(22,Math.round(base*.58)));
-  const maxSquad=detailedLevel?targetSquad:BOX_CAPACITY;
-  const sizes=Array.from({length:count},()=>Math.max(minimum,Math.min(maxSquad,base+Math.round((random()*2-1)*spread))));
+  const spread=Math.max(6,Math.min(22,Math.round(base*.58)));
+  const sizes=Array.from({length:count},()=>Math.max(minimum,Math.min(BOX_CAPACITY,base+Math.round((random()*2-1)*spread))));
   let difference=total-sizes.reduce((sum,value)=>sum+value,0),cursor=Math.floor(random()*count);
   while(difference!==0){
    const index=cursor++%count;
-   if(difference>0&&sizes[index]<maxSquad){sizes[index]++;difference--;}
+   if(difference>0&&sizes[index]<BOX_CAPACITY){sizes[index]++;difference--;}
    else if(difference<0&&sizes[index]>minimum){sizes[index]--;difference++;}
   }
   if(sizes.length>=3&&new Set(sizes).size===1){sizes[0]++;sizes[1]--;}
