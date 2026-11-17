@@ -308,13 +308,13 @@ function renderChoices(){
     peek.append(lock,progress);peek.title="Закрытый бокс";peek.setAttribute("aria-label",`Закрытый бокс, прогресс ${(state.lockProgressColumns||[]).length} из 2`);
    }else if(nextBox){
     if(nextBox.special==="linked")peek.classList.add("linked-peek");
-    const color=COLORS[nextBox.color];peek.style.setProperty("--peek-color",color.hex);
+    const color=COLORS[nextBox.color],roleName=nextBox.role==="builder"?"Строители":nextBox.role==="warrior"?"Военные":null;peek.style.setProperty("--peek-color",color.hex);
     const miniCrate=document.createElement("i");miniCrate.className="peek-crate";miniCrate.setAttribute("aria-hidden","true");
     const meta=document.createElement("span");meta.className="peek-meta";
-    const colorName=document.createElement("small");colorName.className="peek-color-name";colorName.textContent=color.short;
+    const colorName=document.createElement("small");colorName.className="peek-color-name";colorName.textContent=roleName?roleName.slice(0,2).toUpperCase():color.short;
     const count=document.createElement("small");count.className="peek-count";count.textContent=String(nextBox.ants)+" 🐜";
     meta.append(colorName,count);peek.append(miniCrate,meta);
-    peek.title=`Бокс в резерве: ${color.name}, ${nextBox.ants} муравьёв`;peek.setAttribute("aria-label",`Бокс в резервной очереди, цвет ${color.name}, ${nextBox.ants} муравьёв`);
+    peek.title=`Бокс в резерве: ${roleName||color.name}, ${nextBox.ants} муравьёв`;peek.setAttribute("aria-label",`Бокс в резервной очереди: ${roleName||color.name}, ${nextBox.ants} муравьёв`);
    }else{
     const empty=document.createElement("span");empty.className="peek-empty-mark";empty.textContent="—";peek.append(empty);
     peek.title="Пустая позиция резервной очереди";peek.setAttribute("aria-label",peek.title);
