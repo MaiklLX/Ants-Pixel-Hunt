@@ -344,16 +344,24 @@ export const LEVELS=[
 export function getLevel(levelId="meadow-01"){
  return LEVELS.find(level=>level.id===levelId)||LEVELS[0];
 }
+const artworkBoardCache=new Map();
 export function createArtworkBoard(levelId="meadow-01"){
  const level=getLevel(levelId);
- if(level.number>=8)return createComposedArtworkBoard(level.number);
- if(level.id==="garden-02")return createButterflyBoard();
- if(level.id==="garden-03")return createFlowerBoard();
- if(level.id==="forest-04")return createMushroomBoard();
- if(level.id==="forest-05")return createAcornBoard();
- if(level.id==="forest-06")return createSnailBoard();
- if(level.id==="forest-07")return createFireflyBoard();
- return createFrogBoard();
+ if(!artworkBoardCache.has(level.id)){
+  let board;
+  if(level.number>=8)board=createComposedArtworkBoard(level.number);
+  else if(level.id==="garden-02")board=createButterflyBoard();
+  else if(level.id==="garden-03")board=createFlowerBoard();
+  else if(level.id==="forest-04")board=createMushroomBoard();
+  else if(level.id==="forest-05")board=createAcornBoard();
+  else if(level.id==="forest-06")board=createSnailBoard();
+  else if(level.id==="forest-07")board=createFireflyBoard();
+  else board=createFrogBoard();
+  artworkBoardCache.set(level.id,board);
+ }
+ // Return a fresh mutable board: gameplay clears cells in place, so cached
+ // source artwork must never be shared with a running game or another caller.
+ return artworkBoardCache.get(level.id).map(row=>row.slice());
 }
 
 export const INITIAL_BOARD=createArtworkBoard();
