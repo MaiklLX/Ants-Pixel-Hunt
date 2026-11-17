@@ -13,9 +13,9 @@ test("the authored frog is built from large collectible blocks on a 350x350 disp
  assert.ok(s.remaining>400&&s.remaining<900);assert.ok(INITIAL_BOARD.some(row=>row.includes("")));
 });
 test("the box deck contains exactly enough ants to collect every pixel by color",()=>{
- const totals={red:0,blue:0,yellow:0,green:0,purple:0};
+ const totals=Object.fromEntries(Object.keys(COLORS).map(color=>[color,0]));
  for(const row of INITIAL_BOARD)for(const color of row)if(color)totals[color]++;
- const deckTotals={red:0,blue:0,yellow:0,green:0,purple:0};
+ const deckTotals=Object.fromEntries(Object.keys(COLORS).map(color=>[color,0]));
  for(const box of INCOMING)deckTotals[box.color]+=box.ants;
  assert.deepEqual(deckTotals,totals);assert.ok(INCOMING.length>9);assert.equal(BOX_CAPACITY,60);
  assert.deepEqual(INCOMING.slice(0,5).map(box=>box.color),["green","blue","purple","yellow","red"]);
@@ -141,9 +141,9 @@ test("a full wave never assigns the same board cell to two ants",()=>{
 });
 
 test("the 35x35 artwork produces a complete deterministic deck with bounded box sizes",()=>{
- const totals={red:0,blue:0,yellow:0,green:0,purple:0};
+ const totals=Object.fromEntries(Object.keys(COLORS).map(color=>[color,0]));
  for(const row of INITIAL_BOARD)for(const color of row)if(color)totals[color]++;
- const deckTotals={red:0,blue:0,yellow:0,green:0,purple:0};
+ const deckTotals=Object.fromEntries(Object.keys(COLORS).map(color=>[color,0]));
  for(const box of INCOMING){
   assert.ok(box.ants>0&&box.ants<=BOX_CAPACITY);
   deckTotals[box.color]+=box.ants;
@@ -192,9 +192,9 @@ test("all campaign levels have distinct deterministic artwork and exact matching
   const board=createArtworkBoard(level.id),deck=getIncoming(level.id);
   assert.equal(board.length,35);
   assert.ok(board.every(row=>row.length===35));
-  const totals={red:0,blue:0,yellow:0,green:0,purple:0};
+  const totals=Object.fromEntries(Object.keys(COLORS).map(color=>[color,0]));
   for(const row of board)for(const color of row)if(color)totals[color]++;
-  const deckTotals={red:0,blue:0,yellow:0,green:0,purple:0};
+  const deckTotals=Object.fromEntries(Object.keys(COLORS).map(color=>[color,0]));
   for(const box of deck){assert.ok(box.ants>0&&box.ants<=BOX_CAPACITY);deckTotals[box.color]+=box.ants;}
   assert.deepEqual(deckTotals,totals);
   assert.equal(deck.reduce((sum,box)=>sum+box.ants,0),createGame(level.id).remaining);
@@ -434,14 +434,14 @@ test("the seventh firefly meadow has five exact color budgets and a fully solvab
  assert.equal(LEVELS.length,500);
  const board=createArtworkBoard(level.id);
  assert.equal(board.length,SIZE);assert.ok(board.every(row=>row.length===SIZE));
- const totals={red:0,blue:0,yellow:0,green:0,purple:0};
+ const totals=Object.fromEntries(Object.keys(COLORS).map(color=>[color,0]));
  for(const row of board)for(const color of row)if(color)totals[color]++;
  assert.ok(Object.values(totals).every(total=>total>0));
  const exposed=getExposedPixels(board);
  assert.ok(exposed.length>0);
  assert.ok(exposed.every(({x,y})=>board[y][x]==="green"),"every game-exposed block, including board-edge cells, must use the outer green color");
  assert.equal(exposed.length,totals.green,"the complete first band must be reachable from outside");
- const deck=getIncoming(level.id),deckTotals={red:0,blue:0,yellow:0,green:0,purple:0};
+ const deck=getIncoming(level.id),deckTotals=Object.fromEntries(Object.keys(COLORS).map(color=>[color,0]));
  for(const box of deck){deckTotals[box.color]+=box.ants;assert.ok(box.ants>0&&box.ants<=BOX_CAPACITY);}
  assert.deepEqual(deckTotals,totals,"the queue must contain exactly one ant per artwork block");
  assert.equal(getLinkedPair(level.id).length,2,"the authored queue must retain its linked pair");
@@ -555,7 +555,7 @@ test("campaign contains 500 distinct, authored-first and procedurally composed i
   assert.ok(board.every(row=>row.length===SIZE),level.id+" must remain 35×35");
   const colors=new Set(board.flat().filter(Boolean));
   assert.ok(colors.size>=3,level.id+" needs a readable multi-colour image");
-  assert.ok(colors.size<=5,level.id+" must use the current five-colour palette");
+  assert.ok(colors.size>=3&&colors.size<=9,level.id+" must use the expanded nine-colour palette");
   assert.ok(board.flat().filter(Boolean).length>35,level.id+" should contain a visible illustration");
   signatures.add(board.flat().join(","));
  }
