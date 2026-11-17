@@ -714,7 +714,7 @@ export function chooseTopColumn(state,column){
   state.lockProgressColumns=openedFrom;if(openedFrom.length>=2){state.lockedBoxOpen=true;state.message="Щёлк! Пломба снята — закрытый бокс открыт!";}
  }
  shiftColumn(column);normalizeLinkedTray(state);state.pendingLinkedIndex=null;
- state.message=`${COLORS[box.color].name}: бокс отправлен в стартовый отсек ${freeSlot+1}`;
+ state.message=`${box.role==="builder"?"Муравьи-строители":box.role==="warrior"?"Муравьи-воины":COLORS[box.color].name}: бокс отправлен в стартовый отсек ${freeSlot+1}`;
  return true;
 }
 export function findNextMove(state){
