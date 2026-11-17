@@ -723,7 +723,7 @@ export function findNextMove(state){
   const box=state.slots[slot];
   if(box&&box.ants>0&&box.status!=="departing"){
    const target=targets.find(item=>box.role?item.kind==="obstacle"&&item.role===box.role:item.kind==="pixel"&&item.color===box.color);
-   if(target)return{slot,target};
+   if(target)return{slot,target:target.kind==="pixel"?{x:target.x,y:target.y}:target};
   }
  }
  return null;
