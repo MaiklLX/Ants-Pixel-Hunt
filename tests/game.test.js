@@ -313,6 +313,22 @@ test("all campaign drawings and specialist obstacles remain solvable",()=>{
   assert.equal(obstacles.length,0,level.name+" must clear every specialist obstacle");
  }
 });
+test("builder ants dismantle a root barrier before the covered color block can be collected",()=>{
+ const state=createGame("meadow-026"),obstacle=state.obstacles[0],box=getIncoming(state.levelId).find(item=>item.role==="builder");
+ assert.ok(obstacle);assert.equal(obstacle.role,"builder");assert.ok(box);
+ const coveredColor=state.board[obstacle.y][obstacle.x],before=state.remaining;
+ state.slots[0]={...box,ants:box.ants};
+ const target=getExposedTargets(state).find(item=>item.kind==="obstacle"&&item.id===obstacle.id);
+ assert.ok(target);
+ assert.equal(applyAntMove(state,0,target),true);
+ assert.equal(state.remaining,before,"hitting the barrier must not remove the colored block underneath");
+ assert.equal(state.obstacles[0].hp,1,"the first builder hit weakens the barrier");
+ const second=getExposedTargets(state).find(item=>item.kind==="obstacle"&&item.id===obstacle.id);
+ assert.equal(applyAntMove(state,0,second),true);
+ assert.equal(state.obstacles.length,0,"the second builder hit removes the barrier");
+ assert.equal(state.board[obstacle.y][obstacle.x],coveredColor,"the covered artwork block remains intact");
+ assert.ok(getExposedTargets(state).some(item=>item.kind==="pixel"&&item.x===obstacle.x&&item.y===obstacle.y&&item.color===coveredColor));
+});
 test("specialist crates provide exactly enough builders and warriors for each level's obstacles",()=>{
  for(const level of LEVELS){
   const game=createGame(level.id),deck=getIncoming(level.id);
