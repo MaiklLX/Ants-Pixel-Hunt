@@ -4693,3 +4693,9 @@ button:not(:disabled):active{filter:brightness(.96)}
 .map-chapter[data-biome-index="1"] .map-chapter-mark{border-color:#bd9470;color:#f0c99e}
 .map-chapter[data-biome-index="2"] .map-chapter-mark{border-color:#b89a62;color:#e9d09a}
 .map-chapter[data-biome-index="3"] .map-chapter-mark{border-color:#6d9d91;color:#a9d5c8}
+
+/* Specialist ant crates and their field obstacles */
+.choice-crate.specialist-crate{background:linear-gradient(145deg,#fff2d9,#e5c58e);border:1px solid #b78c50;color:#704d2c;box-shadow:inset 0 1px #fff8}
+.choice-crate.specialist-crate b{font-size:18px;line-height:1;text-shadow:0 1px 0 #fff4}
+.slot-role{font-size:13px;line-height:12px;color:#a8793f;font-weight:950;text-shadow:0 1px #fff}
+.slot:has(.slot-role){border-color:#d8bd86;background:linear-gradient(160deg,#fff9eb,#f2e7ce)}
