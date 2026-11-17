@@ -474,8 +474,7 @@ function recolorArtworkByLayers(source,palette){
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
  for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)if(occupied[y][x]){
   const layer=Number.isFinite(depth[y][x])?depth[y][x]:10;
-  const neighbours=[[x-1,y],[x+1,y],[x,y-1],[x,y+1]].filter(([nx,ny])=>nx>=0&&ny>=0&&nx<SIZE&&ny<SIZE&&occupied[ny][nx]).length;
-  if(layer===1&&neighbours>=2)board[y][x]="black";
+  if(layer===1)board[y][x]="black";
   else{
    const index=layer<=3?0:layer<=5?1:layer<=7?2:layer<=9?3:4;
    board[y][x]=palette[index];
