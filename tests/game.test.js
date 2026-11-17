@@ -208,10 +208,9 @@ test("campaign level identity survives save and restore",()=>{
 test("all campaign levels start with accessible colors represented in their box deck",()=>{
  for(const level of LEVELS){
   const board=createArtworkBoard(level.id),deck=getIncoming(level.id);
-  const accessibleColors=new Set();
-  for(let y=0;y<board.length;y++)for(let x=0;x<board[y].length;x++){
-   if(board[y][x]&&isAccessible(board,x,y))accessibleColors.add(board[y][x]);
-  }
+  // One outside flood-fill gives the exact same exposed set as isAccessible,
+  // without repeating a full board traversal for every occupied pixel.
+  const accessibleColors=new Set(getExposedPixels(board).map(({x,y})=>board[y][x]).filter(Boolean));
   const deckColors=new Set(deck.map(box=>box.color));
   assert.ok(accessibleColors.size>0,level.name+" must have a valid opening move");
   for(const color of accessibleColors)assert.ok(deckColors.has(color),level.name+" must provide boxes for accessible color "+color);
