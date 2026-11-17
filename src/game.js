@@ -212,33 +212,137 @@ const GENERATED_MOTIFS=[
  {type:"cloud",name:"Облачко",emoji:"☁️"}
 ];
 const GENERATED_ART_PALETTES={
- flower:["forest","pink","yellow","lime","orange","green","red","cream","olive","purple"],
- tree:["brown","green","lime","yellow","red","forest","olive","orange","cream","gray"],
- mushroom:["cream","red","brown","green","yellow","orange","pink","forest","olive","gray"],
- butterfly:["purple","blue","pink","yellow","orange","forest","turquoise","sky","red","cream"],
- house:["cream","red","brown","sky","green","orange","yellow","blue","forest","gray"],
- fish:["turquoise","blue","orange","yellow","cream","sky","red","purple","green","brown"],
- snail:["green","brown","orange","cream","yellow","forest","red","olive","lime","gray"],
- rocket:["red","cream","orange","blue","sky","yellow","brown","turquoise","purple","gray"],
- bird:["brown","sky","blue","orange","yellow","cream","forest","red","turquoise","gray"],
- acorn:["brown","green","orange","yellow","cream","forest","red","olive","lime","gray"],
- bee:["yellow","black","cream","orange","brown","green","red","forest","olive","sky"],
- cloud:["sky","cream","yellow","orange","blue","turquoise","gray","pink","purple","lime"]
+ flower:["forest","pink","yellow","lime","orange","green","red","cream","olive","purple","brown","sky","turquoise","blue","gray"],
+ tree:["brown","green","lime","yellow","red","forest","olive","orange","cream","gray","sky","turquoise","blue","purple","pink"],
+ mushroom:["cream","red","brown","green","yellow","orange","pink","forest","olive","gray","purple","lime","sky","blue","turquoise"],
+ butterfly:["purple","blue","pink","yellow","orange","forest","turquoise","sky","red","cream","lime","green","olive","gray","brown"],
+ house:["cream","red","brown","sky","green","orange","yellow","blue","forest","gray","turquoise","olive","lime","purple","pink"],
+ fish:["turquoise","blue","orange","yellow","cream","sky","red","purple","green","brown","lime","pink","forest","olive","gray"],
+ snail:["green","brown","orange","cream","yellow","forest","red","olive","lime","gray","pink","purple","sky","turquoise","blue"],
+ rocket:["orange","cream","red","blue","sky","yellow","brown","turquoise","purple","gray","pink","green","lime","forest","olive"],
+ bird:["brown","sky","blue","orange","yellow","cream","forest","red","turquoise","gray","lime","olive","pink","purple","green"],
+ acorn:["brown","green","orange","yellow","cream","forest","red","olive","lime","gray","pink","purple","sky","turquoise","blue"],
+ bee:["yellow","black","cream","orange","brown","green","red","forest","olive","sky","lime","pink","turquoise","blue","gray"],
+ cloud:["sky","cream","yellow","orange","blue","turquoise","gray","pink","purple","lime","green","forest","red","olive","brown"]
 };
+function generatedMotifDetail(type,zone,u,v,variant){
+ const x=Math.floor(u*35),y=Math.floor(v*35),phase=variant%7;
+ const line=(x1,y1,x2,y2,w=.72)=>lineDistance(x,y,x1*35,y1*35,x2*35,y2*35)<=w;
+ const oval=(cx,cy,rx,ry)=>ellipse(u,v,cx,cy,rx,ry);
+ const dot=(cx,cy,r=.035)=>circle(x,y,cx*35,cy*35,r*35);
+ switch(type){
+  case "flower":
+   if(zone===1&&(line(.5,.29,.30,.12)||line(.5,.29,.70,.12)||line(.5,.29,.28,.38)||line(.5,.29,.72,.38)))return 5;
+   if(zone===2&&(oval(.5,.29,.055,.055)||((x+y+phase)%5===0&&oval(.5,.29,.09,.09))))return 6;
+   if(zone===0&&(line(.5,.55,.5,.94,.9)||line(.5,.72,.35,.67)||line(.5,.79,.66,.75)))return 7;
+   if(zone===3&&(oval(.34,.72,.05,.035)||oval(.66,.79,.045,.03)))return 8;
+   break;
+  case "tree":
+   if(zone===1){
+    if(oval(.34,.25,.09,.065)||oval(.63,.34,.075,.06)||oval(.48,.48,.08,.055)||oval(.72,.48,.07,.05))return 5;
+    if(line(.3,.4,.44,.24)||line(.57,.45,.7,.29)||line(.38,.5,.5,.34,.55))return 6;
+    if(((Math.floor(u*12)+Math.floor(v*12)+phase)%5===0)&&oval(.5,.34,.34,.28))return 7;
+   }
+   if(zone===0&&(line(.46,.65,.54,.65)||line(.46,.79,.54,.79)||line(.46,.9,.54,.9)))return 8;
+   break;
+  case "mushroom":
+   if(zone===1&&(oval(.3,.28,.055,.045)||oval(.51,.2,.06,.05)||oval(.7,.34,.055,.045)||oval(.42,.39,.04,.035)))return 5;
+   if(zone===0&&(line(.4,.55,.6,.55)||line(.42,.63,.58,.63)||line(.44,.71,.56,.71)))return 6;
+   if(zone===0&&oval(.46,.8,.035,.025))return 7;
+   break;
+  case "butterfly":
+   if((zone===1||zone===2)&&(
+    oval(.28,.34,.075,.085)||oval(.72,.34,.075,.085)||oval(.34,.68,.06,.07)||oval(.66,.68,.06,.07)
+   ))return 5;
+   if(zone===1||zone===2){
+    if(line(.5,.48,.12,.12)||line(.5,.48,.2,.5)||line(.5,.48,.32,.82)||line(.5,.48,.88,.12)||line(.5,.48,.8,.5)||line(.5,.48,.68,.82))return 6;
+    if(((Math.floor(u*14)+Math.floor(v*14)+phase)%6===0)&&oval(zone===1?.28:.72,.34,.22,.22))return 7;
+   }
+   if(zone===0&&(line(.5,.3,.5,.72,.7)||oval(.5,.23,.035,.035)))return 8;
+   break;
+  case "house":
+   if(zone===1&&(line(.2,.27,.8,.27)||line(.27,.18,.73,.18)||line(.34,.1,.66,.1)))return 5;
+   if(zone===0&&(line(.2,.58,.8,.58)||line(.2,.76,.8,.76)||line(.2,.86,.8,.86)))return 6;
+   if(zone===3&&(line(.34,.52,.34,.65)||line(.28,.585,.4,.585)||line(.67,.52,.67,.65)||line(.61,.585,.73,.585)))return 7;
+   if(zone===2&&oval(.55,.82,.018,.018))return 8;
+   break;
+  case "fish":
+   if(zone===1){
+    const gx=Math.floor(u*12),gy=Math.floor(v*12);
+    if(((gx+gy+phase)%3===0)&&oval((gx+.5)/12,(gy+.5)/12,.035,.03))return 5;
+    if(line(.34,.34,.34,.66,.8)||line(.38,.36,.38,.64,.65))return 6;
+    if(oval(.27,.43,.025,.03))return 7;
+   }
+   if(zone===2&&(line(.78,.39,.94,.5)||line(.78,.61,.94,.5)))return 8;
+   if(zone===3&&(line(.48,.3,.57,.18)||line(.48,.7,.57,.82)))return 9;
+   if(zone===4&&(oval(.27,.43,.018,.02)))return 10;
+   break;
+  case "snail":
+   if(zone===1){
+    const r=Math.hypot((u-.47)*1.05,v-.44);
+    if(Math.abs(r-.19)<.025||Math.abs(r-.12)<.022||Math.abs(r-.055)<.018)return 5;
+    if(line(.47,.44,.65,.29,.8)||line(.47,.44,.32,.58,.8))return 6;
+    if(((Math.floor(u*10)+Math.floor(v*10))%4===0)&&oval(.47,.44,.27,.27))return 7;
+   }
+   if(zone===0&&(line(.7,.29,.7,.16)||line(.85,.29,.85,.16)))return 8;
+   if(zone===3&&(oval(.7,.2,.018,.022)||oval(.85,.2,.018,.022)))return 9;
+   break;
+  case "rocket":
+   if(zone===1){
+    const r=Math.hypot((u-.5)*.95,v-.47);
+    if(Math.abs(r-.12)<.025)return 5;
+    if(Math.abs(r-.075)<.02)return 6;
+    if(line(.5,.3,.5,.65,.8)||line(.42,.34,.42,.58,.55)||line(.58,.34,.58,.58,.55))return 7;
+   }
+   if(zone===0&&(line(.45,.78,.45,.91)||line(.55,.78,.55,.91)))return 8;
+   if(zone===2&&(line(.4,.18,.6,.18)||line(.43,.23,.57,.23)))return 9;
+   if(zone===4&&(oval(.5,.4,.035,.035)))return 10;
+   break;
+  case "bird":
+   if(zone===1&&(line(.3,.54,.58,.4)||line(.34,.61,.62,.48)||line(.4,.67,.65,.55)))return 5;
+   if(zone===2&&(oval(.48,.54,.07,.055)||line(.3,.48,.57,.48,.55)))return 6;
+   if(zone===4&&(oval(.65,.42,.018,.02)))return 7;
+   if(zone===3&&(line(.78,.53,.95,.56,.8)))return 8;
+   break;
+  case "acorn":
+   if(zone===2){
+    const gx=Math.floor(u*14),gy=Math.floor(v*14);
+    if((gx+gy+phase)%3===0&&oval((gx+.5)/14,(gy+.5)/14,.025,.02))return 5;
+    if(line(.28,.32,.72,.32)||line(.3,.39,.7,.39))return 6;
+   }
+   if(zone===1&&(oval(.4,.58,.06,.12)||oval(.56,.68,.045,.1)))return 7;
+   if(zone===0&&line(.5,.16,.55,.05))return 8;
+   break;
+  case "bee":
+   if(zone===1&&(line(.25,.43,.75,.43)||line(.21,.54,.79,.54)||line(.25,.65,.75,.65)))return 5;
+   if(zone===2&&(line(.28,.2,.45,.34)||line(.55,.34,.73,.2)))return 6;
+   if(zone===4&&(line(.35,.18,.48,.28)||line(.6,.28,.75,.18)))return 7;
+   if(zone===0&&(oval(.76,.5,.025,.03)))return 8;
+   break;
+  case "cloud":
+   if(zone===1&&(
+    oval(.34,.57,.08,.07)||oval(.53,.42,.09,.08)||oval(.73,.58,.07,.065)
+   ))return 5;
+   if(zone===2&&(line(.79,.02,.79,.12)||line(.9,.08,.96,.14)||line(.95,.2,.99,.2)||line(.68,.08,.62,.14)||line(.79,.28,.79,.36)))return 6;
+   if(zone===1&&line(.2,.68,.8,.68))return 7;
+   break;
+ }
+ return -1;
+}
 function generatedMotifColor(type,zone,u,v,variant){
  const palette=GENERATED_ART_PALETTES[type]||GENERATED_ART_PALETTES.flower;
- const x=Math.floor(u*20),y=Math.floor(v*20),phase=variant%5;
- // Large, deliberate highlight and shadow clusters follow the shape of each
- // semantic region; these are not random per-tile speckles.
- const accents=[
-  (v>.68&&u>.25&&u<.75)||(u<.24&&v>.35),
-  (u<.27&&v>.24)||(v>.72&&u>.25&&u<.75),
-  ((x+y+phase)%7===0&&u>.18&&u<.82&&v>.18&&v<.82),
-  (u>.62&&v<.48)||(u<.38&&v>.62),
-  (v<.34&&u>.3&&u<.7)||(u>.76&&v>.38&&v<.68)
- ];
- const accentIndex=[5,6,7,8,9][zone];
- return accents[zone]&&palette[accentIndex]?palette[accentIndex]:palette[zone]||palette[0];
+ const detail=generatedMotifDetail(type,zone,u,v,variant);
+ if(detail>=0&&palette[detail])return palette[detail];
+ const x=Math.floor(u*35),y=Math.floor(v*35),phase=variant%5;
+ // Broad, intentional shade planes add volume without noisy checkerboard pixels.
+ const light=(u<.28&&v<.48)||(u>.62&&v<.28);
+ const shadow=(u>.72&&v>.68)||(u<.25&&v>.76);
+ if(light&&palette[9])return palette[9];
+ if(shadow&&palette[10])return palette[10];
+ if(zone===1&&((Math.floor(u*8)+Math.floor(v*8)+phase)%7===0)&&palette[11])return palette[11];
+ if(zone===2&&((Math.floor(u*9)-Math.floor(v*7)+phase)%6===0)&&palette[12])return palette[12];
+ if(zone===3&&((x+y+phase)%11===0)&&palette[13])return palette[13];
+ return palette[zone]||palette[0];
 }
 const GENERATED_CHAPTERS=[
  "Светлячковая роща","Тихий ручей","Солнечная опушка","Старый дуб",
@@ -355,7 +459,7 @@ function generatedMotifZone(type,u,v,variant){
 }
 function generatedSceneLayout(count,variant){
  const layouts={
-  1:[[[5,3,25,29]]],
+  1:[[[0,0,35,35]]],
   2:[
    [[1,5,23,28],[23,15,12,17]],
    [[2,2,18,24],[19,15,15,18]],
