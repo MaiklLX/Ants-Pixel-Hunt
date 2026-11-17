@@ -4626,3 +4626,70 @@ button:not(:disabled):active{filter:brightness(.96)}
  .menu-level-card,.hub-location,.menu-link{transition:none!important}
  .hub-location:hover,.menu-link:hover{transform:none}
 }
+
+
+/* KT-135 — remove the oversized mascot/hero block; keep the menu focused on play. */
+.app-shell.menu-open .main-menu{
+ display:grid;
+ grid-template-columns:minmax(0,1fr);
+ grid-template-areas:"identity" "level" "progress" "hubs" "future" "actions" "how";
+ align-content:start;
+ justify-items:center;
+ gap:12px;
+ width:100%;
+ max-width:780px;
+ margin-inline:auto;
+ padding:calc(env(safe-area-inset-top) + 18px) 20px calc(env(safe-area-inset-bottom) + 18px);
+ overflow-x:hidden;
+ overflow-y:auto;
+}
+.menu-identity{
+ grid-area:identity;
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ gap:12px;
+ width:min(100%,680px);
+ min-height:26px;
+ padding:0 3px 9px;
+ border-bottom:1px solid #81936a55;
+ color:#d9e2c4;
+ font-size:9px;
+ font-weight:950;
+ letter-spacing:2px;
+}
+.menu-identity small{
+ color:#9eaf8d;
+ font-size:7px;
+ font-weight:800;
+ letter-spacing:1px;
+}
+.menu-level-card{grid-area:level;width:min(100%,680px);min-height:76px}
+.menu-progress-card{grid-area:progress;width:min(100%,680px)}
+.hub-locations{grid-area:hubs;width:min(100%,680px)}
+.menu-future{grid-area:future;width:min(100%,680px)}
+.menu-actions{grid-area:actions;width:min(100%,680px)}
+.how-panel{grid-area:how;width:min(100%,680px)}
+@media(min-width:760px){
+ .app-shell.menu-open .main-menu{
+  align-content:center;
+  gap:13px;
+  padding:clamp(24px,5vh,52px) 30px;
+ }
+ .menu-level-card{min-height:82px}
+ .menu-progress-card{padding:14px 17px}
+ .hub-location{min-height:76px}
+}
+@media(max-width:599px){
+ .app-shell.menu-open .main-menu{gap:10px;padding-left:14px;padding-right:14px}
+ .menu-identity{font-size:8px;letter-spacing:1.5px}
+ .menu-identity small{font-size:6px;letter-spacing:.7px}
+}
+@media(prefers-reduced-motion:reduce){
+ .menu-identity{scroll-behavior:auto}
+}
+/* The ten future chapters reuse the four established forest biomes. */
+.map-chapter[data-biome-index="0"] .map-chapter-mark{border-color:#879e69;color:#d4e0ad}
+.map-chapter[data-biome-index="1"] .map-chapter-mark{border-color:#bd9470;color:#f0c99e}
+.map-chapter[data-biome-index="2"] .map-chapter-mark{border-color:#b89a62;color:#e9d09a}
+.map-chapter[data-biome-index="3"] .map-chapter-mark{border-color:#6d9d91;color:#a9d5c8}
