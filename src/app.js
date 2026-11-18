@@ -781,27 +781,33 @@ function cycleGameSpeed(){
  updateGameSpeed(current>=4?1:current+1);
 }
 function updateMainMenu(){
- const primary=$("start-game"),fresh=$("new-game"),progress=$("menu-progress"),level=getLevel(state.levelId);
+ const primary=$("start-game"),fresh=$("new-game"),progress=$("menu-progress");
  const completed=completedLevels(),completedCount=LEVELS.filter(item=>completed.has(item.id)).length;
-  const latestAvailable=LEVELS.filter(item=>isLevelUnlocked(item)).at(-1)||LEVELS[0];
- const unlockedCount=LEVELS.filter(item=>isLevelUnlocked(item)).length,total=LEVELS.length;
+ const latestAvailable=LEVELS.filter(item=>isLevelUnlocked(item)).at(-1)||LEVELS[0];
+ const launchLevel=latestAvailable,total=LEVELS.length;
+ const unlockedCount=LEVELS.filter(item=>isLevelUnlocked(item)).length;
  const percent=total?Math.round(completedCount/total*100):0;
- $("menu-level-name").textContent=level.name;$("menu-level-number").textContent=`ПОЛЯНКА ${String(level.number).padStart(2,"0")}`;$("menu-level-emoji").textContent=level.emoji;
+ $("menu-level-name").textContent=launchLevel.name;
+ $("menu-level-number").textContent=`УРОВЕНЬ ${String(launchLevel.number).padStart(3,"0")}`;
+ $("menu-level-emoji").textContent=launchLevel.emoji;
  $("menu-progress-count").textContent=`${completedCount} / ${total}`;
  $("menu-progress-fill").style.width=percent+"%";
  $("menu-progress-bar").setAttribute("aria-valuemax",String(total));
  $("menu-progress-bar").setAttribute("aria-valuenow",String(completedCount));
- $("menu-progress-hint").textContent=completedCount===total?"Вся кампания пройдена":`Открыто полянок: ${unlockedCount}`;
+ $("menu-progress-hint").textContent=completedCount===total?"Вся кампания пройдена":`Открыто уровней: ${unlockedCount}`;
  const currentButton=$("menu-current-level");
- currentButton.disabled=resetAfterMenu||!isLevelUnlocked(level);
- currentButton.setAttribute("aria-label",`Играть: полянка ${level.number}, ${level.name}`);
+ const playMark=currentButton.querySelector(".level-play-mark");
+ if(playMark)playMark.textContent="НАЧАТЬ →";
+ currentButton.disabled=resetAfterMenu||!isLevelUnlocked(launchLevel);
+ currentButton.dataset.levelId=launchLevel.id;
+ currentButton.setAttribute("aria-label",`Начать последний доступный уровень ${launchLevel.number}: ${launchLevel.name}`);
  const list=$("campaign-levels");
  if(list){list.replaceChildren();for(const item of LEVELS){
   const unlocked=isLevelUnlocked(item),done=completed.has(item.id),button=document.createElement("button");button.type="button";
-  button.className="campaign-level"+(item.id===state.levelId?" current":"")+(unlocked?"":" locked");button.disabled=!unlocked;
+  button.className="campaign-level"+(item.id===launchLevel.id?" current":"")+(unlocked?"":" locked");button.disabled=!unlocked;
   const icon=document.createElement("span");icon.className="campaign-emoji";icon.textContent=unlocked?"📦":"🔒";
   const copy=document.createElement("span");copy.className="campaign-copy";
-  const number=document.createElement("small");number.textContent=`${item.chapter} · ${String(item.number).padStart(2,"0")}`;
+  const number=document.createElement("small");number.textContent=`${item.chapter} · ${String(item.number).padStart(3,"0")}`;
   const name=document.createElement("strong");name.textContent=unlocked?(done?"Пройдена":"Открыта"):"Ещё не открыта";copy.append(number,name);
   const status=document.createElement("span");status.className="campaign-state";status.textContent=done?"✓":unlocked?"›":"🔒";
   button.append(icon,copy,status);button.addEventListener("click",()=>{if(unlocked){closeMap();void startFreshGame(item.id);}});list.append(button);
@@ -809,7 +815,7 @@ function updateMainMenu(){
  primary.textContent=`Начать уровень ${String(launchLevel.number).padStart(3,"0")}`;primary.disabled=resetAfterMenu;
  primary.querySelector("span")?.remove();const arrow=document.createElement("span");arrow.setAttribute("aria-hidden","true");arrow.textContent="→";primary.append(arrow);
  fresh.hidden=true;
- progress.textContent=completed.has(launchLevel.id)?"Кампания пройдена · можно повторить":`Последний доступный уровень · ${LEVELS.length} в кампании`;
+ progress.textContent=completed.has(launchLevel.id)?"Кампания пройдена · можно повторить":`Последний доступный уровень · ${total} в кампании`;
 }
 function showMainMenu(){
  shell.classList.add("menu-open");
