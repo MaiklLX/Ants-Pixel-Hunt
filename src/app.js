@@ -145,8 +145,8 @@ function obstacleAt(x,y){
 function drawBoardTile(x,y,exposed,cell){
  const color=state.board[y][x];if(!color||obstacleAt(x,y))return;
  const px=x*cell,py=y*cell,size=cell,rgb=COLORS[color].hex;
- const inset=Math.max(.18,cell*.022),left=px+inset,top=py+inset,w=size-inset*2,h=size-inset*2;
- const radius=Math.max(1.2,cell*.25);
+ const inset=Math.max(.12,cell*.012),left=px+inset,top=py+inset,w=size-inset*2,h=size-inset*2;
+ const radius=Math.max(1.1,cell*.17);
  boardCtx.save();
  // Chunky candy-like pixel: nearly full-cell face, a confident rounded edge
  // and a visible lower bevel. The color stays flat and readable at phone size.
