@@ -767,8 +767,8 @@ test("KT-201 home launch button targets the highest unlocked campaign level",asy
 test("KT-202 renders chunky toy-like blocks and larger arena sizing",async()=>{
  const app=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
  const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
- assert.match(app,/cell\*\.022/);
- assert.match(app,/cell\*\.25/);
+ assert.match(app,/cell\*\.012/);
+ assert.match(app,/cell\*\.17/);
  assert.match(styles,/width:min\(100%,min\(540px,52dvh,calc\(100dvh - 300px\)\)\)/);
  assert.match(styles,/\.menu-level-card\{min-height:118px/);
 });
