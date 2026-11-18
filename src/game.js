@@ -878,7 +878,7 @@ export function buildIncoming(board,levelNumber=1){
      // Small specialist squads deliberately carry only part of an exposed
      // color layer. The player must decide how many matching boxes to place
      // and which other colors deserve the remaining start compartments.
-     let squadTarget=32+((wave+color.charCodeAt(0))%9)+Math.floor(random()*7);
+     let squadTarget=34+((wave+color.charCodeAt(0))%7)+Math.floor(random()*6);
      if(left<=squadTarget)squadTarget=left;
      else if(left-squadTarget<20)squadTarget=left-20;
      const ants=Math.min(left,squadTarget);
@@ -915,9 +915,18 @@ export function buildIncoming(board,levelNumber=1){
   // one immediately useful layer and two tempting future layers: taking the
   // wrong colors consumes scarce start compartments until the right layer opens.
   const lanes=[[],[],[]];
-  // Balance the three independent tray lanes box-by-box. Every visible row
-  // remains a real choice, and a short lane can no longer shift later boxes
-  // sideways into the wrong column as the player advances the tray.
+  // Keep one valid opening squad in the first lane and deliberately surface
+  // a later-layer color in another lane. This creates a real five-slot tradeoff
+  // instead of presenting three equally safe copies of the current wave.
+  if(waves[0]?.length)lanes[0].push(waves[0].shift());
+  const openingColors=new Set(getExposedPixels(board).map(point=>board[point.y][point.x]));
+  let futureChoice=null;
+  for(let wi=1;wi<waves.length&&!futureChoice;wi++){
+   const index=waves[wi].findIndex(box=>!openingColors.has(box.color));
+   if(index>=0)futureChoice=waves[wi].splice(index,1)[0];
+  }
+  if(futureChoice)lanes[1].push(futureChoice);
+  // Balance all remaining squads across independent vertical lanes.
   for(const waveDeck of waves)for(const box of waveDeck){
    let targetLane=0;
    for(let lane=1;lane<3;lane++)if(lanes[lane].length<lanes[targetLane].length)targetLane=lane;
