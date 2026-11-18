@@ -152,26 +152,46 @@ function obstacleAt(x,y){
 function drawBoardTile(x,y,exposed,cell){
  const color=state.board[y][x];if(!color||obstacleAt(x,y))return;
  const px=x*cell,py=y*cell,size=cell,rgb=COLORS[color].hex;
+ const inset=Math.max(.35,cell*.055),left=px+inset,top=py+inset,w=size-inset*2,h=size-inset*2;
+ const radius=Math.max(1,cell*.19);
  boardCtx.save();
- // Food-Hunt-like flat square pixels: the artwork should read as a mosaic,
- // not as rounded 3D buttons. Keep the grid crisp at phone scale.
- boardCtx.fillStyle=rgb;
- boardCtx.fillRect(px,py,size,size);
- boardCtx.strokeStyle=color==="black"?"#080d0b":"#26352d88";
- boardCtx.lineWidth=color==="black"?.9:.55;
- boardCtx.strokeRect(px+.2,py+.2,size-.4,size-.4);
+ // Glossy toy-block finish from the supplied Food Hunt reference:
+ // separated rounded pixels, a deep lower bevel and a soft raised shadow.
+ boardCtx.shadowColor="#30223c66";boardCtx.shadowBlur=Math.max(1,cell*.12);
+ boardCtx.shadowOffsetX=0;boardCtx.shadowOffsetY=Math.max(.65,cell*.11);
+ boardCtx.beginPath();boardCtx.roundRect(left,top,w,h,radius);
+ const face=boardCtx.createLinearGradient(left,top,left+w,top+h);
+ face.addColorStop(0,lightenHex(rgb,.24));face.addColorStop(.38,rgb);face.addColorStop(1,darkenHex(rgb,.19));
+ boardCtx.fillStyle=face;boardCtx.fill();
+ boardCtx.shadowColor="transparent";boardCtx.shadowBlur=0;boardCtx.shadowOffsetY=0;
+ boardCtx.lineWidth=Math.max(.45,cell*.055);
+ boardCtx.strokeStyle=color==="black"?"#20202a":"#493c4c88";
+ boardCtx.stroke();
+ // Thick lower/right bevel makes each cell feel like a small molded cube.
+ boardCtx.beginPath();boardCtx.moveTo(left+radius,top+h-.45);boardCtx.lineTo(left+w-radius,top+h-.45);
+ boardCtx.quadraticCurveTo(left+w-.45,top+h-.45,left+w-.45,top+h-radius);
+ boardCtx.strokeStyle=darkenHex(rgb,.34);boardCtx.lineWidth=Math.max(.7,cell*.1);boardCtx.stroke();
+ // A broad, soft top-left reflection rather than a flat white pixel.
+ boardCtx.save();boardCtx.beginPath();boardCtx.roundRect(left+cell*.12,top+cell*.09,w-cell*.24,Math.max(.8,cell*.18),cell*.12);boardCtx.clip();
+ const shine=boardCtx.createLinearGradient(left,top,left,top+cell*.3);
+ shine.addColorStop(0,"#ffffff9a");shine.addColorStop(1,"#ffffff00");
+ boardCtx.fillStyle=shine;boardCtx.fillRect(left,top,w,cell*.3);boardCtx.restore();
  if(color!=="black"){
-  boardCtx.fillStyle="#ffffff24";
-  boardCtx.fillRect(px+1,py+1,Math.max(1,size*.16),Math.max(1,size*.16));
-  boardCtx.fillStyle="#101a1422";
-  boardCtx.fillRect(px+size-1.5,py+size-1.5,1,1);
+  boardCtx.fillStyle="#ffffff72";boardCtx.beginPath();boardCtx.ellipse(left+cell*.23,top+cell*.22,cell*.075,cell*.045,-.45,0,Math.PI*2);boardCtx.fill();
  }
  if(exposed){
-  boardCtx.strokeStyle="#f2d58c";
-  boardCtx.lineWidth=.9;
-  boardCtx.strokeRect(px+1,py+1,size-2,size-2);
+  boardCtx.strokeStyle="#fff0b5";boardCtx.lineWidth=Math.max(.65,cell*.07);
+  boardCtx.beginPath();boardCtx.roundRect(left+.7,top+.7,w-1.4,h-1.4,Math.max(.8,radius*.65));boardCtx.stroke();
  }
  boardCtx.restore();
+}
+function lightenHex(hex,amount){
+ const n=parseInt(hex.slice(1),16),r=n>>16,g=(n>>8)&255,b=n&255;
+ return "#"+[r,g,b].map(v=>Math.round(v+(255-v)*amount).toString(16).padStart(2,"0")).join("");
+}
+function darkenHex(hex,amount){
+ const n=parseInt(hex.slice(1),16),r=n>>16,g=(n>>8)&255,b=n&255;
+ return "#"+[r,g,b].map(v=>Math.round(v*(1-amount)).toString(16).padStart(2,"0")).join("");
 }
 
 function drawBoardObstacle(obstacle,exposed,cell){
@@ -215,11 +235,15 @@ function renderBoard(){
  const width=boardEl.width,height=boardEl.height,cell=width/SIZE;
  boardCtx.clearRect(0,0,width,height);
  boardEmptyGradient=boardCtx.createLinearGradient(0,0,width,height);
- boardEmptyGradient.addColorStop(0,"#263e32");boardEmptyGradient.addColorStop(.55,"#20372c");boardEmptyGradient.addColorStop(1,"#182b23");
+ boardEmptyGradient.addColorStop(0,"#c6add4");boardEmptyGradient.addColorStop(.52,"#ad91c1");boardEmptyGradient.addColorStop(1,"#9478aa");
  boardCtx.fillStyle=boardEmptyGradient;boardCtx.fillRect(0,0,width,height);
- for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)drawBoardGroundCell(x,y,cell);
- boardCtx.save();boardCtx.strokeStyle="#a6c3a02a";boardCtx.lineWidth=.55;
- for(let i=0;i<=SIZE;i++){const p=i*cell+.5;boardCtx.beginPath();boardCtx.moveTo(p,0);boardCtx.lineTo(p,height);boardCtx.stroke();boardCtx.beginPath();boardCtx.moveTo(0,p);boardCtx.lineTo(width,p);boardCtx.stroke();}
+ // Subtle woven diamond texture echoes the lavender playfield in the reference.
+ boardCtx.save();boardCtx.strokeStyle="#f4e9ff18";boardCtx.lineWidth=.65;
+ const weave=Math.max(8,cell*1.8);
+ for(let p=-height;p<width+height;p+=weave){
+  boardCtx.beginPath();boardCtx.moveTo(p,0);boardCtx.lineTo(p+height,height);boardCtx.stroke();
+  boardCtx.beginPath();boardCtx.moveTo(p,0);boardCtx.lineTo(p-height,height);boardCtx.stroke();
+ }
  boardCtx.restore();
  const targets=getExposedTargets(state);
  lastExposedPixels=new Set(targets.filter(item=>item.kind==="pixel").map(point=>point.x+","+point.y));
