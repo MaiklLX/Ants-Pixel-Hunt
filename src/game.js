@@ -893,7 +893,14 @@ export function buildIncoming(board,levelNumber=1){
   // one immediately useful layer and two tempting future layers: taking the
   // wrong colors consumes scarce start compartments until the right layer opens.
   const lanes=[[],[],[]];
-  waves.forEach((waveDeck,index)=>lanes[index%3].push(...waveDeck));
+  // Balance the three independent tray lanes box-by-box. Every visible row
+  // remains a real choice, and a short lane can no longer shift later boxes
+  // sideways into the wrong column as the player advances the tray.
+  for(const waveDeck of waves)for(const box of waveDeck){
+   let targetLane=0;
+   for(let lane=1;lane<3;lane++)if(lanes[lane].length<lanes[targetLane].length)targetLane=lane;
+   lanes[targetLane].push(box);
+  }
   const deck=[],longest=Math.max(0,...lanes.map(lane=>lane.length));
   for(let row=0;row<longest;row++)for(let lane=0;lane<3;lane++){
    if(lanes[lane][row])deck.push(lanes[lane][row]);
