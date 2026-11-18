@@ -329,12 +329,81 @@ function generatedMotifDetail(type,zone,u,v,variant){
  }
  return -1;
 }
+function generatedPixelIconDetail(type,zone,u,v,variant){
+ // A 14×14 logical pixel grid gives each motif deliberate interior marks.
+ const x=Math.floor(u*14),y=Math.floor(v*14),p=variant%3;
+ const pixel=(cx,cy)=>x===cx&&y===cy;
+ const hline=(yy,x1,x2)=>y===yy&&x>=x1&&x<=x2;
+ const vline=(xx,y1,y2)=>x===xx&&y>=y1&&y<=y2;
+ switch(type){
+  case "flower":
+   if(pixel(6,6)||pixel(7,6)||pixel(6,7)||pixel(7,7))return 2;
+   if((x===6||x===7)&&((y>=1&&y<=4)||(y>=9&&y<=12)))return 5;
+   if((y===6||y===7)&&((x>=1&&x<=4)||(x>=9&&x<=12)))return 5;
+   break;
+  case "butterfly":
+   if((zone===0||zone===1)&&vline(6,3,10))return 0;
+   if((zone===1||zone===2)&&(pixel(3,4)||pixel(4,4)||pixel(9,4)||pixel(10,4)||pixel(3,9)||pixel(4,9)||pixel(9,9)||pixel(10,9)))return 3;
+   if((zone===1||zone===2)&&(pixel(4,5)||pixel(9,5)||pixel(4,8)||pixel(9,8)))return 1;
+   break;
+  case "mushroom":
+   if(zone===1&&(pixel(3,3)||pixel(6,2)||pixel(10,3)||pixel(8,4)))return 2;
+   if(zone===0&&(hline(7,4,9)||hline(9,5,8)||hline(11,5,8)))return 10;
+   break;
+  case "house":
+   if(zone===0&&(pixel(4,7)||pixel(5,7)||pixel(4,8)||pixel(5,8)||pixel(9,7)||pixel(10,7)||pixel(9,8)||pixel(10,8)))return 3;
+   if(zone===0&&(hline(10,6,8)||vline(7,9,12)))return 2;
+   if(zone===1&&(hline(3,2,11)||hline(4,3,10)))return 5;
+   break;
+  case "fish":
+   if(zone===1&&(pixel(10,6)||pixel(10,7)))return 2;
+   if(zone===1&&(pixel(4,5)||pixel(4,6)||pixel(5,5)||pixel(5,6)))return 3;
+   if(zone===1&&vline(7,4,9)&&x>5)return 5;
+   break;
+  case "snail":
+   if(zone===1&&((x===5&&y>=4&&y<=9)||(x===6&&y===4)||(x===7&&y===5)||(x===8&&y===6)||(x===8&&y===7)||(x===7&&y===8)||(x===6&&y===8)))return 2;
+   if(zone===0&&(pixel(10,3)||pixel(12,3)))return 3;
+   if(zone===0&&(pixel(10,2)||pixel(12,2)))return 5;
+   break;
+  case "rocket":
+   if(zone===1&&(x===6||x===7)&&y>=3&&y<=10)return 3;
+   if(zone===1&&(pixel(6,5)||pixel(7,5)||pixel(6,6)||pixel(7,6)))return 1;
+   if(zone===1&&(x===4||x===9)&&(y===8||y===9||y===10))return 5;
+   if(zone===0&&(x===6||x===7)&&y>=11&&y<=13)return 2;
+   break;
+  case "bird":
+   if(zone===1&&(pixel(9,4)||pixel(10,4)))return 2;
+   if(zone===2&&(pixel(11,5)||pixel(12,5)))return 3;
+   if(zone===1&&((y===8&&x>=3&&x<=8)||(y===9&&x>=4&&x<=7)))return 5;
+   break;
+  case "acorn":
+   if(zone===1&&(hline(5,4,9)||hline(6,3,10)))return 5;
+   if(zone===0&&(x===6||x===7)&&y>=8&&y<=10)return 2;
+   break;
+  case "bee":
+   if(zone===1&&(hline(5,4,9)||hline(8,4,9)))return 2;
+   if(zone===2&&(pixel(5,3)||pixel(9,3)||pixel(5,10)||pixel(9,10)))return 5;
+   if(zone===1&&(pixel(10,6)||pixel(10,7)))return 3;
+   break;
+  case "tree":
+   if(zone===0&&(x===6||x===7)&&y>=7&&y<=12)return 0;
+   if(zone===1&&((x+y+p)%5===0)&&x>=3&&x<=10&&y>=2&&y<=8)return 2;
+   break;
+  case "cloud":
+   if(zone===1&&(pixel(4,6)||pixel(5,6)||pixel(8,6)||pixel(9,6)))return 3;
+   if(zone===1&&hline(8,3,10))return 5;
+   break;
+ }
+ return -1;
+}
 function generatedMotifColor(type,zone,u,v,variant,scenePalette){
  const palette=GENERATED_ART_PALETTES[type]||GENERATED_ART_PALETTES.flower;
  // Keep each object in its own natural pigment family. A shared scene palette
  // made unrelated motifs inherit the same colors and flattened their identity.
  const interior=u>.12&&u<.88&&v>.12&&v<.88;
  if(interior){
+  const pixelDetail=generatedPixelIconDetail(type,zone,u,v,variant);
+  if(pixelDetail>=0&&palette[pixelDetail])return palette[pixelDetail];
   const detail=generatedMotifDetail(type,zone,u,v,variant);
   if(detail>=0&&palette[detail])return palette[detail];
   // Material-aware micro-patterns: clustered marks follow the object rather
@@ -727,7 +796,11 @@ export function buildIncoming(board,levelNumber=1){
     let seed=(boardSeed^Math.imul(wave+1,2654435761)^Math.imul(color.charCodeAt(0),2246822519))>>>0;
     const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
     while(left>0){
-     const squadTarget=5+((wave+color.charCodeAt(0))%5)+Math.floor(random()*2);
+     // Larger squads keep the five starter cells useful; the last crate
+     // in a wave is never reduced to a handful of ants when it can be merged.
+     let squadTarget=28+((wave+color.charCodeAt(0))%9)+Math.floor(random()*6);
+     if(left<=BOX_CAPACITY)squadTarget=left;
+     else if(left-squadTarget<18)squadTarget=left-18;
      const ants=Math.min(left,squadTarget);
      queues[color].push({color,ants});left-=ants;
     }
@@ -769,10 +842,10 @@ export function buildIncoming(board,levelNumber=1){
  const queues={};
  for(const color of colors){
   const total=totals[color];if(!total){queues[color]=[];continue;}
-  const count=Math.max(1,Math.ceil(total/36)),base=Math.floor(total/count),minimum=Math.min(10,Math.max(1,Math.floor(total/count)));
+  const count=Math.max(1,Math.ceil(total/48)),base=Math.floor(total/count),minimum=Math.min(18,Math.max(1,Math.floor(total/count)));
   let seed=(boardSeed^color.charCodeAt(0)*2654435761)>>>0;
   const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
-  const spread=Math.max(6,Math.min(22,Math.round(base*.58)));
+  const spread=Math.max(4,Math.min(12,Math.round(base*.22)));
   const sizes=Array.from({length:count},()=>Math.max(minimum,Math.min(BOX_CAPACITY,base+Math.round((random()*2-1)*spread))));
   let difference=total-sizes.reduce((sum,value)=>sum+value,0),cursor=Math.floor(random()*count);
   while(difference!==0){
