@@ -41,7 +41,7 @@ function createFrogBoard(){
  // occupies a crisp 5×5 group of those squares, so one ant carries one large pixel.
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
  for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){
-  const px=(x+.5)*250/SIZE,py=(y+.5)*250/SIZE;
+  const px=(x+.5)*300/SIZE-25,py=(y+.5)*300/SIZE-25;
   const head=ellipse(px,py,125,126,87,91);
   const headRim=ellipse(px,py,125,126,94,98);
   if(headRim)board[y][x]="purple";
@@ -212,18 +212,12 @@ const GENERATED_MOTIFS=[
  {type:"cloud",name:"Облачко",emoji:"☁️"}
 ];
 const GENERATED_ART_PALETTES={
- flower:["forest","pink","yellow","lime","orange","green","red","cream","olive","purple","brown","sky","turquoise","blue","gray"],
- tree:["brown","green","lime","yellow","red","forest","olive","orange","cream","gray","sky","turquoise","blue","purple","pink"],
- mushroom:["cream","red","brown","green","yellow","orange","pink","forest","olive","gray","purple","lime","sky","blue","turquoise"],
- butterfly:["purple","blue","pink","yellow","orange","forest","turquoise","sky","red","cream","lime","green","olive","gray","brown"],
- house:["cream","red","brown","sky","green","orange","yellow","blue","forest","gray","turquoise","olive","lime","purple","pink"],
- fish:["turquoise","blue","orange","yellow","cream","sky","red","purple","green","brown","lime","pink","forest","olive","gray"],
- snail:["green","brown","orange","cream","yellow","forest","red","olive","lime","gray","pink","purple","sky","turquoise","blue"],
- rocket:["orange","cream","red","blue","sky","yellow","brown","turquoise","purple","gray","pink","green","lime","forest","olive"],
- bird:["brown","sky","blue","orange","yellow","cream","forest","red","turquoise","gray","lime","olive","pink","purple","green"],
- acorn:["brown","green","orange","yellow","cream","forest","red","olive","lime","gray","pink","purple","sky","turquoise","blue"],
- bee:["yellow","brown","cream","orange","forest","green","red","forest","olive","sky","lime","pink","turquoise","blue","gray"],
- cloud:["sky","cream","yellow","orange","blue","turquoise","gray","pink","purple","lime","green","forest","red","olive","brown"]
+ flower:["green","pink","yellow","cream"],tree:["brown","green","lime","yellow"],
+ mushroom:["red","cream","brown","green"],butterfly:["purple","blue","pink","yellow"],
+ house:["red","brown","cream","blue"],fish:["blue","turquoise","yellow","orange"],
+ snail:["green","brown","orange","cream"],rocket:["red","blue","cream","yellow"],
+ bird:["brown","sky","yellow","orange"],acorn:["brown","yellow","cream","green"],
+ bee:["yellow","brown","cream","blue"],cloud:["sky","cream","yellow","blue"]
 };
 function generatedMotifDetail(type,zone,u,v,variant){
  const x=Math.floor(u*35),y=Math.floor(v*35),phase=variant%7;
@@ -398,53 +392,16 @@ function generatedPixelIconDetail(type,zone,u,v,variant){
 }
 function generatedMotifColor(type,zone,u,v,variant,scenePalette){
  const sourcePalette=GENERATED_ART_PALETTES[type]||GENERATED_ART_PALETTES.flower;
- // A compact 5-pigment palette plus the dark contour keeps each color
- // group substantial enough to play while texture pixels add illustration detail.
- const palette=sourcePalette.map((color,index)=>index<5?color:sourcePalette[(index-5)%5]);
- // Keep each object in its own natural pigment family. A shared scene palette
- // made unrelated motifs inherit the same colors and flattened their identity.
- const interior=u>.12&&u<.88&&v>.12&&v<.88;
- if(interior){
+ // Four clear pigments form broad, connected color regions. Details are
+ // intentional pixel-art features, not random speckles or near-identical shades.
+ const palette=sourcePalette.map((color,index)=>index<4?color:sourcePalette[(index-4)%4]);
+ if(u>.06&&u<.94&&v>.06&&v<.93){
   const pixelDetail=generatedPixelIconDetail(type,zone,u,v,variant);
-  if(pixelDetail>=0&&palette[pixelDetail])return palette[pixelDetail];
+  if(pixelDetail>=0)return palette[pixelDetail%4];
   const detail=generatedMotifDetail(type,zone,u,v,variant);
-  if(detail>=0&&palette[detail])return palette[detail];
-  // Material-aware micro-patterns: clustered marks follow the object rather
-  // than sprinkling noise uniformly across the illustration.
-  const gx=Math.floor(u*18),gy=Math.floor(v*18),phase=variant%7;
-  const grain=(gx*7+gy*11+phase*3)%17;
-  if(type==="tree"&&zone===1&&grain<4&&ellipse(u,v,.5,.36,.34,.27))return palette[11];
-  if(type==="flower"&&zone===1&&
-    (lineDistance(Math.floor(u*35),Math.floor(v*35),17,10,Math.round(17+(u-.5)*17),Math.round(10+(v-.29)*13))<.8))return palette[11];
-  if(type==="mushroom"&&zone===1&&grain<3&&ellipse(u,v,.5,.34,.38,.24))return palette[11];
-  if(type==="fish"&&zone===1&&(gx+gy+phase)%4===0&&ellipse(u,v,.47,.5,.34,.25))return palette[11];
-  if(type==="house"&&zone===0&&
-    (Math.abs(v-(.56+Math.floor(u*5)%2*.095))<.018)&&Math.floor(u*7)%3!==0)return palette[11];
-  if((type==="acorn"||type==="snail")&&zone===1&&grain<3)return palette[11];
-  if(type==="butterfly"&&(zone===1||zone===2)&&grain<2)return palette[11];
-  if(type==="bee"&&zone===1&&Math.floor(v*9)%3===0&&u>.28&&u<.72)return palette[11];
-  if(type==="bird"&&zone===1&&Math.abs(v-(.45+u*.2))<.025)return palette[11];
-  // Small intentional seams give each material a second surface tone:
-  // bark/stems, roof and petal edges, shell bands, or glass highlights.
-  if(zone===0&&Math.abs(v-.62)<.035&&palette[11])return palette[11];
-  if(zone===1&&Math.abs(v-.22)<.035&&palette[12])return palette[12];
-  if(zone===2&&Math.abs(u-.5)<.035&&palette[13])return palette[13];
-  if(zone===3&&Math.abs(v-.55)<.035&&palette[14])return palette[14];
-  // Quantized top-left lighting and lower-right ambient shadow create volume
-  // without adding random speckle noise to the pixel artwork.
-  const light=(1-u)*.58+(1-v)*.42;
-  const shade=u*.58+v*.42;
-  if(light>.82&&palette[9])return palette[9];
-  if(shade>.82&&palette[10])return palette[10];
-  // Broad, clustered surface accents read as texture rather than static.
-  if(zone===1&&u>.24&&u<.72&&v>.24&&v<.68&&
-    (Math.floor(u*5)+Math.floor(v*4)+variant)%7===0&&palette[11])return palette[11];
-  if(zone===2&&u>.18&&u<.82&&v>.2&&v<.76&&
-    (Math.floor(u*4)-Math.floor(v*5)+variant)%8===0&&palette[12])return palette[12];
-  if(zone===3&&u>.2&&u<.8&&v>.2&&v<.8&&
-    (Math.floor(u*3)+Math.floor(v*3)+variant)%5===0&&palette[13])return palette[13];
+  if(detail>=0)return palette[detail%4];
  }
- return palette[zone]||palette[0];
+ return palette[zone%4]||palette[0];
 }
 const GENERATED_CHAPTERS=[
  "Светлячковая роща","Тихий ручей","Солнечная опушка","Старый дуб",
@@ -699,6 +656,19 @@ function applyStarterPixelDetails(board,levelNumber){
  }
  return board;
 }
+function normalizeStarterPalette(board,levelNumber){
+ const palettes={
+  1:{green:"green",forest:"green",lime:"green",olive:"green",purple:"purple",blue:"purple",yellow:"yellow",cream:"yellow",orange:"yellow",red:"red",pink:"red"},
+  2:{blue:"blue",sky:"blue",turquoise:"blue",purple:"purple",pink:"pink",red:"pink",yellow:"yellow",cream:"yellow",orange:"yellow",green:"green",forest:"green",lime:"green"},
+  3:{green:"green",forest:"green",lime:"green",olive:"green",pink:"pink",red:"pink",purple:"pink",yellow:"yellow",cream:"yellow",orange:"yellow",blue:"blue",sky:"blue"},
+  4:{red:"red",pink:"red",orange:"red",cream:"cream",yellow:"cream",brown:"brown",green:"green",forest:"green",olive:"green",blue:"green"},
+  5:{brown:"brown",orange:"brown",red:"brown",yellow:"yellow",cream:"cream",green:"green",forest:"green",olive:"green",blue:"green"},
+  6:{green:"green",forest:"green",lime:"green",olive:"green",brown:"brown",orange:"orange",red:"orange",yellow:"yellow",cream:"yellow",purple:"brown",blue:"green",turquoise:"green",sky:"green"},
+  7:{forest:"green",green:"green",lime:"green",olive:"green",purple:"purple",blue:"purple",pink:"purple",yellow:"yellow",orange:"yellow",cream:"yellow",sky:"blue",turquoise:"blue",red:"yellow",brown:"green"}
+ };
+ const map=palettes[levelNumber]||palettes[1];
+ return board.map(row=>row.map(color=>!color||color==="black"?color:(map[color]||color)));
+}
 function enrichStarterArtwork(board,levelNumber){
  const palettes={
   1:{green:["forest","green","lime","olive"],purple:["purple","blue","pink"],yellow:["yellow","cream","orange"],blue:["blue","sky","turquoise"],red:["red","pink","orange"]},
@@ -807,8 +777,8 @@ export function createArtworkBoard(levelId="meadow-01"){
   else if(level.id==="forest-07")board=createFireflyBoard();
   else board=createFrogBoard();
   if(level.number<=7){
-   board=enrichStarterArtwork(board,level.number);
    board=applyStarterPixelDetails(board,level.number);
+   board=normalizeStarterPalette(board,level.number);
   }
   board=applyPixelArtOutlines(board);
   artworkBoardCache.set(level.id,board);
