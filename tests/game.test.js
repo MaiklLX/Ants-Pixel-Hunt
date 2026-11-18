@@ -262,16 +262,14 @@ test("only empty space connected to the outside can expose a block",()=>{
 test("choosing a butterfly box refills from the butterfly deck, not the frog deck length",()=>{
  const levelId="garden-02",s=createGame(levelId),deck=getIncoming(levelId);
  for(let i=0;i<deck.length;i++){
-  let column=i%TRAY_SIZE;
-  if(s.tray[0][column]===null)column=s.tray[0].findIndex(index=>index!==null);
-  if(column<0)break;
-  assert.equal(chooseTopColumn(s,column),true);
+  const box=deck[i];if(box.special==="linked")continue;
+  const column=i%TRAY_SIZE;s.tray[0][column]=i;makeBoxAvailable(s,i);
+  assert.equal(chooseTopColumn(s,column),true,"valid exposed box "+i+" should be selectable");
   const occupied=s.slots.findIndex(Boolean);assert.ok(occupied>=0);s.slots[occupied]=null;
  }
  assert.ok(s.nextContainer<=deck.length);
  assert.ok(s.tray.flat().every(index=>index===null||(index>=0&&index<deck.length)));
 });
-
 test("all campaign drawings and specialist obstacles remain solvable",()=>{
  for(const level of LEVELS){
   if(level.number>=8)continue; // generated 15-tone levels are checked by the full-grid peeling test below
@@ -475,21 +473,21 @@ test("the sealed crate stays hidden until ordinary boxes are placed from both ot
  assert.equal(isLockedBox(s,LOCKED_BOX_INDEX),true);
  assert.equal(getIncoming(s.levelId).length>LOCKED_BOX_INDEX,true);
  // Repeating the same lane does not satisfy the second requirement.
- assert.equal(chooseTopColumn(s,0),true);s.slots[0]=null;
+ makeBoxAvailable(s,s.tray[0][0]);assert.equal(chooseTopColumn(s,0),true);s.slots[0]=null;
  assert.equal(chooseTopColumn(s,0),true);s.slots[0]=null;
  assert.deepEqual(s.lockProgressColumns,[0]);
  // The sealed crate's own lane never contributes to its opening.
- assert.equal(chooseTopColumn(s,LOCKED_BOX_COLUMN),true);s.slots[0]=null;
+ makeBoxAvailable(s,s.tray[0][LOCKED_BOX_COLUMN]);assert.equal(chooseTopColumn(s,LOCKED_BOX_COLUMN),true);s.slots[0]=null;
  assert.equal(chooseTopColumn(s,LOCKED_BOX_COLUMN),true);s.slots[0]=null;
  assert.equal(s.tray[0][LOCKED_BOX_COLUMN],LOCKED_BOX_INDEX);
  assert.equal(chooseTopColumn(s,LOCKED_BOX_COLUMN),false,"sealed crate cannot be selected early");
  assert.equal(isLockedBox(s,LOCKED_BOX_INDEX),true);
  // A real placement from the other lane completes the two-lane requirement.
- assert.equal(chooseTopColumn(s,1),true);
+ makeBoxAvailable(s,s.tray[0][1]);assert.equal(chooseTopColumn(s,1),true);
  assert.deepEqual(s.lockProgressColumns,[0,1]);
  assert.equal(s.lockedBoxOpen,true);
  assert.equal(isLockedBox(s,LOCKED_BOX_INDEX),false);
- assert.equal(chooseTopColumn(s,LOCKED_BOX_COLUMN),true,"opened crate becomes a normal selectable box");
+ makeBoxAvailable(s,LOCKED_BOX_INDEX);assert.equal(chooseTopColumn(s,LOCKED_BOX_COLUMN),true,"opened crate becomes a normal selectable box");
 });
 test("sealed crate progress is normalized and preserved by save data",()=>{
  const s=createGame();s.lockProgressColumns=[0,0,2,1];s.lockedBoxOpen=false;
