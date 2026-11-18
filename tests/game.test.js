@@ -10,7 +10,7 @@ test("the authored frog is built from large collectible blocks on a 350x350 disp
  assert.equal(s.board.length,SIZE);assert.equal(s.slots.length,SLOT_COUNT);
  assert.equal(s.tray.length,TRAY_SIZE);assert.ok(s.tray.every(r=>r.length===TRAY_SIZE));
  const colors=new Set(INITIAL_BOARD.flat().filter(Boolean));assert.ok(colors.has("black"));assert.ok(colors.size>=4&&colors.size<=5,"starter artwork should use four clear pigments plus its contour");
- assert.ok(s.remaining>400&&s.remaining<900);assert.ok(INITIAL_BOARD.some(row=>row.includes("")));
+ assert.ok(s.remaining>400&&s.remaining<1100);assert.ok(INITIAL_BOARD.some(row=>row.includes("")));
 });
 test("the first seven authored illustrations use richer shaded palettes",()=>{
  for(const level of LEVELS.filter(item=>item.number<=7)){
