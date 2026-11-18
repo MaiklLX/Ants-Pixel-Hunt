@@ -331,24 +331,27 @@ function generatedMotifDetail(type,zone,u,v,variant){
 }
 function generatedMotifColor(type,zone,u,v,variant,scenePalette){
  const palette=GENERATED_ART_PALETTES[type]||GENERATED_ART_PALETTES.flower;
- const base=scenePalette||palette;
- // Keep the outer structural layers on one coherent five-tone scene palette.
- // Rich object-specific pigments are reserved for inner details so the five
- // starter slots never get flooded by unrelated surface colors.
- const interior=u>.16&&u<.84&&v>.16&&v<.84;
+ // Keep each object in its own natural pigment family. A shared scene palette
+ // made unrelated motifs inherit the same colors and flattened their identity.
+ const interior=u>.12&&u<.88&&v>.12&&v<.88;
  if(interior){
   const detail=generatedMotifDetail(type,zone,u,v,variant);
   if(detail>=0&&palette[detail])return palette[detail];
-  const x=Math.floor(u*35),y=Math.floor(v*35),phase=variant%5;
-  const light=(u<.34&&v<.48)||(u>.58&&v<.30);
-  const shadow=(u>.68&&v>.68)||(u<.32&&v>.72);
-  if(light&&palette[9])return palette[9];
-  if(shadow&&palette[10])return palette[10];
-  if(zone===1&&((Math.floor(u*8)+Math.floor(v*8)+phase)%7===0)&&palette[11])return palette[11];
-  if(zone===2&&((Math.floor(u*9)-Math.floor(v*7)+phase)%6===0)&&palette[12])return palette[12];
-  if(zone===3&&((x+y+phase)%11===0)&&palette[13])return palette[13];
+  // Quantized top-left lighting and lower-right ambient shadow create volume
+  // without adding random speckle noise to the pixel artwork.
+  const light=(1-u)*.58+(1-v)*.42;
+  const shade=u*.58+v*.42;
+  if(light>.82&&palette[9])return palette[9];
+  if(shade>.82&&palette[10])return palette[10];
+  // Broad, clustered surface accents read as texture rather than static.
+  if(zone===1&&u>.24&&u<.72&&v>.24&&v<.68&&
+    (Math.floor(u*5)+Math.floor(v*4)+variant)%7===0&&palette[11])return palette[11];
+  if(zone===2&&u>.18&&u<.82&&v>.2&&v<.76&&
+    (Math.floor(u*4)-Math.floor(v*5)+variant)%8===0&&palette[12])return palette[12];
+  if(zone===3&&u>.2&&u<.8&&v>.2&&v<.8&&
+    (Math.floor(u*3)+Math.floor(v*3)+variant)%5===0&&palette[13])return palette[13];
  }
- return base[zone]||base[0];
+ return palette[zone]||palette[0];
 }
 const GENERATED_CHAPTERS=[
  "Светлячковая роща","Тихий ручей","Солнечная опушка","Старый дуб",
@@ -532,8 +535,6 @@ function createComposedArtworkBoard(number){
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
  const count=generatedPartCount(number),layoutVariant=(number+Math.floor(number/11))%3;
  const placements=generatedSceneLayout(count,layoutVariant);
- const primaryIndex=(number*7+Math.floor(number/13))%GENERATED_MOTIFS.length;
- const scenePalette=GENERATED_ART_PALETTES[GENERATED_MOTIFS[primaryIndex].type]||GENERATED_ART_PALETTES.flower;
  for(let part=0;part<count;part++){
   const motifIndex=(number*7+part*5+Math.floor(number/13))%GENERATED_MOTIFS.length;
   const motif=GENERATED_MOTIFS[motifIndex],variant=number*37+part*113;
@@ -543,10 +544,10 @@ function createComposedArtworkBoard(number){
    if(zone<0)continue;
    const x=ox+px,y=oy+py;
    if(x<0||y<0||x>=SIZE||y>=SIZE)continue;
-   board[y][x]=generatedMotifColor(motif.type,zone,(px+.5)/width,(py+.5)/height,variant,scenePalette);
+   board[y][x]=generatedMotifColor(motif.type,zone,(px+.5)/width,(py+.5)/height,variant);
   }
  }
- return applyGeneratedDepthPalette(board,scenePalette);
+ return board;
 }
 
 export const LEVELS=[
@@ -648,7 +649,7 @@ export function buildIncoming(board,levelNumber=1){
  if(levelNumber>=8){
   // Each batch mirrors one currently exposed color group. When that squad
   // finishes, its slot is free before the next inner color wave is revealed.
-  const working=board.map(row=>row.slice()),deck=[];
+  const working=board.map(row=>row.slice()),waves=[];
   let remaining=working.reduce((sum,row)=>sum+row.filter(Boolean).length,0),wave=0;
   while(remaining>0){
    const exposed=getExposedPixels(working);
@@ -666,13 +667,15 @@ export function buildIncoming(board,levelNumber=1){
      queues[color].push({color,ants});left-=ants;
     }
    }
+   const waveDeck=[];
    let pending=true,round=0;
    while(pending){
     pending=false;
     const order=round%2?colors.slice().reverse():colors;
-    for(const color of order){const box=queues[color].shift();if(box){deck.push(box);pending=true;}}
+    for(const color of order){const box=queues[color].shift();if(box){waveDeck.push(box);pending=true;}}
     round++;
    }
+   if(waveDeck.length)waves.push(waveDeck);
    for(const point of exposed)working[point.y][point.x]="";
    remaining-=exposed.length;wave++;
   }
@@ -681,7 +684,18 @@ export function buildIncoming(board,levelNumber=1){
   if(remaining>0){
    const totals=Object.fromEntries(colors.map(color=>[color,0]));
    for(const row of working)for(const color of row)if(color)totals[color]++;
-   for(const color of colors)if(totals[color])deck.push({color,ants:totals[color]});
+   const fallback=[];
+   for(const color of colors)if(totals[color])fallback.push({color,ants:totals[color]});
+   if(fallback.length)waves.push(fallback);
+  }
+  // Keep each third wave in a separate tray lane. The top row now presents
+  // one immediately useful layer and two tempting future layers: taking the
+  // wrong colors consumes scarce start compartments until the right layer opens.
+  const lanes=[[],[],[]];
+  waves.forEach((waveDeck,index)=>lanes[index%3].push(...waveDeck));
+  const deck=[],longest=Math.max(0,...lanes.map(lane=>lane.length));
+  for(let row=0;row<longest;row++)for(let lane=0;lane<3;lane++){
+   if(lanes[lane][row])deck.push(lanes[lane][row]);
   }
   return deck;
  }
