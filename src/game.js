@@ -337,6 +337,21 @@ function generatedMotifColor(type,zone,u,v,variant,scenePalette){
  if(interior){
   const detail=generatedMotifDetail(type,zone,u,v,variant);
   if(detail>=0&&palette[detail])return palette[detail];
+  // Material-aware micro-patterns: clustered marks follow the object rather
+  // than sprinkling noise uniformly across the illustration.
+  const gx=Math.floor(u*18),gy=Math.floor(v*18),phase=variant%7;
+  const grain=(gx*7+gy*11+phase*3)%17;
+  if(type==="tree"&&zone===1&&grain<4&&ellipse(u,v,.5,.36,.34,.27))return palette[11];
+  if(type==="flower"&&zone===1&&
+    (lineDistance(Math.floor(u*35),Math.floor(v*35),17,10,Math.round(17+(u-.5)*17),Math.round(10+(v-.29)*13))<.8))return palette[11];
+  if(type==="mushroom"&&zone===1&&grain<3&&ellipse(u,v,.5,.34,.38,.24))return palette[11];
+  if(type==="fish"&&zone===1&&(gx+gy+phase)%4===0&&ellipse(u,v,.47,.5,.34,.25))return palette[11];
+  if(type==="house"&&zone===0&&
+    (Math.abs(v-(.56+Math.floor(u*5)%2*.095))<.018)&&Math.floor(u*7)%3!==0)return palette[11];
+  if((type==="acorn"||type==="snail")&&zone===1&&grain<3)return palette[11];
+  if(type==="butterfly"&&(zone===1||zone===2)&&grain<2)return palette[11];
+  if(type==="bee"&&zone===1&&Math.floor(v*9)%3===0&&u>.28&&u<.72)return palette[11];
+  if(type==="bird"&&zone===1&&Math.abs(v-(.45+u*.2))<.025)return palette[11];
   // Small intentional seams give each material a second surface tone:
   // bark/stems, roof and petal edges, shell bands, or glass highlights.
   if(zone===0&&Math.abs(v-.62)<.035&&palette[11])return palette[11];
