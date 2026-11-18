@@ -18,7 +18,7 @@ function loadEconomy(){try{return normalizeEconomy(JSON.parse(localStorage.getIt
 let colony=loadEconomy();
 function updateEconomy(){try{localStorage.setItem(ECONOMY_STORAGE_KEY,JSON.stringify(colony));}catch{}const pill=$("nest-nectar");if(pill)pill.textContent=String(colony.nectar);if(!$("nest-overlay")?.hidden)renderNest();}
 function renderNest(){
- const scene=$("nest-scene");if(scene){const garden=colony.buildings.garden,granary=colony.buildings.granary;scene.dataset.gardenLevel=String(garden);scene.dataset.granaryLevel=String(granary);scene.setAttribute("aria-label",`Подземный дом колонии. Сад нектара: уровень ${garden} из 3. Хранилище: уровень ${granary} из 3.`);}
+ const scene=$("nest-scene");if(scene){const garden=colony.buildings.garden,granary=colony.buildings.granary,nursery=colony.buildings.nursery;scene.dataset.gardenLevel=String(garden);scene.dataset.granaryLevel=String(granary);scene.dataset.nurseryLevel=String(nursery);scene.dataset.colonyStage=String(Math.min(4,Math.floor(colony.lifetime/150)));scene.setAttribute("aria-label",`Подземный дом колонии. Сад нектара: уровень ${garden} из 3. Хранилище: уровень ${granary} из 3. Питомник: уровень ${nursery} из 3.`);}
  const balance=$("nest-balance");if(balance)balance.textContent=colony.nectar.toLocaleString("ru-RU");
  const progress=$("nest-progress"),bar=$("nest-progress-bar"),fill=$("nest-progress-fill"),label=$("nest-progress-label");
  const percent=Math.round(colony.progress/10*100);
@@ -41,12 +41,12 @@ function renderNest(){
   const icon=document.createElement("span");icon.className="nest-building-icon";icon.textContent=building.icon;
   const copy=document.createElement("div");copy.className="nest-building-copy";
   const title=document.createElement("strong");title.textContent=building.name;
-  const desc=document.createElement("small");desc.textContent=comingSoon?"Особые муравьи появятся в одном из будущих обновлений. Нектар пока лучше сохранить.":building.description;
+  const desc=document.createElement("small");desc.textContent=building.description;
   const rank=document.createElement("span");rank.textContent=comingSoon?"Новое открытие готовится":level>=3?"Максимум · 3/3":`Уровень ${level}/3`;copy.append(title,desc,rank);
   if(!comingSoon){const levels=document.createElement("span");levels.className="nest-level-pips";levels.setAttribute("aria-label",`Уровень ${level} из 3`);for(let step=0;step<3;step++){const pip=document.createElement("i");if(step<level)pip.classList.add("filled");levels.append(pip);}copy.append(levels);}
-  const buy=document.createElement("button");buy.type="button";buy.className="nest-buy";buy.disabled=comingSoon||level>=3||colony.nectar<cost;
-  buy.textContent=comingSoon?"Скоро":level>=3?"Готово":`🌼 ${cost}`;
-  buy.setAttribute("aria-label",comingSoon?"Питомник будет доступен в будущем":level>=3?`${building.name}: максимальный уровень`:`Улучшить ${building.name} за ${cost} нектара`);
+  const buy=document.createElement("button");buy.type="button";buy.className="nest-buy";buy.disabled=level>=3||colony.nectar<cost;
+  buy.textContent=level>=3?"Готово":`🌼 ${cost}`;
+  buy.setAttribute("aria-label",level>=3?`${building.name}: максимальный уровень`:`Улучшить ${building.name} за ${cost} нектара`);
   buy.addEventListener("click",()=>{const result=purchaseBuilding(colony,building.id);if(result.ok){colony=result.economy;updateEconomy();}else renderNest();});
   card.append(icon,copy,buy);(comingSoon?futureGroup:activeGroup).append(card);
  }
@@ -793,6 +793,7 @@ function cycleGameSpeed(){
 function updateMainMenu(){
  const primary=$("start-game"),fresh=$("new-game"),progress=$("menu-progress"),level=getLevel(state.levelId);
  const completed=completedLevels(),completedCount=LEVELS.filter(item=>completed.has(item.id)).length;
+  const latestAvailable=LEVELS.filter(item=>isLevelUnlocked(item)).at(-1)||LEVELS[0];
  const unlockedCount=LEVELS.filter(item=>isLevelUnlocked(item)).length,total=LEVELS.length;
  const percent=total?Math.round(completedCount/total*100):0;
  $("menu-level-name").textContent=level.name;$("menu-level-number").textContent=`ПОЛЯНКА ${String(level.number).padStart(2,"0")}`;$("menu-level-emoji").textContent=level.emoji;
@@ -815,10 +816,10 @@ function updateMainMenu(){
   const status=document.createElement("span");status.className="campaign-state";status.textContent=done?"✓":unlocked?"›":"🔒";
   button.append(icon,copy,status);button.addEventListener("click",()=>{if(unlocked){closeMap();void startFreshGame(item.id);}});list.append(button);
  }}
- primary.textContent=gameStarted?"Вернуться на полянку":"Начать охоту";primary.disabled=resetAfterMenu;
+ primary.textContent=`Начать уровень ${String(launchLevel.number).padStart(3,"0")}`;primary.disabled=resetAfterMenu;
  primary.querySelector("span")?.remove();const arrow=document.createElement("span");arrow.setAttribute("aria-hidden","true");arrow.textContent="→";primary.append(arrow);
  fresh.hidden=true;
- progress.textContent=completed.has(level.id)?"Пройдена · можно повторить":isLevelUnlocked(level)?"Открыта · можно отправляться":"Полянка пока закрыта";
+ progress.textContent=completed.has(launchLevel.id)?"Кампания пройдена · можно повторить":`Последний доступный уровень · ${LEVELS.length} в кампании`;
 }
 function showMainMenu(){
  shell.classList.add("menu-open");
@@ -861,7 +862,7 @@ $("speed-toggle").addEventListener("click",cycleGameSpeed);
 updateGameSpeed(1);
 $("menu-toggle").addEventListener("click",showMainMenu);
 $("start-game").addEventListener("click",startGame);
- $("menu-current-level").addEventListener("click",startGame);
+ $("menu-current-level").addEventListener("click",()=>startFreshGame($("menu-current-level").dataset.levelId||state.levelId));
 $("new-game").addEventListener("click",()=>startFreshGame(state.levelId));
 $("result-retry").addEventListener("click",()=>startFreshGame(state.levelId));
 $("result-next").addEventListener("click",()=>{const index=LEVELS.findIndex(level=>level.id===state.levelId),next=LEVELS[index+1];if(next&&isLevelUnlocked(next))void startFreshGame(next.id);});
