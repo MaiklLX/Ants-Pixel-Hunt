@@ -4724,7 +4724,7 @@ h1,.level-heading h2{color:#5c4770}
 footer{color:#796589}
 
 
-/* KT-212 — a single winding journey instead of hundreds of separate level windows. */
+/* KT-187 — one continuous campaign trail. KT-212 refines it into a single winding journey without separate level windows. */
 .map-overlay .map-card{width:min(760px,100%);max-height:calc(100dvh - 24px);display:flex;flex-direction:column;overflow:hidden}
 .map-overlay .map-intro,.map-overlay .map-chapter-nav{display:none!important}
 .map-overlay #campaign-levels{
