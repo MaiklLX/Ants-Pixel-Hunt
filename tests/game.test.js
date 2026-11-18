@@ -508,11 +508,11 @@ test("linked crates wait until both partners are at the top and two slots are fr
  s.tray[0][0]=pair[0];s.tray[0][1]=null;
  assert.equal(chooseTopColumn(s,0),false,"a lone linked crate cannot be activated");assert.equal(s.pendingLinkedIndex,null);
  s.tray[0][1]=pair[1];s.slots[0]={color:"red",ants:1};s.slots[1]={color:"blue",ants:1};s.slots[2]={color:"green",ants:1};s.slots[3]={color:"yellow",ants:1};
- const before=s.tray.map(row=>row.slice());assert.equal(chooseTopColumn(s,0),false,"pair needs two free compartments");
+ makeBoxAvailable(s,pair[0]);const before=s.tray.map(row=>row.slice());assert.equal(chooseTopColumn(s,0),false,"pair needs two free compartments");
  assert.deepEqual(s.tray,before,"failed placement must not advance either queue");assert.equal(s.slots.filter(Boolean).length,4);
 });
 test("linked crates are placed atomically into two start compartments",()=>{
- const s=createGame(),pair=getLinkedPair(s.levelId);s.tray[0][0]=pair[0];s.tray[0][1]=pair[1];const untouched=s.tray[0][2],next0=s.tray[1][0],next1=s.tray[1][1];
+ const s=createGame(),pair=getLinkedPair(s.levelId);s.tray[0][0]=pair[0];s.tray[0][1]=pair[1];makeBoxAvailable(s,pair[0]);const untouched=s.tray[0][2],next0=s.tray[1][0],next1=s.tray[1][1];
  assert.equal(chooseTopColumn(s,0),true);assert.equal(s.pendingLinkedIndex,null);
  assert.deepEqual(s.slots.slice(0,2).map(box=>box.sourceIndex),pair);assert.ok(s.slots.slice(0,2).every(box=>box.special==="linked"));
  assert.equal(s.tray[0][0],next0);assert.equal(s.tray[0][1],next1);assert.equal(s.tray[0][2],untouched);
