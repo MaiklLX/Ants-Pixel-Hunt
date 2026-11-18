@@ -659,7 +659,7 @@ function applyStarterPixelDetails(board,levelNumber){
 function normalizeStarterPalette(board,levelNumber){
  const palettes={
   1:{green:"green",forest:"green",lime:"green",olive:"green",purple:"purple",blue:"purple",yellow:"yellow",cream:"yellow",orange:"yellow",red:"red",pink:"red"},
-  2:{blue:"blue",sky:"blue",turquoise:"blue",purple:"purple",pink:"pink",red:"pink",yellow:"yellow",cream:"yellow",orange:"yellow",green:"green",forest:"green",lime:"green"},
+  2:{blue:"blue",sky:"blue",turquoise:"blue",purple:"blue",pink:"pink",red:"pink",yellow:"yellow",cream:"yellow",orange:"yellow",green:"green",forest:"green",lime:"green"},
   3:{green:"green",forest:"green",lime:"green",olive:"green",pink:"pink",red:"pink",purple:"pink",yellow:"yellow",cream:"yellow",orange:"yellow",blue:"blue",sky:"blue"},
   4:{red:"red",pink:"red",orange:"red",cream:"cream",yellow:"cream",brown:"brown",green:"green",forest:"green",olive:"green",blue:"green"},
   5:{brown:"brown",orange:"brown",red:"brown",yellow:"yellow",cream:"cream",green:"green",forest:"green",olive:"green",blue:"green"},
