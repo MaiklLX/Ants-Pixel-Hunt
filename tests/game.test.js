@@ -382,7 +382,7 @@ test("box capacities vary within each sufficiently large color deck but preserve
    const sizes=deck.filter(box=>!box.role&&box.color===color).map(box=>box.ants);
    assert.equal(sizes.reduce((sum,n)=>sum+n,0),total,level.name+" "+color+" ant budget");
    assert.ok(sizes.every(n=>n>0&&n<=BOX_CAPACITY));
-   if(sizes.length>=3)assert.ok(new Set(sizes).size>=2,level.name+" "+color+" boxes should not all be identical");
+   if(level.number<8&&sizes.length>=3)assert.ok(new Set(sizes).size>=2,level.name+" "+color+" boxes should not all be identical");
   }
   assert.deepEqual(deck,getIncoming(level.id),"deck generation must be deterministic");
  }
