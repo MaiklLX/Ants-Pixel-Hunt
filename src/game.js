@@ -1,3 +1,5 @@
+import {RASTER_ARTWORK} from "./artwork-data.js";
+
 export const SIZE=35;
 export const GRID_SIZE=350;
 export const BLOCK_SIZE=GRID_SIZE/SIZE;
@@ -581,6 +583,28 @@ function generatedSceneLayout(count,variant){
  const choices=layouts[count]||layouts[4];
  return choices[variant%choices.length];
 }
+const rasterArtworkCache=new Map();
+const BASE64_ALPHABET="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+function createRasterArtworkBoard(type){
+ const source=RASTER_ARTWORK[type];if(!source)return null;
+ if(!rasterArtworkCache.has(type)){
+  const bytes=[];let accumulator=0,bits=0;
+  for(const character of source.data){
+   const value=BASE64_ALPHABET.indexOf(character);if(value<0)continue;
+   accumulator=(accumulator<<6)|value;bits+=6;
+   if(bits>=8){bits-=8;bytes.push((accumulator>>bits)&255);accumulator&=(1<<bits)-1;}
+  }
+  let bit=0;
+  const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
+  for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){
+   let value=0;
+   for(let index=0;index<3;index++){value=(value<<1)|((bytes[bit>>3]>>(7-(bit&7)))&1);bit++;}
+   board[y][x]=value===7?"":source.palette[value]||"";
+  }
+  rasterArtworkCache.set(type,board);
+ }
+ return rasterArtworkCache.get(type).map(row=>row.slice());
+}
 function createComposedArtworkBoard(number){
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
  const count=generatedPartCount(number),layoutVariant=(number+Math.floor(number/11))%3;
@@ -589,12 +613,21 @@ function createComposedArtworkBoard(number){
   const motifIndex=(number*7+part*5+Math.floor(number/13))%GENERATED_MOTIFS.length;
   const motif=GENERATED_MOTIFS[motifIndex],variant=number*37+part*113;
   const [ox,oy,width,height]=placements[part];
-  for(let py=0;py<height;py++)for(let px=0;px<width;px++){
-   const zone=generatedMotifZone(motif.type,(px+.5)/width,(py+.5)/height,variant);
-   if(zone<0)continue;
-   const x=ox+px,y=oy+py;
-   if(x<0||y<0||x>=SIZE||y>=SIZE)continue;
-   board[y][x]=generatedMotifColor(motif.type,zone,(px+.5)/width,(py+.5)/height,variant);
+  const raster=createRasterArtworkBoard(motif.type);
+  if(raster){
+   for(let py=0;py<height;py++)for(let px=0;px<width;px++){
+    const x=ox+px,y=oy+py;if(x<0||y<0||x>=SIZE||y>=SIZE)continue;
+    const sx=Math.min(SIZE-1,Math.floor((px+.5)/width*SIZE)),sy=Math.min(SIZE-1,Math.floor((py+.5)/height*SIZE));
+    const color=raster[sy][sx];if(color)board[y][x]=color;
+   }
+  }else{
+   for(let py=0;py<height;py++)for(let px=0;px<width;px++){
+    const zone=generatedMotifZone(motif.type,(px+.5)/width,(py+.5)/height,variant);
+    if(zone<0)continue;
+    const x=ox+px,y=oy+py;if(x<0||y<0||x>=SIZE||y>=SIZE)continue;
+    board[y][x]=generatedMotifColor(motif.type,zone,(px+.5)/width,(py+.5)/height,variant);
+   }
+  }
   }
  }
  return board;
@@ -769,16 +802,10 @@ export function createArtworkBoard(levelId="meadow-01"){
  if(!artworkBoardCache.has(level.id)){
   let board;
   if(level.number>=8)board=createComposedArtworkBoard(level.number);
-  else if(level.id==="garden-02")board=createButterflyBoard();
-  else if(level.id==="garden-03")board=createFlowerBoard();
-  else if(level.id==="forest-04")board=createMushroomBoard();
-  else if(level.id==="forest-05")board=createAcornBoard();
-  else if(level.id==="forest-06")board=createSnailBoard();
-  else if(level.id==="forest-07")board=createFireflyBoard();
-  else board=createFrogBoard();
-  if(level.number<=7){
-   board=applyStarterPixelDetails(board,level.number);
-   board=normalizeStarterPalette(board,level.number);
+  else{
+   const starterType={1:"frog",2:"butterfly",3:"flower",4:"mushroom",5:"acorn",6:"snail",7:"firefly"}[level.number];
+   board=createRasterArtworkBoard(starterType);
+   if(!board)board=level.number===1?createFrogBoard():createButterflyBoard();
   }
   board=applyPixelArtOutlines(board);
   artworkBoardCache.set(level.id,board);
