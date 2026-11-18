@@ -34,3 +34,11 @@ test("meadow victory counter counts completed runs, including a replay",()=>{
  assert.equal(state.completed,2);
  assert.equal(state.nectar,24);
 });
+
+test("nursery upgrades add a real nectar reward for each completed meadow",()=>{
+ let state={...createEconomy(),nectar:60};
+ const bought=purchaseBuilding(state,"nursery");assert.equal(bought.ok,true);state=bought.economy;
+ state=completeMeadow(state);
+ assert.equal(state.nectar,15);
+ assert.equal(state.buildings.nursery,1);
+});
