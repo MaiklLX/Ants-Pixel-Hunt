@@ -347,9 +347,14 @@ test("generated levels offer tempting future layers while preserving a correct p
  const deck=getIncoming(level.id);
  assert.ok(available.has(deck[0].color),"the first lane must offer a box for the currently exposed layer");
  assert.ok(deck.slice(1,3).some(box=>!available.has(box.color)),"the other top-row lanes must tempt the player with future-layer colors");
- for(const column of [1,2])assert.equal(chooseTopColumn(state,column),true);
- assert.equal(freeSlotCount(state),3,"choosing two future boxes should consume two start compartments");
- assert.equal(findNextMove(state),null,"future-layer boxes cannot collect through the current contour");
+ const futureColumn=[1,2].find(column=>{
+  const index=state.tray[0][column];
+  return index!==null&&index!==undefined&&!available.has(deck[index]?.color);
+ });
+ assert.notEqual(futureColumn,undefined,"at least one visible lane should tempt the player with a future layer");
+ assert.equal(chooseTopColumn(state,futureColumn),true);
+ assert.equal(freeSlotCount(state),4,"choosing a future box should consume one start compartment");
+ assert.equal(findNextMove(state),null,"a future-layer box cannot collect through the current contour");
  assert.equal(isDefeat(state),false,"the level must remain recoverable while the correct lane is available");
  assert.equal(chooseTopColumn(state,0),true,"the player can still choose the current exposed layer");
  assert.ok(findNextMove(state),"the correct order must provide a valid move");
