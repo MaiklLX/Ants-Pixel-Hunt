@@ -4769,3 +4769,42 @@ footer{color:#796589}
 
 .map-overlay .map-card{height:min(920px,calc(100dvh - 24px))}
 .map-overlay #campaign-levels{flex:1 1 auto}
+
+
+/* KT-202 — larger, friendlier toy-mosaic arena and a clear home launch action. */
+.board-wrap{width:min(100%,min(540px,52dvh,calc(100dvh - 300px)));max-height:min(52dvh,calc(100dvh - 300px));padding:10px;border-radius:23px;background:linear-gradient(145deg,#f5e9fa 0%,#d9c2e8 58%,#b798cd 100%);border:2px solid #f8effc;box-shadow:0 7px 0 #8d73a2,0 14px 26px #4c365b38,inset 0 2px 5px #fff}
+.board{border-radius:14px;image-rendering:pixelated;filter:drop-shadow(0 2px 2px #45345144)}
+.slot,.slot.filled{min-height:60px;border-radius:16px;box-shadow:0 4px 0 #9278a5,0 7px 12px #4b365b38,inset 0 2px 0 #fff}
+.choice-card,.choice-card.locked,.choice-card.empty-box{min-height:68px;border-radius:17px;box-shadow:0 5px 0 #9278a5,0 8px 13px #4b365b38,inset 0 2px 0 #fff}
+.choice-crate{transform:scale(1.08)}
+.menu-level-card{min-height:118px!important;padding:16px 18px!important;gap:16px!important;border:2px solid #fff0b8!important;border-radius:23px!important;background:radial-gradient(ellipse at 12% 8%,#fff7c766,transparent 44%),linear-gradient(145deg,#f5d77e 0%,#eebc57 48%,#d99442 100%)!important;color:#5a3d29!important;box-shadow:0 7px 0 #a96c36,0 12px 22px #3925473d,inset 0 2px 0 #fff9!important}
+.menu-level-card .level-thumb{flex-basis:68px!important;width:68px!important;height:68px!important;border-radius:20px!important;background:linear-gradient(145deg,#fff9dc,#f0d38a)!important;border:2px solid #fff5cf!important;box-shadow:0 4px 0 #c18c4c,inset 0 2px #fff;font-size:42px!important}
+.menu-level-card .level-card-copy>span{font-size:10px!important;color:#80502d!important;letter-spacing:1.4px}
+.menu-level-card .level-card-copy strong{font-size:clamp(17px,4vw,22px)!important;color:#593b2b!important;line-height:1.12}
+.menu-level-card .level-card-copy small{font-size:11px!important;color:#805a3d!important}
+.menu-level-card .level-play-mark{padding:11px 14px!important;border-radius:999px!important;background:linear-gradient(145deg,#fff9df,#f5e3a8)!important;border:1px solid #fff!important;color:#754d2b!important;box-shadow:0 3px 0 #c2914d;font-size:11px!important;font-weight:1000!important}
+.menu-level-card:not(:disabled):hover{transform:translateY(-2px);filter:brightness(1.04)}
+.menu-level-card:active:not(:disabled){transform:translateY(2px);box-shadow:0 3px 0 #a96c36!important}
+.nest-nursery{position:absolute;z-index:3;left:50%;bottom:13%;width:74px;height:48px;display:flex;align-items:center;justify-content:center;gap:3px;border:2px solid #9b805c;border-bottom-width:6px;border-radius:22px 22px 12px 12px;background:linear-gradient(145deg,#e9d2a5,#a9875b);box-shadow:0 4px 9px #08150d66,inset 0 2px #fff8;transform:translateX(-50%);opacity:.22;transition:opacity .3s,transform .3s,filter .3s}
+.nest-nursery .nursery-eggs{font-size:15px;letter-spacing:-6px;transform:translateX(-3px)}
+.nest-nursery .nursery-baby{font-size:22px;filter:drop-shadow(0 2px 1px #513b2a66)}
+.nest-nursery i{position:absolute;right:-5px;top:-8px;width:15px;height:15px;border-radius:50%;background:#f6df8a;box-shadow:0 0 12px #f6df8a99}
+.nest-scene[data-nursery-level="1"] .nest-nursery{opacity:.75;transform:translateX(-50%) scale(1.02)}
+.nest-scene[data-nursery-level="2"] .nest-nursery{opacity:.9;transform:translateX(-50%) scale(1.12);filter:saturate(1.1)}
+.nest-scene[data-nursery-level="3"] .nest-nursery{opacity:1;transform:translateX(-50%) scale(1.23);filter:saturate(1.25);box-shadow:0 0 16px #f4d88c77,0 4px 9px #08150d66,inset 0 2px #fff8}
+.nest-firefly{position:absolute;z-index:4;color:#fff1a8;font-size:15px;text-shadow:0 0 8px #fff0a8;animation:nest-firefly-float 3.2s ease-in-out infinite}
+.nest-firefly.firefly-a{left:22%;top:31%}.nest-firefly.firefly-b{right:20%;top:43%;animation-delay:-1.6s}
+@keyframes nest-firefly-float{0%,100%{transform:translateY(3px) scale(.78);opacity:.35}50%{transform:translateY(-8px) scale(1.15);opacity:1}}
+.nest-scene[data-colony-stage="1"] .nest-chamber{box-shadow:0 0 24px #f0d88a33}
+.nest-scene[data-colony-stage="2"] .nest-chamber{box-shadow:0 0 30px #f0d88a55}
+.nest-scene[data-colony-stage="3"] .nest-chamber,.nest-scene[data-colony-stage="4"] .nest-chamber{box-shadow:0 0 38px #f0d88a77}
+@media(max-width:599px){
+ .board-wrap{width:min(94vw,48dvh,460px);max-height:48dvh;padding:8px;border-radius:20px}
+ .menu-level-card{min-height:104px!important;padding:12px!important;gap:10px!important}
+ .menu-level-card .level-thumb{flex-basis:56px!important;width:56px!important;height:56px!important;font-size:34px!important}
+ .menu-level-card .level-card-copy strong{font-size:16px!important}
+ .menu-level-card .level-play-mark{padding:9px 10px!important;font-size:9px!important}
+ .slot,.slot.filled{min-height:54px}.choice-card,.choice-card.locked,.choice-card.empty-box{min-height:62px}
+}
+@media(max-height:700px){.board-wrap{width:min(94vw,44dvh,420px);max-height:44dvh}}
+@media(prefers-reduced-motion:reduce){.nest-firefly,.nest-nursery{animation:none!important;transition:none!important}.menu-level-card{transition:none!important}}
