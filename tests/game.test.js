@@ -1,7 +1,21 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {COLORS,createGame,LEVELS,getLevel,getIncoming,createArtworkBoard,resolveAll,INITIAL_BOARD,INCOMING,isAccessible,getExposedPixels,getExposedTargets,findAccessiblePixel,findAccessiblePixels,findAntWave,chooseTopColumn,findNextMove,applyAntMove,applyAntPickup,completeBoxDeparture,freeSlotCount,isDefeat,SIZE,GRID_SIZE,BLOCK_SIZE,BOX_CAPACITY,SLOT_COUNT,TRAY_SIZE,canChoose,restoreGame,serializeGame,countOutboundBySlot,countQueuedBySlot,countDispatchingWorkers,countSlotWorkers,canDepartSlot,isLockedBox,getLinkedPair,normalizeLinkedTray,buildIncoming,LOCKED_BOX_INDEX,LOCKED_BOX_COLUMN} from "../src/game.js";
+import {COLORS,createGame,LEVELS,getLevel,getIncoming,createArtworkBoard,resolveAll,INITIAL_BOARD,INCOMING,isAccessible,getExposedPixels,getExposedTargets,findAccessiblePixel,findAccessiblePixels,findAntWave,chooseTopColumn,canLaunchBox,findNextMove,applyAntMove,applyAntPickup,completeBoxDeparture,freeSlotCount,isDefeat,SIZE,GRID_SIZE,BLOCK_SIZE,BOX_CAPACITY,SLOT_COUNT,TRAY_SIZE,canChoose,restoreGame,serializeGame,countOutboundBySlot,countQueuedBySlot,countDispatchingWorkers,countSlotWorkers,canDepartSlot,isLockedBox,getLinkedPair,normalizeLinkedTray,buildIncoming,LOCKED_BOX_INDEX,LOCKED_BOX_COLUMN} from "../src/game.js";
 const smallBoard=()=>Array.from({length:5},()=>Array(5).fill("green"));
+const makeBoxAvailable=(state,index)=>{
+ const deck=getIncoming(state.levelId),box=deck[index];
+ state.board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
+ state.obstacles=[];
+ if(box?.special==="linked"){
+  const partner=deck[getLinkedPair(state.levelId).find(value=>value!==index)];
+  state.board[0][0]=box.color;state.board[0][1]=partner.color;state.remaining=2;
+ }else if(box?.role){
+  state.obstacles=[{x:0,y:0,role:box.role,hp:1}];state.remaining=0;
+ }else{
+  state.board[0][0]=box?.color||"black";state.remaining=1;
+ }
+};
+
 
 test("the authored frog is built from large collectible blocks on a 350x350 display grid",()=>{
  const s=createGame();
