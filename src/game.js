@@ -881,7 +881,7 @@ export function buildIncoming(board,levelNumber=1){
     while(left>0){
      // Larger squads keep the five starter cells useful; the last crate
      // in a wave is never reduced to a handful of ants when it can be merged.
-     let squadTarget=55+((wave+color.charCodeAt(0))%7)+Math.floor(random()*8);
+     let squadTarget=40+((wave+color.charCodeAt(0))%11)+Math.floor(random()*6);
      if(left<=BOX_CAPACITY)squadTarget=left;
      else if(left-squadTarget<18)squadTarget=left-18;
      const ants=Math.min(left,squadTarget);
