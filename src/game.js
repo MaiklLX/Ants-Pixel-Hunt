@@ -628,7 +628,6 @@ function createComposedArtworkBoard(number){
     board[y][x]=generatedMotifColor(motif.type,zone,(px+.5)/width,(py+.5)/height,variant);
    }
   }
-  }
  }
  return board;
 }
