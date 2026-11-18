@@ -606,71 +606,41 @@ test("KT-122 reshapes the main menu into an organic forest hub with a two-column
 });
 
 
-test("KT-123 makes the campaign map scrollable and adds chapter shortcuts plus a continue action",async()=>{
+test("KT-187 renders the campaign as one continuous adventure space",async()=>{
  const app=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
  const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
  const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
- const visual=styles.slice(styles.indexOf("KT-123 —"));
- assert.match(html,/app-version" content="KT-\d+"/);
- assert.match(html,/id="map-chapter-nav"[^>]*aria-label="Переход к главе кампании"/);
- assert.match(visual,/.map-overlay{[\s\S]*?overflow-y:auto[\s\S]*?touch-action:pan-y/);
- assert.match(visual,/.map-card{[\s\S]*?max-height:none[\s\S]*?overflow:visible/);
- assert.match(visual,/.map-chapter-nav{[\s\S]*?overflow-x:auto/);
- assert.match(visual,/.map-continue{/);
- assert.match(app,/continueButton.addEventListener\("click"/);
- assert.match(app,/chapterNav.append\(jump\)/);
- assert.match(app,/nextStop.scrollIntoView/);
- assert.match(app,/dataset\.levelId/);
- assert.match(visual,/@media\(prefers-reduced-motion:reduce\)/);
+ assert.match(app,/button\.className="campaign-level trail-node"/);
+ assert.match(app,/list\.append\(button\)/);
+ assert.match(app,/nextStop\.scrollIntoView/);
+ assert.match(app,/continueButton\.addEventListener\("click"/);
+ assert.match(app,/button\.setAttribute\("aria-label",/);
+ assert.doesNotMatch(app,/mapChapterObserver|chapterNav\.append\(jump\)|document\.createElement\("section"\);section\.className="map-chapter"/);
+ assert.doesNotMatch(html,/map-chapter-nav|class="map-intro"/);
+ assert.match(styles,/KT-187 — one continuous campaign trail/);
+ assert.match(styles,/\.map-overlay #campaign-levels\{/);
+ assert.match(styles,/grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
+ assert.match(styles,/\.map-overlay \.trail-node/);
 });
-
-
-test("KT-124 renders campaign levels as an accessible winding forest trail",async()=>{
+test("KT-187 keeps every campaign node keyboard accessible and exposes its state",async()=>{
+ const app=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
+ const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
+ assert.match(app,/button\.disabled=!unlocked/);
+ assert.match(app,/button\.setAttribute\("aria-label",/);
+ assert.match(app,/button\.dataset\.levelState=/);
+ assert.match(app,/button\.append\(icon,number,name,status\)/);
+ assert.match(styles,/\.map-overlay \.trail-node\.completed/);
+ assert.match(styles,/\.map-overlay \.trail-node\.next-stop/);
+ assert.match(styles,/\.map-overlay \.trail-node\.locked/);
+});
+test("KT-187 removes chapter navigation and separate meadow panels",async()=>{
  const app=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
  const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
- const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
- const visual=styles.slice(styles.indexOf("KT-124 —"));
- assert.match(html,/app-version" content="KT-\d+"/);
- assert.match(html,/id="map-chapter-nav"[^>]*aria-label="Переход к главе кампании"/);
- assert.match(app,/grid\.className="campaign-levels map-levels map-trail"/);
- assert.match(visual,/\.map-trail\{[\s\S]*?display:flex!important[\s\S]*?flex-direction:column/);
- assert.match(visual,/\.map-trail::before[\s\S]*?repeating-linear-gradient/);
- assert.match(visual,/\.map-trail \.campaign-level:nth-child\(odd\)/);
- assert.match(visual,/\.map-trail \.campaign-level:nth-child\(even\)/);
- assert.match(visual,/\.map-trail \.campaign-level.next-stop/);
- assert.match(visual,/@media\(prefers-reduced-motion:reduce\)/);
+ assert.doesNotMatch(app,/mapChapterObserver|map-chapter-heading|map-chapter-track/);
+ assert.doesNotMatch(html,/map-chapter-nav|map-intro|campaign-chapter-/);
+ assert.match(app,/list\.replaceChildren\(\)/);
+ assert.match(app,/for\(const item of LEVELS\)/);
 });
-
-
-test("KT-125 adds quiet woodland details and keeps chapter shortcut state accessible",async()=>{
- const app=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
- const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
- const visual=styles.slice(styles.indexOf("KT-125 —"));
- assert.match(app,/jump\.setAttribute\("aria-current","location"\)/);
- assert.match(app,/chapterNav\.querySelectorAll\("\[aria-current\]"\)/);
- assert.match(visual,/\.map-trail \.campaign-level:not\(\.next-stop\)::before/);
- assert.match(visual,/trail-firefly/);
- assert.match(visual,/prefers-reduced-motion:reduce/);
-});
-
-
-test("KT-126 adds chapter signposts and keeps the chapter shortcut synced to the visible trail",async()=>{
- const app=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
- const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
- const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
- const visual=styles.slice(styles.indexOf("KT-126 —"));
- assert.match(html,/app-version" content="KT-\d+"/);
- assert.match(app,/mapChapterObserver=new IntersectionObserver/);
- assert.match(app,/root:\$\("map-overlay"\)/);
- assert.match(app,/section\.dataset\.chapterIndex=String\(index\)/);
- assert.match(app,/jump\.dataset\.chapterIndex=String\(index\)/);
- assert.match(app,/marker\.className="map-chapter-mark"/);
- assert.match(app,/heading\.append\(marker,title,meta\)/);
- assert.match(visual,/\.map-chapter-mark\{/);
- assert.match(visual,/\.map-chapter\.chapter-active \.map-chapter-mark/);
- assert.match(visual,/prefers-reduced-motion:reduce/);
-});
-
 
 test("KT-127 gives campaign chapters restrained biome accents and reduced-motion support",async()=>{
  const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
@@ -718,33 +688,25 @@ test("KT-129 exposes distinct accessible campaign stop states",async()=>{
 });
 
  
-test("KT-130 exposes campaign and chapter completion as accessible progress bars",async()=>{
+test("KT-130 exposes campaign completion as an accessible progress bar",async()=>{
  const app=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
  const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
  assert.ok(app.includes('track.setAttribute("role","progressbar")'));
  assert.ok(app.includes('track.setAttribute("aria-valuemin","0")'));
  assert.ok(app.includes('track.setAttribute("aria-valuemax",String(LEVELS.length))'));
  assert.ok(app.includes('track.setAttribute("aria-valuenow",String(finished))'));
- assert.ok(app.includes('chapterTrack.setAttribute("role","progressbar")'));
- assert.ok(app.includes('chapterTrack.setAttribute("aria-valuemin","0")'));
- assert.ok(app.includes('chapterTrack.setAttribute("aria-valuemax",String(chapter.levels.length))'));
- assert.ok(app.includes('chapterTrack.setAttribute("aria-valuenow",String(chapterDone))'));
  assert.ok(app.includes('track.setAttribute("aria-valuetext"'));
- assert.ok(app.includes('chapterTrack.setAttribute("aria-valuetext"'));
  assert.match(html,/app-version" content="KT-\d+"/);
+ assert.doesNotMatch(app,/chapterTrack/);
 });
-
-
-test("KT-131 gives campaign chapters semantic headings and labelled sections",async()=>{
+test("KT-131 gives each unified map node a semantic accessible label",async()=>{
  const app=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
- const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
- const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
- assert.match(html,/app-version" content="KT-\d+"/);
- assert.match(app,/document\.createElement\("h3"\);title\.className="map-chapter-title"/);
- assert.match(app,/title\.id="campaign-chapter-title-"\+index;title\.textContent=chapter\.name;section\.setAttribute\("aria-labelledby",title\.id\)/);
- assert.match(styles,/\.map-chapter-title\{display:flex/);
+ assert.match(app,/button\.setAttribute\("aria-label",/);
+ assert.match(app,/button\.dataset\.levelId=String\(item\.id\)/);
+ assert.match(app,/button\.dataset\.levelNumber=String\(item\.number\)/);
+ assert.match(app,/button\.setAttribute\("aria-current","step"\)/);
+ assert.match(app,/button\.append\(icon,number,name,status\)/);
 });
-
 
 test("KT-132 gives each campaign biome a distinct stop accent without changing trail structure",async()=>{
  const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
@@ -787,9 +749,10 @@ test("KT-135 removes the oversized mascot hero and keeps the main menu focused",
 });;
 
 
-test("KT-135 assigns the growing campaign a repeating forest biome identity",async()=>{
+test("KT-187 campaign map no longer splits the journey into biome windows",async()=>{
  const app=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
- const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
- assert.match(app,/section\.dataset\.biomeIndex=String\(index%4\)/);
- for(const index of [0,1,2,3])assert.match(styles,new RegExp('data-biome-index="'+index+'"'));
+ const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
+ assert.doesNotMatch(app,/section\.dataset\.biomeIndex|mapChapterObserver/);
+ assert.doesNotMatch(html,/map-chapter-nav|campaign-chapter-/);
+ assert.match(app,/button\.className="campaign-level trail-node"/);
 });
