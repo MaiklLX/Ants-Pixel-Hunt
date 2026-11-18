@@ -332,6 +332,17 @@ test("all campaign drawings and specialist obstacles remain solvable",()=>{
   assert.equal(obstacles.length,0,level.name+" must clear every specialist obstacle");
  }
 });
+test("generated levels punish filling the starter slots with future-layer colors",()=>{
+ const level=LEVELS.find(item=>item.number===8),state=createGame(level.id);
+ const exposed=getExposedPixels(state.board),available=new Set(exposed.map(point=>state.board[point.y][point.x]));
+ const deck=getIncoming(level.id);
+ assert.ok(available.has(deck[0].color),"the first lane must offer a box for the currently exposed layer");
+ assert.ok(deck.slice(1,3).some(box=>!available.has(box.color)),"the other top-row lanes must tempt the player with future-layer colors");
+ for(const column of [1,1,2,2,1])assert.equal(chooseTopColumn(state,column),true);
+ assert.equal(freeSlotCount(state),0);
+ assert.equal(findNextMove(state),null,"none of the five selected future-layer boxes can work through the current contour");
+ assert.equal(isDefeat(state),true,"a careless sequence must create a real, avoidable defeat");
+});
 test("all generated full-grid illustrations can be peeled completely from the exterior",()=>{
  for(const level of LEVELS.filter(item=>item.number>=8)){
   const board=createArtworkBoard(level.id);
