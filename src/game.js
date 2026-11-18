@@ -586,6 +586,49 @@ export const LEVELS=[
 export function getLevel(levelId="meadow-01"){
  return LEVELS.find(level=>level.id===levelId)||LEVELS[0];
 }
+
+function enrichStarterArtwork(board,levelNumber){
+ const palettes={
+  1:{green:["forest","green","lime","olive"],purple:["purple","blue","pink"],yellow:["yellow","cream","orange"],blue:["blue","sky","turquoise"],red:["red","pink","orange"]},
+  2:{purple:["purple","blue","pink"],blue:["blue","sky","turquoise"],red:["red","pink","orange"],yellow:["yellow","cream","orange"],green:["forest","green","lime"]},
+  3:{red:["red","pink","orange"],yellow:["yellow","cream","orange"],green:["forest","green","lime"],blue:["blue","sky","turquoise"],purple:["purple","pink","blue"]},
+  4:{red:["red","orange","pink"],yellow:["yellow","cream"],blue:["brown","cream","yellow"],green:["forest","green","olive"]},
+  5:{yellow:["yellow","orange","cream"],red:["red","orange","brown"],green:["forest","green","olive"],blue:["brown","cream","yellow"]},
+  6:{purple:["brown","orange","yellow"],yellow:["yellow","cream","orange"],red:["red","orange","brown"],blue:["blue","turquoise","sky"],green:["forest","green","lime"]},
+  7:{forest:["forest","purple","blue"],purple:["purple","blue","pink"],yellow:["yellow","cream","orange"],cream:["cream","yellow","sky"],green:["forest","green","lime"]}
+ };
+ const palette=palettes[levelNumber]||palettes[1];
+ for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){
+  const base=board[y][x];if(!base||base==="black")continue;
+  const shades=palette[base];if(!shades)continue;
+  const u=x/(SIZE-1),v=y/(SIZE-1);
+  // A broad upper-left light source gives each form a coherent lit and shaded side.
+  const light=(1-u)*.52+(1-v)*.48;
+  let shade=light>.73?0:light<.29?shades.length-1:Math.min(1,shades.length-1);
+  const grain=(x*13+y*7+levelNumber*11)%19;
+  // Fine material marks are clustered and restrained, preserving the silhouette.
+  const textured=(levelNumber===4||levelNumber===5||levelNumber===6)&&grain<3;
+  if(textured)shade=Math.min(shades.length-1,shade+1);
+  // Petals, shell and wings receive gentle bands instead of flat color fills.
+  if((levelNumber===2||levelNumber===3||levelNumber===6)&&
+    ((x+y+levelNumber)%9===0))shade=Math.max(0,shade-1);
+  board[y][x]=shades[shade]||base;
+ }
+ // Add a few object-specific highlights only where the original shape already exists.
+ for(let y=1;y<SIZE-1;y++)for(let x=1;x<SIZE-1;x++){
+  if(!board[y][x]||board[y][x]==="black")continue;
+  const color=board[y][x],edge=board[y-1][x]&&board[y][x-1];
+  if(levelNumber===1&&color==="green"&&((x-8)**2+(y-12)**2<10||(x-26)**2+(y-12)**2<10))board[y][x]="lime";
+  if(levelNumber===2&&(color==="blue"||color==="purple")&&Math.abs(x-17)>4&&((x+y)%11===0))board[y][x]="pink";
+  if(levelNumber===3&&color==="red"&&((x+y)%8===0))board[y][x]="pink";
+  if(levelNumber===4&&color==="red"&&((x*3+y*5)%17===0))board[y][x]="cream";
+  if(levelNumber===5&&color==="yellow"&&((x+y*2)%13===0))board[y][x]="orange";
+  if(levelNumber===6&&color==="brown"&&((x+y)%7===0))board[y][x]="orange";
+  if(levelNumber===7&&color==="purple"&&((x*2+y)%9===0))board[y][x]="sky";
+ }
+ return board;
+}
+
 const artworkBoardCache=new Map();
 const ART_PALETTES={
  frog:["green","lime","olive","yellow","forest"],
@@ -651,6 +694,7 @@ export function createArtworkBoard(levelId="meadow-01"){
   else if(level.id==="forest-06")board=createSnailBoard();
   else if(level.id==="forest-07")board=createFireflyBoard();
   else board=createFrogBoard();
+  if(level.number<=7)board=enrichStarterArtwork(board,level.number);
   board=applyPixelArtOutlines(board);
   artworkBoardCache.set(level.id,board);
  }
