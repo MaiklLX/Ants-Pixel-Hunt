@@ -1202,7 +1202,7 @@ export function chooseTopColumn(state,column){
  if(!canChoose(state)||!Number.isInteger(column)||column<0||column>=TRAY_SIZE)return false;
  const selectedIndex=state.tray[0][column],incoming=getIncoming(state.levelId);
  if(selectedIndex===null||selectedIndex===undefined||isLockedBox(state,selectedIndex))return false;
- const box=incoming[selectedIndex];if(!box||!canLaunchBox(state,selectedIndex))return false;
+ const box=incoming[selectedIndex];if(!box)return false;
  const freeSlots=state.slots.map((slot,index)=>slot===null?index:-1).filter(index=>index>=0);
  const shiftColumn=lane=>{
   state.tray[0][lane]=state.tray[1][lane];state.tray[1][lane]=state.tray[2][lane];
