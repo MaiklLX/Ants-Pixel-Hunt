@@ -3,7 +3,7 @@ import {RASTER_ARTWORK} from "./artwork-data.js";
 export const SIZE=35;
 export const GRID_SIZE=350;
 export const BLOCK_SIZE=GRID_SIZE/SIZE;
-export const BOX_CAPACITY=60;
+export const BOX_CAPACITY=150;
 export const SLOT_COUNT=5;
 export const TRAY_SIZE=3;
 export const LOCKED_BOX_INDEX=8;
