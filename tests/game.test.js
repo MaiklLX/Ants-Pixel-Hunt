@@ -488,11 +488,11 @@ test("the sealed crate stays hidden until ordinary boxes are placed from both ot
  assert.equal(getIncoming(s.levelId).length>LOCKED_BOX_INDEX,true);
  // Repeating the same lane does not satisfy the second requirement.
  makeBoxAvailable(s,s.tray[0][0]);assert.equal(chooseTopColumn(s,0),true);s.slots[0]=null;
- assert.equal(chooseTopColumn(s,0),true);s.slots[0]=null;
+ makeBoxAvailable(s,s.tray[0][0]);assert.equal(chooseTopColumn(s,0),true);s.slots[0]=null;
  assert.deepEqual(s.lockProgressColumns,[0]);
  // The sealed crate's own lane never contributes to its opening.
  makeBoxAvailable(s,s.tray[0][LOCKED_BOX_COLUMN]);assert.equal(chooseTopColumn(s,LOCKED_BOX_COLUMN),true);s.slots[0]=null;
- assert.equal(chooseTopColumn(s,LOCKED_BOX_COLUMN),true);s.slots[0]=null;
+ makeBoxAvailable(s,s.tray[0][LOCKED_BOX_COLUMN]);assert.equal(chooseTopColumn(s,LOCKED_BOX_COLUMN),true);s.slots[0]=null;
  assert.equal(s.tray[0][LOCKED_BOX_COLUMN],LOCKED_BOX_INDEX);
  assert.equal(chooseTopColumn(s,LOCKED_BOX_COLUMN),false,"sealed crate cannot be selected early");
  assert.equal(isLockedBox(s,LOCKED_BOX_INDEX),true);
@@ -521,7 +521,7 @@ test("linked crates wait until both partners are at the top and two slots are fr
  const s=createGame(),pair=getLinkedPair(s.levelId);assert.equal(pair.length,2);
  s.tray[0][0]=pair[0];s.tray[0][1]=null;
  assert.equal(chooseTopColumn(s,0),false,"a lone linked crate cannot be activated");assert.equal(s.pendingLinkedIndex,null);
- s.tray[0][1]=pair[1];s.slots[0]={color:"red",ants:1};s.slots[1]={color:"blue",ants:1};s.slots[2]={color:"green",ants:1};s.slots[3]={color:"yellow",ants:1};
+ s.tray[0][1]=pair[1];s.slots[0]={role:"builder",ants:1};s.slots[1]={role:"warrior",ants:1};s.slots[2]={color:"purple",ants:1};s.slots[3]={color:"orange",ants:1};
  makeBoxAvailable(s,pair[0]);const before=s.tray.map(row=>row.slice());assert.equal(chooseTopColumn(s,0),false,"pair needs two free compartments");
  assert.deepEqual(s.tray,before,"failed placement must not advance either queue");assert.equal(s.slots.filter(Boolean).length,4);
 });
@@ -534,11 +534,11 @@ test("linked crates are placed atomically into two start compartments",()=>{
 });
 test("atomic linked-pair placement uses the first two free compartments",()=>{
  const s=createGame(),pair=getLinkedPair(s.levelId);s.slots[0]={color:"red",ants:1};s.slots[2]={color:"blue",ants:1};
- s.tray[0][0]=pair[0];s.tray[0][1]=pair[1];assert.equal(chooseTopColumn(s,1),true);
+ s.tray[0][0]=pair[0];s.tray[0][1]=pair[1];makeBoxAvailable(s,pair[0]);assert.equal(chooseTopColumn(s,1),true);
  assert.deepEqual([s.slots[1].sourceIndex,s.slots[3].sourceIndex],[pair[1],pair[0]]);
 });
 test("linked-pair placement is fully represented after save and restore",()=>{
- const s=createGame(),pair=getLinkedPair(s.levelId);s.tray[0][0]=pair[0];s.tray[0][1]=pair[1];
+ const s=createGame(),pair=getLinkedPair(s.levelId);s.tray[0][0]=pair[0];s.tray[0][1]=pair[1];makeBoxAvailable(s,pair[0]);
  assert.equal(chooseTopColumn(s,0),true);const restored=restoreGame(serializeGame(s));
  assert.equal(restored.pendingLinkedIndex,null);assert.deepEqual(restored.slots.slice(0,2).map(box=>box?.sourceIndex),pair);
 });
