@@ -426,13 +426,12 @@ test("KT-110 adds subtle ant body highlights and a clearly outlined carried pixe
 });
 
 
-test("KT-111 adds restrained deterministic forest-floor texture and restores it after pickup", async()=>{
+test("KT-184 uses a clean lavender woven playfield instead of forest-floor speckles", async()=>{
  const source=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
- const helper=source.slice(source.indexOf("function drawBoardGroundCell"),source.indexOf("function drawBoardTile"));
- assert.match(helper,/seed=\(x\*374761393\+y\*668265263\)>>>0/);
- assert.match(helper,/globalAlpha=\.12/);
- assert.doesNotMatch(helper,/Math\.random/);
- assert.match(source,/for\(let y=0;y<SIZE;y\+\+\)for\(let x=0;x<SIZE;x\+\+\)drawBoardGroundCell\(x,y,cell\)/);
+ const renderer=source.slice(source.indexOf("function renderBoard()"),source.indexOf("function renderBoardAfterPickup"));
+ assert.match(renderer,/c6add4/);
+ assert.match(renderer,/woven diamond texture/);
+ assert.doesNotMatch(renderer,/drawBoardGroundCell\(x,y,cell\)/);
  assert.match(source,/drawBoardGroundCell\(target\.x,target\.y,cell\)/);
 });
 
@@ -457,7 +456,9 @@ test("KT-113 gives the playfield frame a restrained carved-wood and moss finish"
  assert.match(frame,/\.board-wrap::after/);
  assert.match(frame,/pointer-events:none/);
  assert.match(frame,/@media\(prefers-reduced-motion:reduce\)/);
- assert.doesNotMatch(frame,/\.board\s*\{/);
+ assert.match(frame,/\.board\s*\{/);
+ assert.match(frame,/border-radius:11px/);
+ assert.match(frame,/lavender toy-world visual direction/);
 });
 
 
