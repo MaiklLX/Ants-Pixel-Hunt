@@ -1161,6 +1161,24 @@ export function canChoose(state){
 export function isLockedBox(state,index){
  return index===LOCKED_BOX_INDEX&&!state.lockedBoxOpen;
 }
+// A crate is a move only when its target type is on the currently exposed
+// frontier. One active squad per color/role prevents duplicate crates from
+// flooding the five starter cells while a different layer is needed.
+export function canLaunchBox(state,index){
+ const incoming=getIncoming(state.levelId),box=incoming[index];
+ if(!box||isLockedBox(state,index))return false;
+ const exposed=getExposedTargets(state);
+ const hasTarget=candidate=>candidate.role
+  ?exposed.some(target=>target.kind==="obstacle"&&target.role===candidate.role)
+  :exposed.some(target=>target.kind==="pixel"&&target.color===candidate.color);
+ if(box.special==="linked"){
+  const partnerIndex=getLinkedPartner(state.levelId,index),partner=incoming[partnerIndex];
+  if(!partner||!hasTarget(box)||!hasTarget(partner))return false;
+  return !state.slots.some(active=>active&&(active.pairId===box.pairId||active.role===box.role&&box.role||!active.role&&!box.role&&active.color===box.color||!active.role&&!partner.role&&active.color===partner.color));
+ }
+ if(!hasTarget(box))return false;
+ return !state.slots.some(active=>active&&((box.role&&active.role===box.role)||(!box.role&&!active.role&&active.color===box.color)));
+}
 // Correct only a vertical-lane collision; never promote a crate or change its queue depth.
 export function normalizeLinkedTray(state){
  if(!state?.tray)return false;
@@ -1184,7 +1202,7 @@ export function chooseTopColumn(state,column){
  if(!canChoose(state)||!Number.isInteger(column)||column<0||column>=TRAY_SIZE)return false;
  const selectedIndex=state.tray[0][column],incoming=getIncoming(state.levelId);
  if(selectedIndex===null||selectedIndex===undefined||isLockedBox(state,selectedIndex))return false;
- const box=incoming[selectedIndex];if(!box)return false;
+ const box=incoming[selectedIndex];if(!box||!canLaunchBox(state,selectedIndex))return false;
  const freeSlots=state.slots.map((slot,index)=>slot===null?index:-1).filter(index=>index>=0);
  const shiftColumn=lane=>{
   state.tray[0][lane]=state.tray[1][lane];state.tray[1][lane]=state.tray[2][lane];
