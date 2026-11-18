@@ -71,7 +71,6 @@ function renderMap(){
  if(nextPlayable)continueButton.addEventListener("click",()=>{closeMap();void startFreshGame(nextPlayable.id);});
  summary.append(stat,track,next,continueButton);
  list.replaceChildren();
- const chapterNav=$("map-chapter-nav");if(chapterNav){chapterNav.replaceChildren();chapterNav.hidden=true;}
  const intro=document.querySelector(".map-intro");if(intro)intro.hidden=true;
  for(const item of LEVELS){
   const unlocked=isLevelUnlocked(item),completed=done.has(item.id),isNext=nextPlayable?.id===item.id;
