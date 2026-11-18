@@ -150,11 +150,11 @@ function drawBoardTile(x,y,exposed,cell){
  boardCtx.save();
  // Chunky candy-like pixel: nearly full-cell face, a confident rounded edge
  // and a visible lower bevel. The color stays flat and readable at phone size.
- boardCtx.shadowColor="#34274755";boardCtx.shadowBlur=Math.max(1,cell*.16);
+ boardCtx.shadowColor="#26352b66";boardCtx.shadowBlur=Math.max(1.2,cell*.2);
  boardCtx.shadowOffsetX=0;boardCtx.shadowOffsetY=Math.max(.8,cell*.13);
  boardCtx.beginPath();boardCtx.roundRect(left,top,w,h,radius);
  const face=boardCtx.createLinearGradient(left,top,left+w*.18,top+h);
- face.addColorStop(0,lightenHex(rgb,.19));face.addColorStop(.48,rgb);face.addColorStop(1,darkenHex(rgb,.22));
+ face.addColorStop(0,lightenHex(rgb,.25));face.addColorStop(.34,lightenHex(rgb,.08));face.addColorStop(.72,rgb);face.addColorStop(1,darkenHex(rgb,.28));
  boardCtx.fillStyle=face;boardCtx.fill();
  boardCtx.shadowColor="transparent";boardCtx.shadowBlur=0;boardCtx.shadowOffsetY=0;
  boardCtx.lineWidth=Math.max(.65,cell*.065);
@@ -167,7 +167,10 @@ function drawBoardTile(x,y,exposed,cell){
  boardCtx.quadraticCurveTo(left+w-cell*.08,top+h-cell*.08,left+w-cell*.08,top+h-radius);
  boardCtx.strokeStyle=darkenHex(rgb,.38);boardCtx.lineWidth=Math.max(.8,cell*.12);boardCtx.stroke();
  if(color!=="black"){
-  boardCtx.fillStyle="#ffffff88";boardCtx.beginPath();boardCtx.ellipse(left+cell*.25,top+cell*.22,cell*.12,cell*.055,-.35,0,Math.PI*2);boardCtx.fill();
+  boardCtx.fillStyle="#ffffff99";boardCtx.beginPath();boardCtx.ellipse(left+cell*.25,top+cell*.22,cell*.15,cell*.065,-.35,0,Math.PI*2);boardCtx.fill();
+  const grain=(x*17+y*31+color.length*13)%7;
+  if(grain===0||grain===3){boardCtx.globalAlpha=.22;boardCtx.fillStyle=lightenHex(rgb,.42);boardCtx.fillRect(left+cell*.62,top+cell*.28,Math.max(.7,cell*.09),Math.max(.7,cell*.09));}
+  if(grain===2||grain===5){boardCtx.globalAlpha=.18;boardCtx.fillStyle=darkenHex(rgb,.35);boardCtx.fillRect(left+cell*.22,top+cell*.68,Math.max(.7,cell*.1),Math.max(.7,cell*.1));}
  }
  if(exposed){
   boardCtx.strokeStyle="#fff0b5";boardCtx.lineWidth=Math.max(.65,cell*.07);
@@ -319,7 +322,7 @@ function renderChoices(){
   const waitingForPartner=linked&&state.pendingLinkedIndex!==index&&!state.tray[0].includes(partner),needsPairSlots=linked&&(state.pendingLinkedIndex===null||state.pendingLinkedIndex===undefined)&&state.slots.filter(slot=>slot===null).length<2;
   const blockedByPair=state.pendingLinkedIndex!==null&&state.pendingLinkedIndex!==undefined&&index!==state.pendingLinkedIndex;
   const frontierReady=box&&canLaunchBox(state,index);
-  button.disabled=!box||sealed||!frontierReady||resetting||resetAfterMenu||state.won||state.lost||!canChoose(state)||blockedByPair||waitingForPartner||needsPairSlots;
+  button.disabled=!box||sealed||resetting||resetAfterMenu||state.won||state.lost||!canChoose(state)||blockedByPair||waitingForPartner||needsPairSlots;
   if(sealed){
    const crate=document.createElement("span");crate.className="choice-crate sealed-crate";crate.setAttribute("aria-hidden","true");
     for(let plank=0;plank<3;plank++){const board=document.createElement("i");board.className="sealed-plank";crate.append(board);}
@@ -328,12 +331,12 @@ function renderChoices(){
    const count=document.createElement("small");count.className="sealed-progress";count.textContent=`${(state.lockProgressColumns||[]).length}/2`;
    button.append(crate,count);button.title="Закрытый бокс откроется после размещения обычных боксов из двух других колонок";
    button.setAttribute("aria-label",`Закрытый бокс, прогресс открытия ${(state.lockProgressColumns||[]).length} из 2`);
-  }else if(box){button.style.setProperty("--ant-color",COLORS[box.color].hex);
+  }else if(box){button.style.setProperty("--ant-color",COLORS[box.color].hex);if(!frontierReady)button.classList.add("waiting-box");
    if(linked){button.classList.add("linked-box");const chain=document.createElement("span");chain.className="linked-mark";chain.textContent="⛓";button.append(chain);button.title=blockedByPair?"Сначала выбери первый связанный бокс":waitingForPartner?"Связанный бокс появится в верхнем ряду позже":needsPairSlots?"Для пары нужны два свободных отсека":"Связанная пара: после этого бокса выбери второй";}
    const crate=document.createElement("span");crate.className="choice-crate"+(box.role?" specialist-crate":"");crate.setAttribute("aria-hidden","true");
    if(box.role){const mark=document.createElement("b");mark.textContent=box.role==="builder"?"⚒":"⚔";crate.append(mark);}
    else{const gem=document.createElement("i");gem.style.setProperty("--gem-color",COLORS[box.color].hex);crate.append(gem);}
-   const colorName=document.createElement("span");colorName.className="box-color-name";colorName.textContent=box.role==="builder"?"Строители":box.role==="warrior"?"Военные":COLORS[box.color].name;
+   if(!frontierReady&&!linked)button.title="Можно поставить в стартовую зону заранее. Муравьи начнут сбор, когда этот цвет откроется на краю рисунка.";const colorName=document.createElement("span");colorName.className="box-color-name";colorName.textContent=box.role==="builder"?"Строители":box.role==="warrior"?"Военные":COLORS[box.color].name;
    const count=document.createElement("small");count.className="box-count";count.textContent=`${box.ants.toLocaleString("ru-RU")} 🐜`;
    button.append(crate,colorName,count);if(!frontierReady&&!linked)button.title="Этот цвет пока закрыт рисунком. Сначала расчисти доступный слой";button.setAttribute("aria-label",`${linked?"Связанный бокс. ":""}${box.role?"Бокс: "+colorName.textContent+". ":"Выбрать бокс: "}${box.ants} муравьёв`);
   }else{button.textContent="Очередь закончилась";button.setAttribute("aria-label","В этой колонке больше нет боксов");}
