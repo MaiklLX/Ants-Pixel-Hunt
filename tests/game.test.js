@@ -28,19 +28,24 @@ test("the box deck contains exactly enough ants to collect every pixel by color"
  assert.deepEqual(Object.fromEntries(Object.entries(deckTotals).filter(([,total])=>total>0)),Object.fromEntries(Object.entries(totals).filter(([,total])=>total>0)));assert.ok(INCOMING.length>9);assert.equal(BOX_CAPACITY,150);
  assert.deepEqual(INCOMING.slice(0,5).map(box=>box.color),["black","forest","green","lime","cream"]);
 });
-test("only top-row boxes can be selected; chosen column shifts upward and refills at bottom",()=>{
+test("only boxes matching the exposed puzzle layer can be selected",()=>{
  const s=createGame();assert.deepEqual(s.tray,[[0,1,2],[3,4,5],[6,7,8]]);
- assert.equal(chooseTopColumn(s,1),true);assert.equal(s.slots[0].sourceIndex,1);
- assert.deepEqual(s.tray.map(r=>r[1]),[4,7,9]);assert.equal(s.nextContainer,10);
+ assert.equal(canLaunchBox(s,1),false,"future-layer color is not a legal move");
+ assert.equal(chooseTopColumn(s,1),false);
+ assert.equal(chooseTopColumn(s,0),true);assert.equal(s.slots[0].sourceIndex,0);
+ assert.deepEqual(s.tray.map(r=>r[0]),[3,6,9]);assert.equal(s.nextContainer,10);
 });
-test("selection fills the first free start compartment, not a player-selected location",()=>{
- const s=createGame();chooseTopColumn(s,2);chooseTopColumn(s,0);
- assert.equal(s.slots[0].sourceIndex,2);assert.equal(s.slots[1].sourceIndex,0);assert.equal(s.slots[2],null);
+test("selection fills the first free start compartment after a valid layer choice",()=>{
+ const s=createGame();assert.equal(chooseTopColumn(s,0),true);
+ const second=s.tray[0][1];makeBoxAvailable(s,second);
+ assert.equal(chooseTopColumn(s,1),true);
+ assert.equal(s.slots[0].sourceIndex,0);assert.equal(s.slots[1].sourceIndex,second);assert.equal(s.slots[2],null);
 });
-test("player can fill every remaining start slot with rapid choices during an active ant trip",()=>{
+test("one active squad per color prevents flooding all five starter cells",()=>{
  const s=createGame();s.resolving=true;
- for(const column of [0,1,2,0,1])assert.equal(chooseTopColumn(s,column),true);
- assert.equal(freeSlotCount(s),0);assert.deepEqual(s.slots.map(box=>box.sourceIndex),[0,1,2,3,4]);assert.equal(canChoose(s),false);
+ assert.equal(chooseTopColumn(s,0),true);
+ for(const column of [0,1,2])assert.equal(chooseTopColumn(s,column),false,"same or future layer cannot occupy another slot");
+ assert.equal(freeSlotCount(s),4);assert.equal(canChoose(s),true);
 });
 test("accessibility checks use actual board dimensions",()=>{
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill("green"));
@@ -109,9 +114,9 @@ test("defeat requires all five start slots occupied and no available matching mo
  s.slots[4]=null;assert.equal(isDefeat(s),false);
 });
 test("saved tray, selected slots and sorting counter survive restore",()=>{
- const s=createGame();chooseTopColumn(s,1);s.sortedBoxes=7;
+ const s=createGame();chooseTopColumn(s,0);s.sortedBoxes=7;
  const restored=restoreGame(serializeGame(s));assert.deepEqual(restored.tray,s.tray);
- assert.equal(restored.slots[0].sourceIndex,1);assert.equal(restored.sortedBoxes,7);
+ assert.equal(restored.slots[0].sourceIndex,0);assert.equal(restored.sortedBoxes,7);
 });
 test("legacy save with three candidates can be upgraded to a 3x3 tray",()=>{
  const restored=restoreGame({board:INITIAL_BOARD,slots:Array(5).fill(null),candidates:[2,1,0],nextContainer:3,remaining:createGame().remaining});
@@ -341,7 +346,7 @@ test("all campaign drawings and specialist obstacles remain solvable",()=>{
   assert.equal(obstacles.length,0,level.name+" must clear every specialist obstacle");
  }
 });
-test("generated levels offer tempting future layers while preserving a correct path",()=>{
+test("future-layer boxes are blocked until the player clears the exposed contour",()=>{
  const level=LEVELS.find(item=>item.number===8),state=createGame(level.id);
  const exposed=getExposedPixels(state.board),available=new Set(exposed.map(point=>state.board[point.y][point.x]));
  const deck=getIncoming(level.id);
