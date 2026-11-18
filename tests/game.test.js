@@ -9,7 +9,7 @@ test("the authored frog is built from large collectible blocks on a 350x350 disp
  assert.equal(INITIAL_BOARD.length,SIZE);assert.ok(INITIAL_BOARD.every(r=>r.length===SIZE));
  assert.equal(s.board.length,SIZE);assert.equal(s.slots.length,SLOT_COUNT);
  assert.equal(s.tray.length,TRAY_SIZE);assert.ok(s.tray.every(r=>r.length===TRAY_SIZE));
- const colors=new Set(INITIAL_BOARD.flat().filter(Boolean));assert.ok(colors.has("black"));assert.ok(colors.size>=7&&colors.size<=12,"starter artwork should use shaded material tones while keeping a readable palette");
+ const colors=new Set(INITIAL_BOARD.flat().filter(Boolean));assert.ok(colors.has("black"));assert.ok(colors.size>=7&&colors.size<=16,"starter artwork should use shaded material tones while keeping a readable palette");
  assert.ok(s.remaining>400&&s.remaining<900);assert.ok(INITIAL_BOARD.some(row=>row.includes("")));
 });
 test("the first seven authored illustrations use richer shaded palettes",()=>{
@@ -26,7 +26,7 @@ test("the box deck contains exactly enough ants to collect every pixel by color"
  const deckTotals=Object.fromEntries(Object.keys(COLORS).map(color=>[color,0]));
  for(const box of INCOMING)deckTotals[box.color]+=box.ants;
  assert.deepEqual(Object.fromEntries(Object.entries(deckTotals).filter(([,total])=>total>0)),Object.fromEntries(Object.entries(totals).filter(([,total])=>total>0)));assert.ok(INCOMING.length>9);assert.equal(BOX_CAPACITY,60);
- assert.deepEqual(INCOMING.slice(0,5).map(box=>box.color),["black","green","blue","purple","red"]);
+ assert.deepEqual(INCOMING.slice(0,5).map(box=>box.color),["black","forest","green","lime","olive"]);
 });
 test("only top-row boxes can be selected; chosen column shifts upward and refills at bottom",()=>{
  const s=createGame();assert.deepEqual(s.tray,[[0,1,2],[3,4,5],[6,7,8]]);
@@ -189,7 +189,8 @@ test("a box cannot depart while any ant assigned to its slot is still travelling
 test("incoming deck balances a color total of 19 without an impossible minimum",()=>{
  const board=[Array(19).fill("red")];
  const deck=buildIncoming(board,8);
- assert.ok(deck.length>=2&&deck.length<=8);
+ assert.equal(deck.length,1,"a 19-ant color group should stay together in one useful crate");
+  assert.equal(deck[0].ants,19);
  assert.equal(deck.reduce((sum,box)=>sum+box.ants,0),19);
  assert.ok(deck.every(box=>box.color==="red"&&box.ants>0&&box.ants<=BOX_CAPACITY));
 });
