@@ -909,6 +909,21 @@ export function buildIncoming(board,levelNumber=1){
    for(const color of colors)if(totals[color])fallback.push({color,ants:totals[color]});
    if(fallback.length)waves.push(fallback);
   }
+  // Fold undersized batches into the nearest same-colour wave. This keeps
+  // ant squads substantial while preserving a valid layer-by-layer route.
+  for(const color of colors){
+   const refs=[];
+   for(let wi=0;wi<waves.length;wi++)for(const box of waves[wi])if(box.color===color)refs.push({wave:wi,box});
+   for(const ref of refs){
+    if(ref.box.ants===0||ref.box.ants>=18)continue;
+    const candidates=refs.filter(other=>other!==ref&&other.box.ants>0&&other.box.ants+ref.box.ants<=BOX_CAPACITY)
+     .sort((a,b)=>Math.abs(a.wave-ref.wave)-Math.abs(b.wave-ref.wave));
+    const partner=candidates[0];if(!partner)continue;
+    if(ref.wave<=partner.wave){ref.box.ants+=partner.box.ants;partner.box.ants=0;}
+    else{partner.box.ants+=ref.box.ants;ref.box.ants=0;}
+   }
+  }
+  for(let wi=0;wi<waves.length;wi++)waves[wi]=waves[wi].filter(box=>box.ants>0);
   // Do not move ants between layers: every box must be able to finish on the
   // pixels exposed at the moment its wave is reached.
   // Keep each third wave in a separate tray lane. The top row now presents
