@@ -656,6 +656,46 @@ export function getLevel(levelId="meadow-01"){
  return LEVELS.find(level=>level.id===levelId)||LEVELS[0];
 }
 
+function applyStarterPixelDetails(board,levelNumber){
+ const paint=(x,y,color)=>{if(board[y]?.[x]&&board[y][x]!=="black")board[y][x]=color;};
+ const line=(x1,y1,x2,y2,color)=>{
+  const steps=Math.max(Math.abs(x2-x1),Math.abs(y2-y1));
+  for(let i=0;i<=steps;i++){const t=steps?i/steps:0;paint(Math.round(x1+(x2-x1)*t),Math.round(y1+(y2-y1)*t),color);}
+ };
+ if(levelNumber===1){
+  for(const [x,y] of [[11,7],[23,7]]){paint(x,y,"purple");paint(x+1,y-1,"yellow");}
+  paint(15,14,"purple");paint(19,14,"purple");
+  line(12,17,15,19,"red");line(15,19,19,19,"red");line(19,19,22,17,"red");
+ }
+ if(levelNumber===2){
+  for(const [cx,cy] of [[9,10],[25,10],[10,23],[24,23]])for(const [dx,dy] of [[0,0],[1,0],[0,1],[1,1]])paint(cx+dx,cy+dy,"pink");
+  line(17,9,17,25,"purple");line(16,11,13,8,"cream");line(18,11,21,8,"cream");
+ }
+ if(levelNumber===3){
+  for(const [x,y] of [[16,16],[17,16],[18,16],[16,17],[17,17],[18,17],[16,18],[17,18],[18,18]])paint(x,y,"orange");
+  for(const [x1,y1,x2,y2] of [[17,11,17,13],[21,13,20,15],[23,17,21,17],[21,21,20,19],[17,23,17,21],[13,21,14,19],[11,17,13,17],[13,13,14,15]])line(x1,y1,x2,y2,"pink");
+ }
+ if(levelNumber===4){
+  for(const [x,y] of [[11,9],[16,7],[21,9],[24,12],[13,12]])paint(x,y,"cream");
+  for(let x=10;x<=24;x+=3)line(x,15,x+(x<17?1:-1),17,"brown");
+ }
+ if(levelNumber===5){
+  line(8,11,25,11,"brown");line(10,13,23,13,"brown");
+  for(const x of [11,15,19,23])line(x,8,x-1,12,"orange");
+  line(8,15,26,15,"brown");
+ }
+ if(levelNumber===6){
+  line(17,10,20,12,"orange");line(20,12,21,16,"orange");line(21,16,18,19,"orange");
+  line(18,19,14,18,"orange");line(14,18,13,15,"orange");line(13,15,16,13,"orange");
+  for(const [x,y] of [[25,9],[29,9]]){paint(x,y,"yellow");paint(x,y+1,"purple");}
+ }
+ if(levelNumber===7){
+  for(let y=18;y<=27;y+=3)line(15,y,19,y,"yellow");
+  line(10,8,7,5,"sky");line(24,8,27,5,"sky");line(10,13,7,16,"sky");line(24,13,27,16,"sky");
+  paint(16,5,"yellow");paint(17,5,"yellow");paint(18,5,"yellow");
+ }
+ return board;
+}
 function enrichStarterArtwork(board,levelNumber){
  const palettes={
   1:{green:["forest","green","lime","olive"],purple:["purple","blue","pink"],yellow:["yellow","cream","orange"],blue:["blue","sky","turquoise"],red:["red","pink","orange"]},
@@ -763,7 +803,10 @@ export function createArtworkBoard(levelId="meadow-01"){
   else if(level.id==="forest-06")board=createSnailBoard();
   else if(level.id==="forest-07")board=createFireflyBoard();
   else board=createFrogBoard();
-  if(level.number<=7)board=enrichStarterArtwork(board,level.number);
+  if(level.number<=7){
+   board=enrichStarterArtwork(board,level.number);
+   board=applyStarterPixelDetails(board,level.number);
+  }
   board=applyPixelArtOutlines(board);
   artworkBoardCache.set(level.id,board);
  }
