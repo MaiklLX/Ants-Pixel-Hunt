@@ -393,6 +393,17 @@ test("specialist crates provide exactly enough builders and warriors for each le
   }
  }
 });
+test("generated wave boxes carry substantial ant squads without losing any color budget",()=>{
+ for(const level of LEVELS.filter(item=>item.number>=8)){
+  const board=createArtworkBoard(level.id),deck=getIncoming(level.id).filter(box=>!box.role);
+  const total=board.flat().filter(Boolean).length;
+  const ants=deck.reduce((sum,box)=>sum+box.ants,0);
+  assert.equal(ants,total,level.name+" must keep a complete ant budget");
+  assert.ok(deck.every(box=>box.ants>0&&box.ants<=BOX_CAPACITY),level.name+" must respect box capacity");
+  const average=ants/Math.max(1,deck.length);
+  assert.ok(average>=18,level.name+" should not flood the tray with tiny ant squads");
+ }
+});
 test("box capacities vary within each sufficiently large color deck but preserve exact ant totals",()=>{
  for(const level of LEVELS){
   const board=createArtworkBoard(level.id),deck=getIncoming(level.id);
