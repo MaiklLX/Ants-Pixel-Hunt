@@ -875,11 +875,12 @@ export function buildIncoming(board,levelNumber=1){
     let seed=(boardSeed^Math.imul(wave+1,2654435761)^Math.imul(color.charCodeAt(0),2246822519))>>>0;
     const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
     while(left>0){
-     // Larger squads keep the five starter cells useful; the last crate
-     // in a wave is never reduced to a handful of ants when it can be merged.
-     let squadTarget=58+((wave+color.charCodeAt(0))%11)+Math.floor(random()*8);
-     if(left<=BOX_CAPACITY)squadTarget=left;
-     else if(left-squadTarget<18)squadTarget=left-18;
+     // Small specialist squads deliberately carry only part of an exposed
+     // color layer. The player must decide how many matching boxes to place
+     // and which other colors deserve the remaining start compartments.
+     let squadTarget=32+((wave+color.charCodeAt(0))%9)+Math.floor(random()*7);
+     if(left<=squadTarget)squadTarget=left;
+     else if(left-squadTarget<20)squadTarget=left-20;
      const ants=Math.min(left,squadTarget);
      queues[color].push({color,ants});left-=ants;
     }
@@ -905,20 +906,8 @@ export function buildIncoming(board,levelNumber=1){
    for(const color of colors)if(totals[color])fallback.push({color,ants:totals[color]});
    if(fallback.length)waves.push(fallback);
   }
-  // Fold undersized batches into the nearest same-colour wave. This keeps
-  // ant squads substantial while preserving a valid layer-by-layer route.
-  for(const color of colors){
-   const refs=[];
-   for(let wi=0;wi<waves.length;wi++)for(const box of waves[wi])if(box.color===color)refs.push({wave:wi,box});
-   for(const ref of refs){
-    if(ref.box.ants===0||ref.box.ants>=24)continue;
-    const candidates=refs.filter(other=>other!==ref&&other.box.ants>0&&other.box.ants+ref.box.ants<=BOX_CAPACITY)
-     .sort((a,b)=>Math.abs(a.wave-ref.wave)-Math.abs(b.wave-ref.wave));
-    const partner=candidates[0];if(!partner)continue;
-    if(ref.wave<=partner.wave){ref.box.ants+=partner.box.ants;partner.box.ants=0;}
-    else{partner.box.ants+=ref.box.ants;ref.box.ants=0;}
-   }
-  }
+  // Never merge across exposure layers: doing so would turn one box into
+  // a full-color key and erase the player's choice about how to stage squads.
   for(let wi=0;wi<waves.length;wi++)waves[wi]=waves[wi].filter(box=>box.ants>0);
   // Do not move ants between layers: every box must be able to finish on the
   // pixels exposed at the moment its wave is reached.
