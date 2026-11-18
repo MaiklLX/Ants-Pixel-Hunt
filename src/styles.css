@@ -4722,3 +4722,47 @@ h1,.level-heading h2{color:#5c4770}
 .conveyor{background:linear-gradient(180deg,#e7d9ef,#bca3ce);border-color:#eadcf2;box-shadow:inset 0 1px #fff,0 3px 0 #8c719e}
 .belt{background:repeating-linear-gradient(135deg,#987fae 0 7px,#c9b3d7 7px 14px);box-shadow:inset 0 3px 5px #47335455,0 1px 1px #fff}
 footer{color:#796589}
+
+
+/* KT-187 — one continuous campaign trail, without separate meadow panels. */
+.map-overlay .map-card{width:min(760px,100%);max-height:calc(100dvh - 24px);display:flex;flex-direction:column;overflow:hidden}
+.map-overlay .map-intro,.map-overlay .map-chapter-nav{display:none!important}
+.map-overlay #campaign-levels{
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;
+ overflow-y:auto;overscroll-behavior:contain;min-height:0;padding:8px 3px 18px;
+ background:
+  radial-gradient(ellipse at 50% 8%,#a8b8a044,transparent 55%),
+  linear-gradient(180deg,#dfe8d6 0%,#d5e2d0 48%,#cbdcc9 100%);
+ border:1px solid #a9bea2;border-radius:18px;
+}
+.map-overlay .trail-node{
+ position:relative;display:grid;grid-template-columns:1fr auto;grid-template-rows:42px auto;
+ align-items:center;justify-items:center;gap:3px;min-height:78px;padding:7px 5px;
+ border:1px solid #a9bda2;border-radius:17px;
+ background:linear-gradient(155deg,#f8fff2,#e4f0dc 70%,#d6e6cf);
+ box-shadow:0 3px 0 #b2c5a8,0 5px 10px #425d3b18;
+ color:#344b36;text-align:center;overflow:hidden;
+}
+.map-overlay .trail-node::after{content:"";position:absolute;inset:3px;border:1px solid #ffffff8a;border-radius:13px;pointer-events:none}
+.map-overlay .trail-node .campaign-emoji{
+ grid-column:1/-1;width:38px;height:38px;display:grid;place-items:center;
+ border-radius:13px;background:radial-gradient(circle at 35% 25%,#fff,#dcebcf 75%);
+ border:1px solid #c0d3b7;font-size:22px;line-height:1;
+}
+.map-overlay .trail-node .trail-number{grid-column:1;justify-self:start;padding-left:5px;font-size:9px;font-weight:950;letter-spacing:.7px;color:#7c9272}
+.map-overlay .trail-node .trail-name{grid-column:1/-1;max-width:100%;font-size:9px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#435b42}
+.map-overlay .trail-node .campaign-state{position:absolute;right:8px;bottom:6px;font-size:10px;color:#8a9d78}
+.map-overlay .trail-node.completed{background:linear-gradient(150deg,#fff8dc,#e9e2b9);border-color:#c9b875;box-shadow:0 3px 0 #b8a66d,0 5px 10px #6d5d2918}
+.map-overlay .trail-node.completed .campaign-emoji{background:radial-gradient(circle at 35% 25%,#fff8d9,#e2c978);border-color:#c8b36b;color:#6e683d}
+.map-overlay .trail-node.next-stop{outline:3px solid #8cac69;outline-offset:2px;transform:translateY(-2px);background:linear-gradient(150deg,#fff,#e9f7d9);box-shadow:0 4px 0 #9cb783,0 7px 15px #58754830}
+.map-overlay .trail-node.next-stop .trail-number{color:#50783d}
+.map-overlay .trail-node.locked{opacity:.55;filter:saturate(.5);background:linear-gradient(150deg,#e4e9df,#d2dcd0);box-shadow:0 2px 0 #b4beb0}
+.map-overlay .trail-node.locked .campaign-emoji{filter:grayscale(.65);background:#d8e0d5}
+.map-overlay .trail-node:disabled{cursor:default}
+.map-overlay .map-summary{flex:0 0 auto}
+@media(max-width:390px){
+ .map-overlay #campaign-levels{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:6px 2px 14px}
+ .map-overlay .trail-node{min-height:72px;padding:6px 3px;border-radius:14px}
+ .map-overlay .trail-node .campaign-emoji{width:34px;height:34px;font-size:20px}
+ .map-overlay .trail-node .trail-name{font-size:8px}
+}
