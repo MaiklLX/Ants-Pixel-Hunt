@@ -497,7 +497,7 @@ test("the sealed crate stays hidden until ordinary boxes are placed from both ot
  assert.equal(chooseTopColumn(s,LOCKED_BOX_COLUMN),false,"sealed crate cannot be selected early");
  assert.equal(isLockedBox(s,LOCKED_BOX_INDEX),true);
  // A real placement from the other lane completes the two-lane requirement.
- makeBoxAvailable(s,s.tray[0][1]);assert.equal(chooseTopColumn(s,1),true);
+ makeBoxAvailable(s,s.tray[0][1]);assert.equal(chooseTopColumn(s,1),true);s.slots[0]=null;
  assert.deepEqual(s.lockProgressColumns,[0,1]);
  assert.equal(s.lockedBoxOpen,true);
  assert.equal(isLockedBox(s,LOCKED_BOX_INDEX),false);
