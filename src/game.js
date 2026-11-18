@@ -635,6 +635,21 @@ function createComposedArtworkBoard(number){
    }
   }
  }
+ // Two tiny, deliberate firefly sparkles distinguish campaign variants while
+ // leaving the source illustration itself intact and immediately recognizable.
+ const pigments=[...new Set(board.flat().filter(color=>color&&color!=="black"))];
+ const candidates=[];
+ for(let y=1;y<SIZE-1;y++)for(let x=1;x<SIZE-1;x++){
+  let clear=true;
+  for(let dy=-1;dy<=1&&clear;dy++)for(let dx=-1;dx<=1;dx++)if(board[y+dy][x+dx]){clear=false;break;}
+  if(clear)candidates.push([x,y]);
+ }
+ for(let sparkle=0;sparkle<2&&candidates.length;sparkle++){
+  const index=(number*(73+sparkle*24)+sparkle*53)%candidates.length;
+  const [x,y]=candidates[index];
+  const color=pigments[(number+sparkle*2)%Math.max(1,pigments.length)]||"yellow";
+  for(const [dx,dy] of [[0,0],[-1,0],[1,0],[0,-1],[0,1]])board[y+dy][x+dx]=color;
+ }
  return board;
 }
 
