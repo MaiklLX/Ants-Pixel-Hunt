@@ -171,13 +171,20 @@ function drawBoardTile(x,y,exposed,cell){
  boardCtx.beginPath();boardCtx.moveTo(left+radius,top+h-.45);boardCtx.lineTo(left+w-radius,top+h-.45);
  boardCtx.quadraticCurveTo(left+w-.45,top+h-.45,left+w-.45,top+h-radius);
  boardCtx.strokeStyle=darkenHex(rgb,.34);boardCtx.lineWidth=Math.max(.7,cell*.1);boardCtx.stroke();
- // A broad, soft top-left reflection rather than a flat white pixel.
- boardCtx.save();boardCtx.beginPath();boardCtx.roundRect(left+cell*.12,top+cell*.09,w-cell*.24,Math.max(.8,cell*.18),cell*.12);boardCtx.clip();
- const shine=boardCtx.createLinearGradient(left,top,left,top+cell*.3);
- shine.addColorStop(0,"#ffffff9a");shine.addColorStop(1,"#ffffff00");
- boardCtx.fillStyle=shine;boardCtx.fillRect(left,top,w,cell*.3);boardCtx.restore();
+ // Layered glossy face: a narrow rim, soft top reflection and a
+ // translucent lower sheen make adjacent cells read as crafted mosaic pieces.
+ boardCtx.save();boardCtx.beginPath();boardCtx.roundRect(left+cell*.09,top+cell*.07,w-cell*.18,h-cell*.16,Math.max(.8,radius*.72));boardCtx.clip();
+ const shine=boardCtx.createLinearGradient(left,top,left,top+h);
+ shine.addColorStop(0,"#ffffff9c");shine.addColorStop(.28,"#ffffff22");shine.addColorStop(.72,"#ffffff00");shine.addColorStop(1,"#1b142522");
+ boardCtx.fillStyle=shine;boardCtx.fillRect(left,top,w,h);
+ const gloss=boardCtx.createLinearGradient(left,top,left+w*.7,top+cell*.42);
+ gloss.addColorStop(0,"#ffffff50");gloss.addColorStop(.48,"#ffffff08");gloss.addColorStop(1,"#ffffff00");
+ boardCtx.fillStyle=gloss;boardCtx.fillRect(left,top,w,h);
+ boardCtx.restore();
+ // Tiny paired glints keep the toy-like finish without obscuring pixel colors.
  if(color!=="black"){
-  boardCtx.fillStyle="#ffffff72";boardCtx.beginPath();boardCtx.ellipse(left+cell*.23,top+cell*.22,cell*.075,cell*.045,-.45,0,Math.PI*2);boardCtx.fill();
+  boardCtx.fillStyle="#ffffff9a";boardCtx.beginPath();boardCtx.ellipse(left+cell*.23,top+cell*.2,cell*.075,cell*.04,-.45,0,Math.PI*2);boardCtx.fill();
+  boardCtx.fillStyle="#ffffff45";boardCtx.beginPath();boardCtx.ellipse(left+cell*.39,top+cell*.16,cell*.035,cell*.022,-.45,0,Math.PI*2);boardCtx.fill();
  }
  if(exposed){
   boardCtx.strokeStyle="#fff0b5";boardCtx.lineWidth=Math.max(.65,cell*.07);
