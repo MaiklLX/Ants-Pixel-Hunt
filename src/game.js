@@ -337,6 +337,12 @@ function generatedMotifColor(type,zone,u,v,variant,scenePalette){
  if(interior){
   const detail=generatedMotifDetail(type,zone,u,v,variant);
   if(detail>=0&&palette[detail])return palette[detail];
+  // Small intentional seams give each material a second surface tone:
+  // bark/stems, roof and petal edges, shell bands, or glass highlights.
+  if(zone===0&&Math.abs(v-.62)<.035&&palette[11])return palette[11];
+  if(zone===1&&Math.abs(v-.22)<.035&&palette[12])return palette[12];
+  if(zone===2&&Math.abs(u-.5)<.035&&palette[13])return palette[13];
+  if(zone===3&&Math.abs(v-.55)<.035&&palette[14])return palette[14];
   // Quantized top-left lighting and lower-right ambient shadow create volume
   // without adding random speckle noise to the pixel artwork.
   const light=(1-u)*.58+(1-v)*.42;
