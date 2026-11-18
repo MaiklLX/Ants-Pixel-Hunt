@@ -346,7 +346,7 @@ test("generated levels offer tempting future layers while preserving a correct p
  const exposed=getExposedPixels(state.board),available=new Set(exposed.map(point=>state.board[point.y][point.x]));
  const deck=getIncoming(level.id);
  assert.ok(available.has(deck[0].color),"the first lane must offer a box for the currently exposed layer");
- assert.ok(deck.slice(1,3).some(box=>!available.has(box.color),"the other top-row lanes must tempt the player with future-layer colors"));
+ assert.ok(deck.slice(1,3).some(box=>!available.has(box.color)),"the other top-row lanes must tempt the player with future-layer colors");
  for(const column of [1,2])assert.equal(chooseTopColumn(state,column),true);
  assert.equal(freeSlotCount(state),3,"choosing two future boxes should consume two start compartments");
  assert.equal(findNextMove(state),null,"future-layer boxes cannot collect through the current contour");
