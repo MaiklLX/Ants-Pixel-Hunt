@@ -411,11 +411,12 @@ const GENERATED_CHAPTERS=[
  "Сказочная чаща","Большой лес"
 ];
 function generatedPartCount(number){
- if(number<26)return 1;
- if(number<76)return 2;
- if(number<151)return number%3===0?3:2;
- if(number<301)return 3;
- return 4;
+ // Keep each subject large enough to read as a real pixel illustration.
+ // New subjects are introduced gradually; the board never becomes a collage
+ // of tiny icons that lose their defining details.
+ if(number<51)return 1;
+ if(number<301)return 2;
+ return 3;
 }
 function generatedChapter(number){
  if(number<=50)return "Светлячковая роща";
@@ -565,22 +566,17 @@ function generatedSceneLayout(count,variant){
  const layouts={
   1:[[[0,0,35,35]]],
   2:[
-   [[1,5,23,28],[23,15,12,17]],
-   [[2,2,18,24],[19,15,15,18]],
-   [[1,15,16,18],[16,2,18,25]]
+   [[0,2,19,31],[17,2,18,31]],
+   [[0,1,18,33],[17,1,18,33]],
+   [[0,2,20,31],[18,2,17,31]]
   ],
   3:[
-   [[8,7,19,24],[0,0,13,14],[22,0,13,14]],
-   [[1,7,18,23],[20,0,15,14],[21,20,14,14]],
-   [[16,7,18,23],[0,0,14,14],[0,20,14,14]]
-  ],
-  4:[
-   [[9,7,17,21],[0,0,13,14],[22,0,13,14],[1,23,13,11]],
-   [[1,7,18,23],[20,0,15,14],[21,20,14,14],[0,0,10,10]],
-   [[9,7,18,22],[0,14,12,16],[23,14,12,16],[12,0,11,10]]
+   [[9,1,17,22],[0,17,17,18],[18,17,17,18]],
+   [[0,1,17,22],[18,1,17,22],[9,17,17,18]],
+   [[9,0,17,22],[0,17,17,18],[18,17,17,18]]
   ]
  };
- const choices=layouts[count]||layouts[4];
+ const choices=layouts[count]||layouts[3];
  return choices[variant%choices.length];
 }
 const rasterArtworkCache=new Map();
@@ -881,7 +877,7 @@ export function buildIncoming(board,levelNumber=1){
     while(left>0){
      // Larger squads keep the five starter cells useful; the last crate
      // in a wave is never reduced to a handful of ants when it can be merged.
-     let squadTarget=40+((wave+color.charCodeAt(0))%11)+Math.floor(random()*6);
+     let squadTarget=58+((wave+color.charCodeAt(0))%11)+Math.floor(random()*8);
      if(left<=BOX_CAPACITY)squadTarget=left;
      else if(left-squadTarget<18)squadTarget=left-18;
      const ants=Math.min(left,squadTarget);
@@ -915,7 +911,7 @@ export function buildIncoming(board,levelNumber=1){
    const refs=[];
    for(let wi=0;wi<waves.length;wi++)for(const box of waves[wi])if(box.color===color)refs.push({wave:wi,box});
    for(const ref of refs){
-    if(ref.box.ants===0||ref.box.ants>=18)continue;
+    if(ref.box.ants===0||ref.box.ants>=24)continue;
     const candidates=refs.filter(other=>other!==ref&&other.box.ants>0&&other.box.ants+ref.box.ants<=BOX_CAPACITY)
      .sort((a,b)=>Math.abs(a.wave-ref.wave)-Math.abs(b.wave-ref.wave));
     const partner=candidates[0];if(!partner)continue;
