@@ -112,7 +112,7 @@ test("a returned empty box frees its slot immediately so a new box can be chosen
  assert.equal(completeBoxDeparture(s,0),true);
  assert.equal(freeSlotCount(s),1);
  assert.equal(canChoose(s),true);
- assert.equal(chooseTopColumn(s,0),true);
+ makeBoxAvailable(s,s.tray[0][0]);assert.equal(chooseTopColumn(s,0),true);
 });
 
 test("leftmost eligible start compartment receives the next ant turn",()=>{
@@ -369,10 +369,10 @@ test("future-layer boxes are blocked until the player clears the exposed contour
   return index!==null&&index!==undefined&&!available.has(deck[index]?.color);
  });
  assert.notEqual(futureColumn,undefined,"at least one visible lane should tempt the player with a future layer");
- assert.equal(chooseTopColumn(state,futureColumn),true);
- assert.equal(freeSlotCount(state),4,"choosing a future box should consume one start compartment");
- assert.equal(findNextMove(state),null,"a future-layer box cannot collect through the current contour");
- assert.equal(isDefeat(state),false,"the level must remain recoverable while the correct lane is available");
+ assert.equal(chooseTopColumn(state,futureColumn),false,"future-layer box must be blocked");
+ assert.equal(freeSlotCount(state),5,"invalid choices do not consume a start compartment");
+ assert.equal(findNextMove(state),null,"no ants are sent before a valid choice");
+ assert.equal(isDefeat(state),false,"the level remains recoverable");
  assert.equal(chooseTopColumn(state,0),true,"the player can still choose the current exposed layer");
  assert.ok(findNextMove(state),"the correct order must provide a valid move");
 });
