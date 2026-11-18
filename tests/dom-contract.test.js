@@ -385,7 +385,7 @@ test("KT-108 immediately refreshes queue choices when a starting slot is physica
  assert.match(worker,/const slotFreed=completeBoxDeparture\(state,slot\)/);
  assert.match(worker,/if\(slotFreed\)renderChoices\(\)/);
  assert.ok(worker.indexOf("if(slotFreed)renderChoices()")<worker.indexOf("renderSlots()"));
- assert.match(app,/button\.disabled=!box\|\|sealed\|\|!frontierReady\|\|resetting\|\|resetAfterMenu\|\|state\.won\|\|state\.lost\|\|!canChoose\(state\)/);
+ assert.match(app,/button\.disabled=!box\|\|sealed\|\|resetting\|\|resetAfterMenu\|\|state\.won\|\|state\.lost\|\|!canChoose\(state\)/);
 });
 
 test("a freed ordinary start compartment immediately makes the top queue selectable",async()=>{
