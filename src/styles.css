@@ -4699,3 +4699,26 @@ button:not(:disabled):active{filter:brightness(.96)}
 .choice-crate.specialist-crate b{font-size:18px;line-height:1;text-shadow:0 1px 0 #fff4}
 .slot-role{font-size:13px;line-height:12px;color:#a8793f;font-weight:950;text-shadow:0 1px #fff}
 .slot:has(.slot-role){border-color:#d8bd86;background:linear-gradient(160deg,#fff9eb,#f2e7ce)}
+
+
+/* KT-184 — lavender toy-world visual direction from the supplied reference. */
+:root{
+ --bg:#b9a0c8;--panel:#d8c5e2;--panel2:#c7add5;--gold:#efc65d;
+ --muted:#75627f;--text:#493b57;--line:#e5d3ef;
+}
+html,body{background:#b39ac4}
+body{background:radial-gradient(ellipse at 50% -8%,#d9c9e4 0%,#bba4cb 54%,#927aa9 100%);color:#493b57}
+.app-shell{background:linear-gradient(160deg,#d5c2df 0%,#c0a9d0 55%,#a990bc 100%);border-color:#e9d9f1;box-shadow:0 14px 36px #4a345c30,inset 0 1px #fff9}
+h1,.level-heading h2{color:#5c4770}
+.subtitle,.board-status,.level-kicker{color:#806b91}
+.board-wrap{background:linear-gradient(145deg,#d9c5e5,#a98cbd);border:2px solid #e6d5f0;box-shadow:0 6px 0 #80678f,0 12px 22px #49345638,inset 0 2px 5px #fff9;border-radius:18px}
+.board{border-radius:11px;filter:drop-shadow(0 2px 2px #46325255);image-rendering:auto}
+.board-corners i{border-color:#f3d36d}
+.slot{background:linear-gradient(145deg,#e7d6ef,#b99ecb);border:1px solid #f2e6f8;box-shadow:0 3px 0 #876c9a,0 5px 9px #513b6240,inset 0 1px 0 #fff;border-radius:13px}
+.slot.filled{background:linear-gradient(145deg,#f1e4f6,#c7add8)}
+.slot.active{box-shadow:0 5px 0 #876c9a,0 8px 13px #513b6255,inset 0 1px 0 #fff}
+.choice-card{background:linear-gradient(150deg,#fff 0%,#e8d8f0 62%,#c7aed8 100%);border:1px solid #f5eafa;box-shadow:0 4px 0 #8c719e,0 7px 12px #503b6140,inset 0 1px 0 #fff;border-radius:15px}
+.choice-card.selectable:active{box-shadow:0 1px 0 #8c719e,0 2px 5px #503b6140}
+.conveyor{background:linear-gradient(180deg,#e7d9ef,#bca3ce);border-color:#eadcf2;box-shadow:inset 0 1px #fff,0 3px 0 #8c719e}
+.belt{background:repeating-linear-gradient(135deg,#987fae 0 7px,#c9b3d7 7px 14px);box-shadow:inset 0 3px 5px #47335455,0 1px 1px #fff}
+footer{color:#796589}
