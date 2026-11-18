@@ -42,12 +42,13 @@ test("the box deck contains exactly enough ants to collect every pixel by color"
  assert.deepEqual(Object.fromEntries(Object.entries(deckTotals).filter(([,total])=>total>0)),Object.fromEntries(Object.entries(totals).filter(([,total])=>total>0)));assert.ok(INCOMING.length>9);assert.equal(BOX_CAPACITY,150);
  assert.deepEqual(INCOMING.slice(0,5).map(box=>box.color),["black","forest","green","lime","cream"]);
 });
-test("only boxes matching the exposed puzzle layer can be selected",()=>{
+test("a future-layer box can be staged in a starter slot and waits for its color to open",()=>{
  const s=createGame();assert.deepEqual(s.tray,[[0,1,2],[3,4,5],[6,7,8]]);
- assert.equal(canLaunchBox(s,1),false,"future-layer color is not a legal move");
- assert.equal(chooseTopColumn(s,1),false);
- assert.equal(chooseTopColumn(s,0),true);assert.equal(s.slots[0].sourceIndex,0);
- assert.deepEqual(s.tray.map(r=>r[0]),[3,6,9]);assert.equal(s.nextContainer,10);
+ assert.equal(canLaunchBox(s,1),false,"future-layer ants cannot collect until the color is exposed");
+ assert.equal(chooseTopColumn(s,1),true,"the box itself can be staged before its color is exposed");
+ assert.equal(s.slots[0].sourceIndex,1);assert.equal(s.slots[0].color,getIncoming(s.levelId)[1].color);
+ assert.equal(chooseTopColumn(s,0),true);assert.equal(s.slots[1].sourceIndex,0);
+ assert.deepEqual(s.tray.map(r=>r[1]),[4,7,10]);assert.equal(s.nextContainer,11);
 });
 test("selection fills the first free start compartment after a valid layer choice",()=>{
  const s=createGame();assert.equal(chooseTopColumn(s,0),true);
