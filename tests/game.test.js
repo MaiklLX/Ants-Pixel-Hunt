@@ -56,11 +56,12 @@ test("selection fills the first free start compartment after a valid layer choic
  assert.equal(chooseTopColumn(s,1),true);
  assert.equal(s.slots[0].sourceIndex,0);assert.equal(s.slots[1].sourceIndex,second);assert.equal(s.slots[2],null);
 });
-test("one active squad per color prevents flooding all five starter cells",()=>{
+test("duplicate color squads cannot launch together, but crates can be staged",()=>{
  const s=createGame();s.resolving=true;
  assert.equal(chooseTopColumn(s,0),true);
- for(const column of [0,1,2])assert.equal(chooseTopColumn(s,column),false,"same or future layer cannot occupy another slot");
- assert.equal(freeSlotCount(s),4);assert.equal(canChoose(s),true);
+ assert.equal(canLaunchBox(s,1),false,"same color squad is already active");
+ assert.equal(chooseTopColumn(s,1),true,"the next crate may wait in another starter compartment");
+ assert.equal(freeSlotCount(s),3);assert.equal(canChoose(s),true);
 });
 test("accessibility checks use actual board dimensions",()=>{
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill("green"));
@@ -359,7 +360,7 @@ test("all campaign drawings and specialist obstacles remain solvable",()=>{
   assert.equal(obstacles.length,0,level.name+" must clear every specialist obstacle");
  }
 });
-test("future-layer boxes are blocked until the player clears the exposed contour",()=>{
+test("future-layer boxes can be staged but their ants wait until the player clears the exposed contour",()=>{
  const level=LEVELS.find(item=>item.number===8),state=createGame(level.id);
  const exposed=getExposedPixels(state.board),available=new Set(exposed.map(point=>state.board[point.y][point.x]));
  const deck=getIncoming(level.id);
@@ -370,9 +371,9 @@ test("future-layer boxes are blocked until the player clears the exposed contour
   return index!==null&&index!==undefined&&!available.has(deck[index]?.color);
  });
  assert.notEqual(futureColumn,undefined,"at least one visible lane should tempt the player with a future layer");
- assert.equal(chooseTopColumn(state,futureColumn),false,"future-layer box must be blocked");
- assert.equal(freeSlotCount(state),5,"invalid choices do not consume a start compartment");
- assert.equal(findNextMove(state),null,"no ants are sent before a valid choice");
+ assert.equal(chooseTopColumn(state,futureColumn),true,"future-layer box can be staged in a starter compartment");
+ assert.equal(freeSlotCount(state),4,"a waiting crate deliberately occupies a start compartment");
+ assert.equal(findNextMove(state),null,"its ants wait until matching pixels are exposed");
  assert.equal(isDefeat(state),false,"the level remains recoverable");
  assert.equal(chooseTopColumn(state,0),true,"the player can still choose the current exposed layer");
  assert.ok(findNextMove(state),"the correct order must provide a valid move");
