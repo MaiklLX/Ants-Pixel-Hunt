@@ -817,6 +817,22 @@ function applyPixelArtOutlines(source){
  return board;
 }
 
+function mergeSparseArtworkColors(board,minimum=18){
+ const totals=new Map();
+ for(const row of board)for(const color of row)if(color&&color!=="black")totals.set(color,(totals.get(color)||0)+1);
+ const dominant=[...totals].filter(([,count])=>count>=minimum).map(([color,count])=>({color,count}));
+ if(!dominant.length)return board;
+ const rgb=color=>{const hex=COLORS[color]?.hex||"#000000";return[1,3,5].map(index=>parseInt(hex.slice(index,index+2),16));};
+ for(const [rare,count] of [...totals].sort((a,b)=>a[1]-b[1])){
+  if(count>=minimum)continue;
+  const from=rgb(rare);
+  const nearest=dominant.map(item=>{const to=rgb(item.color);const distance=(from[0]-to[0])**2*0.3+(from[1]-to[1])**2*0.59+(from[2]-to[2])**2*0.11;return{...item,distance};}).sort((a,b)=>a.distance-b.distance||b.count-a.count)[0];
+  if(!nearest)continue;
+  for(const row of board)for(let x=0;x<row.length;x++)if(row[x]===rare)row[x]=nearest.color;
+  const target=dominant.find(item=>item.color===nearest.color);if(target)target.count+=count;
+ }
+ return board;
+}
 export function createArtworkBoard(levelId="meadow-01"){
  const level=getLevel(levelId);
  if(!artworkBoardCache.has(level.id)){
@@ -828,6 +844,7 @@ export function createArtworkBoard(levelId="meadow-01"){
    if(!board)board=level.number===1?createFrogBoard():createButterflyBoard();
   }
   board=applyPixelArtOutlines(board);
+  board=mergeSparseArtworkColors(board,18);
   artworkBoardCache.set(level.id,board);
  }
  // Return a fresh mutable board: gameplay clears cells in place, so cached
