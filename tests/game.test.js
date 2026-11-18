@@ -564,6 +564,17 @@ test("the seventh firefly meadow has five exact color budgets and a fully solvab
  assert.ok(deck.length>0,"the firefly artwork must receive its complete color queue");
 });
 
+test("every campaign illustration merges tiny color flecks into readable ant squads",()=>{
+ for(const level of LEVELS){
+  const board=createArtworkBoard(level.id),totals=Object.fromEntries(Object.keys(COLORS).map(color=>[color,0]));
+  for(const row of board)for(const color of row)if(color)totals[color]++;
+  for(const [color,count] of Object.entries(totals)){
+   if(color!=="black"&&count>0)assert.ok(count>=18,`${level.id} ${color} has only ${count} pixels; sparse accents should merge into a nearby pigment`);
+  }
+  const deck=getIncoming(level.id).filter(box=>!box.role);
+  assert.equal(deck.reduce((sum,box)=>sum+box.ants,0),board.flat().filter(Boolean).length,`${level.id} must retain its exact ant budget after palette cleanup`);
+ }
+});
 test("runtime pickup removes the block without consuming another ant from the source box",()=>{
  const s=createGame(),slot=0,target=getExposedPixels(s.board)[0],color=s.board[target.y][target.x];
  const box=getIncoming(s.levelId).find(item=>item.color===color);s.slots[slot]={...box,ants:7};
