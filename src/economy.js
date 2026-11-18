@@ -1,7 +1,7 @@
 export const BUILDINGS=[
  {id:"garden",name:"Сад нектара",icon:"🌼",description:"Больше нектара за каждые 10 собранных кубиков.",baseCost:30},
  {id:"granary",name:"Большое хранилище",icon:"🧺",description:"Больше награда за полностью собранную полянку.",baseCost:45},
- {id:"nursery",name:"Питомник героев",icon:"🐣",description:"Особые муравьи появятся в одном из будущих обновлений.",baseCost:60}
+ {id:"nursery",name:"Питомник муравьёв",icon:"🐣",description:"Больше нектара за каждую завершённую полянку.",baseCost:60}
 ];
 export function createEconomy(){return{nectar:0,progress:0,lifetime:0,completed:0,buildings:{garden:0,granary:0,nursery:0}};}
 export function normalizeEconomy(value){
@@ -17,7 +17,7 @@ export function collectCube(economy){
  return next;
 }
 export function completeMeadow(economy){
- const next=normalizeEconomy(economy);next.completed++;next.nectar+=12+next.buildings.granary*5;return next;
+ const next=normalizeEconomy(economy);next.completed++;next.nectar+=12+next.buildings.granary*5+next.buildings.nursery*3;return next;
 }
 export function buildingCost(building,level){return building.baseCost*(level+1);}
 export function purchaseBuilding(economy,id){
