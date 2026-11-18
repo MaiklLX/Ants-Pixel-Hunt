@@ -401,6 +401,22 @@ test("specialist crates provide exactly enough builders and warriors for each le
   }
  }
 });
+test("generated campaign boxes are tactical partial squads, not one-box color keys",()=>{
+ for(const level of LEVELS.filter(item=>item.number>=8)){
+  const deck=getIncoming(level.id).filter(box=>!box.role);
+  assert.ok(deck.every(box=>box.ants<=46),level.name+" must keep every ordinary squad smaller than a full exposed color layer");
+  const board=createArtworkBoard(level.id),colorTotals=new Map();
+  for(const color of board.flat().filter(Boolean))colorTotals.set(color,(colorTotals.get(color)||0)+1);
+  for(const [color,total] of colorTotals){
+   const squads=deck.filter(box=>box.color===color);
+   if(total>=65){
+    assert.ok(squads.length>=2,level.name+" "+color+" should require staging multiple squads");
+    assert.ok(squads.every(box=>box.ants<total),level.name+" "+color+" must not be a single full-color key");
+   }
+  }
+ }
+});
+
 test("generated wave boxes carry substantial ant squads without losing any color budget",()=>{
  for(const level of LEVELS.filter(item=>item.number>=8)){
   const board=createArtworkBoard(level.id),deck=getIncoming(level.id).filter(box=>!box.role);
