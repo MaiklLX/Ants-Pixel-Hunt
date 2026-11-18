@@ -4815,3 +4815,7 @@ footer{color:#796589}
 }
 @media(max-height:700px){.board-wrap{width:min(94vw,44dvh,420px);max-height:44dvh}}
 @media(prefers-reduced-motion:reduce){.nest-firefly,.nest-nursery{animation:none!important;transition:none!important}.menu-level-card{transition:none!important}}
+
+/* KT-215: staged crates remain selectable while their ant squad waits for the matching frontier. */
+.choice-card.waiting-box{border-style:dashed;border-color:color-mix(in srgb,var(--ant-color) 42%,#d3e4ce);background:linear-gradient(155deg,#fffdf6,#f4f1e5);box-shadow:inset 0 0 0 1px #fff,0 2px 7px #527e4810}
+.choice-card.waiting-box::after{content:"ОЖИДАЕТ";font-size:7px;font-weight:950;letter-spacing:.8px;color:#a18a58;padding-top:1px}
