@@ -9,13 +9,13 @@ test("the authored frog is built from large collectible blocks on a 350x350 disp
  assert.equal(INITIAL_BOARD.length,SIZE);assert.ok(INITIAL_BOARD.every(r=>r.length===SIZE));
  assert.equal(s.board.length,SIZE);assert.equal(s.slots.length,SLOT_COUNT);
  assert.equal(s.tray.length,TRAY_SIZE);assert.ok(s.tray.every(r=>r.length===TRAY_SIZE));
- const colors=new Set(INITIAL_BOARD.flat().filter(Boolean));assert.ok(colors.has("black"));assert.ok(colors.size>=7&&colors.size<=16,"starter artwork should use shaded material tones while keeping a readable palette");
+ const colors=new Set(INITIAL_BOARD.flat().filter(Boolean));assert.ok(colors.has("black"));assert.ok(colors.size>=4&&colors.size<=5,"starter artwork should use four clear pigments plus its contour");
  assert.ok(s.remaining>400&&s.remaining<900);assert.ok(INITIAL_BOARD.some(row=>row.includes("")));
 });
 test("the first seven authored illustrations use richer shaded palettes",()=>{
  for(const level of LEVELS.filter(item=>item.number<=7)){
   const board=createArtworkBoard(level.id),colors=new Set(board.flat().filter(Boolean));
-  assert.ok(colors.size>=7,`${level.id} should contain layered shades and highlights`);
+  assert.ok(colors.size>=4&&colors.size<=5,`${level.id} should use a compact four-pigment palette plus contour`);
   assert.ok(colors.has("black"),`${level.id} should retain a clean outer contour`);
   assert.ok(board.flat().filter(Boolean).length>300,`${level.id} should fill a substantial part of the arena`);
  }
