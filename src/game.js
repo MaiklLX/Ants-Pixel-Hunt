@@ -1029,7 +1029,7 @@ export function createGame(levelId="meadow-01"){
   nextContainer:TRAY_SIZE*TRAY_SIZE,remaining:board.reduce((sum,row)=>sum+row.filter(Boolean).length,0),won:false,lost:false,resolving:false,
   activeSlot:-1,activeTarget:null,activeSlots:[],sortedBoxes:0,
   lockedBoxOpen:false,lockProgressColumns:[],pendingLinkedIndex:null,
-  message:"Собирай рисунок снаружи внутрь — внутренние блоки откроются следом",resolutionLog:[]};
+  message:"Открывай рисунок слоями: выпускай только муравьёв цвета доступного края. Один отряд каждого цвета за раз.",resolutionLog:[]};
 }
 export function getExposedPixels(board){
  const height=board.length,width=Math.max(0,...board.map(row=>row.length));
