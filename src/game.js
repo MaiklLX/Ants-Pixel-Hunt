@@ -833,6 +833,26 @@ function mergeSparseArtworkColors(board,minimum=18){
  }
  return board;
 }
+function mergeSmallExposedColorGroups(board,minimum=18){
+ const working=board.map(row=>row.slice()),rgb=color=>{const hex=COLORS[color]?.hex||"#000000";return[1,3,5].map(index=>parseInt(hex.slice(index,index+2),16));};
+ for(let wave=0;wave<SIZE*SIZE;wave++){
+  const exposed=getExposedPixels(working);if(!exposed.length)break;
+  const groups=new Map();
+  for(const point of exposed){const color=working[point.y][point.x];if(color){if(!groups.has(color))groups.set(color,[]);groups.get(color).push(point);}}
+  const candidates=[...groups].filter(([color])=>color!=="black").sort((a,b)=>b[1].length-a[1].length);
+  for(const [color,points] of candidates){
+   if(points.length>=minimum)continue;
+   const from=rgb(color),targets=[...groups].filter(([other,items])=>other!==color&&items.length>=minimum)
+    .map(([other,items])=>{const to=rgb(other),distance=(from[0]-to[0])**2*.3+(from[1]-to[1])**2*.59+(from[2]-to[2])**2*.11;return{color:other,count:items.length,distance};})
+    .sort((a,b)=>a.distance-b.distance||b.count-a.count);
+   const fallback=[...groups].filter(([other])=>other!==color).sort((a,b)=>b[1].length-a[1].length)[0];
+   const target=targets[0]?.color||fallback?.[0];if(!target)continue;
+   for(const point of points)board[point.y][point.x]=target;
+  }
+  for(const point of exposed)working[point.y][point.x]="";
+ }
+ return board;
+}
 export function createArtworkBoard(levelId="meadow-01"){
  const level=getLevel(levelId);
  if(!artworkBoardCache.has(level.id)){
@@ -845,6 +865,7 @@ export function createArtworkBoard(levelId="meadow-01"){
   }
   board=applyPixelArtOutlines(board);
   board=mergeSparseArtworkColors(board,18);
+  board=mergeSmallExposedColorGroups(board,18);
   artworkBoardCache.set(level.id,board);
  }
  // Return a fresh mutable board: gameplay clears cells in place, so cached
@@ -906,22 +927,8 @@ export function buildIncoming(board,levelNumber=1){
    for(const color of colors)if(totals[color])fallback.push({color,ants:totals[color]});
    if(fallback.length)waves.push(fallback);
   }
-  // Fold undersized color batches into the nearest same-color wave when
-  // capacity allows. The crate waits for its later pixels, but the ant budget
-  // stays generous and the player still has to manage the five start cells.
-  for(const color of colors){
-   const refs=[];
-   for(let wi=0;wi<waves.length;wi++)for(const box of waves[wi])if(box.color===color)refs.push({wave:wi,box});
-   for(const ref of refs){
-    if(ref.box.ants===0||ref.box.ants>=18)continue;
-    const candidates=refs.filter(other=>other!==ref&&other.box.ants>0&&other.box.ants+ref.box.ants<=BOX_CAPACITY)
-     .sort((a,b)=>Math.abs(a.wave-ref.wave)-Math.abs(b.wave-ref.wave));
-    const partner=candidates[0];if(!partner)continue;
-    if(ref.wave<=partner.wave){ref.box.ants+=partner.box.ants;partner.box.ants=0;}
-    else{partner.box.ants+=ref.box.ants;ref.box.ants=0;}
-   }
-  }
-  for(let wi=0;wi<waves.length;wi++)waves[wi]=waves[wi].filter(box=>box.ants>0);
+  // Do not move ants between layers: every box must be able to finish on the
+  // pixels exposed at the moment its wave is reached.
   // Keep each third wave in a separate tray lane. The top row now presents
   // one immediately useful layer and two tempting future layers: taking the
   // wrong colors consumes scarce start compartments until the right layer opens.
