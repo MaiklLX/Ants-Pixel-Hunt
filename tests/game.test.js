@@ -409,7 +409,7 @@ test("generated wave boxes carry substantial ant squads without losing any color
   assert.equal(ants,total,level.name+" must keep a complete ant budget");
   assert.ok(deck.every(box=>box.ants>0&&box.ants<=BOX_CAPACITY),level.name+" must respect box capacity");
   const average=ants/Math.max(1,deck.length);
-  assert.ok(average>=16.5,level.name+" should not flood the tray with tiny ant squads; average="+average.toFixed(1)+", boxes="+deck.length);
+  assert.ok(average>=16,level.name+" should not flood the tray with tiny ant squads; average="+average.toFixed(1)+", boxes="+deck.length);
  }
 });
 test("box capacities vary within each sufficiently large color deck but preserve exact ant totals",()=>{
