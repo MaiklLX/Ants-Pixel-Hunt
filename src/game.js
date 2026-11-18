@@ -397,7 +397,10 @@ function generatedPixelIconDetail(type,zone,u,v,variant){
  return -1;
 }
 function generatedMotifColor(type,zone,u,v,variant,scenePalette){
- const palette=GENERATED_ART_PALETTES[type]||GENERATED_ART_PALETTES.flower;
+ const sourcePalette=GENERATED_ART_PALETTES[type]||GENERATED_ART_PALETTES.flower;
+ // Keep a deliberate 9-pigment object palette; later detail indices reuse
+ // those pigments instead of fragmenting the artwork into tiny color batches.
+ const palette=sourcePalette.map((color,index)=>index<9?color:sourcePalette[(index-9)%9]);
  // Keep each object in its own natural pigment family. A shared scene palette
  // made unrelated motifs inherit the same colors and flattened their identity.
  const interior=u>.12&&u<.88&&v>.12&&v<.88;
