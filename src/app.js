@@ -1,4 +1,4 @@
-import {COLORS,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,LEVELS,getLevel,getIncoming,createGame,canChoose,chooseTopColumn,isLockedBox,getLinkedPartner,findAntWave,applyAntPickup,completeBoxDeparture,isDefeat,isGameComplete,getExposedTargets,getExposedPixels,countQueuedBySlot,countDispatchingWorkers,countSlotWorkers} from "./game.js";
+import {COLORS,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,LEVELS,getLevel,getIncoming,createGame,canChoose,chooseTopColumn,canLaunchBox,isLockedBox,getLinkedPartner,findAntWave,applyAntPickup,completeBoxDeparture,isDefeat,isGameComplete,getExposedTargets,getExposedPixels,countQueuedBySlot,countDispatchingWorkers,countSlotWorkers} from "./game.js";
 import {getAntTripFrame,getAntLaunchDelay,getAntQueueDelay,createPausableClock,getTrailPose,getAntTravelDurations,getAntGaitFrame} from "./ant-animation.js";
 import {isCampaignLevelUnlocked,getNextCampaignLevel} from "./campaign.js";
 import {BUILDINGS,createEconomy,normalizeEconomy,collectCube,completeMeadow,purchaseBuilding,buildingCost} from "./economy.js";
@@ -318,7 +318,7 @@ function renderChoices(){
   const linked=box?.special==="linked",partner=linked?getLinkedPartner(state.levelId,index):null;
   const waitingForPartner=linked&&state.pendingLinkedIndex!==index&&!state.tray[0].includes(partner),needsPairSlots=linked&&(state.pendingLinkedIndex===null||state.pendingLinkedIndex===undefined)&&state.slots.filter(slot=>slot===null).length<2;
   const blockedByPair=state.pendingLinkedIndex!==null&&state.pendingLinkedIndex!==undefined&&index!==state.pendingLinkedIndex;
-  button.disabled=!box||sealed||resetting||resetAfterMenu||state.won||state.lost||!canChoose(state)||blockedByPair||waitingForPartner||needsPairSlots;
+  const frontierReady=box&&canLaunchBox(state,index);\n  button.disabled=!box||sealed||!frontierReady||resetting||resetAfterMenu||state.won||state.lost||!canChoose(state)||blockedByPair||waitingForPartner||needsPairSlots;
   if(sealed){
    const crate=document.createElement("span");crate.className="choice-crate sealed-crate";crate.setAttribute("aria-hidden","true");
     for(let plank=0;plank<3;plank++){const board=document.createElement("i");board.className="sealed-plank";crate.append(board);}
@@ -334,7 +334,7 @@ function renderChoices(){
    else{const gem=document.createElement("i");gem.style.setProperty("--gem-color",COLORS[box.color].hex);crate.append(gem);}
    const colorName=document.createElement("span");colorName.className="box-color-name";colorName.textContent=box.role==="builder"?"Строители":box.role==="warrior"?"Военные":COLORS[box.color].name;
    const count=document.createElement("small");count.className="box-count";count.textContent=`${box.ants.toLocaleString("ru-RU")} 🐜`;
-   button.append(crate,colorName,count);button.setAttribute("aria-label",`${linked?"Связанный бокс. ":""}${box.role?"Бокс: "+colorName.textContent+". ":"Выбрать бокс: "}${box.ants} муравьёв`);
+   button.append(crate,colorName,count);if(!frontierReady&&!linked)button.title="Этот цвет пока закрыт рисунком. Сначала расчисти доступный слой";button.setAttribute("aria-label",`${linked?"Связанный бокс. ":""}${box.role?"Бокс: "+colorName.textContent+". ":"Выбрать бокс: "}${box.ants} муравьёв`);
   }else{button.textContent="Очередь закончилась";button.setAttribute("aria-label","В этой колонке больше нет боксов");}
   button.addEventListener("click",()=>onChoose(col));lane.append(button);
   const preview=document.createElement("div");preview.className="queue-preview";preview.setAttribute("aria-label","Следующие боксы в колонке");
