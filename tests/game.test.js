@@ -26,7 +26,7 @@ test("the box deck contains exactly enough ants to collect every pixel by color"
  const deckTotals=Object.fromEntries(Object.keys(COLORS).map(color=>[color,0]));
  for(const box of INCOMING)deckTotals[box.color]+=box.ants;
  assert.deepEqual(Object.fromEntries(Object.entries(deckTotals).filter(([,total])=>total>0)),Object.fromEntries(Object.entries(totals).filter(([,total])=>total>0)));assert.ok(INCOMING.length>9);assert.equal(BOX_CAPACITY,60);
- assert.deepEqual(INCOMING.slice(0,5).map(box=>box.color),["black","green","purple","red","yellow"]);
+ assert.deepEqual(INCOMING.slice(0,5).map(box=>box.color),["black","forest","green","lime","cream"]);
 });
 test("only top-row boxes can be selected; chosen column shifts upward and refills at bottom",()=>{
  const s=createGame();assert.deepEqual(s.tray,[[0,1,2],[3,4,5],[6,7,8]]);
