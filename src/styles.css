@@ -4766,3 +4766,6 @@ footer{color:#796589}
  .map-overlay .trail-node .campaign-emoji{width:34px;height:34px;font-size:20px}
  .map-overlay .trail-node .trail-name{font-size:8px}
 }
+
+.map-overlay .map-card{height:min(920px,calc(100dvh - 24px))}
+.map-overlay #campaign-levels{flex:1 1 auto}
