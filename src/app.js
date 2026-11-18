@@ -139,39 +139,29 @@ function obstacleAt(x,y){
 function drawBoardTile(x,y,exposed,cell){
  const color=state.board[y][x];if(!color||obstacleAt(x,y))return;
  const px=x*cell,py=y*cell,size=cell,rgb=COLORS[color].hex;
- const inset=Math.max(.35,cell*.055),left=px+inset,top=py+inset,w=size-inset*2,h=size-inset*2;
- const radius=Math.max(1,cell*.19);
+ const inset=Math.max(.18,cell*.022),left=px+inset,top=py+inset,w=size-inset*2,h=size-inset*2;
+ const radius=Math.max(1.2,cell*.25);
  boardCtx.save();
- // Glossy toy-block finish from the supplied Food Hunt reference:
- // separated rounded pixels, a deep lower bevel and a soft raised shadow.
- boardCtx.shadowColor="#30223c66";boardCtx.shadowBlur=Math.max(1,cell*.12);
- boardCtx.shadowOffsetX=0;boardCtx.shadowOffsetY=Math.max(.65,cell*.11);
+ // Chunky candy-like pixel: nearly full-cell face, a confident rounded edge
+ // and a visible lower bevel. The color stays flat and readable at phone size.
+ boardCtx.shadowColor="#34274755";boardCtx.shadowBlur=Math.max(1,cell*.16);
+ boardCtx.shadowOffsetX=0;boardCtx.shadowOffsetY=Math.max(.8,cell*.13);
  boardCtx.beginPath();boardCtx.roundRect(left,top,w,h,radius);
- const face=boardCtx.createLinearGradient(left,top,left+w,top+h);
- face.addColorStop(0,lightenHex(rgb,.24));face.addColorStop(.38,rgb);face.addColorStop(1,darkenHex(rgb,.19));
+ const face=boardCtx.createLinearGradient(left,top,left+w*.18,top+h);
+ face.addColorStop(0,lightenHex(rgb,.19));face.addColorStop(.48,rgb);face.addColorStop(1,darkenHex(rgb,.22));
  boardCtx.fillStyle=face;boardCtx.fill();
  boardCtx.shadowColor="transparent";boardCtx.shadowBlur=0;boardCtx.shadowOffsetY=0;
- boardCtx.lineWidth=Math.max(.45,cell*.055);
- boardCtx.strokeStyle=color==="black"?"#20202a":"#493c4c88";
+ boardCtx.lineWidth=Math.max(.65,cell*.065);
+ boardCtx.strokeStyle=color==="black"?"#20202a":"#493c4c99";
  boardCtx.stroke();
- // Thick lower/right bevel makes each cell feel like a small molded cube.
- boardCtx.beginPath();boardCtx.moveTo(left+radius,top+h-.45);boardCtx.lineTo(left+w-radius,top+h-.45);
- boardCtx.quadraticCurveTo(left+w-.45,top+h-.45,left+w-.45,top+h-radius);
- boardCtx.strokeStyle=darkenHex(rgb,.34);boardCtx.lineWidth=Math.max(.7,cell*.1);boardCtx.stroke();
- // Layered glossy face: a narrow rim, soft top reflection and a
- // translucent lower sheen make adjacent cells read as crafted mosaic pieces.
- boardCtx.save();boardCtx.beginPath();boardCtx.roundRect(left+cell*.09,top+cell*.07,w-cell*.18,h-cell*.16,Math.max(.8,radius*.72));boardCtx.clip();
- const shine=boardCtx.createLinearGradient(left,top,left,top+h);
- shine.addColorStop(0,"#ffffff9c");shine.addColorStop(.28,"#ffffff22");shine.addColorStop(.72,"#ffffff00");shine.addColorStop(1,"#1b142522");
- boardCtx.fillStyle=shine;boardCtx.fillRect(left,top,w,h);
- const gloss=boardCtx.createLinearGradient(left,top,left+w*.7,top+cell*.42);
- gloss.addColorStop(0,"#ffffff50");gloss.addColorStop(.48,"#ffffff08");gloss.addColorStop(1,"#ffffff00");
- boardCtx.fillStyle=gloss;boardCtx.fillRect(left,top,w,h);
- boardCtx.restore();
- // Tiny paired glints keep the toy-like finish without obscuring pixel colors.
+ // Broad toy-block bevel: a short highlight along the top and a rounded dark foot.
+ boardCtx.beginPath();boardCtx.moveTo(left+radius*.8,top+cell*.11);boardCtx.lineTo(left+w-radius*.8,top+cell*.11);
+ boardCtx.strokeStyle="#ffffff75";boardCtx.lineWidth=Math.max(.7,cell*.09);boardCtx.stroke();
+ boardCtx.beginPath();boardCtx.moveTo(left+radius,top+h-cell*.08);boardCtx.lineTo(left+w-radius,top+h-cell*.08);
+ boardCtx.quadraticCurveTo(left+w-cell*.08,top+h-cell*.08,left+w-cell*.08,top+h-radius);
+ boardCtx.strokeStyle=darkenHex(rgb,.38);boardCtx.lineWidth=Math.max(.8,cell*.12);boardCtx.stroke();
  if(color!=="black"){
-  boardCtx.fillStyle="#ffffff9a";boardCtx.beginPath();boardCtx.ellipse(left+cell*.23,top+cell*.2,cell*.075,cell*.04,-.45,0,Math.PI*2);boardCtx.fill();
-  boardCtx.fillStyle="#ffffff45";boardCtx.beginPath();boardCtx.ellipse(left+cell*.39,top+cell*.16,cell*.035,cell*.022,-.45,0,Math.PI*2);boardCtx.fill();
+  boardCtx.fillStyle="#ffffff88";boardCtx.beginPath();boardCtx.ellipse(left+cell*.25,top+cell*.22,cell*.12,cell*.055,-.35,0,Math.PI*2);boardCtx.fill();
  }
  if(exposed){
   boardCtx.strokeStyle="#fff0b5";boardCtx.lineWidth=Math.max(.65,cell*.07);
