@@ -756,3 +756,28 @@ test("KT-187 campaign map no longer splits the journey into biome windows",async
  assert.doesNotMatch(html,/map-chapter-nav|campaign-chapter-/);
  assert.match(app,/button\.className="campaign-level trail-node"/);
 });
+
+test("KT-201 home launch button targets the highest unlocked campaign level",async()=>{
+ const app=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
+ assert.match(app,/const latestAvailable=LEVELS\.filter\(item=>isLevelUnlocked\(item\)\)\.at\(-1\)/);
+ assert.match(app,/currentButton\.dataset\.levelId=launchLevel\.id/);
+ assert.match(app,/startFreshGame\(\$\("menu-current-level"\)\.dataset\.levelId\|\|state\.levelId\)/);
+ assert.match(app,/НАЧАТЬ →/);
+});
+test("KT-202 renders chunky toy-like blocks and larger arena sizing",async()=>{
+ const app=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
+ const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
+ assert.match(app,/cell\*\.022/);
+ assert.match(app,/cell\*\.25/);
+ assert.match(styles,/width:min\(100%,min\(540px,52dvh,calc\(100dvh - 300px\)\)\)/);
+ assert.match(styles,/\.menu-level-card\{min-height:118px/);
+});
+test("KT-201 shows a functional nursery inside the evolving colony scene",async()=>{
+ const app=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
+ const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
+ const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
+ assert.match(app,/nursery=colony\.buildings\.nursery/);
+ assert.match(app,/scene\.dataset\.nurseryLevel=String\(nursery\)/);
+ assert.match(html,/class="nest-nursery"/);
+ assert.match(styles,/\.nest-scene\[data-nursery-level="3"\] \.nest-nursery/);
+});
