@@ -1,4 +1,5 @@
-import {COLORS,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,LEVELS,getLevel,getIncoming,createGame,canChoose,chooseTopColumn,canLaunchBox,isLockedBox,getLinkedPartner,findAntWave,applyAntPickup,completeBoxDeparture,isDefeat,isGameComplete,getExposedTargets,getExposedPixels,countQueuedBySlot,countDispatchingWorkers,countSlotWorkers} from "./game.js";
+import {COLORS,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,LEVELS,getLevel,getIncoming,createGame,setArtworkBoard,canChoose,chooseTopColumn,canLaunchBox,isLockedBox,getLinkedPartner,findAntWave,applyAntPickup,completeBoxDeparture,isDefeat,isGameComplete,getExposedTargets,getExposedPixels,countQueuedBySlot,countDispatchingWorkers,countSlotWorkers} from "./game.js";
+import {createArtworkSvg} from "./artwork-renderer.js";
 import {getAntTripFrame,getAntLaunchDelay,getAntQueueDelay,createPausableClock,getTrailPose,getAntTravelDurations,getAntGaitFrame} from "./ant-animation.js";
 import {isCampaignLevelUnlocked,getNextCampaignLevel} from "./campaign.js";
 import {BUILDINGS,createEconomy,normalizeEconomy,collectCube,completeMeadow,purchaseBuilding,buildingCost} from "./economy.js";
@@ -104,7 +105,54 @@ const loadingSlots=new Set(),workerPromises=new Map(),reservedTargets=new Set(),
 let workerSequence=0,lastAntFrameAt=0,lastExposedPixels=new Set();
 const MAX_ACTIVE_ANTS=36,ANT_FRAME_INTERVAL=1000/60;
 const colorRGB=Object.fromEntries(Object.entries(COLORS).map(([key,value])=>[key,value.hex.match(/[\da-f]{2}/gi).map(v=>parseInt(v,16))]));
-let boardEmptyGradient=null;
+let boardEmptyGradient=null,boardArtworkKey="",boardArtworkImage=null;
+function rasterizeArtworkToBlocks(image){
+ const canvas=document.createElement("canvas");canvas.width=450;canvas.height=450;
+ const ctx=canvas.getContext("2d",{willReadFrequently:true});ctx.clearRect(0,0,450,450);ctx.drawImage(image,0,0,450,450);
+ const pixels=ctx.getImageData(0,0,450,450).data;
+ const palette=Object.entries(COLORS).filter(([key])=>key!=="black"&&key!=="gray").map(([key,value])=>{
+  const hex=value.hex;return{key,r:parseInt(hex.slice(1,3),16),g:parseInt(hex.slice(3,5),16),b:parseInt(hex.slice(5,7),16)};
+ });
+ const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
+ for(let gy=0;gy<SIZE;gy++)for(let gx=0;gx<SIZE;gx++){
+  let r=0,g=0,b=0,alpha=0,weight=0;
+  for(let py=gy*10;py<(gy+1)*10;py++)for(let px=gx*10;px<(gx+1)*10;px++){
+   const index=(py*450+px)*4,a=pixels[index+3]/255;
+   if(a<.08)continue;
+   r+=pixels[index]*a;g+=pixels[index+1]*a;b+=pixels[index+2]*a;alpha+=a;weight++;
+  }
+  if(!weight||alpha/100<.22)continue;
+  r/=alpha;g/=alpha;b/=alpha;
+  let nearest=palette[0],best=Infinity;
+  for(const color of palette){
+   const dr=r-color.r,dg=g-color.g,db=b-color.b;
+   const distance=dr*dr*.30+dg*dg*.59+db*db*.11;
+   if(distance<best){best=distance;nearest=color;}
+  }
+  board[gy][gx]=nearest.key;
+ }
+ return board;
+}
+function ensureBoardArtwork(){
+ const key=state.levelId;
+ if(boardArtworkKey===key)return;
+ boardArtworkKey=key;boardArtworkImage=null;
+ const image=new Image();
+ image.onload=()=>{
+  if(boardArtworkKey!==key||state.levelId!==key)return;
+  boardArtworkImage=image;
+  const board=rasterizeArtworkToBlocks(image);
+  setArtworkBoard(key,board);
+  // The SVG is never shown as an overlay: its sampled pigments now are the
+  // actual collectible cells, so ants remove the visible image tile by tile.
+  state=createGame(key);
+  totalBlocks=state.remaining+(state.obstacles||[]).reduce((sum,item)=>sum+item.hp,0);
+  lastExposedPixels=new Set();
+  render();
+ };
+ image.onerror=()=>{if(boardArtworkKey===key)boardArtworkImage=null;};
+ image.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(createArtworkSvg(Number(getLevel(key).number)));
+}
 function tasksRemaining(){
  return state.remaining+(state.obstacles||[]).reduce((sum,item)=>sum+item.hp,0);
 }
@@ -265,6 +313,7 @@ function drawBoardScenery(){
  boardCtx.restore();
 }
 function renderBoard(){
+ ensureBoardArtwork();
  const width=boardEl.width,height=boardEl.height,cell=width/SIZE;
  boardCtx.clearRect(0,0,width,height);
  boardEmptyGradient=boardCtx.createLinearGradient(0,0,width,height);
