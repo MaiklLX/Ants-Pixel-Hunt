@@ -589,7 +589,8 @@ test("the seventh firefly meadow has five exact color budgets and a fully solvab
  const exposed=getExposedPixels(board);
  assert.ok(exposed.length>0);
  assert.ok(exposed.every(({x,y})=>board[y][x]==="black"),"every game-exposed block, including board-edge cells, must use the black contour");
- assert.equal(exposed.length,totals.black,"the complete black contour must be reachable from outside");
+ assert.ok(exposed.length<=totals.black,"the outer black contour must be reachable first; internal ink lines may unlock in later layers");
+ assert.ok(totals.black>exposed.length,"the illustration should retain internal black contours beneath the outer silhouette");
  const deck=getIncoming(level.id),deckTotals=Object.fromEntries(Object.keys(COLORS).map(color=>[color,0]));
  for(const box of deck){assert.ok(box.ants>0&&box.ants<=BOX_CAPACITY);if(!box.role)deckTotals[box.color]+=box.ants;}
  assert.deepEqual(deckTotals,totals,"the queue must contain exactly one ant per artwork block");
