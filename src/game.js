@@ -370,7 +370,12 @@ function generatedPixelIconDetail(type,zone,u,v,variant){
   case "bird":
    if(zone===1&&(pixel(9,4)||pixel(10,4)))return 2;
    if(zone===2&&(pixel(11,5)||pixel(12,5)))return 3;
-   if(zone===1&&((y===8&&x>=3&&x<=8)||(y===9&&x>=4&&x<=7)))return 5;
+   // Stepped feather patch gives the body a clear wing direction and stays
+   // connected at the rendered board scale.
+   if(zone===1&&(
+    (y===6&&x>=4&&x<=8)||(y===7&&x>=3&&x<=8)||
+    (y===8&&x>=4&&x<=7)||(y===9&&x>=5&&x<=7)
+   ))return 5;
    break;
   case "acorn":
    if(zone===1&&(hline(5,4,9)||hline(6,3,10)))return 5;
@@ -381,10 +386,19 @@ function generatedPixelIconDetail(type,zone,u,v,variant){
    if(zone===2&&(pixel(5,3)||pixel(9,3)||pixel(5,10)||pixel(9,10)))return 5;
    if(zone===1&&(pixel(10,6)||pixel(10,7)))return 3;
    break;
-  case "tree":
+  case "tree":{
+   // Connected foliage clusters and a trunk highlight read as branches,
+   // rather than evenly scattered decorative pixels.
    if(zone===0&&(x===6||x===7)&&y>=7&&y<=12)return 0;
-   if(zone===1&&((x+y+p)%5===0)&&x>=3&&x<=10&&y>=2&&y<=8)return 2;
+   const leafCluster=(cx,cy,rx,ry)=>
+    ((x-cx)*(x-cx))/(rx*rx)+((y-cy)*(y-cy))/(ry*ry)<=1;
+   if(zone===1&&(
+    leafCluster(4,4,2.1,1.8)||leafCluster(8,3,2.4,2.0)||
+    leafCluster(10,6,1.8,1.7)||leafCluster(5,7,2.0,1.4)
+   ))return 2;
+   if(zone===1&&(x===6||x===7)&&y>=5&&y<=8)return 3;
    break;
+  }
   case "cloud":
    if(zone===1&&(pixel(4,6)||pixel(5,6)||pixel(8,6)||pixel(9,6)))return 3;
    if(zone===1&&hline(8,3,10))return 5;
