@@ -110,8 +110,19 @@ function rasterizeArtworkToBlocks(image){
  const canvas=document.createElement("canvas");canvas.width=450;canvas.height=450;
  const ctx=canvas.getContext("2d",{willReadFrequently:true});ctx.clearRect(0,0,450,450);ctx.drawImage(image,0,0,450,450);
  const pixels=ctx.getImageData(0,0,450,450).data;
+ const toLab=(r,g,b)=>{
+  const linear=value=>{value/=255;return value<=.04045?value/12.92:((value+.055)/1.055)**2.4;};
+  r=linear(r);g=linear(g);b=linear(b);
+  const x=(r*.4124564+g*.3575761+b*.1804375)/.95047;
+  const y=(r*.2126729+g*.7151522+b*.0721750);
+  const z=(r*.0193339+g*.1191920+b*.9503041)/1.08883;
+  const f=value=>value>.008856?Math.cbrt(value):7.787*value+16/116;
+  const fx=f(x),fy=f(y),fz=f(z);
+  return{l:116*fy-16,a:500*(fx-fy),b:200*(fy-fz)};
+ };
  const palette=Object.entries(COLORS).filter(([key])=>key!=="black"&&key!=="gray").map(([key,value])=>{
-  const hex=value.hex;return{key,r:parseInt(hex.slice(1,3),16),g:parseInt(hex.slice(3,5),16),b:parseInt(hex.slice(5,7),16)};
+  const hex=value.hex,r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return{key,...toLab(r,g,b)};
  });
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
  for(let gy=0;gy<SIZE;gy++)for(let gx=0;gx<SIZE;gx++){
@@ -123,10 +134,11 @@ function rasterizeArtworkToBlocks(image){
   }
   if(!weight||alpha/100<.22)continue;
   r/=alpha;g/=alpha;b/=alpha;
+  const sample=toLab(r,g,b);
   let nearest=palette[0],best=Infinity;
   for(const color of palette){
-   const dr=r-color.r,dg=g-color.g,db=b-color.b;
-   const distance=dr*dr*.30+dg*dg*.59+db*db*.11;
+   const dl=sample.l-color.l,da=sample.a-color.a,db=sample.b-color.b;
+   const distance=dl*dl+da*da+db*db;
    if(distance<best){best=distance;nearest=color;}
   }
   board[gy][gx]=nearest.key;
