@@ -1052,6 +1052,12 @@ function createLevelObstacles(levelId,board){
  }));
 }
 const incomingCache=new Map();
+export function setArtworkBoard(levelId,board){
+ const id=getLevel(levelId).id;
+ if(!Array.isArray(board)||board.length!==SIZE||board.some(row=>!Array.isArray(row)||row.length!==SIZE))throw new Error("Artwork board must be a 45×45 grid");
+ artworkBoardCache.set(id,board.map(row=>row.slice()));
+ incomingCache.delete(id);
+}
 export function getIncoming(levelId="meadow-01"){
  const id=getLevel(levelId).id;
  if(!incomingCache.has(id)){
