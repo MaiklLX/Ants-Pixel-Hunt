@@ -764,6 +764,17 @@ test("every live queue opens with at least one immediately playable top-lane cra
  }
 });
 
+test("generated opening row offers distinct useful colors when the exposed rim has a choice",()=>{
+ for(const level of LEVELS.filter(item=>item.number>=8&&item.number<26)){
+  const state=createGame(level.id),deck=getIncoming(level.id);
+  const exposedColors=new Set(getExposedPixels(state.board).map(point=>state.board[point.y][point.x]));
+  if(exposedColors.size<2)continue;
+  const useful=state.tray[0].filter(index=>index!==null&&canLaunchBox(state,index)).map(index=>deck[index]).filter(box=>box&&!box.role);
+  const colors=new Set(useful.map(box=>box.color));
+  assert.ok(colors.size>=2,level.name+" should offer two different currently exposed colors instead of duplicate squads");
+ }
+});
+
 test("linked crates are scheduled at the same queue depth in separate lanes across all 500 levels",()=>{
  for(const level of LEVELS){
   const pair=getLinkedPair(level.id);
