@@ -946,7 +946,16 @@ export function buildIncoming(board,levelNumber=1){
    const totals=Object.fromEntries(colors.map(color=>[color,0]));
    for(const row of working)for(const color of row)if(color)totals[color]++;
    const fallback=[];
-   for(const color of colors)if(totals[color])fallback.push({color,ants:totals[color]});
+   for(const color of colors){
+    let left=totals[color],part=0;
+    while(left>0){
+     const squadBase=levelNumber<26?40:levelNumber<76?36:levelNumber<151?32:levelNumber<301?28:24;
+     let target=Math.min(left,squadBase+((wave+part+color.charCodeAt(0))%5)+2);
+     if(left>target&&left-target<20)target=left-20;
+     const ants=Math.min(left,target);
+     fallback.push({color,ants});left-=ants;part++;
+    }
+   }
    if(fallback.length)waves.push(fallback);
   }
   // Never merge across exposure layers: doing so would turn one box into
