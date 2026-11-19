@@ -1,7 +1,7 @@
 import {RASTER_ARTWORK} from "./artwork-data.js";
 
-export const SIZE=35;
-export const GRID_SIZE=350;
+export const SIZE=45;
+export const GRID_SIZE=450;
 export const BLOCK_SIZE=GRID_SIZE/SIZE;
 export const BOX_CAPACITY=150;
 export const SLOT_COUNT=5;
@@ -591,7 +591,12 @@ function generatedSceneLayout(count,variant){
   ]
  };
  const choices=layouts[count]||layouts[3];
- return choices[variant%choices.length];
+ const scale=SIZE/35;
+ return choices[variant%choices.length].map(([x,y,width,height])=>{
+  const left=Math.round(x*scale),top=Math.round(y*scale);
+  const right=Math.round((x+width)*scale),bottom=Math.round((y+height)*scale);
+  return [left,top,right-left,bottom-top];
+ });
 }
 const rasterArtworkCache=new Map();
 const BASE64_ALPHABET="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -604,13 +609,19 @@ function createRasterArtworkBoard(type){
    accumulator=(accumulator<<6)|value;bits+=6;
    if(bits>=8){bits-=8;bytes.push((accumulator>>bits)&255);accumulator&=(1<<bits)-1;}
   }
+  // Authored source illustrations are 35×35. Decode at their native size,
+  // then enlarge with nearest-neighbour sampling so every original pixel stays
+  // crisp while the 45×45 board gains room for future scene details.
+  const sourceSize=35,sourceBoard=Array.from({length:sourceSize},()=>Array(sourceSize).fill(""));
   let bit=0;
-  const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
-  for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){
+  for(let y=0;y<sourceSize;y++)for(let x=0;x<sourceSize;x++){
    let value=0;
    for(let index=0;index<3;index++){value=(value<<1)|((bytes[bit>>3]>>(7-(bit&7)))&1);bit++;}
-   board[y][x]=value===7?"":source.palette[value]||"";
+   sourceBoard[y][x]=value===7?"":source.palette[value]||"";
   }
+  const board=Array.from({length:SIZE},(_,y)=>Array.from({length:SIZE},(_,x)=>
+   sourceBoard[Math.min(sourceSize-1,Math.floor(y*sourceSize/SIZE))][Math.min(sourceSize-1,Math.floor(x*sourceSize/SIZE))]
+  ));
   rasterArtworkCache.set(type,board);
  }
  return rasterArtworkCache.get(type).map(row=>row.slice());
