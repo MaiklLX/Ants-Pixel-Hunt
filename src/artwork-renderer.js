@@ -157,12 +157,12 @@ fish:
 };
 const MOTIF_ORDER=['flower','tree','mushroom','butterfly','house','fish','snail','rocket','bird','acorn','bee','cloud'];
 function sceneLayout(count,variant){
- const choices=count===1?[[[0,0,35,35]]]:count===2?[
+ const choices=count===1?[[[5,5,35,35]]]:count===2?[
  [[0,2,19,31],[17,2,18,31]],[[0,1,18,33],[17,1,18,33]],[[0,2,20,31],[18,2,17,31]]
  ]:[
  [[9,1,17,22],[0,17,17,18],[18,17,17,18]],[[0,1,17,22],[18,1,17,22],[9,17,17,18]],[[9,0,17,22],[0,17,17,18],[18,17,17,18]]
  ];
- return choices[variant%choices.length].map(p=>p.slice());
+ return choices[variant%choices.length].map(p=>[p[0]+5,p[1]+5,p[2],p[3]]);
 }
 export function createArtworkSvg(levelNumber){
  const isStarter=levelNumber<=7;
