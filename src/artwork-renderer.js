@@ -93,6 +93,22 @@ bird:
 '<ellipse cx="244" cy="162" rx="22" ry="25" fill="#f5e9d1"/><circle cx="250" cy="163" r="10" fill="#24323a"/><circle cx="253" cy="159" r="3.5" fill="#fff"/>'+
 '<path d="M105 244Q69 267 58 294Q100 295 143 273" fill="#b86e45" stroke="#754736" stroke-width="5"/>'+
 '<path d="M160 282L151 315M203 283L210 315" stroke="#8c603e" stroke-width="7" stroke-linecap="round"/><path d="M141 317L163 317M198 317L220 317" stroke="#b27b45" stroke-width="6" stroke-linecap="round"/></g>',
+firefly:
+'<g filter="url(#shadow)"><ellipse cx="175" cy="231" rx="104" ry="112" fill="url(#glow)" opacity=".62"/>'+
+'<path d="M151 143C93 70 62 97 89 161Q113 194 157 190M199 143C257 70 288 97 261 161Q237 194 193 190" fill="url(#wingBlue)" stroke="#557b91" stroke-width="5" opacity=".82"/>'+
+'<path d="M151 166Q109 129 93 151M199 166Q241 129 257 151" fill="none" stroke="#e6fbff" stroke-width="4" opacity=".75"/>'+
+'<ellipse cx="175" cy="217" rx="63" ry="91" fill="url(#leaf)" stroke="#355d43" stroke-width="7"/>'+
+'<path d="M132 191Q175 209 218 191M128 221Q175 241 222 221M139 253Q175 270 211 253" fill="none" stroke="#31563d" stroke-width="12"/>'+
+'<ellipse cx="175" cy="278" rx="43" ry="48" fill="url(#glow)" stroke="#d6a747" stroke-width="5"/>'+
+'<ellipse cx="175" cy="278" rx="27" ry="32" fill="#f6df78" opacity=".94"/>'+
+'<path d="M155 278Q175 291 195 278" fill="none" stroke="#e7a94b" stroke-width="5" stroke-linecap="round"/>'+
+'<circle cx="175" cy="111" r="53" fill="url(#skinLight)" stroke="#3d754c" stroke-width="7"/>'+
+'<ellipse cx="157" cy="107" rx="9" ry="13" fill="#f7f0d7"/><ellipse cx="193" cy="107" rx="9" ry="13" fill="#f7f0d7"/>'+
+'<circle cx="159" cy="108" r="5" fill="#263b35"/><circle cx="195" cy="108" r="5" fill="#263b35"/>'+
+'<circle cx="161" cy="106" r="2" fill="#fff"/><circle cx="197" cy="106" r="2" fill="#fff"/>'+
+'<path d="M158 66Q142 39 127 38M192 66Q208 39 223 38" stroke="#584c3b" stroke-width="5" fill="none" stroke-linecap="round"/>'+
+'<circle cx="127" cy="38" r="5" fill="#e6c46e"/><circle cx="223" cy="38" r="5" fill="#e6c46e"/>'+
+'<path d="M143 292L126 326M207 292L224 326" stroke="#416c47" stroke-width="8" stroke-linecap="round"/></g>',
 bee:
 '<g filter="url(#shadow)"><path d="M126 145Q89 89 112 61Q145 36 170 111M224 145Q261 89 238 61Q205 36 180 111" fill="url(#wingBlue)" stroke="#7199ad" stroke-width="5" opacity=".88"/>'+
 '<path d="M111 177Q104 111 175 103Q246 111 239 177L224 252Q175 304 126 252Z" fill="#f0bf4b" stroke="#75502f" stroke-width="7"/>'+
