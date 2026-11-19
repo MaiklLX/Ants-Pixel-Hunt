@@ -450,6 +450,28 @@ test("generated campaign boxes are tactical partial squads, not one-box color ke
  }
 });
 
+test("fallback queue fragments never create oversized ordinary squads",()=>{
+ for(const level of LEVELS.filter(item=>item.number>=8)){
+  const deck=buildIncoming(createArtworkBoard(level.id),level.number);
+  assert.ok(deck.every(box=>box.ants>0&&box.ants<=46),level.name+" fallback squads must stay within the tactical size cap");
+ }
+});
+
+test("the opening queue offers a useful exposed color before its future-layer temptation",()=>{
+ for(const level of LEVELS.filter(item=>item.number>=8)){
+  const board=createArtworkBoard(level.id),deck=buildIncoming(board,level.number);
+  const exposedColors=new Set(getExposedPixels(board).map(point=>board[point.y][point.x]));
+  assert.ok(deck.length>=1,level.name+" must have an opening crate");
+  assert.ok(exposedColors.has(deck[0].color),level.name+" first crate must match the current exposed rim");
+  const peeled=board.map(row=>row.slice());
+  for(const point of getExposedPixels(peeled))peeled[point.y][point.x]="";
+  const futureColors=new Set(getExposedPixels(peeled).map(point=>peeled[point.y][point.x]));
+  if(deck.length>1&&[...futureColors].some(color=>!exposedColors.has(color))){
+   assert.ok(!exposedColors.has(deck[1].color),level.name+" second crate should be a future-layer choice");
+  }
+ }
+});
+
 test("generated wave boxes carry substantial ant squads without losing any color budget",()=>{
  for(const level of LEVELS.filter(item=>item.number>=8)){
   const board=createArtworkBoard(level.id),deck=getIncoming(level.id).filter(box=>!box.role);
