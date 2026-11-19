@@ -105,7 +105,7 @@ const loadingSlots=new Set(),workerPromises=new Map(),reservedTargets=new Set(),
 let workerSequence=0,lastAntFrameAt=0,lastExposedPixels=new Set();
 const MAX_ACTIVE_ANTS=36,ANT_FRAME_INTERVAL=1000/60;
 const colorRGB=Object.fromEntries(Object.entries(COLORS).map(([key,value])=>[key,value.hex.match(/[\da-f]{2}/gi).map(v=>parseInt(v,16))]));
-let boardEmptyGradient=null,boardArtworkKey="",boardArtworkImage=null;
+let boardEmptyGradient=null,boardArtworkKey="";
 function rasterizeArtworkToBlocks(image){
  const canvas=document.createElement("canvas");canvas.width=450;canvas.height=450;
  const ctx=canvas.getContext("2d",{willReadFrequently:true});ctx.clearRect(0,0,450,450);ctx.drawImage(image,0,0,450,450);
@@ -136,11 +136,12 @@ function rasterizeArtworkToBlocks(image){
 function ensureBoardArtwork(){
  const key=state.levelId;
  if(boardArtworkKey===key)return;
- boardArtworkKey=key;boardArtworkImage=null;
+ boardArtworkKey=key;
  const image=new Image();
  image.onload=()=>{
   if(boardArtworkKey!==key||state.levelId!==key)return;
-  boardArtworkImage=image;
+  const untouched=state.remaining===totalBlocks&&state.slots.every(slot=>!slot)&&state.nextContainer===TRAY_SIZE*TRAY_SIZE;
+  if(!untouched)return;
   const board=rasterizeArtworkToBlocks(image);
   setArtworkBoard(key,board);
   // The SVG is never shown as an overlay: its sampled pigments now are the
@@ -150,7 +151,7 @@ function ensureBoardArtwork(){
   lastExposedPixels=new Set();
   render();
  };
- image.onerror=()=>{if(boardArtworkKey===key)boardArtworkImage=null;};
+ image.onerror=()=>{if(boardArtworkKey===key)boardArtworkKey="";};
  image.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(createArtworkSvg(Number(getLevel(key).number)));
 }
 function tasksRemaining(){
