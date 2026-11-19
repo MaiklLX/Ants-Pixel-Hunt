@@ -764,11 +764,15 @@ test("KT-201 home launch button targets the highest unlocked campaign level",asy
  assert.match(app,/startFreshGame\(\$\("menu-current-level"\)\.dataset\.levelId\|\|state\.levelId\)/);
  assert.match(app,/НАЧАТЬ →/);
 });
-test("KT-202 renders chunky toy-like blocks and larger arena sizing",async()=>{
+test("KT-226 renders clean square pigment blocks and converts full illustrations into collectible grid cells",async()=>{
  const app=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
  const styles=await readFile(new URL("../src/styles.css",import.meta.url),"utf8");
- assert.match(app,/cell\*\.012/);
- assert.match(app,/cell\*\.17/);
+ assert.match(app,/const gap=Math\.max\(\.22,cell\*\.035\)/);
+ assert.match(app,/const radius=Math\.max\(\.35,cell\*\.075\)/);
+ assert.match(app,/rasterizeArtworkToBlocks\(image\)/);
+ assert.match(app,/ctx\.getImageData\(0,0,450,450\)/);
+ assert.match(app,/setArtworkBoard\(key,board\)/);
+ assert.doesNotMatch(app,/boardCtx\.drawImage\(image/);
  assert.match(styles,/width:min\(100%,min\(540px,52dvh,calc\(100dvh - 300px\)\)\)/);
  assert.match(styles,/\.menu-level-card\{min-height:118px/);
 });
