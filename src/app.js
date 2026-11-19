@@ -140,7 +140,7 @@ function ensureBoardArtwork(){
  const image=new Image();
  image.onload=()=>{
   if(boardArtworkKey!==key||state.levelId!==key)return;
-  const untouched=state.remaining===totalBlocks&&state.slots.every(slot=>!slot)&&state.nextContainer===TRAY_SIZE*TRAY_SIZE;
+  const untouched=state.slots.every(slot=>!slot)&&state.nextContainer===TRAY_SIZE*TRAY_SIZE;
   if(!untouched)return;
   const board=rasterizeArtworkToBlocks(image);
   setArtworkBoard(key,board);
