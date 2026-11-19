@@ -875,7 +875,8 @@ export function createArtworkBoard(levelId="meadow-01"){
    board=createRasterArtworkBoard(starterType,true);
    if(!board)board=level.number===1?createFrogBoard():createButterflyBoard();
   }
-  // Preserve authored pigment contours; no synthetic outline is painted around the whole silhouette.
+  // Keep the tested legacy pixel board as an offline fallback; the browser replaces it with the SVG-derived, non-black block mosaic as soon as the local illustration rasterizes.
+  board=applyPixelArtOutlines(board);
   board=mergeSparseArtworkColors(board,18);
   artworkBoardCache.set(level.id,board);
  }
