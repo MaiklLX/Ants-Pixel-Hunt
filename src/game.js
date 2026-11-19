@@ -921,7 +921,8 @@ export function createArtworkBoard(levelId="meadow-01"){
    board=createRasterArtworkBoard(starterType,true);
    if(!board)board=level.number===1?createFrogBoard():createButterflyBoard();
   }
-  if(level.number<=7)board=applyStarterInkDetails(board,level.number);\n  board=applyPixelArtOutlines(board);
+  if(level.number<=7)board=applyStarterInkDetails(board,level.number);
+  board=applyPixelArtOutlines(board);
   board=mergeSparseArtworkColors(board,18);
   artworkBoardCache.set(level.id,board);
  }
