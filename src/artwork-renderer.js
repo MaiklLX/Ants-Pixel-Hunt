@@ -168,7 +168,7 @@ export function createArtworkSvg(levelNumber){
  const isStarter=levelNumber<=7;
  const types=isStarter?({1:['frog'],2:['butterfly'],3:['flower'],4:['mushroom'],5:['acorn'],6:['snail'],7:['firefly']})[levelNumber]||['frog']:[];
  let placements=[];
- if(isStarter)placements=[[5,5,35,35]];
+ if(isStarter)placements=[[50,50,350,350]];
  else{
   const count=levelNumber<51?1:levelNumber<301?2:3;
   const variant=(levelNumber+Math.floor(levelNumber/11))%3;
