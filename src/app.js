@@ -144,54 +144,32 @@ function obstacleAt(x,y){
 
 function drawBoardTile(x,y,exposed,cell){
  const color=state.board[y][x];if(!color||obstacleAt(x,y))return;
- const px=x*cell,py=y*cell,size=cell,rgb=COLORS[color].hex;
- const inset=Math.max(.12,cell*.012),left=px+inset,top=py+inset,w=size-inset*2,h=size-inset*2;
- const radius=Math.max(1.1,cell*.17);
+ const px=x*cell,py=y*cell,rgb=COLORS[color].hex;
+ // The picture is the board: one clean, square pigment tile per collectible.
+ // Tiny spacing and restrained light give a tactile block surface without
+ // burying the pixel-art shapes under glossy effects or random decoration.
+ const gap=Math.max(.22,cell*.035),left=px+gap,top=py+gap,size=cell-gap*2;
+ const radius=Math.max(.35,cell*.075);
  boardCtx.save();
- // Chunky candy-like pixel: nearly full-cell face, a confident rounded edge
- // and a visible lower bevel. The color stays flat and readable at phone size.
- boardCtx.shadowColor="#26352b66";boardCtx.shadowBlur=Math.max(1.2,cell*.2);
- boardCtx.shadowOffsetX=0;boardCtx.shadowOffsetY=Math.max(.8,cell*.13);
- boardCtx.beginPath();boardCtx.roundRect(left,top,w,h,radius);
- const face=boardCtx.createLinearGradient(left,top,left+w*.18,top+h);
- face.addColorStop(0,lightenHex(rgb,.25));face.addColorStop(.34,lightenHex(rgb,.08));face.addColorStop(.72,rgb);face.addColorStop(1,darkenHex(rgb,.28));
+ boardCtx.shadowColor="#26352b30";
+ boardCtx.shadowBlur=Math.max(.25,cell*.035);
+ boardCtx.shadowOffsetY=Math.max(.25,cell*.045);
+ boardCtx.beginPath();boardCtx.roundRect(left,top,size,size,radius);
+ const face=boardCtx.createLinearGradient(left,top,left+size*.72,top+size);
+ face.addColorStop(0,lightenHex(rgb,.13));
+ face.addColorStop(.38,rgb);
+ face.addColorStop(1,darkenHex(rgb,.12));
  boardCtx.fillStyle=face;boardCtx.fill();
  boardCtx.shadowColor="transparent";boardCtx.shadowBlur=0;boardCtx.shadowOffsetY=0;
- boardCtx.lineWidth=Math.max(.65,cell*.065);
- boardCtx.strokeStyle=color==="black"?"#20202a":"#493c4c99";
+ boardCtx.lineWidth=Math.max(.18,cell*.018);
+ boardCtx.strokeStyle=darkenHex(rgb,.2)+"55";
  boardCtx.stroke();
- // Broad toy-block bevel: a short highlight along the top and a rounded dark foot.
- boardCtx.beginPath();boardCtx.moveTo(left+radius*.8,top+cell*.11);boardCtx.lineTo(left+w-radius*.8,top+cell*.11);
- boardCtx.strokeStyle="#ffffff75";boardCtx.lineWidth=Math.max(.7,cell*.09);boardCtx.stroke();
- boardCtx.beginPath();boardCtx.moveTo(left+radius,top+h-cell*.08);boardCtx.lineTo(left+w-radius,top+h-cell*.08);
- boardCtx.quadraticCurveTo(left+w-cell*.08,top+h-cell*.08,left+w-cell*.08,top+h-radius);
- boardCtx.strokeStyle=darkenHex(rgb,.38);boardCtx.lineWidth=Math.max(.8,cell*.12);boardCtx.stroke();
- if(color!=="black"){
-  const grain=(x*17+y*31+color.length*13)%11;
-  // A soft upper-left reflection and a narrow side facet make each block
-  // read as a small piece of polished coloured glass, not a flat button.
-  boardCtx.globalAlpha=.72;boardCtx.fillStyle="#ffffff";
-  boardCtx.beginPath();boardCtx.ellipse(left+cell*.25,top+cell*.22,cell*.16,cell*.07,-.35,0,Math.PI*2);boardCtx.fill();
-  boardCtx.globalAlpha=.26;boardCtx.strokeStyle=lightenHex(rgb,.48);boardCtx.lineWidth=Math.max(.45,cell*.045);
-  boardCtx.beginPath();boardCtx.moveTo(left+cell*.12,top+cell*.34);boardCtx.lineTo(left+cell*.12,top+h-cell*.3);boardCtx.stroke();
-  // Fine, deterministic mineral flecks add texture without changing the
-  // underlying colour group or creating extra collectible pixels.
-  if(grain===0||grain===4||grain===8){
-   boardCtx.globalAlpha=.24;boardCtx.fillStyle=lightenHex(rgb,.55);
-   boardCtx.fillRect(left+cell*.58,top+cell*.31,Math.max(.65,cell*.075),Math.max(.65,cell*.075));
-  }
-  if(grain===2||grain===6||grain===10){
-   boardCtx.globalAlpha=.22;boardCtx.fillStyle=darkenHex(rgb,.42);
-   boardCtx.fillRect(left+cell*.27,top+cell*.69,Math.max(.65,cell*.08),Math.max(.65,cell*.08));
-  }
-  if(grain===3||grain===9){
-   boardCtx.globalAlpha=.18;boardCtx.strokeStyle="#ffffff";boardCtx.lineWidth=Math.max(.4,cell*.035);
-   boardCtx.beginPath();boardCtx.moveTo(left+cell*.62,top+cell*.56);boardCtx.lineTo(left+cell*.77,top+cell*.48);boardCtx.stroke();
-  }
- }
+ // A single soft top edge catches the light; no forced black perimeter.
+ boardCtx.beginPath();boardCtx.moveTo(left+radius,top+cell*.11);boardCtx.lineTo(left+size-radius,top+cell*.11);
+ boardCtx.strokeStyle="#ffffff35";boardCtx.lineWidth=Math.max(.25,cell*.035);boardCtx.stroke();
  if(exposed){
-  boardCtx.strokeStyle="#fff0b5";boardCtx.lineWidth=Math.max(.65,cell*.07);
-  boardCtx.beginPath();boardCtx.roundRect(left+.7,top+.7,w-1.4,h-1.4,Math.max(.8,radius*.65));boardCtx.stroke();
+  boardCtx.beginPath();boardCtx.roundRect(left+.45,top+.45,size-.9,size-.9,Math.max(.25,radius*.7));
+  boardCtx.strokeStyle="#fff0b5";boardCtx.lineWidth=Math.max(.55,cell*.055);boardCtx.stroke();
  }
  boardCtx.restore();
 }
