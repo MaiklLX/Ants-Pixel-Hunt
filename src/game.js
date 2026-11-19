@@ -822,14 +822,26 @@ function applyPixelArtOutlines(source){
   const [x,y]=queue[head];
   for(const [nx,ny] of [[x-1,y],[x+1,y],[x,y-1],[x,y+1]])add(nx,ny);
  }
- // Outline only the exterior-connected silhouette. Internal cavities are not
- // recolored black, so a contour color cannot reappear after its box is empty.
+ // Black outer silhouette plus restrained internal ink lines. Internal
+ // contours are drawn only where a pixel touches at least two distinct
+ // neighboring pigments: this traces eyes, limbs, petals and object details
+ // without turning every shade transition into a noisy checkerboard.
  for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){
-  if(!source[y][x])continue;
-  const edge=[[x-1,y],[x+1,y],[x,y-1],[x,y+1]].some(([nx,ny])=>
+  const color=source[y][x];
+  if(!color)continue;
+  const neighbors=[];
+  for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
+   if(!dx&&!dy)continue;
+   const nx=x+dx,ny=y+dy;
+   if(nx<0||ny<0||nx>=SIZE||ny>=SIZE)continue;
+   const neighbor=source[ny][nx];
+   if(neighbor&&neighbor!==color)neighbors.push(neighbor);
+  }
+  const outerEdge=[[x-1,y],[x+1,y],[x,y-1],[x,y+1]].some(([nx,ny])=>
    nx<0||ny<0||nx>=SIZE||ny>=SIZE||outside[ny][nx]
   );
-  if(edge)board[y][x]="black";
+  const internalEdge=new Set(neighbors).size>=2;
+  if(outerEdge||internalEdge)board[y][x]="black";
  }
  return board;
 }
