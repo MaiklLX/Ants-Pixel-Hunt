@@ -912,7 +912,11 @@ export function buildIncoming(board,levelNumber=1){
      // Small specialist squads deliberately carry only part of an exposed
      // color layer. The player must decide how many matching boxes to place
      // and which other colors deserve the remaining start compartments.
-     let squadTarget=34+((wave+color.charCodeAt(0))%7)+Math.floor(random()*6);
+     // Squads gradually become smaller across the campaign. Early meadows
+     // stay readable; later ones ask the player to plan more box rotations
+     // and use all five starter compartments deliberately.
+     const squadBase=levelNumber<26?42:levelNumber<76?38:levelNumber<151?34:levelNumber<301?30:26;
+     let squadTarget=squadBase+((wave+color.charCodeAt(0))%5)+Math.floor(random()*4);
      if(left<=squadTarget)squadTarget=left;
      else if(left-squadTarget<20)squadTarget=left-20;
      const ants=Math.min(left,squadTarget);
