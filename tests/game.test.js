@@ -732,3 +732,18 @@ test("campaign contains 500 distinct, authored-first and procedurally composed i
  assert.equal(signatures.size,493,"generated levels must not repeat the same pixel artwork");
  assert.equal(new Set(LEVELS.map(level=>level.chapter)).size,13,"the 500 levels are grouped into progressive forest chapters");
 });
+
+
+test("campaign queue squads become smaller in measured steps without losing any ants",()=>{
+ const board=Array.from({length:SIZE},()=>Array(SIZE).fill("green"));
+ const early=buildIncoming(board,8),late=buildIncoming(board,500);
+ const median=items=>{
+  const values=items.map(box=>box.ants).sort((a,b)=>a-b);
+  return values[Math.floor(values.length/2)];
+ };
+ for(const deck of [early,late]){
+  assert.ok(deck.every(box=>box.ants>0&&box.ants<=BOX_CAPACITY));
+  assert.equal(deck.reduce((sum,box)=>sum+box.ants,0),SIZE*SIZE);
+ }
+ assert.ok(median(late)<median(early),"late levels should require more deliberate box rotations");
+});
