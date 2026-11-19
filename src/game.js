@@ -875,7 +875,8 @@ export function createArtworkBoard(levelId="meadow-01"){
    board=createRasterArtworkBoard(starterType,true);
    if(!board)board=level.number===1?createFrogBoard():createButterflyBoard();
   }
-  // Keep the puzzle pigment map clean; visual contours and material detail live in the illustration renderer.
+  // Keep the gameplay contour layer for orderly exposure; the renderer supplies the actual painted surface and avoids drawing extra ink on top.
+  board=applyPixelArtOutlines(board);
   board=mergeSparseArtworkColors(board,18);
   artworkBoardCache.set(level.id,board);
  }
