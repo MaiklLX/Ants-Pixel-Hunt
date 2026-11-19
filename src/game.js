@@ -920,10 +920,15 @@ export function buildIncoming(board,levelNumber=1){
     }
    }
    const waveDeck=[];
+   // Lead with the colors that occupy the largest part of this exposed rim.
+   // Rotate ties by layer so the queue does not repeat the same color rhythm.
+   const layerOrder=colors.filter(color=>queues[color].length).sort((a,b)=>
+    totals[b]-totals[a]||(colors.indexOf(a)-colors.indexOf(b))
+   );
    let pending=true,round=0;
    while(pending){
     pending=false;
-    const order=round%2?colors.slice().reverse():colors;
+    const order=round%2?layerOrder.slice().reverse():layerOrder;
     for(const color of order){const box=queues[color].shift();if(box){waveDeck.push(box);pending=true;}}
     round++;
    }
@@ -949,21 +954,25 @@ export function buildIncoming(board,levelNumber=1){
   // one immediately useful layer and two tempting future layers: taking the
   // wrong colors consumes scarce start compartments until the right layer opens.
   const lanes=[[],[],[]];
-  // Keep one valid opening squad in the first lane and deliberately surface
-  // a later-layer color in another lane. This creates a real five-slot tradeoff
-  // instead of presenting three equally safe copies of the current wave.
-  if(waves[0]?.length)lanes[0].push(waves[0].shift());
   const openingColors=new Set(getExposedPixels(board).map(point=>board[point.y][point.x]));
+  // Opening row: one useful squad, one deliberate future-layer temptation,
+  // and (when the rim has another color) a second useful choice.
+  if(waves[0]?.length)lanes[0].push(waves[0].shift());
   let futureChoice=null;
   for(let wi=1;wi<waves.length&&!futureChoice;wi++){
    const index=waves[wi].findIndex(box=>!openingColors.has(box.color));
    if(index>=0)futureChoice=waves[wi].splice(index,1)[0];
   }
   if(futureChoice)lanes[1].push(futureChoice);
-  // Balance all remaining squads across independent vertical lanes.
+  const secondOpening=waves[0]?.findIndex(box=>openingColors.has(box.color))??-1;
+  if(secondOpening>=0)lanes[2].push(waves[0].splice(secondOpening,1)[0]);
+  // Keep the first row intentionally readable, then distribute the remaining
+  // squads by the shallowest lane. Never change a squad's exposure-wave order.
   for(const waveDeck of waves)for(const box of waveDeck){
    let targetLane=0;
-   for(let lane=1;lane<3;lane++)if(lanes[lane].length<lanes[targetLane].length)targetLane=lane;
+   for(let lane=1;lane<3;lane++){
+    if(lanes[lane].length<lanes[targetLane].length)targetLane=lane;
+   }
    lanes[targetLane].push(box);
   }
   const deck=[],longest=Math.max(0,...lanes.map(lane=>lane.length));
