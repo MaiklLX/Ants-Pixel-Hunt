@@ -156,13 +156,13 @@ fish:
 '<g fill="#f6d17b" opacity=".75"><circle cx="145" cy="151" r="5"/><circle cx="172" cy="174" r="5"/><circle cx="144" cy="204" r="5"/><circle cx="204" cy="188" r="4"/></g></g>'
 };
 const MOTIF_ORDER=['flower','tree','mushroom','butterfly','house','fish','snail','rocket','bird','acorn','bee','cloud'];
-function sceneLayout(count,variant){
- const choices=count===1?[[[5,5,35,35]]]:count===2?[
- [[0,2,19,31],[17,2,18,31]],[[0,1,18,33],[17,1,18,33]],[[0,2,20,31],[18,2,17,31]]
- ]:[
- [[9,1,17,22],[0,17,17,18],[18,17,17,18]],[[0,1,17,22],[18,1,17,22],[9,17,17,18]],[[9,0,17,22],[0,17,17,18],[18,17,17,18]]
- ];
- return choices[variant%choices.length].map(p=>[p[0]+5,p[1]+5,p[2],p[3]]);
+function sceneLayout(count){
+ // Compose every motif as a balanced cluster around the arena centre.
+ // All placements are square viewports so character proportions stay natural.
+ if(count===1)return [[40,40,370,370]];
+ if(count===2)return [[22,127,196,196],[232,127,196,196]];
+ // Three motifs form a centred, stable triangle rather than an uneven row.
+ return [[22,22,196,196],[232,22,196,196],[127,232,196,196]];
 }
 export function createArtworkSvg(levelNumber){
  const isStarter=levelNumber<=7;
@@ -172,12 +172,15 @@ export function createArtworkSvg(levelNumber){
  else{
   const count=levelNumber<51?1:levelNumber<301?2:3;
   const variant=(levelNumber+Math.floor(levelNumber/11))%3;
-  placements=sceneLayout(count,variant);
+  placements=sceneLayout(count);
   for(let part=0;part<count;part++)types.push(MOTIF_ORDER[(levelNumber*7+part*5+Math.floor(levelNumber/13))%MOTIF_ORDER.length]);
  }
  const body=placements.map((p,i)=>{
-  const x=p[0]*10,y=p[1]*10,w=p[2]*10,h=p[3]*10;
-  return '<g transform="translate('+x+' '+y+') scale('+(w/350)+' '+(h/350)+')">'+(M[types[i]]||M.frog)+'</g>';
+  const [x,y,w,h]=p;
+  const scale=Math.min(w/350,h/350);
+  const drawW=350*scale,drawH=350*scale;
+  const offsetX=x+(w-drawW)/2,offsetY=y+(h-drawH)/2;
+  return '<g transform="translate('+offsetX+' '+offsetY+') scale('+scale+' '+scale+')">'+(M[types[i]]||M.frog)+'</g>';
  }).join('');
  return '<svg xmlns="http://www.w3.org/2000/svg" width="450" height="450" viewBox="0 0 450 450">'+DEFS+body+'</svg>';
 }
