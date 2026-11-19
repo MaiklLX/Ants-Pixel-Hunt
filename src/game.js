@@ -915,7 +915,7 @@ export function buildIncoming(board,levelNumber=1){
      // Squads gradually become smaller across the campaign. Early meadows
      // stay readable; later ones ask the player to plan more box rotations
      // and use all five starter compartments deliberately.
-     const squadBase=levelNumber<26?42:levelNumber<76?38:levelNumber<151?34:levelNumber<301?30:26;
+     const squadBase=levelNumber<26?40:levelNumber<76?36:levelNumber<151?32:levelNumber<301?28:24;
      let squadTarget=squadBase+((wave+color.charCodeAt(0))%5)+Math.floor(random()*4);
      if(left<=squadTarget)squadTarget=left;
      else if(left-squadTarget<20)squadTarget=left-20;
