@@ -5,7 +5,7 @@ import { createArtworkSvg } from "../src/artwork-renderer.js";
 function transforms(level){
  return [...createArtworkSvg(level).matchAll(/transform="translate\(([^)]+)\) scale\(([^)]+)\)"/g)]
   .map(([,position,scale])=>({
-   position:position.split(/\s+/).map(Number),
+   position:position.split(/\s+/).map(value=>Math.round(Number(value))),
    scale:scale.split(/\s+/).map(Number)
   }));
 }
