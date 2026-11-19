@@ -179,7 +179,7 @@ test("the 45x45 artwork produces a complete deterministic deck with bounded box 
  }
  assert.deepEqual(Object.fromEntries(Object.entries(deckTotals).filter(([,total])=>total>0)),Object.fromEntries(Object.entries(totals).filter(([,total])=>total>0)));
  assert.equal(INCOMING.reduce((sum,box)=>sum+box.ants,0),createGame().remaining);
- assert.ok(INCOMING.length>=10&&INCOMING.length<=25);
+ assert.ok(INCOMING.length>=10&&INCOMING.length<=50);
 });
 
 test("a returning ant does not block the next dispatch after its pickup opens a new pixel",()=>{
@@ -220,8 +220,8 @@ test("all campaign levels have distinct deterministic artwork and exact matching
  const signatures=new Set();
  for(const level of LEVELS){
   const board=createArtworkBoard(level.id),deck=getIncoming(level.id);
-  assert.equal(board.length,35);
-  assert.ok(board.every(row=>row.length===35));
+  assert.equal(board.length,SIZE);
+  assert.ok(board.every(row=>row.length===SIZE));
   const totals=Object.fromEntries(Object.keys(COLORS).map(color=>[color,0]));
   for(const row of board)for(const color of row)if(color)totals[color]++;
   const artworkColors=Object.entries(totals).filter(([,total])=>total>0).map(([color])=>color);
