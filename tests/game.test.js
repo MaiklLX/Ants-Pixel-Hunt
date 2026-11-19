@@ -207,6 +207,20 @@ test("a box cannot depart while any ant assigned to its slot is still travelling
  assert.equal(countOutboundBySlot(workers).get(1),1);
 });
 
+test("layered box queue opens with two exposed-color choices and one future-layer decoy",()=>{
+ const board=Array.from({length:9},()=>Array(9).fill("blue"));
+ for(let x=0;x<9;x++){board[0][x]="red";board[8][x]="yellow";}
+ for(let y=1;y<8;y++){board[y][0]="red";board[y][8]="yellow";}
+ const deck=buildIncoming(board,8);
+ assert.deepEqual(deck.slice(0,3).map(box=>box.color),["red","blue","yellow"]);
+ assert.ok(deck.every(box=>box.ants>0&&box.ants<=BOX_CAPACITY));
+ const totals=Object.fromEntries(Object.keys(COLORS).map(color=>[color,0]));
+ for(const row of board)for(const color of row)if(color)totals[color]++;
+ const queued=Object.fromEntries(Object.keys(COLORS).map(color=>[color,0]));
+ for(const box of deck)queued[box.color]+=box.ants;
+ assert.deepEqual(Object.fromEntries(Object.entries(queued).filter(([,n])=>n)),Object.fromEntries(Object.entries(totals).filter(([,n])=>n)));
+ assert.deepEqual(deck,buildIncoming(board,8),"same artwork must produce the same readable queue");
+});
 test("incoming deck balances a color total of 19 without an impossible minimum",()=>{
  const board=[Array(19).fill("red")];
  const deck=buildIncoming(board,8);
