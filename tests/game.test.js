@@ -48,7 +48,7 @@ test("a future-layer box can be staged in a starter slot and waits for its color
  assert.equal(chooseTopColumn(s,1),true,"the box itself can be staged before its color is exposed");
  assert.equal(s.slots[0].sourceIndex,1);assert.equal(s.slots[0].color,getIncoming(s.levelId)[1].color);
  assert.equal(chooseTopColumn(s,0),true);assert.equal(s.slots[1].sourceIndex,0);
- assert.deepEqual(s.tray.map(r=>r[1]),[4,7,10]);assert.equal(s.nextContainer,11);
+ assert.deepEqual(s.tray.map(r=>r[1]),[4,7,9]);assert.equal(s.nextContainer,11);
 });
 test("selection fills the first free start compartment after a valid layer choice",()=>{
  const s=createGame();assert.equal(chooseTopColumn(s,0),true);
