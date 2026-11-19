@@ -100,6 +100,16 @@ bee:
 '<ellipse cx="151" cy="133" rx="8" ry="11" fill="#fff3cf"/><ellipse cx="199" cy="133" rx="8" ry="11" fill="#fff3cf"/><circle cx="153" cy="135" r="4" fill="#28323a"/><circle cx="201" cy="135" r="4" fill="#28323a"/>'+
 '<path d="M156 91Q143 62 126 56M194 91Q207 62 224 56" stroke="#5e4637" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="126" cy="56" r="5" fill="#5e4637"/><circle cx="224" cy="56" r="5" fill="#5e4637"/>'+
 '<path d="M159 287Q175 315 191 287" fill="none" stroke="#765034" stroke-width="7" stroke-linecap="round"/></g>',
+firefly:
+'<g filter="url(#shadow)"><ellipse cx="175" cy="201" rx="48" ry="98" fill="url(#wood)" stroke="#704b36" stroke-width="7"/>'+
+'<path d="M142 150Q94 70 56 104Q27 134 116 204Q136 216 151 203Z" fill="url(#wingBlue)" stroke="#577a8b" stroke-width="6"/>'+
+'<path d="M208 150Q256 70 294 104Q323 134 234 204Q214 216 199 203Z" fill="url(#wingBlue)" stroke="#577a8b" stroke-width="6"/>'+
+'<path d="M132 169Q91 127 63 113M218 169Q259 127 287 113" stroke="#e8fbf5" stroke-width="5" fill="none" opacity=".8"/>'+
+'<path d="M149 160Q175 177 201 160M142 188Q175 208 208 188M143 218Q175 239 207 218" stroke="#6c4836" stroke-width="9" fill="none"/>'+
+'<path d="M157 115Q140 78 122 71M193 115Q210 78 228 71" stroke="#62483a" stroke-width="5" fill="none" stroke-linecap="round"/>'+
+'<circle cx="122" cy="71" r="5" fill="#62483a"/><circle cx="228" cy="71" r="5" fill="#62483a"/>'+
+'<circle cx="175" cy="270" r="71" fill="url(#glow)" opacity=".78"/><ellipse cx="175" cy="275" rx="31" ry="41" fill="#f7d96f" stroke="#c38b45" stroke-width="6"/><ellipse cx="175" cy="275" rx="17" ry="28" fill="#fff4b2"/>'+
+'<path d="M144 247L117 278M206 247L233 278M145 224L119 237M205 224L231 237" stroke="#634b39" stroke-width="6" stroke-linecap="round"/></g>',
 cloud:
 '<g filter="url(#shadow)"><path d="M76 251Q37 244 43 199Q48 163 87 159Q87 92 150 80Q211 68 241 127Q294 109 315 155Q349 214 293 247Q270 262 76 251Z" fill="url(#sky)" stroke="#639eb9" stroke-width="7"/>'+
 '<path d="M68 200Q71 167 108 174Q112 111 157 108Q204 103 219 159Q274 133 292 180Q312 226 266 235Q147 250 68 230Z" fill="#f4fcf8" opacity=".78"/>'+
@@ -140,7 +150,7 @@ function sceneLayout(count,variant){
 }
 export function createArtworkSvg(levelNumber){
  const isStarter=levelNumber<=7;
- const types=isStarter?({1:['frog'],2:['butterfly'],3:['flower'],4:['mushroom'],5:['acorn'],6:['snail'],7:['bee']})[levelNumber]||['frog']:[];
+ const types=isStarter?({1:['frog'],2:['butterfly'],3:['flower'],4:['mushroom'],5:['acorn'],6:['snail'],7:['firefly']})[levelNumber]||['frog']:[];
  let placements=[];
  if(isStarter)placements=[[5,5,35,35]];
  else{
