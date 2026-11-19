@@ -24,7 +24,7 @@ test("the authored frog is built from large collectible blocks on a 450x450 disp
  assert.equal(s.board.length,SIZE);assert.equal(s.slots.length,SLOT_COUNT);
  assert.equal(s.tray.length,TRAY_SIZE);assert.ok(s.tray.every(r=>r.length===TRAY_SIZE));
  const colors=new Set(INITIAL_BOARD.flat().filter(Boolean));assert.ok(colors.has("black"));assert.ok(colors.size>=4&&colors.size<=5,"starter artwork should use four clear pigments plus its contour");
- assert.ok(s.remaining>650&&s.remaining<1800);assert.ok(INITIAL_BOARD.some(row=>row.includes("")));
+ assert.ok(s.remaining>400&&s.remaining<1100);assert.ok(INITIAL_BOARD.some(row=>row.includes("")));
 });
 test("the first seven authored illustrations use richer shaded palettes",()=>{
  for(const level of LEVELS.filter(item=>item.number<=7)){
@@ -179,7 +179,7 @@ test("the 45x45 artwork produces a complete deterministic deck with bounded box 
  }
  assert.deepEqual(Object.fromEntries(Object.entries(deckTotals).filter(([,total])=>total>0)),Object.fromEntries(Object.entries(totals).filter(([,total])=>total>0)));
  assert.equal(INCOMING.reduce((sum,box)=>sum+box.ants,0),createGame().remaining);
- assert.ok(INCOMING.length>=10&&INCOMING.length<=50);
+ assert.ok(INCOMING.length>=10&&INCOMING.length<=25);
 });
 
 test("a returning ant does not block the next dispatch after its pickup opens a new pixel",()=>{
