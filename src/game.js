@@ -977,7 +977,8 @@ export function buildIncoming(board,levelNumber=1){
    if(index>=0)futureChoice=waves[wi].splice(index,1)[0];
   }
   if(futureChoice)lanes[1].push(futureChoice);
-  const secondOpening=waves[0]?.findIndex(box=>openingColors.has(box.color))??-1;
+  const firstOpeningColor=lanes[0][0]?.color;
+  const secondOpening=waves[0]?.findIndex(box=>openingColors.has(box.color)&&box.color!==firstOpeningColor)??-1;
   if(secondOpening>=0)lanes[2].push(waves[0].splice(secondOpening,1)[0]);
   // Keep the first row intentionally readable, then distribute the remaining
   // squads by the shallowest lane. Never change a squad's exposure-wave order.
