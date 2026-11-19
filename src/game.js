@@ -600,18 +600,20 @@ function generatedSceneLayout(count,variant){
 }
 const rasterArtworkCache=new Map();
 const BASE64_ALPHABET="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-function createRasterArtworkBoard(type){
+function createRasterArtworkBoard(type,native=false){
  const source=RASTER_ARTWORK[type];if(!source)return null;
- if(!rasterArtworkCache.has(type)){
+ const cacheKey=type+(native?":native":"");
+ if(!rasterArtworkCache.has(cacheKey)){
   const bytes=[];let accumulator=0,bits=0;
   for(const character of source.data){
    const value=BASE64_ALPHABET.indexOf(character);if(value<0)continue;
    accumulator=(accumulator<<6)|value;bits+=6;
    if(bits>=8){bits-=8;bytes.push((accumulator>>bits)&255);accumulator&=(1<<bits)-1;}
   }
-  // Authored source illustrations are 35×35. Decode at their native size,
-  // then enlarge with nearest-neighbour sampling so every original pixel stays
-  // crisp while the 45×45 board gains room for future scene details.
+  // The authored masters are 35×35. Starter portraits keep their original
+  // collectible footprint while the enlarged 45×45 field gains a scenic
+  // non-collectible margin; procedural compositions use crisp nearest-neighbour
+  // enlargement to fill their larger placements.
   const sourceSize=35,sourceBoard=Array.from({length:sourceSize},()=>Array(sourceSize).fill(""));
   let bit=0;
   for(let y=0;y<sourceSize;y++)for(let x=0;x<sourceSize;x++){
@@ -619,12 +621,19 @@ function createRasterArtworkBoard(type){
    for(let index=0;index<3;index++){value=(value<<1)|((bytes[bit>>3]>>(7-(bit&7)))&1);bit++;}
    sourceBoard[y][x]=value===7?"":source.palette[value]||"";
   }
-  const board=Array.from({length:SIZE},(_,y)=>Array.from({length:SIZE},(_,x)=>
-   sourceBoard[Math.min(sourceSize-1,Math.floor(y*sourceSize/SIZE))][Math.min(sourceSize-1,Math.floor(x*sourceSize/SIZE))]
-  ));
-  rasterArtworkCache.set(type,board);
+  let board;
+  if(native){
+   board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
+   const offset=Math.floor((SIZE-sourceSize)/2);
+   for(let y=0;y<sourceSize;y++)for(let x=0;x<sourceSize;x++)board[y+offset][x+offset]=sourceBoard[y][x];
+  }else{
+   board=Array.from({length:SIZE},(_,y)=>Array.from({length:SIZE},(_,x)=>
+    sourceBoard[Math.min(sourceSize-1,Math.floor(y*sourceSize/SIZE))][Math.min(sourceSize-1,Math.floor(x*sourceSize/SIZE))]
+   ));
+  }
+  rasterArtworkCache.set(cacheKey,board);
  }
- return rasterArtworkCache.get(type).map(row=>row.slice());
+ return rasterArtworkCache.get(cacheKey).map(row=>row.slice());
 }
 function createComposedArtworkBoard(number){
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
@@ -851,7 +860,7 @@ export function createArtworkBoard(levelId="meadow-01"){
   if(level.number>=8)board=createComposedArtworkBoard(level.number);
   else{
    const starterType={1:"frog",2:"butterfly",3:"flower",4:"mushroom",5:"acorn",6:"snail",7:"firefly"}[level.number];
-   board=createRasterArtworkBoard(starterType);
+   board=createRasterArtworkBoard(starterType,true);
    if(!board)board=level.number===1?createFrogBoard():createButterflyBoard();
   }
   board=applyPixelArtOutlines(board);
@@ -871,9 +880,8 @@ export function buildIncoming(board,levelNumber=1){
   const code=color?colors.indexOf(color)+1:0;
   boardSeed=Math.imul(boardSeed^code,16777619)>>>0;
  }
- if(levelNumber>=1){
-  // Every board size uses exposure-layer batches: a box must never contain
-  // more ants than its currently reachable matching pixels. When that squad
+ if(levelNumber>=8){
+  // Each batch mirrors one currently exposed color group. When that squad
   // finishes, its slot is free before the next inner color wave is revealed.
   const working=board.map(row=>row.slice()),waves=[];
   let remaining=working.reduce((sum,row)=>sum+row.filter(Boolean).length,0),wave=0;
