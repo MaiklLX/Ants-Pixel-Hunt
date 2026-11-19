@@ -146,7 +146,7 @@ function sceneLayout(count,variant){
  ]:[
  [[9,1,17,22],[0,17,17,18],[18,17,17,18]],[[0,1,17,22],[18,1,17,22],[9,17,17,18]],[[9,0,17,22],[0,17,17,18],[18,17,17,18]]
  ];
- return choices[variant%choices.length].map(p=>p.map((v,i)=>i<2?Math.round(v*450/35):Math.round(v*450/35)));
+ return choices[variant%choices.length].map(p=>p.slice());
 }
 export function createArtworkSvg(levelNumber){
  const isStarter=levelNumber<=7;
