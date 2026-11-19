@@ -1,5 +1,4 @@
 import {COLORS,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,LEVELS,getLevel,getIncoming,createGame,canChoose,chooseTopColumn,canLaunchBox,isLockedBox,getLinkedPartner,findAntWave,applyAntPickup,completeBoxDeparture,isDefeat,isGameComplete,getExposedTargets,getExposedPixels,countQueuedBySlot,countDispatchingWorkers,countSlotWorkers} from "./game.js";
-import {createArtworkSvg} from "./artwork-renderer.js";
 import {getAntTripFrame,getAntLaunchDelay,getAntQueueDelay,createPausableClock,getTrailPose,getAntTravelDurations,getAntGaitFrame} from "./ant-animation.js";
 import {isCampaignLevelUnlocked,getNextCampaignLevel} from "./campaign.js";
 import {BUILDINGS,createEconomy,normalizeEconomy,collectCube,completeMeadow,purchaseBuilding,buildingCost} from "./economy.js";
@@ -105,16 +104,7 @@ const loadingSlots=new Set(),workerPromises=new Map(),reservedTargets=new Set(),
 let workerSequence=0,lastAntFrameAt=0,lastExposedPixels=new Set();
 const MAX_ACTIVE_ANTS=36,ANT_FRAME_INTERVAL=1000/60;
 const colorRGB=Object.fromEntries(Object.entries(COLORS).map(([key,value])=>[key,value.hex.match(/[\da-f]{2}/gi).map(v=>parseInt(v,16))]));
-let boardEmptyGradient=null,boardArtworkImage=null,boardArtworkKey="";
-function ensureBoardArtwork(){
- const key=String(getLevel(state.levelId).number);
- if(boardArtworkKey===key)return;
- boardArtworkKey=key;boardArtworkImage=null;
- const image=new Image();
- image.onload=()=>{if(boardArtworkKey===key){boardArtworkImage=image;renderBoard();}};
- image.onerror=()=>{if(boardArtworkKey===key)boardArtworkImage=null;};
- image.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(createArtworkSvg(Number(key)));
-}
+let boardEmptyGradient=null;
 function tasksRemaining(){
  return state.remaining+(state.obstacles||[]).reduce((sum,item)=>sum+item.hp,0);
 }
@@ -155,12 +145,6 @@ function obstacleAt(x,y){
 function drawBoardTile(x,y,exposed,cell){
  const color=state.board[y][x];if(!color||obstacleAt(x,y))return;
  const px=x*cell,py=y*cell,size=cell,rgb=COLORS[color].hex;
- if(boardArtworkImage&&boardArtworkImage.complete&&boardArtworkImage.naturalWidth){
-  boardCtx.drawImage(boardArtworkImage,x*10,y*10,10,10,px,py,size,size);
-  boardCtx.save();boardCtx.strokeStyle="#fff7e9";boardCtx.globalAlpha=.10;boardCtx.lineWidth=Math.max(.25,cell*.025);boardCtx.strokeRect(px+.25,py+.25,size-.5,size-.5);
-  if(exposed){boardCtx.globalAlpha=.9;boardCtx.strokeStyle="#fff0b5";boardCtx.lineWidth=Math.max(.65,cell*.07);boardCtx.strokeRect(px+.8,py+.8,size-1.6,size-1.6);}
-  boardCtx.restore();return;
- }
  const inset=Math.max(.12,cell*.012),left=px+inset,top=py+inset,w=size-inset*2,h=size-inset*2;
  const radius=Math.max(1.1,cell*.17);
  boardCtx.save();
@@ -302,53 +286,7 @@ function drawBoardScenery(){
  }
  boardCtx.restore();
 }
-function drawStarterInkOverlay(){
- const level=getLevel(state.levelId).number;
- if(level>7)return;
- const cell=boardEl.width/SIZE;
- const line=(points,width=.17)=>{
-  boardCtx.beginPath();boardCtx.moveTo(points[0][0]*cell,points[0][1]*cell);
-  for(let i=1;i<points.length;i++)boardCtx.lineTo(points[i][0]*cell,points[i][1]*cell);
-  boardCtx.lineWidth=Math.max(1,cell*width);boardCtx.lineCap="round";boardCtx.lineJoin="round";boardCtx.stroke();
- };
- const dot=(x,y,r=.105)=>{
-  boardCtx.beginPath();boardCtx.arc(x*cell,y*cell,cell*r,0,Math.PI*2);boardCtx.fill();
- };
- boardCtx.save();boardCtx.strokeStyle="#111714";boardCtx.fillStyle="#111714";
- if(level===1){
-  // Frog portrait: inked pupils, nostrils and a clean, expressive smile.
-  dot(15.5,12.2,.16);dot(29.5,12.2,.16);
-  boardCtx.fillStyle="#fff2cf";dot(15.45,12.12,.045);dot(29.45,12.12,.045);
-  boardCtx.fillStyle="#111714";
-  line([[15.5,20.7],[17.2,22.1],[19.2,23.1],[22.2,23.8],[25,23.1],[27,22.1],[28.5,20.7]],.19);
-  dot(18.2,17.4,.07);dot(25.8,17.4,.07);
-  line([[10.5,29.3],[11.3,30.1]],.12);line([[33.7,29.3],[34.5,30.1]],.12);
- }else if(level===2){
-  line([[22.5,12],[22.5,31]],.15);
-  line([[21.5,17],[17.5,14],[15,11]],.12);line([[23.5,17],[27.5,14],[30,11]],.12);
-  line([[21.5,25],[17.5,28],[15,30]],.12);line([[23.5,25],[27.5,28],[30,30]],.12);
- }else if(level===3){
-  const rays=[[[22,13],[22,16]],[[28,16],[26,19]],[[31,22],[27,22]],[[28,28],[26,25]],[[22,31],[22,27]],[[16,28],[18,25]],[[13,22],[17,22]],[[16,16],[18,19]]];
-  for(const ray of rays)line(ray,.12);
-  boardCtx.beginPath();boardCtx.arc(22,22,cell*1.2,0,Math.PI*2);boardCtx.lineWidth=cell*.16;boardCtx.stroke();
- }else if(level===4){
-  line([[13,19],[17,21],[20,22],[24,22],[28,20],[31,18]],.13);
-  line([[18,22],[18,29]],.12);line([[26,22],[26,29]],.12);
- }else if(level===5){
-  line([[13,17],[17,18],[22,18.2],[27,17]],.15);
-  line([[20,9],[22,6],[24,6]],.13);
- }else if(level===6){
-  line([[15,20],[18,17],[22,17],[24,20],[23,23],[20,23],[19,21],[21,20]],.16);
-  line([[30,14],[31,9]],.12);line([[35,14],[36,9]],.12);
-  dot(31,8.8,.12);dot(36,8.8,.12);
- }else if(level===7){
-  line([[19,19],[19,25]],.13);line([[22,18],[22,26]],.13);line([[25,19],[25,25]],.13);
-  line([[17,15],[13,11]],.12);line([[27,15],[31,11]],.12);
- }
- boardCtx.restore();
-}
 function renderBoard(){
- ensureBoardArtwork();
  const width=boardEl.width,height=boardEl.height,cell=width/SIZE;
  boardCtx.clearRect(0,0,width,height);
  boardEmptyGradient=boardCtx.createLinearGradient(0,0,width,height);
