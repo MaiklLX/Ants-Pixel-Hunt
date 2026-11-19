@@ -241,6 +241,51 @@ function drawBoardObstacle(obstacle,exposed,cell){
  if(exposed){boardCtx.strokeStyle="#f0c66f";boardCtx.lineWidth=1;boardCtx.strokeRect(px+.8,py+.8,cell-1.6,cell-1.6);}
  boardCtx.restore();
 }
+function drawBoardScenery(){
+ const n=getLevel(state.levelId).number,w=boardEl.width,h=boardEl.height;
+ const point=(u,v)=>({x:u*w,y:v*h});
+ boardCtx.save();
+ if(n===1){
+  // A quiet pond behind the frog: broad water rings and lily pads are scenery,
+  // not collectible cells, so they never change the ant puzzle or its counts.
+  boardCtx.strokeStyle="#e4f4f0";boardCtx.lineWidth=Math.max(1,w*.002);boardCtx.globalAlpha=.16;
+  for(const [u,v,rx,ry] of [[.17,.22,.12,.035],[.82,.36,.1,.028],[.72,.78,.14,.04],[.22,.82,.08,.025]]){
+   const p=point(u,v);boardCtx.beginPath();boardCtx.ellipse(p.x,p.y,w*rx,h*ry,-.12,0,Math.PI*2);boardCtx.stroke();
+  }
+  for(const [u,v,scale] of [[.13,.72,1],[.86,.18,.82],[.83,.83,.7]]){
+   const p=point(u,v);boardCtx.save();boardCtx.translate(p.x,p.y);boardCtx.rotate(-.22);
+   boardCtx.globalAlpha=.2;boardCtx.fillStyle="#456f55";boardCtx.strokeStyle="#a5c18c";boardCtx.lineWidth=1.2;
+   boardCtx.beginPath();boardCtx.ellipse(0,0,w*.055*scale,h*.027*scale,0,0,Math.PI*2);boardCtx.fill();boardCtx.stroke();
+   boardCtx.globalAlpha=.18;boardCtx.strokeStyle="#d5e8bd";boardCtx.beginPath();boardCtx.moveTo(-w*.04*scale,0);boardCtx.lineTo(w*.035*scale,0);boardCtx.stroke();
+   boardCtx.restore();
+  }
+  // Reeds frame the pond without competing with the frog's face.
+  boardCtx.globalAlpha=.2;boardCtx.strokeStyle="#64865b";boardCtx.lineWidth=Math.max(1,w*.003);
+  for(const [u,v,dir] of [[.035,.84,1],[.96,.72,-1],[.93,.91,-1]]){
+   const p=point(u,v);boardCtx.beginPath();boardCtx.moveTo(p.x,p.y);boardCtx.quadraticCurveTo(p.x+dir*w*.015,p.y-h*.08,p.x+dir*w*.008,p.y-h*.13);boardCtx.stroke();
+   boardCtx.beginPath();boardCtx.ellipse(p.x+dir*w*.009,p.y-h*.12,w*.012,h*.008,-.6,0,Math.PI*2);boardCtx.fillStyle="#789a67";boardCtx.fill();
+  }
+ }else{
+  // A soft woodland floor gives each later portrait a sense of place.
+  const flowers=n===2||n===3||n%6===0;
+  boardCtx.globalAlpha=.16;boardCtx.strokeStyle="#78956b";boardCtx.lineWidth=Math.max(1,w*.0025);
+  for(let i=0;i<14;i++){
+   const u=((i*37+n*11)%97)/100+.015,v=((i*53+n*7)%89)/100+.04,p=point(u,v);
+   boardCtx.beginPath();boardCtx.moveTo(p.x,p.y);boardCtx.quadraticCurveTo(p.x-w*.012,p.y-h*.018,p.x-w*.02,p.y-h*.035);boardCtx.stroke();
+   boardCtx.beginPath();boardCtx.moveTo(p.x,p.y);boardCtx.quadraticCurveTo(p.x+w*.012,p.y-h*.02,p.x+w*.022,p.y-h*.03);boardCtx.stroke();
+   if(flowers&&i%3===0){
+    boardCtx.globalAlpha=.14;boardCtx.fillStyle=i%2?"#e9b5ce":"#f1d98b";
+    boardCtx.beginPath();boardCtx.arc(p.x,p.y-h*.04,w*.006,0,Math.PI*2);boardCtx.fill();
+    boardCtx.globalAlpha=.16;boardCtx.strokeStyle="#78956b";
+   }
+  }
+  if(n===7||n%7===0){
+   boardCtx.globalAlpha=.14;boardCtx.fillStyle="#f4d67e";
+   for(const [u,v] of [[.2,.22],[.76,.3],[.62,.76],[.3,.84]]){const p=point(u,v);boardCtx.beginPath();boardCtx.arc(p.x,p.y,w*.012,0,Math.PI*2);boardCtx.fill();}
+  }
+ }
+ boardCtx.restore();
+}
 function renderBoard(){
  const width=boardEl.width,height=boardEl.height,cell=width/SIZE;
  boardCtx.clearRect(0,0,width,height);
@@ -255,6 +300,7 @@ function renderBoard(){
   boardCtx.beginPath();boardCtx.moveTo(p,0);boardCtx.lineTo(p-height,height);boardCtx.stroke();
  }
  boardCtx.restore();
+ drawBoardScenery();
  const targets=getExposedTargets(state);
  lastExposedPixels=new Set(targets.filter(item=>item.kind==="pixel").map(point=>point.x+","+point.y));
  for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)drawBoardTile(x,y,lastExposedPixels.has(x+","+y),cell);
@@ -267,6 +313,7 @@ function renderBoardAfterPickup(target){
  const cell=boardEl.width/SIZE,px=target.x*cell,py=target.y*cell;
  boardCtx.save();boardCtx.beginPath();boardCtx.rect(px-2,py-2,cell+4,cell+4);boardCtx.clip();
  boardCtx.fillStyle=boardEmptyGradient||"#20372c";boardCtx.fillRect(px-2,py-2,cell+4,cell+4);boardCtx.restore();
+ boardCtx.save();boardCtx.beginPath();boardCtx.rect(px-2,py-2,cell+4,cell+4);boardCtx.clip();drawBoardScenery();boardCtx.restore();
  drawBoardGroundCell(target.x,target.y,cell);
  drawBoardGridCell(target.x,target.y,cell);
  const nextExposed=new Set(getExposedTargets(state).filter(item=>item.kind==="pixel").map(point=>point.x+","+point.y));
