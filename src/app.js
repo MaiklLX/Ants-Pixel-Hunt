@@ -286,6 +286,51 @@ function drawBoardScenery(){
  }
  boardCtx.restore();
 }
+function drawStarterInkOverlay(){
+ const level=getLevel(state.levelId).number;
+ if(level>7)return;
+ const cell=boardEl.width/SIZE;
+ const line=(points,width=.17)=>{
+  boardCtx.beginPath();boardCtx.moveTo(points[0][0]*cell,points[0][1]*cell);
+  for(let i=1;i<points.length;i++)boardCtx.lineTo(points[i][0]*cell,points[i][1]*cell);
+  boardCtx.lineWidth=Math.max(1,cell*width);boardCtx.lineCap="round";boardCtx.lineJoin="round";boardCtx.stroke();
+ };
+ const dot=(x,y,r=.105)=>{
+  boardCtx.beginPath();boardCtx.arc(x*cell,y*cell,cell*r,0,Math.PI*2);boardCtx.fill();
+ };
+ boardCtx.save();boardCtx.strokeStyle="#111714";boardCtx.fillStyle="#111714";
+ if(level===1){
+  // Frog portrait: inked pupils, nostrils and a clean, expressive smile.
+  dot(15.5,12.2,.16);dot(29.5,12.2,.16);
+  boardCtx.fillStyle="#fff2cf";dot(15.45,12.12,.045);dot(29.45,12.12,.045);
+  boardCtx.fillStyle="#111714";
+  line([[15.5,20.7],[17.2,22.1],[19.2,23.1],[22.2,23.8],[25,23.1],[27,22.1],[28.5,20.7]],.19);
+  dot(18.2,17.4,.07);dot(25.8,17.4,.07);
+  line([[10.5,29.3],[11.3,30.1]],.12);line([[33.7,29.3],[34.5,30.1]],.12);
+ }else if(level===2){
+  line([[22.5,12],[22.5,31]],.15);
+  line([[21.5,17],[17.5,14],[15,11]],.12);line([[23.5,17],[27.5,14],[30,11]],.12);
+  line([[21.5,25],[17.5,28],[15,30]],.12);line([[23.5,25],[27.5,28],[30,30]],.12);
+ }else if(level===3){
+  const rays=[[[22,13],[22,16]],[[28,16],[26,19]],[[31,22],[27,22]],[[28,28],[26,25]],[[22,31],[22,27]],[[16,28],[18,25]],[[13,22],[17,22]],[[16,16],[18,19]]];
+  for(const ray of rays)line(ray,.12);
+  boardCtx.beginPath();boardCtx.arc(22,22,cell*1.2,0,Math.PI*2);boardCtx.lineWidth=cell*.16;boardCtx.stroke();
+ }else if(level===4){
+  line([[13,19],[17,21],[20,22],[24,22],[28,20],[31,18]],.13);
+  line([[18,22],[18,29]],.12);line([[26,22],[26,29]],.12);
+ }else if(level===5){
+  line([[13,17],[17,18],[22,18.2],[27,17]],.15);
+  line([[20,9],[22,6],[24,6]],.13);
+ }else if(level===6){
+  line([[15,20],[18,17],[22,17],[24,20],[23,23],[20,23],[19,21],[21,20]],.16);
+  line([[30,14],[31,9]],.12);line([[35,14],[36,9]],.12);
+  dot(31,8.8,.12);dot(36,8.8,.12);
+ }else if(level===7){
+  line([[19,19],[19,25]],.13);line([[22,18],[22,26]],.13);line([[25,19],[25,25]],.13);
+  line([[17,15],[13,11]],.12);line([[27,15],[31,11]],.12);
+ }
+ boardCtx.restore();
+}
 function renderBoard(){
  const width=boardEl.width,height=boardEl.height,cell=width/SIZE;
  boardCtx.clearRect(0,0,width,height);
@@ -304,6 +349,7 @@ function renderBoard(){
  const targets=getExposedTargets(state);
  lastExposedPixels=new Set(targets.filter(item=>item.kind==="pixel").map(point=>point.x+","+point.y));
  for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)drawBoardTile(x,y,lastExposedPixels.has(x+","+y),cell);
+ drawStarterInkOverlay();
  const exposedObstacles=new Set(targets.filter(item=>item.kind==="obstacle").map(item=>item.x+","+item.y));
  for(const obstacle of state.obstacles||[])drawBoardObstacle(obstacle,exposedObstacles.has(obstacle.x+","+obstacle.y),cell);
  updateBoardProgress();
@@ -320,6 +366,13 @@ function renderBoardAfterPickup(target){
  for(const key of nextExposed){
   if(lastExposedPixels.has(key))continue;
   const [x,y]=key.split(",").map(Number);drawBoardTile(x,y,true,cell);
+ }
+ // Re-ink only the cells repainted during this incremental update so a
+ // removed collectible never leaves a stale line behind.
+ const repaintKeys=new Set([target.x+","+target.y,...[...nextExposed].filter(key=>!lastExposedPixels.has(key))]);
+ for(const key of repaintKeys){
+  const [x,y]=key.split(",").map(Number);
+  boardCtx.save();boardCtx.beginPath();boardCtx.rect(x*cell,y*cell,cell,cell);boardCtx.clip();drawStarterInkOverlay();boardCtx.restore();
  }
  lastExposedPixels=nextExposed;updateBoardProgress();
 }
