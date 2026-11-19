@@ -846,6 +846,52 @@ function applyPixelArtOutlines(source){
  return board;
 }
 
+function applyStarterInkDetails(board,levelNumber){
+ const ink=(x,y)=>{
+  if(x<0||y<0||x>=SIZE||y>=SIZE)return;
+  if(board[y][x])board[y][x]="black";
+ };
+ const line=(x1,y1,x2,y2)=>{
+  const steps=Math.max(Math.abs(x2-x1),Math.abs(y2-y1));
+  for(let i=0;i<=steps;i++){
+   const t=steps?i/steps:0;
+   ink(Math.round(x1+(x2-x1)*t),Math.round(y1+(y2-y1)*t));
+  }
+ };
+ if(levelNumber===1){
+  // Frog: pupils, nostrils, a clearly drawn smile and small toe separations.
+  for(const [x,y] of [[15,12],[29,12],[16,11],[28,11]])ink(x,y);
+  line(16,21,19,23);line(19,23,22,24);line(22,24,25,23);line(25,23,28,21);
+  for(const [x,y] of [[9,29],[11,30],[33,29],[35,30]])ink(x,y);
+ }else if(levelNumber===2){
+  // Butterfly: body seam and paired wing veins.
+  line(22,13,22,31);line(21,17,17,14);line(23,17,27,14);
+  line(21,25,17,28);line(23,25,27,28);
+ }else if(levelNumber===3){
+  // Flower: fine separations between petals and a crisp centre.
+  line(22,10,22,15);line(29,16,26,19);line(31,22,27,22);
+  line(29,28,26,25);line(22,31,22,27);line(15,28,18,25);
+  line(13,22,17,22);line(15,16,18,19);
+ }else if(levelNumber===4){
+  // Mushroom: underside gills and a defined stem edge.
+  line(13,19,17,22);line(17,22,21,23);line(21,23,25,22);line(25,22,29,19);
+  line(18,23,18,30);line(26,23,26,30);
+ }else if(levelNumber===5){
+  // Acorn: cap seam and a short stem outline.
+  line(13,17,18,18);line(18,18,22,18);line(22,18,27,17);
+  line(20,9,22,6);line(22,6,24,6);
+ }else if(levelNumber===6){
+  // Snail: readable shell spiral and eye stalks.
+  line(15,20,18,17);line(18,17,22,17);line(22,17,24,20);
+  line(24,20,22,23);line(22,23,19,22);line(19,22,20,20);
+  line(30,13,31,9);line(35,13,36,9);
+ }else if(levelNumber===7){
+  // Firefly: segmented abdomen and wing folds.
+  line(19,19,19,25);line(22,18,22,26);line(25,19,25,25);
+  line(17,15,13,11);line(27,15,31,11);
+ }
+ return board;
+}
 function mergeSparseArtworkColors(board,minimum=18){
  const totals=new Map();
  for(const row of board)for(const color of row)if(color&&color!=="black")totals.set(color,(totals.get(color)||0)+1);
@@ -875,7 +921,7 @@ export function createArtworkBoard(levelId="meadow-01"){
    board=createRasterArtworkBoard(starterType,true);
    if(!board)board=level.number===1?createFrogBoard():createButterflyBoard();
   }
-  board=applyPixelArtOutlines(board);
+  if(level.number<=7)board=applyStarterInkDetails(board,level.number);\n  board=applyPixelArtOutlines(board);
   board=mergeSparseArtworkColors(board,18);
   artworkBoardCache.set(level.id,board);
  }
