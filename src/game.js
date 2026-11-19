@@ -871,8 +871,9 @@ export function buildIncoming(board,levelNumber=1){
   const code=color?colors.indexOf(color)+1:0;
   boardSeed=Math.imul(boardSeed^code,16777619)>>>0;
  }
- if(levelNumber>=8){
-  // Each batch mirrors one currently exposed color group. When that squad
+ if(levelNumber>=1){
+  // Every board size uses exposure-layer batches: a box must never contain
+  // more ants than its currently reachable matching pixels. When that squad
   // finishes, its slot is free before the next inner color wave is revealed.
   const working=board.map(row=>row.slice()),waves=[];
   let remaining=working.reduce((sum,row)=>sum+row.filter(Boolean).length,0),wave=0;
