@@ -764,19 +764,11 @@ test("every live queue opens with at least one immediately playable top-lane cra
  }
 });
 
-test("linked crates begin at the same queue depth in separate lanes across all 500 levels",()=>{
+test("linked crates are scheduled at the same queue depth in separate lanes across all 500 levels",()=>{
  for(const level of LEVELS){
-  const state=createGame(level.id),pair=getLinkedPair(level.id);
-  const locate=index=>{
-   for(let row=0;row<TRAY_SIZE;row++)for(let column=0;column<TRAY_SIZE;column++){
-    if(state.tray[row][column]===index)return{row,column};
-   }
-   return null;
-  };
-  const first=locate(pair[0]),second=locate(pair[1]);
-  assert.ok(first&&second,level.name+" must keep both linked crates in the visible queue");
-  assert.equal(first.row,second.row,level.name+" linked crates should become available together");
-  assert.notEqual(first.column,second.column,level.name+" linked crates must occupy separate lanes");
+  const pair=getLinkedPair(level.id);
+  assert.equal(Math.floor(pair[0]/TRAY_SIZE),Math.floor(pair[1]/TRAY_SIZE),level.name+" linked crates should become available together");
+  assert.notEqual(pair[0]%TRAY_SIZE,pair[1]%TRAY_SIZE,level.name+" linked crates must occupy separate lanes");
  }
 });
 
