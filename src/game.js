@@ -865,6 +865,31 @@ function mergeSparseArtworkColors(board,minimum=18){
  }
  return board;
 }
+function replaceBlackWithPigment(source){
+ const board=source.map(row=>row.slice());
+ const luminance=color=>{
+  const hex=COLORS[color]?.hex||"#000000";
+  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return r*.2126+g*.7152+b*.0722;
+ };
+ for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){
+  if(source[y][x]!=="black")continue;
+  const neighbors=[];
+  for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
+   if(!dx&&!dy)continue;
+   const nx=x+dx,ny=y+dy;
+   if(nx<0||ny<0||nx>=SIZE||ny>=SIZE)continue;
+   const color=source[ny][nx];
+   if(color&&color!=="black"&&!neighbors.includes(color))neighbors.push(color);
+  }
+  if(!neighbors.length){board[y][x]="";continue;}
+  // Keep definition lines in the artwork, but let their hue belong to the
+  // object rather than forcing a harsh black fence around every silhouette.
+  board[y][x]=neighbors.sort((a,b)=>luminance(a)-luminance(b))[0];
+ }
+ return board;
+}
+
 export function createArtworkBoard(levelId="meadow-01"){
  const level=getLevel(levelId);
  if(!artworkBoardCache.has(level.id)){
@@ -875,8 +900,8 @@ export function createArtworkBoard(levelId="meadow-01"){
    board=createRasterArtworkBoard(starterType,true);
    if(!board)board=level.number===1?createFrogBoard():createButterflyBoard();
   }
-  // Keep the gameplay contour layer for orderly exposure; the renderer supplies the actual painted surface and avoids drawing extra ink on top.
-  board=applyPixelArtOutlines(board);
+  // Preserve the authored illustration as real collectible cells. Avoid synthetic black outlines: silhouette edges come from the artwork's own pigments.
+  board=replaceBlackWithPigment(board);
   board=mergeSparseArtworkColors(board,18);
   artworkBoardCache.set(level.id,board);
  }
