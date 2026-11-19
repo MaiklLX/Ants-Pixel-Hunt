@@ -756,6 +756,30 @@ test("campaign contains 500 distinct, authored-first and procedurally composed i
 });
 
 
+test("every live queue opens with at least one immediately playable top-lane crate",()=>{
+ for(const level of LEVELS){
+  const state=createGame(level.id),visible=state.tray[0].filter(index=>index!==null);
+  assert.ok(visible.length>0,level.name+" must show an opening crate");
+  assert.ok(visible.some(index=>canLaunchBox(state,index)),level.name+" must not begin with three unusable top-lane crates");
+ }
+});
+
+test("linked crates begin at the same queue depth in separate lanes across all 500 levels",()=>{
+ for(const level of LEVELS){
+  const state=createGame(level.id),pair=getLinkedPair(level.id);
+  const locate=index=>{
+   for(let row=0;row<TRAY_SIZE;row++)for(let column=0;column<TRAY_SIZE;column++){
+    if(state.tray[row][column]===index)return{row,column};
+   }
+   return null;
+  };
+  const first=locate(pair[0]),second=locate(pair[1]);
+  assert.ok(first&&second,level.name+" must keep both linked crates in the visible queue");
+  assert.equal(first.row,second.row,level.name+" linked crates should become available together");
+  assert.notEqual(first.column,second.column,level.name+" linked crates must occupy separate lanes");
+ }
+});
+
 test("campaign queue squads become smaller in measured steps without losing any ants",()=>{
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill("green"));
  const early=buildIncoming(board,8),late=buildIncoming(board,500);
