@@ -167,10 +167,27 @@ function drawBoardTile(x,y,exposed,cell){
  boardCtx.quadraticCurveTo(left+w-cell*.08,top+h-cell*.08,left+w-cell*.08,top+h-radius);
  boardCtx.strokeStyle=darkenHex(rgb,.38);boardCtx.lineWidth=Math.max(.8,cell*.12);boardCtx.stroke();
  if(color!=="black"){
-  boardCtx.fillStyle="#ffffff99";boardCtx.beginPath();boardCtx.ellipse(left+cell*.25,top+cell*.22,cell*.15,cell*.065,-.35,0,Math.PI*2);boardCtx.fill();
-  const grain=(x*17+y*31+color.length*13)%7;
-  if(grain===0||grain===3){boardCtx.globalAlpha=.22;boardCtx.fillStyle=lightenHex(rgb,.42);boardCtx.fillRect(left+cell*.62,top+cell*.28,Math.max(.7,cell*.09),Math.max(.7,cell*.09));}
-  if(grain===2||grain===5){boardCtx.globalAlpha=.18;boardCtx.fillStyle=darkenHex(rgb,.35);boardCtx.fillRect(left+cell*.22,top+cell*.68,Math.max(.7,cell*.1),Math.max(.7,cell*.1));}
+  const grain=(x*17+y*31+color.length*13)%11;
+  // A soft upper-left reflection and a narrow side facet make each block
+  // read as a small piece of polished coloured glass, not a flat button.
+  boardCtx.globalAlpha=.72;boardCtx.fillStyle="#ffffff";
+  boardCtx.beginPath();boardCtx.ellipse(left+cell*.25,top+cell*.22,cell*.16,cell*.07,-.35,0,Math.PI*2);boardCtx.fill();
+  boardCtx.globalAlpha=.26;boardCtx.strokeStyle=lightenHex(rgb,.48);boardCtx.lineWidth=Math.max(.45,cell*.045);
+  boardCtx.beginPath();boardCtx.moveTo(left+cell*.12,top+cell*.34);boardCtx.lineTo(left+cell*.12,top+h-cell*.3);boardCtx.stroke();
+  // Fine, deterministic mineral flecks add texture without changing the
+  // underlying colour group or creating extra collectible pixels.
+  if(grain===0||grain===4||grain===8){
+   boardCtx.globalAlpha=.24;boardCtx.fillStyle=lightenHex(rgb,.55);
+   boardCtx.fillRect(left+cell*.58,top+cell*.31,Math.max(.65,cell*.075),Math.max(.65,cell*.075));
+  }
+  if(grain===2||grain===6||grain===10){
+   boardCtx.globalAlpha=.22;boardCtx.fillStyle=darkenHex(rgb,.42);
+   boardCtx.fillRect(left+cell*.27,top+cell*.69,Math.max(.65,cell*.08),Math.max(.65,cell*.08));
+  }
+  if(grain===3||grain===9){
+   boardCtx.globalAlpha=.18;boardCtx.strokeStyle="#ffffff";boardCtx.lineWidth=Math.max(.4,cell*.035);
+   boardCtx.beginPath();boardCtx.moveTo(left+cell*.62,top+cell*.56);boardCtx.lineTo(left+cell*.77,top+cell*.48);boardCtx.stroke();
+  }
  }
  if(exposed){
   boardCtx.strokeStyle="#fff0b5";boardCtx.lineWidth=Math.max(.65,cell*.07);
