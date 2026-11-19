@@ -916,7 +916,7 @@ export function buildIncoming(board,levelNumber=1){
      // stay readable; later ones ask the player to plan more box rotations
      // and use all five starter compartments deliberately.
      const squadBase=levelNumber<26?40:levelNumber<76?36:levelNumber<151?32:levelNumber<301?28:24;
-     let squadTarget=squadBase+((wave+color.charCodeAt(0))%5)+Math.floor(random()*4);
+     let squadTarget=Math.min(46,squadBase+((wave+color.charCodeAt(0))%5)+Math.floor(random()*4));
      if(left<=squadTarget)squadTarget=left;
      else if(left-squadTarget<20)squadTarget=left-20;
      const ants=Math.min(left,squadTarget);
@@ -950,7 +950,7 @@ export function buildIncoming(board,levelNumber=1){
     let left=totals[color],part=0;
     while(left>0){
      const squadBase=levelNumber<26?40:levelNumber<76?36:levelNumber<151?32:levelNumber<301?28:24;
-     let target=Math.min(left,squadBase+((wave+part+color.charCodeAt(0))%5)+2);
+     let target=Math.min(46,left,squadBase+((wave+part+color.charCodeAt(0))%5)+2);
      if(left>target&&left-target<20)target=left-20;
      const ants=Math.min(left,target);
      fallback.push({color,ants});left-=ants;part++;
