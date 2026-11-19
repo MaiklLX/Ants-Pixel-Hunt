@@ -1,4 +1,5 @@
 import {COLORS,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,LEVELS,getLevel,getIncoming,createGame,canChoose,chooseTopColumn,canLaunchBox,isLockedBox,getLinkedPartner,findAntWave,applyAntPickup,completeBoxDeparture,isDefeat,isGameComplete,getExposedTargets,getExposedPixels,countQueuedBySlot,countDispatchingWorkers,countSlotWorkers} from "./game.js";
+import {createArtworkSvg} from "./artwork-renderer.js";
 import {getAntTripFrame,getAntLaunchDelay,getAntQueueDelay,createPausableClock,getTrailPose,getAntTravelDurations,getAntGaitFrame} from "./ant-animation.js";
 import {isCampaignLevelUnlocked,getNextCampaignLevel} from "./campaign.js";
 import {BUILDINGS,createEconomy,normalizeEconomy,collectCube,completeMeadow,purchaseBuilding,buildingCost} from "./economy.js";
@@ -104,7 +105,16 @@ const loadingSlots=new Set(),workerPromises=new Map(),reservedTargets=new Set(),
 let workerSequence=0,lastAntFrameAt=0,lastExposedPixels=new Set();
 const MAX_ACTIVE_ANTS=36,ANT_FRAME_INTERVAL=1000/60;
 const colorRGB=Object.fromEntries(Object.entries(COLORS).map(([key,value])=>[key,value.hex.match(/[\da-f]{2}/gi).map(v=>parseInt(v,16))]));
-let boardEmptyGradient=null;
+let boardEmptyGradient=null,boardArtworkImage=null,boardArtworkKey="";
+function ensureBoardArtwork(){
+ const key=String(getLevel(state.levelId).number);
+ if(boardArtworkKey===key)return;
+ boardArtworkKey=key;boardArtworkImage=null;
+ const image=new Image();
+ image.onload=()=>{if(boardArtworkKey===key){boardArtworkImage=image;renderBoard();}};
+ image.onerror=()=>{if(boardArtworkKey===key)boardArtworkImage=null;};
+ image.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(createArtworkSvg(Number(key)));
+}
 function tasksRemaining(){
  return state.remaining+(state.obstacles||[]).reduce((sum,item)=>sum+item.hp,0);
 }
@@ -145,6 +155,12 @@ function obstacleAt(x,y){
 function drawBoardTile(x,y,exposed,cell){
  const color=state.board[y][x];if(!color||obstacleAt(x,y))return;
  const px=x*cell,py=y*cell,size=cell,rgb=COLORS[color].hex;
+ if(boardArtworkImage&&boardArtworkImage.complete&&boardArtworkImage.naturalWidth){
+  boardCtx.drawImage(boardArtworkImage,x*10,y*10,10,10,px,py,size,size);
+  boardCtx.save();boardCtx.strokeStyle="#fff7e9";boardCtx.globalAlpha=.10;boardCtx.lineWidth=Math.max(.25,cell*.025);boardCtx.strokeRect(px+.25,py+.25,size-.5,size-.5);
+  if(exposed){boardCtx.globalAlpha=.9;boardCtx.strokeStyle="#fff0b5";boardCtx.lineWidth=Math.max(.65,cell*.07);boardCtx.strokeRect(px+.8,py+.8,size-1.6,size-1.6);}
+  boardCtx.restore();return;
+ }
  const inset=Math.max(.12,cell*.012),left=px+inset,top=py+inset,w=size-inset*2,h=size-inset*2;
  const radius=Math.max(1.1,cell*.17);
  boardCtx.save();
@@ -332,6 +348,7 @@ function drawStarterInkOverlay(){
  boardCtx.restore();
 }
 function renderBoard(){
+ ensureBoardArtwork();
  const width=boardEl.width,height=boardEl.height,cell=width/SIZE;
  boardCtx.clearRect(0,0,width,height);
  boardEmptyGradient=boardCtx.createLinearGradient(0,0,width,height);
@@ -349,7 +366,6 @@ function renderBoard(){
  const targets=getExposedTargets(state);
  lastExposedPixels=new Set(targets.filter(item=>item.kind==="pixel").map(point=>point.x+","+point.y));
  for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)drawBoardTile(x,y,lastExposedPixels.has(x+","+y),cell);
- drawStarterInkOverlay();
  const exposedObstacles=new Set(targets.filter(item=>item.kind==="obstacle").map(item=>item.x+","+item.y));
  for(const obstacle of state.obstacles||[])drawBoardObstacle(obstacle,exposedObstacles.has(obstacle.x+","+obstacle.y),cell);
  updateBoardProgress();
@@ -366,13 +382,6 @@ function renderBoardAfterPickup(target){
  for(const key of nextExposed){
   if(lastExposedPixels.has(key))continue;
   const [x,y]=key.split(",").map(Number);drawBoardTile(x,y,true,cell);
- }
- // Re-ink only the cells repainted during this incremental update so a
- // removed collectible never leaves a stale line behind.
- const repaintKeys=new Set([target.x+","+target.y,...[...nextExposed].filter(key=>!lastExposedPixels.has(key))]);
- for(const key of repaintKeys){
-  const [x,y]=key.split(",").map(Number);
-  boardCtx.save();boardCtx.beginPath();boardCtx.rect(x*cell,y*cell,cell,cell);boardCtx.clip();drawStarterInkOverlay();boardCtx.restore();
  }
  lastExposedPixels=nextExposed;updateBoardProgress();
 }
@@ -491,7 +500,7 @@ function render(){
  const level=getLevel(state.levelId);
  $("level-number").textContent=`ПОЛЯНКА № ${level.number}`;
  $("level-title").textContent=level.name;
- $("board").setAttribute("aria-label",`${level.name}: цветная пиксельная картина на сетке 35 на 35`);
+ $("board").setAttribute("aria-label",`${level.name}: иллюстрация из цветных фрагментов на сетке 45 на 45`);
  renderBoard();renderSlots();renderChoices();renderConveyor();
  $("message").textContent=state.message;
  updateResultOverlay();
