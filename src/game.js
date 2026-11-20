@@ -1183,9 +1183,16 @@ export function chooseTopColumn(state,column){
  };
  if(box.special==="linked"){
   const partnerIndex=getLinkedPartner(state.levelId,selectedIndex),partnerColumn=state.tray[0].findIndex(index=>index===partnerIndex);
-  if(partnerColumn<0||partnerColumn===column||freeSlots.length<2)return false;
+  if(partnerColumn<0||partnerColumn===column)return false;
   const partnerBox=incoming[partnerIndex];
   if(!partnerBox||partnerBox.special!=="linked"||partnerBox.pairId!==box.pairId)return false;
+  if(freeSlots.length===1){
+   const freeSlot=freeSlots[0];state.slots[freeSlot]={...box,sourceIndex:selectedIndex};
+   shiftColumn(column);normalizeLinkedTray(state);state.pendingLinkedIndex=null;
+   state.message="Первая часть связки отправлена. Второй бокс можно отправить, когда освободится отсек.";
+   return true;
+  }
+  if(freeSlots.length<2)return false;
   const placements=[{slot:freeSlots[0],index:selectedIndex,crate:box},{slot:freeSlots[1],index:partnerIndex,crate:partnerBox}];
   for(const item of placements)state.slots[item.slot]={...item.crate,sourceIndex:item.index};
   shiftColumn(column);shiftColumn(partnerColumn);normalizeLinkedTray(state);state.pendingLinkedIndex=null;
