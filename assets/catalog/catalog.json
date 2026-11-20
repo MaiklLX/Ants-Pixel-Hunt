@@ -10,26 +10,6 @@
   "usage": "Use original sprites as source material. Convert selected sprite regions into collectible 45x45 color-block artwork before adding a campaign level.",
   "packs": [
     {
-      "id": "apples",
-      "genre": "misc",
-      "title": "Apples",
-      "tags": [
-        "fruit",
-        "food",
-        "bright",
-        "colorful"
-      ],
-      "path": "misc/oga-apples",
-      "fit": "excellent",
-      "ideas": [
-        "single fruit",
-        "fruit basket",
-        "orchard"
-      ],
-      "url": "https://github.com/Tiddybub/2d-assets/tree/main/misc/oga-apples",
-      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/misc/oga-apples/SOURCE.md"
-    },
-    {
       "id": "foliage-sprites",
       "genre": "nature",
       "title": "Foliage Sprites",
@@ -38,15 +18,16 @@
         "plants",
         "nature"
       ],
-      "path": "nature/foliage-sprites",
+      "path": "characters/foliage-sprites",
       "fit": "excellent",
       "ideas": [
         "leaf",
         "fern",
         "forest composition"
       ],
-      "url": "https://github.com/Tiddybub/2d-assets/tree/main/nature/foliage-sprites",
-      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/nature/foliage-sprites/SOURCE.md"
+      "url": "https://github.com/Tiddybub/2d-assets/tree/main/characters/foliage-sprites",
+      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/characters/foliage-sprites/SOURCE.md",
+      "verifiedInUpstreamIndex": true
     },
     {
       "id": "foliage-pack",
@@ -65,7 +46,8 @@
         "forest"
       ],
       "url": "https://github.com/Tiddybub/2d-assets/tree/main/nature/foliage-pack",
-      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/nature/foliage-pack/SOURCE.md"
+      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/nature/foliage-pack/SOURCE.md",
+      "verifiedInUpstreamIndex": true
     },
     {
       "id": "pixel-platformer-farm-expansion",
@@ -77,54 +59,16 @@
         "plants",
         "pixel"
       ],
-      "path": "tiles-terrain/pixel-platformer-farm-expansion",
+      "path": "nature/pixel-platformer-farm-expansion",
       "fit": "excellent",
       "ideas": [
         "farm animals",
         "vegetables",
         "farm scene"
       ],
-      "url": "https://github.com/Tiddybub/2d-assets/tree/main/tiles-terrain/pixel-platformer-farm-expansion",
-      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/tiles-terrain/pixel-platformer-farm-expansion/SOURCE.md"
-    },
-    {
-      "id": "pixel-platformer-blocks",
-      "genre": "tiles-terrain",
-      "title": "Pixel Platformer Blocks",
-      "tags": [
-        "pixel",
-        "blocks",
-        "terrain"
-      ],
-      "path": "tiles-terrain/pixel-platformer-blocks",
-      "fit": "good",
-      "ideas": [
-        "stone",
-        "wood",
-        "terrain objects"
-      ],
-      "url": "https://github.com/Tiddybub/2d-assets/tree/main/tiles-terrain/pixel-platformer-blocks",
-      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/tiles-terrain/pixel-platformer-blocks/SOURCE.md"
-    },
-    {
-      "id": "mixed-162-stuff",
-      "genre": "misc",
-      "title": "mixed 16^2 stuff",
-      "tags": [
-        "pixel",
-        "objects",
-        "mixed",
-        "top-down"
-      ],
-      "path": "misc/oga-mixed-162-stuff",
-      "fit": "excellent",
-      "ideas": [
-        "small props",
-        "collectible objects",
-        "decor"
-      ],
-      "url": "https://github.com/Tiddybub/2d-assets/tree/main/misc/oga-mixed-162-stuff",
-      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/misc/oga-mixed-162-stuff/SOURCE.md"
+      "url": "https://github.com/Tiddybub/2d-assets/tree/main/nature/pixel-platformer-farm-expansion",
+      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/nature/pixel-platformer-farm-expansion/SOURCE.md",
+      "verifiedInUpstreamIndex": true
     },
     {
       "id": "generic-items",
@@ -142,7 +86,8 @@
         "household objects"
       ],
       "url": "https://github.com/Tiddybub/2d-assets/tree/main/misc/generic-items",
-      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/misc/generic-items/SOURCE.md"
+      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/misc/generic-items/SOURCE.md",
+      "verifiedInUpstreamIndex": true
     },
     {
       "id": "monster-builder-pack",
@@ -160,7 +105,8 @@
         "creature portraits"
       ],
       "url": "https://github.com/Tiddybub/2d-assets/tree/main/characters/monster-builder-pack",
-      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/characters/monster-builder-pack/SOURCE.md"
+      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/characters/monster-builder-pack/SOURCE.md",
+      "verifiedInUpstreamIndex": true
     },
     {
       "id": "toon-characters",
@@ -178,7 +124,8 @@
         "mascots"
       ],
       "url": "https://github.com/Tiddybub/2d-assets/tree/main/characters/toon-characters",
-      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/characters/toon-characters/SOURCE.md"
+      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/characters/toon-characters/SOURCE.md",
+      "verifiedInUpstreamIndex": true
     },
     {
       "id": "platformer-characters",
@@ -197,7 +144,8 @@
         "animals"
       ],
       "url": "https://github.com/Tiddybub/2d-assets/tree/main/characters/platformer-characters",
-      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/characters/platformer-characters/SOURCE.md"
+      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/characters/platformer-characters/SOURCE.md",
+      "verifiedInUpstreamIndex": true
     },
     {
       "id": "pico-8-platformer",
@@ -215,25 +163,8 @@
         "small characters"
       ],
       "url": "https://github.com/Tiddybub/2d-assets/tree/main/characters/pico-8-platformer",
-      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/characters/pico-8-platformer/SOURCE.md"
-    },
-    {
-      "id": "puzzle-pack-1",
-      "genre": "misc",
-      "title": "Puzzle Pack 1",
-      "tags": [
-        "puzzle",
-        "objects",
-        "icons"
-      ],
-      "path": "misc/puzzle-pack-1",
-      "fit": "good",
-      "ideas": [
-        "puzzle props",
-        "small scenes"
-      ],
-      "url": "https://github.com/Tiddybub/2d-assets/tree/main/misc/puzzle-pack-1",
-      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/misc/puzzle-pack-1/SOURCE.md"
+      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/characters/pico-8-platformer/SOURCE.md",
+      "verifiedInUpstreamIndex": true
     },
     {
       "id": "puzzle-pack-2",
@@ -244,69 +175,15 @@
         "objects",
         "icons"
       ],
-      "path": "misc/puzzle-pack-2",
+      "path": "characters/puzzle-pack-2",
       "fit": "good",
       "ideas": [
         "puzzle props",
         "mechanical objects"
       ],
-      "url": "https://github.com/Tiddybub/2d-assets/tree/main/misc/puzzle-pack-2",
-      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/misc/puzzle-pack-2/SOURCE.md"
-    },
-    {
-      "id": "oga-cubikopp-qubic-smilies",
-      "genre": "ui",
-      "title": "Cubikopp Qubic Smilies",
-      "tags": [
-        "faces",
-        "emotions",
-        "pixel"
-      ],
-      "path": "ui/oga-cubikopp-qubic-smilies",
-      "fit": "excellent",
-      "ideas": [
-        "expressive faces",
-        "emotional portraits"
-      ],
-      "url": "https://github.com/Tiddybub/2d-assets/tree/main/ui/oga-cubikopp-qubic-smilies",
-      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/ui/oga-cubikopp-qubic-smilies/SOURCE.md"
-    },
-    {
-      "id": "oga-faceset-2-bit",
-      "genre": "ui",
-      "title": "Faceset 2-bit",
-      "tags": [
-        "faces",
-        "pixel",
-        "character"
-      ],
-      "path": "ui/oga-faceset-2-bit",
-      "fit": "good",
-      "ideas": [
-        "faces",
-        "character details"
-      ],
-      "url": "https://github.com/Tiddybub/2d-assets/tree/main/ui/oga-faceset-2-bit",
-      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/ui/oga-faceset-2-bit/SOURCE.md"
-    },
-    {
-      "id": "roguelike-rpg-pack",
-      "genre": "ui",
-      "title": "Roguelike RPG Pack",
-      "tags": [
-        "pixel",
-        "furniture",
-        "items"
-      ],
-      "path": "ui/roguelike-rpg-pack",
-      "fit": "good",
-      "ideas": [
-        "chests",
-        "furniture",
-        "props"
-      ],
-      "url": "https://github.com/Tiddybub/2d-assets/tree/main/ui/roguelike-rpg-pack",
-      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/ui/roguelike-rpg-pack/SOURCE.md"
+      "url": "https://github.com/Tiddybub/2d-assets/tree/main/characters/puzzle-pack-2",
+      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/characters/puzzle-pack-2/SOURCE.md",
+      "verifiedInUpstreamIndex": true
     },
     {
       "id": "pixel-vehicle-pack",
@@ -324,7 +201,8 @@
         "transport"
       ],
       "url": "https://github.com/Tiddybub/2d-assets/tree/main/vehicles/pixel-vehicle-pack",
-      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/vehicles/pixel-vehicle-pack/SOURCE.md"
+      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/vehicles/pixel-vehicle-pack/SOURCE.md",
+      "verifiedInUpstreamIndex": true
     },
     {
       "id": "racing-pack",
@@ -342,7 +220,8 @@
         "track compositions"
       ],
       "url": "https://github.com/Tiddybub/2d-assets/tree/main/vehicles/racing-pack",
-      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/vehicles/racing-pack/SOURCE.md"
+      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/vehicles/racing-pack/SOURCE.md",
+      "verifiedInUpstreamIndex": true
     },
     {
       "id": "alien-ufo-pack",
@@ -362,26 +241,8 @@
         "space scenes"
       ],
       "url": "https://github.com/Tiddybub/2d-assets/tree/main/sci-fi/alien-ufo-pack",
-      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/sci-fi/alien-ufo-pack/SOURCE.md"
-    },
-    {
-      "id": "i-are-spaceship",
-      "genre": "characters",
-      "title": "I ARE SPACESHIP (16x16)",
-      "tags": [
-        "spaceship",
-        "stars",
-        "asteroids",
-        "pixel"
-      ],
-      "path": "characters/oga-i-are-spaceship-16x16-space-sprites",
-      "fit": "excellent",
-      "ideas": [
-        "spacecraft",
-        "space scenes"
-      ],
-      "url": "https://github.com/Tiddybub/2d-assets/tree/main/characters/oga-i-are-spaceship-16x16-space-sprites",
-      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/characters/oga-i-are-spaceship-16x16-space-sprites/SOURCE.md"
+      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/sci-fi/alien-ufo-pack/SOURCE.md",
+      "verifiedInUpstreamIndex": true
     },
     {
       "id": "flag-pack",
@@ -399,25 +260,8 @@
         "world map"
       ],
       "url": "https://github.com/Tiddybub/2d-assets/tree/main/misc/flag-pack",
-      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/misc/flag-pack/SOURCE.md"
-    },
-    {
-      "id": "foliage-pack-modern",
-      "genre": "modern-urban",
-      "title": "Foliage Pack",
-      "tags": [
-        "tree",
-        "nature",
-        "environment"
-      ],
-      "path": "modern-urban/foliage-pack",
-      "fit": "good",
-      "ideas": [
-        "trees",
-        "urban garden"
-      ],
-      "url": "https://github.com/Tiddybub/2d-assets/tree/main/modern-urban/foliage-pack",
-      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/modern-urban/foliage-pack/SOURCE.md"
+      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/misc/flag-pack/SOURCE.md",
+      "verifiedInUpstreamIndex": true
     }
   ]
 }
