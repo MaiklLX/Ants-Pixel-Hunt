@@ -40,6 +40,15 @@ test("pilot PNGs are embedded RGBA sources for offline use",()=>{
  assert.equal(seen.size,4,"each pilot must use a different source sprite");
 });
 
+test("starting a campaign level loads its artwork before ants can launch",async()=>{
+ const app=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
+ const start=app.slice(app.indexOf("async function startFreshGame"),app.indexOf("function readZenPayload"));
+ assert.match(start,/if\(!boardArtworkKey\)boardArtworkPromise=ensureBoardArtwork\(\)/);
+ assert.ok(start.indexOf("ensureBoardArtwork()")<start.indexOf("await boardArtworkPromise"));
+ assert.match(start,/if\(!artworkReady&&PILOT_ARTWORK\[getLevel\(levelId\)\.number\]\)/);
+ assert.match(start,/Не удалось загрузить изображение пилотного уровня/);
+});
+
 test("pilot rasterizer preserves all 16 game colors and samples the full 35x35 source",async()=>{
  const app=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
  assert.match(app,/const palette=Object\.entries\(COLORS\)\.map/);
