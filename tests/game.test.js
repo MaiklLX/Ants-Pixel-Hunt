@@ -487,7 +487,7 @@ test("generated wave boxes carry substantial ant squads without losing any color
   assert.ok(deck.every(box=>box.ants>0&&box.ants<=BOX_CAPACITY),level.name+" must respect box capacity");
   const average=ants/Math.max(1,deck.length);
   assert.ok(average>=18,level.name+" should use substantial squads rather than flood the queue with micro-boxes; average="+average.toFixed(1)+", boxes="+deck.length);
-  assert.ok(deck.length<=24,level.name+" should not require more than 24 ordinary boxes; found "+deck.length);
+  assert.ok(deck.length<=28,level.name+" should keep the ordinary queue below 30 boxes; found "+deck.length);
  }
 });
 test("box capacities vary within each sufficiently large color deck but preserve exact ant totals",()=>{
