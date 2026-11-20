@@ -88,7 +88,7 @@ function renderMap(){
  const copy=document.createElement("span");copy.textContent="уровней пройдено";stat.append(count,copy);
  const track=document.createElement("div");track.className="map-summary-track";track.setAttribute("role","progressbar");track.setAttribute("aria-label","Прогресс кампании");track.setAttribute("aria-valuemin","0");track.setAttribute("aria-valuemax",String(LEVELS.length));track.setAttribute("aria-valuenow",String(finished));track.setAttribute("aria-valuetext",`${finished} из ${LEVELS.length} уровней пройдено`);
  const fill=document.createElement("span");fill.style.width=(finished/LEVELS.length*100)+"%";track.append(fill);
- const next=document.createElement("small");next.className="map-summary-next";next.textContent=finished===LEVELS.length?"Все 504 уровня пройдены — можно возвращаться к любимым":nextPlayable?"Следующий шаг · "+nextPlayable.name:"Кампания открыта";
+ const next=document.createElement("small");next.className="map-summary-next";next.textContent=finished===LEVELS.length?"Все 504 уровня пройдены — можно возвращаться к любимым":nextPlayable?"Следующий шаг · "+(PILOT_ARTWORK[nextPlayable.number]?.label?PILOT_ARTWORK[nextPlayable.number].label+" · ":"")+nextPlayable.name:"Кампания открыта";
  const continueButton=document.createElement("button");continueButton.type="button";continueButton.className="map-continue";continueButton.textContent=nextPlayable?"Продолжить · "+(PILOT_ARTWORK[nextPlayable.number]?.label||"уровень "+nextPlayable.number):"Все уровни пройдены";continueButton.disabled=!nextPlayable;
  continueButton.setAttribute("aria-label",nextPlayable?"Начать следующий уровень: "+nextPlayable.name:"Все уровни пройдены");
  if(nextPlayable)continueButton.addEventListener("click",()=>{closeMap();void startFreshGame(nextPlayable.id);});
@@ -886,7 +886,7 @@ function updateResultOverlay(){
  const complete=state.won,failed=state.lost;
  const next=nextLevel();
  $("result-next").hidden=zenMode||!complete||!next||!isLevelUnlocked(next);
- if(next)$("result-next").textContent=`Следующая полянка: ${next.name} →`;
+ if(next)$("result-next").textContent=`Следующая полянка: ${PILOT_ARTWORK[next.number]?.label?PILOT_ARTWORK[next.number].label+" · ":""}${next.name} →`;
  overlay.hidden=!(complete||failed);
  if(!complete&&!failed)return;
  const kicker=$("result-overlay").querySelector(".result-kicker"),resultLevel=getLevel(state.levelId);if(kicker)kicker.textContent=zenMode?"ДЗЕН-ИСПЫТАНИЕ":PILOT_ARTWORK[resultLevel.number]?.label||`ПОЛЯНКА № ${resultLevel.number}`;
@@ -1031,10 +1031,12 @@ function maybeFinalizeMenuExit(){
  state=createGame(wasZen?"meadow-01":state.levelId);totalBlocks=state.remaining;gameStarted=false;resetAfterMenu=false;resetting=false;updateZenHud();
  render();$("save-status").textContent=wasZen?"Дзен-попытка оставлена · временный нектар сброшен":"Партия сброшена · открытые полянки сохранены";updateMainMenu();
 }
-function startGame(){
+async function startGame(){
  if(resetAfterMenu)return;
- shell.classList.remove("menu-open");gameStarted=true;resizeAntLayer();updateMainMenu();
- kickColony();
+ resetting=true;render();shell.classList.remove("menu-open");gameStarted=true;resizeAntLayer();updateMainMenu();
+ await boardArtworkPromise;
+ if(resetAfterMenu){resetting=false;return;}
+ resetting=false;render();kickColony();
 }
 async function startFreshGame(levelId=state.levelId){
  if(workerPromises.size>0||loadingSlots.size>0||resetAfterMenu)return;
@@ -1042,7 +1044,7 @@ async function startFreshGame(levelId=state.levelId){
  resetting=true;boardArtworkPromise=Promise.resolve(true);cancelAnimationFrame(antFrame);activeAnts.clear();pickupEffects.length=0;deliveryEffects.length=0;reservedTargets.clear();slotNextLaunchAt.clear();applySavedArtwork(levelId);state=createGame(levelId);boardArtworkKey=readCustomArtwork(levelId)?levelId:"";totalBlocks=tasksRemaining();
  gameStarted=true;render();$("save-status").textContent="Новая партия · прогресс уровня не сохраняется";shell.classList.remove("menu-open");resizeAntLayer();updateMainMenu();
  await boardArtworkPromise;
- if(state.levelId!==levelId||resetAfterMenu)return;
+ if(state.levelId!==levelId||resetAfterMenu){resetting=false;return;}
  resetting=false;render();kickColony();
 }
 function readZenPayload(){
