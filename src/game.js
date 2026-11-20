@@ -995,7 +995,7 @@ function createLevelObstacles(levelId,board){
  if(number<26)return [];
  const count=number<51?1:number<151?2:number<301?3:4;
  const roles=count===1?["builder"]:count===2?["builder","warrior"]:count===3?["builder","warrior","builder"]:["builder","warrior","builder","warrior"];
- const hp=number>=151?3:2;
+ const hp=number>=301?12:number>=151?10:8;
  const candidates=getExposedPixels(board).slice();
  if(!candidates.length)return [];
  const selected=[candidates[0]];
