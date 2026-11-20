@@ -578,16 +578,16 @@ function applyGeneratedDepthPalette(source,palette){
 
 function generatedSceneLayout(count,variant){
  const layouts={
-  1:[[[0,0,35,35]]],
+  1:[[[0,0,45,45]]],
   2:[
-   [[0,2,19,31],[17,2,18,31]],
-   [[0,1,18,33],[17,1,18,33]],
-   [[0,2,20,31],[18,2,17,31]]
+   [[0,7,28,31],[17,7,28,31]],
+   [[0,1,28,31],[17,13,28,31]],
+   [[0,13,28,31],[17,1,28,31]]
   ],
   3:[
-   [[9,1,17,22],[0,17,17,18],[18,17,17,18]],
-   [[0,1,17,22],[18,1,17,22],[9,17,17,18]],
-   [[9,0,17,22],[0,17,17,18],[18,17,17,18]]
+   [[0,0,26,26],[19,0,26,26],[9,19,26,26]],
+   [[0,0,26,26],[19,0,26,26],[9,19,26,26]],
+   [[0,0,26,26],[19,0,26,26],[9,19,26,26]]
   ]
  };
  const choices=layouts[count]||layouts[3];
@@ -640,11 +640,20 @@ function createComposedArtworkBoard(number){
  const count=generatedPartCount(number),layoutVariant=(number+Math.floor(number/11))%3;
  const placements=generatedSceneLayout(count,layoutVariant);
  for(let part=0;part<count;part++){
-  const motifIndex=(number*7+part*5+Math.floor(number/13))%GENERATED_MOTIFS.length;
-  const motif=GENERATED_MOTIFS[motifIndex],variant=number*37+part*113;
+  const motifSeed=(Math.imul(number,0x9e3779b1)^Math.imul(part+1,0x85ebca6b))>>>0;
+  const motifIndex=motifSeed%GENERATED_MOTIFS.length;
+  const motif=GENERATED_MOTIFS[motifIndex],variant=(Math.imul(number,0x45d9f3b)+part*0x27d4eb2d)>>>0;
   const [ox,oy,width,height]=placements[part];
   const raster=createRasterArtworkBoard(motif.type);
   if(raster){
+   const palettes=[
+    ["forest","green","lime","yellow"],["purple","blue","sky","pink"],
+    ["red","orange","yellow","cream"],["blue","turquoise","sky","cream"],
+    ["brown","orange","cream","green"],["pink","purple","yellow","cream"]
+   ];
+   const theme=palettes[Math.floor(number/8)%palettes.length];
+   const sourcePalette=RASTER_ARTWORK[motif.type]?.palette||[];
+   const pigmentMap=Object.fromEntries(sourcePalette.slice(1).map((color,index)=>[color,theme[index%theme.length]]));
    for(let py=0;py<height;py++)for(let px=0;px<width;px++){
     const x=ox+px,y=oy+py;if(x<0||y<0||x>=SIZE||y>=SIZE)continue;
     const scaleX=1+(((variant*7)%9)-4)*.025,scaleY=1+(((variant*11)%9)-4)*.025;
@@ -654,7 +663,7 @@ function createComposedArtworkBoard(number){
     if(variant%2===0)sourceU=1-sourceU;
     const sx=Math.max(0,Math.min(SIZE-1,Math.floor(sourceU*SIZE)));
     const sy=Math.max(0,Math.min(SIZE-1,Math.floor(sourceV*SIZE)));
-    const color=raster[sy][sx];if(color)board[y][x]=color;
+    const color=raster[sy][sx];if(color)board[y][x]=color==="black"?"black":(pigmentMap[color]||color);
    }
   }else{
    for(let py=0;py<height;py++)for(let px=0;px<width;px++){
@@ -915,8 +924,8 @@ export function buildIncoming(board,levelNumber=1){
      // Squads gradually become smaller across the campaign. Early meadows
      // stay readable; later ones ask the player to plan more box rotations
      // and use all five starter compartments deliberately.
-     const squadBase=levelNumber<26?40:levelNumber<76?36:levelNumber<151?32:levelNumber<301?28:24;
-     let squadTarget=Math.min(46,squadBase+((wave+color.charCodeAt(0))%5)+Math.floor(random()*4));
+     const squadBase=levelNumber<26?62:levelNumber<76?58:levelNumber<151?54:levelNumber<301?50:46;
+     let squadTarget=Math.min(68,squadBase+((wave+color.charCodeAt(0))%7)+Math.floor(random()*5));
      if(left<=squadTarget)squadTarget=left;
      else if(left-squadTarget<20)squadTarget=left-20;
      const ants=Math.min(left,squadTarget);
@@ -949,8 +958,8 @@ export function buildIncoming(board,levelNumber=1){
    for(const color of colors){
     let left=totals[color],part=0;
     while(left>0){
-     const squadBase=levelNumber<26?40:levelNumber<76?36:levelNumber<151?32:levelNumber<301?28:24;
-     let target=Math.min(46,left,squadBase+((wave+part+color.charCodeAt(0))%5)+2);
+     const squadBase=levelNumber<26?62:levelNumber<76?58:levelNumber<151?54:levelNumber<301?50:46;
+     let target=Math.min(68,left,squadBase+((wave+part+color.charCodeAt(0))%7)+3);
      if(left>target&&left-target<20)target=left-20;
      const ants=Math.min(left,target);
      fallback.push({color,ants});left-=ants;part++;
@@ -971,15 +980,21 @@ export function buildIncoming(board,levelNumber=1){
   // Opening row: one useful squad, one deliberate future-layer temptation,
   // and (when the rim has another color) a second useful choice.
   if(waves[0]?.length)lanes[0].push(waves[0].shift());
-  let futureChoice=null;
-  for(let wi=1;wi<waves.length&&!futureChoice;wi++){
-   const index=waves[wi].findIndex(box=>!openingColors.has(box.color));
-   if(index>=0)futureChoice=waves[wi].splice(index,1)[0];
-  }
-  if(futureChoice)lanes[1].push(futureChoice);
-  const firstOpeningColor=lanes[0][0]?.color;
-  const secondOpening=waves[0]?.findIndex(box=>openingColors.has(box.color)&&box.color!==firstOpeningColor)??-1;
-  if(secondOpening>=0)lanes[2].push(waves[0].splice(secondOpening,1)[0]);
+  const takeFutureChoice=excludedColor=>{
+   for(let wi=1;wi<waves.length;wi++){
+    const index=waves[wi].findIndex(box=>!openingColors.has(box.color)&&box.color!==excludedColor);
+    if(index>=0)return waves[wi].splice(index,1)[0];
+   }
+   for(let wi=1;wi<waves.length;wi++){
+    const index=waves[wi].findIndex(box=>!openingColors.has(box.color));
+    if(index>=0)return waves[wi].splice(index,1)[0];
+   }
+   return null;
+  };
+  const firstFuture=takeFutureChoice(lanes[0][0]?.color);
+  if(firstFuture)lanes[1].push(firstFuture);
+  const secondFuture=takeFutureChoice(firstFuture?.color||lanes[0][0]?.color);
+  if(secondFuture)lanes[2].push(secondFuture);
   // Keep the first row intentionally readable, then distribute the remaining
   // squads by the shallowest lane. Never change a squad's exposure-wave order.
   for(const waveDeck of waves)for(const box of waveDeck){
