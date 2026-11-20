@@ -1237,3 +1237,11 @@ KT-097: создать одну авторскую седьмую полянку
 - The previous failed run exposed two stale assertions: `game.test.js` still expected the former monster/dragon/pineapple/crystal-flower pilot names, and `sprite-catalog.test.js` expected an obsolete Russian policy phrase. Both tests now match the current animal pilot set and catalog policy.
 - Updated the visible app version to KT-304 and refreshed both service-worker cache identifiers.
 - Source PNGs were inspected and confirmed as elephant, giraffe, hippo, and monkey. Actual in-game visual confirmation after deployment remains pending; do not mark the art task visually closed until the board is checked in the browser.
+
+
+## KT-305 — 2026-11-20: detailed pilot art + reset progress
+- Pilot PNGs now retain accent colors down to 3 cells instead of merging every color region smaller than 18 cells into the dominant body color. Non-pilot artwork keeps the existing threshold of 18.
+- Added a destructive-action button to the main menu: `Сбросить прогресс`. It requires confirmation, removes only campaign completion and colony-economy progression keys, then reloads the app. Custom artwork and other local data are preserved.
+- Added regression tests for pilot color retention and the scoped reset behavior. Updated app version to KT-305 and both service-worker cache identifiers.
+- GitHub Pages run `44744687034` succeeded: 193/193 tests, production build, and Pages deploy.
+- Visual inspection of all four revised animal mosaics on a real browser/device remains pending.
