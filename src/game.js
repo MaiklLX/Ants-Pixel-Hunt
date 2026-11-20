@@ -454,7 +454,7 @@ function generatedMotifColor(type,zone,u,v,variant,scenePalette){
   const detail=generatedMotifDetail(type,zone,u,v,variant);
   if(detail>=0)return palette[detail%palette.length];
  }
- return palette[zone%4]||palette[0];
+ return palette[zone%palette.length]||palette[0];
 }
 const GENERATED_CHAPTERS=[
  "Светлячковая роща","Тихий ручей","Солнечная опушка","Старый дуб",
@@ -582,6 +582,9 @@ function generatedMotifZone(type,u,v,variant){
    if(T(.24,.2,.3,.02,.43,.24)||T(.57,.24,.7,.02,.76,.2))return 2;
    if(E(.32,.37,.09,.11)||E(.68,.37,.09,.11))return 3;
    if(T(.16,.64,.04,.84,.28,.78)||T(.84,.64,.96,.84,.72,.78))return 4;
+   if(E(.32,.49,.075,.065)||E(.68,.49,.075,.065))return 5;
+   if(E(.5,.68,.13,.1))return 6;
+   if(T(.2,.55,.08,.45,.12,.68)||T(.8,.55,.92,.45,.88,.68))return 7;
    break;
   case "dragon":
    if(E(.49,.55,.25,.3)||E(.5,.8,.19,.14))return 0;
@@ -589,16 +592,29 @@ function generatedMotifZone(type,u,v,variant){
    if(T(.3,.48,.03,.31,.18,.68)||T(.7,.48,.97,.31,.82,.68))return 2;
    if(T(.39,.77,.24,.98,.47,.9)||T(.61,.77,.76,.98,.53,.9))return 3;
    if(T(.48,.51,.52,.51,.5,.62))return 4;
+   if(E(.5,.34,.12,.055))return 5;
+   if(E(.5,.61,.13,.14))return 6;
+   if(T(.5,.42,.43,.6,.57,.6))return 7;
    break;
   case "pineapple":
    if(E(.5,.59,.29,.35))return 0;
    if(T(.5,.32,.29,.04,.47,.25)||T(.5,.32,.7,.02,.55,.26)||T(.5,.28,.44,.09,.36,.25))return 1;
    if(E(.5,.88,.18,.06))return 2;
+   if(E(.5,.56,.16,.18))return 3;
+   if(E(.5,.75,.17,.09))return 4;
+   if(T(.38,.34,.2,.11,.4,.02))return 5;
+   if(T(.62,.34,.8,.11,.6,.02))return 6;
+   if(E(.5,.59,.09,.1))return 7;
    break;
   case "crystal-flower":
    if(E(.5,.25,.14,.18)||E(.27,.39,.17,.15)||E(.73,.39,.17,.15)||E(.34,.65,.16,.15)||E(.66,.65,.16,.15))return 1;
    if(T(.5,.07,.42,.27,.58,.27)||T(.5,.43,.42,.68,.58,.68)||T(.08,.39,.31,.29,.31,.49)||T(.92,.39,.69,.29,.69,.49))return 2;
    if(R(.46,.65,.54,.97))return 0;
+   if(E(.5,.39,.1,.11))return 3;
+   if(E(.5,.74,.12,.08))return 4;
+   if(T(.5,.1,.39,.3,.61,.3))return 5;
+   if(T(.25,.39,.43,.32,.43,.48)||T(.75,.39,.57,.32,.57,.48))return 6;
+   if(T(.5,.47,.44,.62,.56,.62))return 7;
    break;
  }
  return -1;
