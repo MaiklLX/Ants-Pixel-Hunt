@@ -792,3 +792,12 @@ test("KT-201 shows a functional nursery inside the evolving colony scene",async(
  assert.match(html,/class="nest-nursery"/);
  assert.match(styles,/\.nest-scene\[data-nursery-level="3"\] \.nest-nursery/);
 });
+
+
+test("KT-258 prevents boxes without an exposed matching target from entering starter slots",()=>{
+ assert.match(app,/button\.disabled=!box\|\|sealed\|\|resetting\|\|resetAfterMenu\|\|state\.won\|\|state\.lost\|\|!canChoose\(state\)\|\|!frontierReady/);
+ const start=app.indexOf("async function onChoose(column){");
+ const end=app.indexOf("\\nfunction updateResultOverlay",start);
+ const handler=app.slice(start,end);
+ assert.match(handler,/!canLaunchBox\(state,selectedIndex\)/);
+});
