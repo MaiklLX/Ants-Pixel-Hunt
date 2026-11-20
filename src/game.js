@@ -488,10 +488,10 @@ const GENERATED_LEVELS=Array.from({length:493},(_,index)=>{
  const obstacleHint=number>=301?"Корни, камни и осы: чередуй строителей и военных, у преград несколько уровней прочности":number>=151?"Корневые завалы и пауки-стражи: сначала расчисти путь специалистами":number>=51?"На рисунке есть жук-страж — военные прогонят его, строители разбирают корни":number>=26?"Корневой завал закрывает цветной блок — отправь к нему муравьёв-строителей":"";
  return {id:"meadow-"+String(number).padStart(3,"0"),number,chapter:generatedChapter(number),name,emoji:motifs[0].emoji,hint:obstacleHint?artworkHint+" · "+obstacleHint:artworkHint};
 }).concat([
- {id:"meadow-501",number:501,chapter:"Испытательная тропа",name:"Монстрик из мшистой пещеры",emoji:"👾",hint:"Пилотный уровень: 8 цветов, лицо и тело открываются разными слоями"},
- {id:"meadow-502",number:502,chapter:"Испытательная тропа",name:"Маленький лесной дракон",emoji:"🐉",hint:"Пилотный уровень: крылья, чешуя и мордочка образуют отдельные цветовые группы"},
- {id:"meadow-503",number:503,chapter:"Испытательная тропа",name:"Золотой ананас",emoji:"🍍",hint:"Пилотный уровень: плотная фактура кожуры и листья проверяют работу очереди"},
- {id:"meadow-504",number:504,chapter:"Испытательная тропа",name:"Кристальный цветок",emoji:"💠",hint:"Пилотный уровень: многослойные лепестки и стебель с контрастными оттенками"}
+ {id:"meadow-501",number:501,chapter:"Испытательная тропа",name:"Слон на полянке",emoji:"🐘",hint:"ПИЛОТНЫЙ 1 · Оригинальный спрайт слона из Animal Pack — Round"},
+ {id:"meadow-502",number:502,chapter:"Испытательная тропа",name:"Жираф на полянке",emoji:"🦒",hint:"ПИЛОТНЫЙ 2 · Оригинальный спрайт жирафа из Animal Pack — Round"},
+ {id:"meadow-503",number:503,chapter:"Испытательная тропа",name:"Бегемот на полянке",emoji:"🦛",hint:"ПИЛОТНЫЙ 3 · Оригинальный спрайт бегемота из Animal Pack — Round"},
+ {id:"meadow-504",number:504,chapter:"Испытательная тропа",name:"Обезьянка на полянке",emoji:"🐒",hint:"ПИЛОТНЫЙ 4 · Оригинальный спрайт обезьянки из Animal Pack — Round"}
 ]);
 function inTriangle(px,py,ax,ay,bx,by,cx,cy){
  const sign=(x1,y1,x2,y2,x3,y3)=>(x1-x3)*(y2-y3)-(x2-x3)*(y1-y3);
