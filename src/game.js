@@ -903,100 +903,33 @@ export function createArtworkBoard(levelId="meadow-01"){
 export const INITIAL_BOARD=createArtworkBoard();
 export function buildIncoming(board,levelNumber=1){
  const colors=Object.keys(COLORS);
- let boardSeed=2166136261;
- for(const row of board)for(const color of row){
-  const code=color?colors.indexOf(color)+1:0;
-  boardSeed=Math.imul(boardSeed^code,16777619)>>>0;
- }
- if(levelNumber>=8){
-  // Generated levels use whole-color squads, not a new set of tiny crates
-  // for every thin exposure rim. A large squad can clear its current pixels,
-  // wait for the next layer, then resume; this makes slot order meaningful.
-  const totals=Object.fromEntries(colors.map(color=>[color,0]));
-  for(const row of board)for(const color of row)if(color)totals[color]++;
-  const exposedCounts=Object.fromEntries(colors.map(color=>[color,0]));
-  for(const point of getExposedPixels(board)){
-   const color=board[point.y][point.x];if(color)exposedCounts[color]++;
-  }
-  const totalBlocks=Object.values(totals).reduce((sum,value)=>sum+value,0);
-  // Keep ordinary squads tactical: no 90-ant warehouses and no arbitrary
-  // one-color mega-crates. The target adapts to picture size while keeping
-  // each crate in a readable 42–68 range whenever that color budget permits.
-  const target=Math.min(68,Math.max(42,Math.ceil(totalBlocks/20)));
-  const queues={};
-  for(const color of colors){
-   const total=totals[color];queues[color]=[];
-   if(!total)continue;
-   const count=Math.max(1,Math.ceil(total/target));
-   const base=Math.floor(total/count),remainder=total%count;
-   for(let index=0;index<count;index++){
-    const ants=base+(index<remainder?1:0);
-    queues[color].push({color,ants});
-   }
-  }
-  const openingColors=colors.filter(color=>exposedCounts[color]>0)
-   .sort((a,b)=>exposedCounts[b]-exposedCounts[a]||colors.indexOf(a)-colors.indexOf(b));
-  const futureColors=colors.filter(color=>totals[color]>0&&!exposedCounts[color]);
-  const deck=[],used=new Set();
-  const take=color=>{
-   if(!color||used.has(color)||!queues[color]?.length)return;
-   deck.push(queues[color].shift());used.add(color);
-  };
-  // First: one useful front color, a tempting future layer, then a second
-  // useful color when available. Every crate is a bounded work batch; if its
-  // next matching block is covered, the remaining ants wait in the slot.
-  take(openingColors[0]);
-  take(futureColors[0]);
-  take(openingColors[1]);
-  const order=[...openingColors.slice(2),...futureColors.slice(1)];
-  let pending=true,round=0;
-  while(pending){
-   pending=false;
-   const colorsThisRound=round%2?order.slice().reverse():order;
-   for(const color of colorsThisRound){
-    if(queues[color]?.length){deck.push(queues[color].shift());pending=true;}
-   }
-   round++;
-  }
-  // Any remaining squads of the three opening colors follow after the first
-  // decision row, interleaved so no one pigment dominates the visible queue.
-  let extras=true,extraRound=0;
-  while(extras){
-   extras=false;
-   const extraOrder=extraRound%2?colors.slice().reverse():colors;
-   for(const color of extraOrder){
-    if(queues[color]?.length){deck.push(queues[color].shift());extras=true;}
-   }
-   extraRound++;
-  }
-  return deck;
- }
+ const work=board.map(row=>row.slice());
  const totals=Object.fromEntries(colors.map(color=>[color,0]));
- for(const row of board)for(const color of row)if(color)totals[color]++;
- const queues={};
- for(const color of colors){
-  const total=totals[color];if(!total){queues[color]=[];continue;}
-  const count=Math.max(1,Math.ceil(total/48)),base=Math.floor(total/count),minimum=Math.min(18,Math.max(1,Math.floor(total/count)));
-  let seed=(boardSeed^color.charCodeAt(0)*2654435761)>>>0;
-  const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
-  const spread=Math.max(4,Math.min(12,Math.round(base*.22)));
-  const sizes=Array.from({length:count},()=>Math.max(minimum,Math.min(BOX_CAPACITY,base+Math.round((random()*2-1)*spread))));
-  let difference=total-sizes.reduce((sum,value)=>sum+value,0),cursor=Math.floor(random()*count);
-  while(difference!==0){
-   const index=cursor++%count;
-   if(difference>0&&sizes[index]<BOX_CAPACITY){sizes[index]++;difference--;}
-   else if(difference<0&&sizes[index]>minimum){sizes[index]--;difference++;}
+ for(const row of work)for(const color of row)if(color)totals[color]++;
+ let left=Object.values(totals).reduce((sum,value)=>sum+value,0);
+ if(!left)return [];
+ const deck=[];let lastColor=null,guard=0;
+ // Generate a real outside-in peeling order; each box clears only currently exposed matching blocks.
+ while(left>0&&guard++<SIZE*SIZE*2){
+  const exposed=getExposedPixels(work),counts=Object.fromEntries(colors.map(color=>[color,0]));
+  for(const point of exposed){const color=work[point.y][point.x];if(color)counts[color]++;}
+  let candidates=colors.filter(color=>counts[color]>0&&totals[color]>0);
+  if(!candidates.length)break;
+  const alternatives=candidates.filter(color=>color!==lastColor);if(alternatives.length)candidates=alternatives;
+  candidates.sort((a,b)=>counts[b]-counts[a]||colors.indexOf(a)-colors.indexOf(b));
+  const color=candidates[0],ants=Math.min(60,counts[color]);if(!ants)break;
+  deck.push({color,ants});let collected=0;
+  while(collected<ants){
+   const point=getExposedPixels(work).find(item=>work[item.y][item.x]===color);
+   if(!point)break;
+   work[point.y][point.x]='';collected++;left--;totals[color]--;
   }
-  if(sizes.length>=3&&new Set(sizes).size===1){sizes[0]++;sizes[1]--;}
-  queues[color]=sizes.map(ants=>({color,ants}));
+  if(collected!==ants){deck.pop();break;}lastColor=color;
  }
- const deck=[];
- let pending=true,round=0;
- while(pending){
-  pending=false;
-  const order=round%2?colors.slice().reverse():colors;
-  for(const color of order){const box=queues[color].shift();if(box){deck.push(box);pending=true;}}
-  round++;
+ if(left>0){
+  const leftovers=Object.fromEntries(colors.map(color=>[color,0]));
+  for(const row of work)for(const color of row)if(color)leftovers[color]++;
+  for(const color of colors){let total=leftovers[color];while(total>0){const ants=Math.min(60,total);deck.push({color,ants});total-=ants;}}
  }
  return deck;
 }
