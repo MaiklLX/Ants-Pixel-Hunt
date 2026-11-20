@@ -994,10 +994,6 @@ async function startFreshGame(levelId=state.levelId){
  gameStarted=true;render();$("save-status").textContent="Новая партия · прогресс уровня не сохраняется";shell.classList.remove("menu-open");updateMainMenu();kickColony();
 }
 
-$("artwork-import-file")?.addEventListener("change",event=>{
- const file=event.target.files?.[0];if(file)importArtworkFile(file);
-});
-$("artwork-import-button")?.addEventListener("click",()=> $("artwork-import-file")?.click());
 
 async function boot(){
  if(applySavedArtwork(state.levelId)){state=createGame(state.levelId);boardArtworkKey=state.levelId;}
