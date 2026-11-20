@@ -920,12 +920,23 @@ export function buildIncoming(board,levelNumber=1){
  const chunks={},nextChunk={},remaining={...totals};
  for(const color of colors){
   const total=totals[color];if(!total)continue;
-  // Split each colour budget into as few balanced squads as possible.
-  // This keeps squads near capacity when a colour is abundant, while allowing
-  // genuinely small groups (1–9) only when the artwork itself has few cells.
-  const count=Math.max(1,Math.ceil(total/BOX_CAPACITY));
+  // Keep squads substantial, but deliberately avoid identical arithmetic
+  // splits. Uneven sizes make queue order and free-slot planning matter.
+  // For a colour with at least 13 cells, ordinary squads stay in 13–30 range;
+  // smaller artwork accents remain a single genuinely small squad.
+  let count=Math.max(1,Math.ceil(total/22));
+  while(count>1&&Math.floor(total/count)<13)count--;
   const base=Math.floor(total/count),extra=total%count;
   const sizes=Array.from({length:count},(_,i)=>base+(i<extra?1:0));
+  // Deterministic pairwise transfers create varied counts (e.g. 13, 17, 23)
+  // without changing the total budget or producing undersized fragments.
+  const colorSeed=[...color].reduce((sum,ch)=>sum+ch.charCodeAt(0),levelNumber||1);
+  for(let pair=0;pair+1<sizes.length;pair+=2){
+   const a=(pair+(colorSeed%2))%sizes.length,b=(a+1)%sizes.length;
+   const donor=(colorSeed+pair)%2===0?a:b,receiver=donor===a?b:a;
+   const transfer=Math.min(7,sizes[donor]-13,30-sizes[receiver]);
+   if(transfer>0){sizes[donor]-=transfer;sizes[receiver]+=transfer;}
+  }
   chunks[color]=sizes;nextChunk[color]=0;
  }
  const active=new Map(),deck=[];let left=leftTotal,lastColor=null,guard=0;
