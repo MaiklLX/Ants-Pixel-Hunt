@@ -1049,9 +1049,18 @@ async function startFreshGame(levelId=state.levelId){
  if(workerPromises.size>0||loadingSlots.size>0||resetAfterMenu)return;
  clearZenLaunchParam();zenMode=false;zenRunCollected=0;zenPendingNectar=0;
  resetting=true;boardArtworkPromise=Promise.resolve(true);cancelAnimationFrame(antFrame);activeAnts.clear();pickupEffects.length=0;deliveryEffects.length=0;reservedTargets.clear();slotNextLaunchAt.clear();applySavedArtwork(levelId);state=createGame(levelId);boardArtworkKey=readCustomArtwork(levelId)?levelId:"";totalBlocks=tasksRemaining();
- gameStarted=true;render();$("save-status").textContent="Новая партия · прогресс уровня не сохраняется";shell.classList.remove("menu-open");resizeAntLayer();updateMainMenu();
- await boardArtworkPromise;
+ gameStarted=true;
+ // Campaign artwork must be loaded before the first playable frame. Without
+ // this call pilot levels silently kept createArtworkBoard()'s old motifs.
+ if(!boardArtworkKey)boardArtworkPromise=ensureBoardArtwork();
+ render();$("save-status").textContent="Новая партия · прогресс уровня не сохраняется";shell.classList.remove("menu-open");resizeAntLayer();updateMainMenu();
+ const artworkReady=await boardArtworkPromise;
  if(state.levelId!==levelId||resetAfterMenu){resetting=false;return;}
+ if(!artworkReady&&PILOT_ARTWORK[getLevel(levelId).number]){
+  resetting=false;gameStarted=false;shell.classList.add("menu-open");render();updateMainMenu();
+  $("save-status").textContent="Не удалось загрузить изображение пилотного уровня. Попробуй открыть его ещё раз при подключении к сети.";
+  return;
+ }
  resetting=false;render();kickColony();
 }
 function readZenPayload(){
