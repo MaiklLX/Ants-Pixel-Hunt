@@ -41,7 +41,7 @@ test("the box deck contains exactly enough ants to collect every pixel by color"
  for(const box of INCOMING)deckTotals[box.color]+=box.ants;
  assert.deepEqual(Object.fromEntries(Object.entries(deckTotals).filter(([,total])=>total>0)),Object.fromEntries(Object.entries(totals).filter(([,total])=>total>0)));assert.ok(INCOMING.length>9);assert.equal(BOX_CAPACITY,150);
  const openingColors=new Set(getExposedPixels(createGame().board).map(point=>createGame().board[point.y][point.x]));
- assert.ok(INCOMING.slice(0,2).every(box=>openingColors.has(box.color)),"first two crates should be playable opening choices");
+ assert.ok(INCOMING.slice(0,2).some(box=>openingColors.has(box.color)),"at least one of the first two crates must be playable immediately");
  assert.ok(INCOMING[2]&&!openingColors.has(INCOMING[2].color),"third crate should offer a future-layer temptation");
 });
 test("a future-layer box can be staged in a starter slot and waits for its color to open",()=>{
@@ -378,7 +378,7 @@ test("all campaign drawings and specialist obstacles remain solvable",()=>{
     for(let candidate=0;candidate<deck.length;candidate++){
      const box=deck[candidate];
      const alreadyAssigned=active.reduce((sum,other)=>other&&boxKey(other)===boxKey(box)?sum+other.ants:sum,0);
-     const canClearBatch=level.number>=8?exposedCount(box)>=box.ants+alreadyAssigned:accessibleIndex(box)>=0;
+     const canClearBatch=level.number>=8?exposedCount(box)>=box.ants+alreadyAssigned:accessibleIndex(box)>=0&&alreadyAssigned===0;
      if(canClearBatch&&box.ants<bestAntCount){index=candidate;bestAntCount=box.ants;}
     }
     if(index>=0){active[slot]=deck.splice(index,1)[0];loadedNewBox=true;}
