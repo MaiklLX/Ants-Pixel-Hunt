@@ -5277,3 +5277,9 @@ footer{order:9}
 }
 .map-overlay .trail-node:has(.pilot-art-preview) .trail-number{font-size:8px;letter-spacing:.55px;color:#e1c77e!important}
 .map-overlay .trail-node:has(.pilot-art-preview) .trail-name{font-size:10px}
+
+
+/* KT-305: destructive progress reset remains visually secondary in the home hub. */
+.menu-reset-progress{grid-column:1/-1;justify-self:center;min-height:30px;padding:5px 14px;border:1px solid #80564e;border-radius:999px;background:#382b29;color:#d7aaa0;font-size:10px;font-weight:800;letter-spacing:.04em;cursor:pointer}
+.menu-reset-progress:hover{border-color:#c47b6d;background:#49312e;color:#ffe0d8}
+.menu-reset-progress:focus-visible{outline:2px solid #dfc17c;outline-offset:3px}
