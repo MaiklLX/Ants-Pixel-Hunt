@@ -540,17 +540,17 @@ function render(){
  updateResultOverlay();
 }
 function resizeAntLayer(){
- const rect=shell.getBoundingClientRect(),dpr=Math.min(1.5,window.devicePixelRatio||1);
+ const rect=antLayer.getBoundingClientRect(),dpr=Math.min(1.5,window.devicePixelRatio||1);
  antCanvasWidth=rect.width;antCanvasHeight=rect.height;
  antLayer.width=Math.max(1,Math.round(rect.width*dpr));antLayer.height=Math.max(1,Math.round(rect.height*dpr));
  antCtx.setTransform(dpr,0,0,dpr,0,0);
 }
 function pointFor(element){
- const r=element.getBoundingClientRect(),s=shell.getBoundingClientRect();
+ const r=element.getBoundingClientRect(),s=antLayer.getBoundingClientRect();
  return{x:r.left+r.width/2-s.left,y:r.top+r.height/2-s.top};
 }
 function cellCenter(x,y){
- const r=boardEl.getBoundingClientRect(),s=shell.getBoundingClientRect();
+ const r=boardEl.getBoundingClientRect(),s=antLayer.getBoundingClientRect();
  return{x:r.left-s.left+(x+.5)*r.width/SIZE,y:r.top-s.top+(y+.5)*r.height/SIZE};
 }
 function slotCenter(index){return pointFor(slotsEl.children[index]);}
