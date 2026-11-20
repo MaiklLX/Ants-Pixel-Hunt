@@ -434,16 +434,16 @@ test("specialist crates provide exactly enough builders and warriors for each le
   }
  }
 });
-test("generated campaign uses substantial whole-color squads instead of micro-boxes",()=>{
+test("generated campaign uses bounded tactical squads and exact color budgets",()=>{
  for(const level of LEVELS.filter(item=>item.number>=8)){
   const deck=getIncoming(level.id).filter(box=>!box.role);
-  assert.ok(deck.every(box=>box.ants>=18&&box.ants<=130),level.name+" must avoid tiny squads and respect capacity");
+  assert.ok(deck.every(box=>box.ants>=18&&box.ants<=52),level.name+" squads must be bounded and avoid micro-boxes");
   const board=createArtworkBoard(level.id),colorTotals=new Map();
   for(const color of board.flat().filter(Boolean))if(color!=="black")colorTotals.set(color,(colorTotals.get(color)||0)+1);
   for(const [color,total] of colorTotals){
    const squads=deck.filter(box=>box.color===color);
    assert.equal(squads.reduce((sum,box)=>sum+box.ants,0),total,level.name+" "+color+" must retain its complete color budget");
-   assert.ok(squads.length<=Math.max(1,Math.ceil(total/Math.min(118,Math.max(36,level.number<26?104:level.number<76?112:level.number<151?118:level.number<301?124:130)))+2),level.name+" "+color+" should use a compact number of boxes even when a linked pair splits the squad");
+   assert.ok(squads.length<=Math.max(1,Math.ceil(total/40)+1),level.name+" "+color+" should not fragment into excessive crates");
   }
  }
 });
@@ -451,7 +451,7 @@ test("generated campaign uses substantial whole-color squads instead of micro-bo
 test("fallback queue fragments never create oversized ordinary squads",()=>{
  for(const level of LEVELS.filter(item=>item.number>=8)){
   const deck=buildIncoming(createArtworkBoard(level.id),level.number);
-  assert.ok(deck.every(box=>box.ants>0&&box.ants<=130),level.name+" fallback squads must stay within the tactical size cap");
+  assert.ok(deck.every(box=>box.ants>0&&box.ants<=52),level.name+" fallback squads must stay within the tactical size cap");
  }
 });
 
@@ -799,4 +799,6 @@ test("campaign queue squads become smaller in measured steps without losing any 
  }
  assert.ok(median(early)>=35,"early generated levels should avoid micro-squads");
  assert.ok(median(late)>=35,"late generated levels should avoid micro-squads while keeping exact totals");
+ assert.ok(Math.max(...early.map(box=>box.ants))<=52,"early squads must never become oversized");
+ assert.ok(Math.max(...late.map(box=>box.ants))<=52,"late squads must never become oversized");
 });
