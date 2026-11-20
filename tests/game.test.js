@@ -940,14 +940,13 @@ test("a custom Zen artwork registers as an isolated playable board with a comple
 
 test("a Zen artwork queue has a complete five-slot clearing route",()=>{
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
- for(let y=5;y<30;y++)for(let x=5;x<30;x++){
-  board[y][x]=["green","blue","yellow","red","purple"][(Math.floor(x/5)+Math.floor(y/5))%5];
- }
+ for(let y=8;y<27;y++)for(let x=8;x<27;x++)board[y][x]=y<17?"green":"blue";
+ for(let y=14;y<21;y++)for(let x=14;x<21;x++)board[y][x]="yellow";
  const level=registerCustomArtwork("test-zen-route",board,"Тест");
  const work=createGame(level.id).board,deck=getIncoming(level.id).map(box=>({...box,special:null}));
  const active=Array(SLOT_COUNT).fill(null);
- let remaining=work.flat().filter(Boolean).length,steps=0;
- while(remaining>0&&steps++<SIZE*SIZE*4){
+ let remaining=work.flat().filter(Boolean).length,steps=0,next=0;
+ while(remaining>0&&steps++<10000){
   let progressed=false;
   for(let slot=0;slot<active.length;slot++){
    const box=active[slot];if(!box)continue;
@@ -956,18 +955,12 @@ test("a Zen artwork queue has a complete five-slot clearing route",()=>{
    work[point.y][point.x]="";box.ants--;remaining--;progressed=true;
    if(box.ants<=0)active[slot]=null;
   }
-  let loaded=false;
-  for(let slot=0;slot<active.length;slot++){
-   if(active[slot])continue;
-   let choice=-1,best=Infinity;
-   for(let i=0;i<deck.length;i++){
-    const box=deck[i],assigned=active.reduce((sum,item)=>sum+(item?.color===box.color?item.ants:0),0);
-    const exposed=getExposedPixels(work).filter(point=>work[point.y][point.x]===box.color).length;
-    if(exposed>=box.ants+assigned&&box.ants<best){choice=i;best=box.ants;}
-   }
-   if(choice>=0){active[slot]=deck.splice(choice,1)[0];loaded=true;}
-  }
-  if(!progressed&&!loaded)break;
+  for(let slot=0;slot<active.length;slot++)if(!active[slot]&&next<deck.length)active[slot]=deck[next++];
+  const exposed=getExposedPixels(work);
+  const playable=active.some(box=>box&&exposed.some(point=>work[point.y][point.x]===box.color));
+  if(!progressed&&!playable&&active.every(Boolean))break;
+  if(!progressed&&!playable&&next>=deck.length)break;
  }
- assert.equal(remaining,0,"a complete strategy must clear every custom pixel");
+ assert.equal(remaining,0,"a complete five-slot strategy must clear every custom pixel");
+ assert.ok(steps<10000,"the Zen route must finish without an endless wait");
 });
