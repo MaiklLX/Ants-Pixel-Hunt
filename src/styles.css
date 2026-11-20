@@ -5002,7 +5002,7 @@ html,body{background:#17271f}
 .zen-run-hud p{grid-column:2;grid-row:2;margin:0;align-self:center;color:#aebfa3;font-size:8px;line-height:1.1;white-space:nowrap}
 .board-wrap{order:4}
 .slots-section{order:3}
-.nest-return-section{order:5}
+.app-shell:not(.menu-open) :where(.nest-return-section){order:5}
 .choices-section{order:6}
 .message{order:7}
 .bottom-actions{order:8}
