@@ -4902,3 +4902,119 @@ body{background:#dfe5db}
 .level-heading h2{color:#d6e2c8}
 .board-status{color:#b0c2a5}
 .slots-section,.choices-section{background:linear-gradient(155deg,#263d31dd,#20352bdf);border-color:#405943}
+
+
+/* KT-296 — finish the woodland night palette and keep the Zen nectar HUD outside the artwork. */
+html,body{background:#17271f}
+.app-shell:not(.menu-open){
+ background:
+  radial-gradient(ellipse at 50% 0%,#314a37 0%,transparent 43%),
+  linear-gradient(180deg,#1d3026 0%,#17271f 100%);
+ color:#e0e9d5;
+ border-color:#344b38;
+ box-shadow:0 14px 36px #07140f88,inset 0 1px #ffffff0a;
+}
+.app-shell:not(.menu-open) .topbar{border-bottom-color:#3a5140}
+.app-shell:not(.menu-open) .brand-mark{filter:drop-shadow(0 3px 5px #0b170f)}
+.app-shell:not(.menu-open) .eyebrow{color:#b7a36e}
+.app-shell:not(.menu-open) h1{color:#d2dfbd;text-shadow:0 2px 12px #9ebc7b22}
+.app-shell:not(.menu-open) .subtitle,
+.app-shell:not(.menu-open) .level-kicker{color:#93a88b}
+.app-shell:not(.menu-open) .level-heading h2{color:#e0e9d5}
+.app-shell:not(.menu-open) .board-status{
+ color:#c2d1b7;border:1px solid #405744;border-radius:8px;
+ background:linear-gradient(145deg,#2b4232,#203629);padding:3px 7px;
+}
+.app-shell:not(.menu-open) .level-progress{background:#14251b;border:1px solid #405744;box-shadow:inset 0 1px 3px #07140f}
+.app-shell:not(.menu-open) .slots-section,
+.app-shell:not(.menu-open) .choices-section{
+ background:linear-gradient(155deg,#263d30,#1e3328);
+ border:1px solid #3a5340;border-radius:13px;
+ box-shadow:inset 0 1px #ffffff08,0 3px 9px #07140f44;
+}
+.app-shell:not(.menu-open) .slots,
+.app-shell:not(.menu-open) .choices{
+ background:#17291f;border:1px solid #3a5140;border-radius:10px;
+}
+.app-shell:not(.menu-open) .slot,
+.app-shell:not(.menu-open) .slot.filled{
+ color:#e1ead7;
+ background:linear-gradient(150deg,color-mix(in srgb,var(--box-color,#78936e) 22%,#314735),#1d3026 78%);
+ border:1px solid color-mix(in srgb,var(--box-color,#829d78) 58%,#344b38);
+ border-bottom:3px solid color-mix(in srgb,var(--box-color,#829d78) 46%,#24382b);
+ box-shadow:0 3px 0 #14251b,0 5px 9px #07140f66,inset 0 1px #ffffff14;
+}
+.app-shell:not(.menu-open) .slot .ant-count{color:#edf3e5;text-shadow:0 1px #101b14}
+.app-shell:not(.menu-open) .slot .slot-number{color:#b2c2a8}
+.app-shell:not(.menu-open) .slot .slot-plus{color:#71886f}
+.app-shell:not(.menu-open) .choice-card,
+.app-shell:not(.menu-open) .choice-card.locked,
+.app-shell:not(.menu-open) .choice-card.empty-box{
+ color:#dce7d2;
+ background:linear-gradient(150deg,color-mix(in srgb,var(--ant-color,#819a70) 17%,#304635),#1c3026 82%);
+ border:1px solid color-mix(in srgb,var(--ant-color,#819a70) 52%,#344b38);
+ box-shadow:0 4px 0 #14251b,0 7px 12px #07140f66,inset 0 1px #ffffff12;
+}
+.app-shell:not(.menu-open) .choice-card strong{color:var(--ant-color,#e0e9d5);text-shadow:0 1px #101b14}
+.app-shell:not(.menu-open) .choice-card small,
+.app-shell:not(.menu-open) .choice-number{color:#b0c0a6}
+.app-shell:not(.menu-open) .choice-card.locked{background:linear-gradient(150deg,#2a382d,#202c24);border-color:#465448;opacity:.78}
+.app-shell:not(.menu-open) .conveyor{
+ background:linear-gradient(180deg,#304735,#1f3429);
+ border-color:#435b43;box-shadow:inset 0 1px #ffffff12,0 3px 0 #14251b;
+}
+.app-shell:not(.menu-open) .conveyor-in,
+.app-shell:not(.menu-open) .conveyor-out{background:#263c2d;border-color:#435b43;color:#bdcdb0}
+.app-shell:not(.menu-open) .belt{
+ background:repeating-linear-gradient(135deg,#526c4d 0 7px,#344b37 7px 14px);
+ border-color:#61775a;box-shadow:inset 0 3px 5px #07140f88,0 1px 0 #71866a;
+}
+.app-shell:not(.menu-open) .belt i{background:radial-gradient(circle at 32% 28%,#e9edda 0 18%,#8fa17c 42%,#4d6547 100%);border-color:#71866a}
+.app-shell:not(.menu-open) .section-line h3{color:#c4d3b7}
+.app-shell:not(.menu-open) .section-line>span{color:#9eaf94}
+.app-shell:not(.menu-open) .message{
+ color:#d0ddc4;background:linear-gradient(110deg,#263d30,#1d3328);
+ border-color:#405943;box-shadow:inset 0 1px #ffffff08,0 2px 5px #07140f55;
+}
+.app-shell:not(.menu-open) .restart-button,
+.app-shell:not(.menu-open) .speed-toggle,
+.app-shell:not(.menu-open) .icon-button{
+ color:#d8e3c9;background:linear-gradient(145deg,#344a37,#22372b);
+ border-color:#52694b;box-shadow:0 2px 0 #14251b,0 4px 8px #07140f66;
+}
+.app-shell:not(.menu-open) footer{color:#8fa18a;border-top-color:#344b38}
+.app-shell:not(.menu-open) .save-status{color:#9aab91}
+.app-shell:not(.menu-open) .nest-return-section{background:transparent}
+.zen-run-hud{
+ order:2;position:relative;inset:auto;z-index:1;
+ display:grid;grid-template-columns:minmax(0,1fr) auto;
+ grid-template-rows:auto auto;gap:3px 9px;
+ width:min(100%,470px);min-height:0;margin:0 auto;padding:5px 9px;
+ border:1px solid #465e43;border-radius:10px;
+ background:linear-gradient(145deg,#2c4432,#1e3428);
+ box-shadow:inset 0 1px #ffffff12,0 3px 8px #07140f66;
+ color:#dce7d1;pointer-events:none;
+}
+.zen-run-hud[hidden]{display:none!important}
+.zen-run-top{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:10px;font-weight:850;line-height:1.1}
+.zen-run-top strong{font-size:14px;color:#e3c47b}
+.zen-run-track{grid-column:1;grid-row:2;height:5px;margin:0;align-self:center;background:#14271d}
+.zen-run-track span{background:linear-gradient(90deg,#8eae70,#d2b66f)}
+.zen-run-hud p{grid-column:2;grid-row:2;margin:0;align-self:center;color:#aebfa3;font-size:8px;line-height:1.1;white-space:nowrap}
+.board-wrap{order:4}
+.slots-section{order:3}
+.nest-return-section{order:5}
+.choices-section{order:6}
+.message{order:7}
+.bottom-actions{order:8}
+footer{order:9}
+.ant-layer{order:10}
+@media(max-width:599px){
+ .zen-run-hud{width:100%;padding:4px 7px;gap:2px 7px}
+ .zen-run-top{font-size:9px}
+ .zen-run-top strong{font-size:12px}
+ .zen-run-hud p{font-size:7px}
+ .app-shell:not(.menu-open) .slots-section,
+ .app-shell:not(.menu-open) .choices-section{border-radius:10px}
+}
+@media(prefers-reduced-motion:reduce){.zen-run-track span{transition:none}}
