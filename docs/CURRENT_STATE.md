@@ -725,3 +725,10 @@ KT-140: исправлен бесконечный цикл балансиров�
 
 
 Текущая контрольная точка KT-304: исправлен фактический запуск пилотных 501–504 — теперь `startFreshGame()` вызывает `ensureBoardArtwork()` до старта муравьёв, поэтому вместо старых процедурных мотивов должны собираться оригинальные PNG слона, жирафа, бегемота и обезьянки. При ошибке загрузки пилот не запускается на ложной картинке. Добавлен регрессионный тест. App version KT-303, SW cache v118, public cache v111. CI/Pages и ручная визуальная проверка ожидают подтверждения.
+
+
+## Current verification — KT-304 follow-up (2026-11-20)
+- Latest main commit: `2042e3f2c3b8e299f71709bf330739936e711869`.
+- GitHub Pages workflow run `44743617628`: **success** (gameplay tests, production build, artifact upload, deployment).
+- The earlier KT-304 deploy did not publish because two stale tests failed; both assertions were corrected and the new run passed.
+- Four embedded source PNGs are verified as elephant/giraffe/hippo/monkey. Browser-level visual confirmation of the rasterized 35×35 game board is still outstanding.
