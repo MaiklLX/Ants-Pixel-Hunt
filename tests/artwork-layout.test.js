@@ -10,28 +10,20 @@ function transforms(level){
   }));
 }
 
-test("single artwork is enlarged and centred without distortion",()=>{
- const [item]=transforms(8);
- assert.deepEqual(item.position,[4,4]);
- assert.ok(Math.abs(item.scale[0]-item.scale[1])<1e-9);
- assert.ok(item.scale[0]>1);
+test("every generated level is one large centred illustration, not a collage",()=>{
+ for(const level of [8,9,51,150,151,301,500]){
+  const items=transforms(level);
+  assert.equal(items.length,1,`level ${level} must have exactly one subject`);
+  assert.deepEqual(items[0].position,[4,4]);
+  assert.ok(Math.abs(items[0].scale[0]-items[0].scale[1])<1e-9);
+  assert.ok(items[0].scale[0]>1);
+ }
 });
 
-test("two-piece artwork forms a horizontally balanced centred pair",()=>{
- const items=transforms(51);
- assert.equal(items.length,2);
- assert.deepEqual(items.map(item=>item.position),[[0,74],[158,74]]);
- assert.ok(items.every(item=>Math.abs(item.scale[0]-item.scale[1])<1e-9));
- const left=items[0].position[0],right=items[1].position[0];
- assert.equal(left+146,450-(right+146));
-});
-
-test("three-piece artwork forms a centred triangular composition",()=>{
- const items=transforms(301);
- assert.equal(items.length,3);
- assert.deepEqual(items.map(item=>item.position),[[0,0],[174,0],[87,174]]);
- assert.ok(items.every(item=>Math.abs(item.scale[0]-item.scale[1])<1e-9));
- const centerTop=(items[0].position[0]+138+items[1].position[0]+138)/2;
- assert.equal(centerTop,225);
- assert.equal(items[2].position[0]+138,225);
+test("the first seven authored starter illustrations keep their original centred placement",()=>{
+ for(const level of [1,2,3,4,5,6,7]){
+  const [item]=transforms(level);
+  assert.deepEqual(item.position,[50,50]);
+  assert.ok(Math.abs(item.scale[0]-item.scale[1])<1e-9);
+ }
 });
