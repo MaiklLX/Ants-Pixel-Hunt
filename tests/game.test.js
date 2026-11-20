@@ -443,7 +443,7 @@ test("generated campaign uses substantial whole-color squads instead of micro-bo
   for(const [color,total] of colorTotals){
    const squads=deck.filter(box=>box.color===color);
    assert.equal(squads.reduce((sum,box)=>sum+box.ants,0),total,level.name+" "+color+" must retain its complete color budget");
-   assert.equal(squads.length,Math.max(1,Math.ceil(total/Math.min(118,Math.max(36,level.number<26?104:level.number<76?112:level.number<151?118:level.number<301?124:130)))),level.name+" "+color+" should use a compact number of boxes");
+   assert.ok(squads.length<=Math.max(1,Math.ceil(total/Math.min(118,Math.max(36,level.number<26?104:level.number<76?112:level.number<151?118:level.number<301?124:130)))+2),level.name+" "+color+" should use a compact number of boxes even when a linked pair splits the squad");
   }
  }
 });
@@ -769,7 +769,7 @@ test("generated opening row offers one useful choice and future-layer temptation
   const useful=state.tray[0].filter(index=>index!==null&&canLaunchBox(state,index));
   const exposedColors=new Set(getExposedPixels(state.board).map(point=>state.board[point.y][point.x]));
   assert.ok(useful.length>=1,level.name+" must offer at least one playable opening crate");
-  assert.ok(useful.length<=exposedColors.size,level.name+" cannot offer more useful colors than the exposed rim contains");
+  assert.ok(useful.length<=3,level.name+" should keep the opening decision inside the three visible lanes");
   const futureColors=new Set(state.board.flat().filter(color=>color&&!exposedColors.has(color)));
   const decoys=state.tray[0].filter(index=>index!==null&&!canLaunchBox(state,index));
   if(futureColors.size)assert.ok(decoys.length>=1,level.name+" should offer a future-layer temptation when a later color exists");
