@@ -1212,11 +1212,11 @@ export function canLaunchBox(state,index){
   :exposed.some(target=>target.kind==="pixel"&&target.color===candidate.color);
  if(box.special==="linked"){
   const partnerIndex=getLinkedPartner(state.levelId,index),partner=incoming[partnerIndex];
-  if(!partner||!hasTarget(box)||!hasTarget(partner))return false;
-  return !state.slots.some(active=>active&&(active.pairId===box.pairId||active.role===box.role&&box.role||!active.role&&!box.role&&active.color===box.color||!active.role&&!partner.role&&active.color===partner.color));
+  return !!partner&&hasTarget(box)&&hasTarget(partner);
  }
- if(!hasTarget(box))return false;
- return !state.slots.some(active=>active&&((box.role&&active.role===box.role)||(!box.role&&!active.role&&active.color===box.color)));
+ // Several squads of one color may work concurrently. The wave planner
+ // shares the exposed-target cursor so they never claim the same pixel.
+ return hasTarget(box);
 }
 // Correct only a vertical-lane collision; never promote a crate or change its queue depth.
 export function normalizeLinkedTray(state){
