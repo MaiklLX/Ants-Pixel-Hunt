@@ -4892,3 +4892,19 @@ footer{color:#78877a}
 .zen-location .hub-location-icon{background:linear-gradient(145deg,#f5f3e8,#d9e4d4)}
 .zen-location .hub-location-copy strong{color:#4d674e}
 .zen-location .hub-location-arrow{color:#8da284}
+
+
+/* KT-293 — Zen run HUD and woodland menu controls. */
+.zen-location,.zen-workshop{width:100%;text-align:left;cursor:pointer;font:inherit}
+.zen-location:disabled{opacity:.55;cursor:not-allowed;filter:saturate(.55)}
+.zen-workshop{background:linear-gradient(145deg,#f6f4e9,#e7e9dd);border-color:#d4d7c8;color:#56624f}
+.zen-status-message{margin:-2px 4px 0;text-align:center;color:#82917d;font-size:10px}
+.zen-run-hud{width:min(100%,470px);margin:-3px auto 0;padding:9px 12px;border:1px solid #cbd8c5;border-radius:13px;background:linear-gradient(145deg,#f7f5eb,#e3eadc);box-shadow:0 3px 0 #c2cfbc,0 5px 12px #344b3818;color:#4c614c}
+.zen-run-hud[hidden]{display:none}
+.zen-run-top{display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:850}
+.zen-run-top strong{font-size:17px;color:#9a7b3d}
+.zen-run-top strong b{font-weight:950}
+.zen-run-track{height:6px;margin:6px 0 5px;border-radius:99px;overflow:hidden;background:#cbd6c4}
+.zen-run-track span{display:block;height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,#8da879,#c3a45e);transition:width .2s}
+.zen-run-hud p{margin:0;color:#7a8975;font-size:9px;line-height:1.4}
+@media(max-width:599px){.zen-run-hud{padding:6px 9px}.zen-run-top{font-size:10px}.zen-run-top strong{font-size:14px}.zen-run-hud p{font-size:8px}}
