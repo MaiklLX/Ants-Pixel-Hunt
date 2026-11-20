@@ -577,44 +577,44 @@ function generatedMotifZone(type,u,v,variant){
    if(L(.79,.02,.79,.07)||L(.95,.2,.99,.2)||L(.63,.2,.59,.2)||L(.79,.36,.79,.4))return 3;
    break;
   case "monster":
-   if(E(.5,.64,.29,.25)||E(.5,.84,.23,.12))return 0;
-   if(E(.5,.36,.34,.29)||E(.25,.36,.11,.19)||E(.75,.36,.11,.19))return 1;
-   if(T(.24,.2,.3,.02,.43,.24)||T(.57,.24,.7,.02,.76,.2))return 2;
-   if(E(.32,.37,.09,.11)||E(.68,.37,.09,.11))return 3;
-   if(T(.16,.64,.04,.84,.28,.78)||T(.84,.64,.96,.84,.72,.78))return 4;
    if(E(.32,.49,.075,.065)||E(.68,.49,.075,.065))return 5;
    if(E(.5,.68,.13,.1))return 6;
    if(T(.2,.55,.08,.45,.12,.68)||T(.8,.55,.92,.45,.88,.68))return 7;
+   if(T(.24,.2,.22,.005,.45,.27)||T(.55,.27,.78,.005,.76,.2))return 2;
+   if(E(.32,.37,.09,.11)||E(.68,.37,.09,.11))return 3;
+   if(T(.16,.64,.04,.84,.28,.78)||T(.84,.64,.96,.84,.72,.78))return 4;
+   if(E(.5,.36,.34,.29)||E(.25,.36,.11,.19)||E(.75,.36,.11,.19))return 1;
+   if(E(.5,.64,.29,.25)||E(.5,.84,.23,.12))return 0;
    break;
   case "dragon":
-   if(E(.49,.55,.25,.3)||E(.5,.8,.19,.14))return 0;
-   if(E(.5,.27,.23,.2)||T(.34,.23,.18,.04,.43,.13)||T(.57,.13,.82,.04,.66,.24))return 1;
+   if(E(.5,.34,.15,.075))return 5;
+   if(E(.5,.61,.15,.17))return 6;
+   if(T(.5,.42,.4,.67,.6,.67))return 7;
+   if(T(.48,.51,.52,.51,.5,.68))return 4;
    if(T(.3,.48,.03,.31,.18,.68)||T(.7,.48,.97,.31,.82,.68))return 2;
    if(T(.39,.77,.24,.98,.47,.9)||T(.61,.77,.76,.98,.53,.9))return 3;
-   if(T(.48,.51,.52,.51,.5,.62))return 4;
-   if(E(.5,.34,.12,.055))return 5;
-   if(E(.5,.61,.13,.14))return 6;
-   if(T(.5,.42,.43,.6,.57,.6))return 7;
+   if(E(.5,.27,.23,.2)||T(.34,.23,.18,.04,.43,.13)||T(.57,.13,.82,.04,.66,.24))return 1;
+   if(E(.49,.55,.25,.3)||E(.5,.8,.19,.14))return 0;
    break;
   case "pineapple":
-   if(E(.5,.59,.29,.35))return 0;
-   if(T(.5,.32,.29,.04,.47,.25)||T(.5,.32,.7,.02,.55,.26)||T(.5,.28,.44,.09,.36,.25))return 1;
-   if(E(.5,.88,.18,.06))return 2;
    if(E(.5,.56,.16,.18))return 3;
    if(E(.5,.75,.17,.09))return 4;
-   if(T(.38,.34,.2,.11,.4,.02))return 5;
-   if(T(.62,.34,.8,.11,.6,.02))return 6;
-   if(E(.5,.59,.09,.1))return 7;
-   break;
-  case "crystal-flower":
-   if(E(.5,.25,.14,.18)||E(.27,.39,.17,.15)||E(.73,.39,.17,.15)||E(.34,.65,.16,.15)||E(.66,.65,.16,.15))return 1;
-   if(T(.5,.07,.42,.27,.58,.27)||T(.5,.43,.42,.68,.58,.68)||T(.08,.39,.31,.29,.31,.49)||T(.92,.39,.69,.29,.69,.49))return 2;
-   if(R(.46,.65,.54,.97))return 0;
-   if(E(.5,.39,.1,.11))return 3;
-   if(E(.5,.74,.12,.08))return 4;
-   if(T(.5,.1,.39,.3,.61,.3))return 5;
+   if(T(.5,.1,.35,.32,.65,.32))return 5;
    if(T(.25,.39,.43,.32,.43,.48)||T(.75,.39,.57,.32,.57,.48))return 6;
    if(T(.5,.47,.44,.62,.56,.62))return 7;
+   if(T(.5,.32,.29,.04,.47,.25)||T(.5,.32,.7,.02,.55,.26)||T(.5,.28,.44,.09,.36,.25))return 1;
+   if(E(.5,.88,.18,.06))return 2;
+   if(E(.5,.59,.29,.35))return 0;
+   break;
+  case "crystal-flower":
+   if(E(.5,.39,.12,.13))return 3;
+   if(E(.5,.74,.14,.1))return 4;
+   if(T(.5,.1,.35,.32,.65,.32))return 5;
+   if(T(.25,.39,.4,.29,.45,.52)||T(.75,.39,.6,.29,.55,.52))return 6;
+   if(T(.5,.47,.4,.68,.6,.68))return 7;
+   if(T(.5,.07,.42,.27,.58,.27)||T(.5,.43,.42,.68,.58,.68)||T(.08,.39,.31,.29,.31,.49)||T(.92,.39,.69,.29,.69,.49))return 2;
+   if(E(.5,.25,.14,.18)||E(.27,.39,.17,.15)||E(.73,.39,.17,.15)||E(.34,.65,.16,.15)||E(.66,.65,.16,.15))return 1;
+   if(R(.46,.65,.54,.97))return 0;
    break;
  }
  return -1;
@@ -724,7 +724,7 @@ function createRasterArtworkBoard(type,native=false){
 function createComposedArtworkBoard(number){
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
  const count=generatedPartCount(number),layoutVariant=(number+Math.floor(number/11))%3;
- const placements=generatedSceneLayout(count,layoutVariant),usedMotifs=new Set();
+ const placements=number>=501&&number<=504?[[0,0,SIZE,SIZE]]:generatedSceneLayout(count,layoutVariant),usedMotifs=new Set();
  for(let part=0;part<count;part++){
   const motifSeed=(Math.imul(number,0x9e3779b1)^Math.imul(part+1,0x85ebca6b))>>>0;
   let motifIndex=motifSeed%GENERATED_MOTIFS.length;
