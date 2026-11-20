@@ -443,7 +443,7 @@ test("generated campaign uses substantial whole-color squads instead of micro-bo
   for(const [color,total] of colorTotals){
    const squads=deck.filter(box=>box.color===color);
    assert.equal(squads.reduce((sum,box)=>sum+box.ants,0),total,level.name+" "+color+" must retain its complete color budget");
-   assert.equal(squads.length,Math.max(1,Math.ceil(total/(level.number<26?104:level.number<76?112:level.number<151?118:level.number<301?124:130))),level.name+" "+color+" should use a compact number of boxes");
+   assert.equal(squads.length,Math.max(1,Math.ceil(total/Math.min(118,Math.max(36,level.number<26?104:level.number<76?112:level.number<151?118:level.number<301?124:130)))),level.name+" "+color+" should use a compact number of boxes");
   }
  }
 });
