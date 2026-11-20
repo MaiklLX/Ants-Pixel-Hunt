@@ -105,14 +105,19 @@ function renderMap(){
  const copy=document.createElement("span");copy.textContent="уровней пройдено";stat.append(count,copy);
  const track=document.createElement("div");track.className="map-summary-track";track.setAttribute("role","progressbar");track.setAttribute("aria-label","Прогресс кампании");track.setAttribute("aria-valuemin","0");track.setAttribute("aria-valuemax",String(LEVELS.length));track.setAttribute("aria-valuenow",String(finished));track.setAttribute("aria-valuetext",`${finished} из ${LEVELS.length} уровней пройдено`);
  const fill=document.createElement("span");fill.style.width=(finished/LEVELS.length*100)+"%";track.append(fill);
- const next=document.createElement("small");next.className="map-summary-next";next.textContent=finished===LEVELS.length?"Все 500 уровней пройдены — можно возвращаться к любимым":nextPlayable?"Следующий шаг · "+nextPlayable.name:"Кампания открыта";
+ const next=document.createElement("small");next.className="map-summary-next";next.textContent=finished===LEVELS.length?"Все 504 уровня пройдены — можно возвращаться к любимым":nextPlayable?"Следующий шаг · "+nextPlayable.name:"Кампания открыта";
  const continueButton=document.createElement("button");continueButton.type="button";continueButton.className="map-continue";continueButton.textContent=nextPlayable?"Продолжить · уровень "+nextPlayable.number:"Все уровни пройдены";continueButton.disabled=!nextPlayable;
  continueButton.setAttribute("aria-label",nextPlayable?"Начать следующий уровень: "+nextPlayable.name:"Все уровни пройдены");
  if(nextPlayable)continueButton.addEventListener("click",()=>{closeMap();void startFreshGame(nextPlayable.id);});
  summary.append(stat,track,next,continueButton);
  list.replaceChildren();
  const intro=document.querySelector(".map-intro");if(intro)intro.hidden=true;
- for(const item of LEVELS){
+ const pilotLevels=LEVELS.filter(item=>item.number>=501&&item.number<=504);
+ if(pilotLevels.length){
+  const heading=document.createElement("div");heading.className="campaign-section-heading";heading.textContent="Пилотная подборка · можно играть сразу";list.append(heading);
+ }
+ const displayLevels=[...pilotLevels,...LEVELS.filter(item=>item.number<501||item.number>504)];
+ for(const item of displayLevels){
   const unlocked=isLevelUnlocked(item),completed=done.has(item.id),isNext=nextPlayable?.id===item.id;
   const button=document.createElement("button");button.type="button";
   button.className="campaign-level trail-node"+(item.id===state.levelId?" current":"")+(completed?" completed":"")+(isNext?" next-stop":"")+(unlocked?"":" locked");
@@ -132,7 +137,7 @@ function renderMap(){
 function closeMap(){$("map-overlay").hidden=true;}
 function completedLevels(){try{return new Set(JSON.parse(localStorage.getItem(CAMPAIGN_KEY)||"[]"));}catch{return new Set();}}
 function markLevelComplete(levelId){const done=completedLevels();done.add(levelId);try{localStorage.setItem(CAMPAIGN_KEY,JSON.stringify([...done]));}catch{}}
-function isLevelUnlocked(level){return isCampaignLevelUnlocked(LEVELS,completedLevels(),level.id);}
+function isLevelUnlocked(level){return level.number>=501&&level.number<=504||isCampaignLevelUnlocked(LEVELS,completedLevels(),level.id);}
 function nextLevel(){return getNextCampaignLevel(LEVELS,state.levelId);}
 const loadingSlots=new Set(),workerPromises=new Map(),reservedTargets=new Set(),slotNextLaunchAt=new Map(),activeAnts=new Map(),pickupEffects=[],deliveryEffects=[];
 let workerSequence=0,lastAntFrameAt=0,lastExposedPixels=new Set();
