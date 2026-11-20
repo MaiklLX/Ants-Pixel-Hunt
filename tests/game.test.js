@@ -968,3 +968,26 @@ test("a Zen artwork queue has a complete five-slot clearing route",()=>{
  assert.equal(remaining,0,"a complete five-slot strategy must clear every custom pixel");
  assert.ok(steps<10000,"the Zen route must finish without an endless wait");
 });
+
+
+test("specialist obstacles scale into several separated tactical blockers",()=>{
+ const expected=[[26,3],[51,5],[151,7],[301,9]];
+ for(const [number,count] of expected){
+  const state=createGame("meadow-"+String(number).padStart(3,"0"));
+  assert.equal(state.obstacles.length,count,"level "+number+" should create several blockers");
+  assert.equal(new Set(state.obstacles.map(item=>item.x+","+item.y)).size,count);
+  assert.ok(state.obstacles.every(item=>item.hp===(number>=301?12:number>=151?10:8)));
+ }
+});
+
+test("builder ants split their first attacks across separate root barriers",()=>{
+ const state=createGame("meadow-026");
+ const builder=getIncoming(state.levelId).find(item=>item.role==="builder");
+ assert.ok(builder);
+ state.slots[0]={...builder,ants:2};
+ const first=findAntWave(state,new Set(),new Map(),2);
+ assert.equal(first.length,2);
+ assert.equal(new Set(first.map(move=>move.target.x+","+move.target.y)).size,2,
+  "the first two builder ants must not crowd the same root block");
+ assert.ok(first.every(move=>move.role==="builder"));
+});
