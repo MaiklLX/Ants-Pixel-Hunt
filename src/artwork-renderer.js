@@ -157,12 +157,10 @@ fish:
 };
 const MOTIF_ORDER=['flower','tree','mushroom','butterfly','house','fish','snail','rocket','bird','acorn','bee','cloud'];
 function sceneLayout(count){
- // Compose every motif as a balanced cluster around the arena centre.
- // All placements are square viewports so character proportions stay natural.
- if(count===1)return [[40,40,370,370]];
- if(count===2)return [[22,127,196,196],[232,127,196,196]];
- // Three motifs form a centred, stable triangle rather than an uneven row.
- return [[22,22,196,196],[232,22,196,196],[127,232,196,196]];
+ // Fill the arena with large, readable motifs instead of tiny central stickers.
+ if(count===1)return [[4,4,442,442]];
+ if(count===2)return [[0,74,292,292],[158,74,292,292]];
+ return [[0,0,276,276],[174,0,276,276],[87,174,276,276]];
 }
 export function createArtworkSvg(levelNumber){
  const isStarter=levelNumber<=7;
