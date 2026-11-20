@@ -645,11 +645,12 @@ function createRasterArtworkBoard(type,native=false){
 function createComposedArtworkBoard(number){
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
  const count=generatedPartCount(number),layoutVariant=(number+Math.floor(number/11))%3;
- const placements=generatedSceneLayout(count,layoutVariant);
+ const placements=generatedSceneLayout(count,layoutVariant),usedMotifs=new Set();
  for(let part=0;part<count;part++){
   const motifSeed=(Math.imul(number,0x9e3779b1)^Math.imul(part+1,0x85ebca6b))>>>0;
   let motifIndex=motifSeed%GENERATED_MOTIFS.length;
-  if(part&&GENERATED_MOTIFS.slice(0,part).some(item=>item.type===GENERATED_MOTIFS[motifIndex].type))motifIndex=(motifIndex+1)%GENERATED_MOTIFS.length;
+  while(usedMotifs.has(motifIndex))motifIndex=(motifIndex+1)%GENERATED_MOTIFS.length;
+  usedMotifs.add(motifIndex);
   const motif=GENERATED_MOTIFS[motifIndex],variant=(Math.imul(number,0x45d9f3b)+part*0x27d4eb2d)>>>0;
   const [ox,oy,width,height]=placements[part];
   const raster=createRasterArtworkBoard(motif.type);
