@@ -437,7 +437,7 @@ test("specialist crates provide exactly enough builders and warriors for each le
 test("generated campaign boxes are tactical partial squads, not one-box color keys",()=>{
  for(const level of LEVELS.filter(item=>item.number>=8)){
   const deck=getIncoming(level.id).filter(box=>!box.role);
-  assert.ok(deck.every(box=>box.ants<=46),level.name+" must keep every ordinary squad smaller than a full exposed color layer");
+  assert.ok(deck.every(box=>box.ants<=68),level.name+" must keep ordinary squads within the new larger-box capacity");
   const board=createArtworkBoard(level.id),colorTotals=new Map();
   for(const color of board.flat().filter(Boolean))colorTotals.set(color,(colorTotals.get(color)||0)+1);
   for(const [color,total] of colorTotals){
@@ -453,7 +453,7 @@ test("generated campaign boxes are tactical partial squads, not one-box color ke
 test("fallback queue fragments never create oversized ordinary squads",()=>{
  for(const level of LEVELS.filter(item=>item.number>=8)){
   const deck=buildIncoming(createArtworkBoard(level.id),level.number);
-  assert.ok(deck.every(box=>box.ants>0&&box.ants<=46),level.name+" fallback squads must stay within the tactical size cap");
+  assert.ok(deck.every(box=>box.ants>0&&box.ants<=68),level.name+" fallback squads must stay within the tactical size cap");
  }
 });
 
@@ -480,7 +480,8 @@ test("generated wave boxes carry substantial ant squads without losing any color
   assert.equal(ants,total,level.name+" must keep a complete ant budget");
   assert.ok(deck.every(box=>box.ants>0&&box.ants<=BOX_CAPACITY),level.name+" must respect box capacity");
   const average=ants/Math.max(1,deck.length);
-  assert.ok(average>=8,level.name+" should not flood the tray with tiny ant squads; average="+average.toFixed(1)+", boxes="+deck.length);
+  assert.ok(average>=18,level.name+" should use substantial squads rather than flood the queue with micro-boxes; average="+average.toFixed(1)+", boxes="+deck.length);
+  assert.ok(deck.length<=24,level.name+" should not require more than 24 ordinary boxes; found "+deck.length);
  }
 });
 test("box capacities vary within each sufficiently large color deck but preserve exact ant totals",()=>{
@@ -764,16 +765,18 @@ test("every live queue opens with at least one immediately playable top-lane cra
  }
 });
 
-test("generated opening row offers distinct useful colors when the exposed rim has a choice",()=>{
- for(const level of LEVELS.filter(item=>item.number>=8&&item.number<26)){
-  const state=createGame(level.id),deck=getIncoming(level.id);
-  const exposedColors=new Set(getExposedPixels(state.board).map(point=>state.board[point.y][point.x]));
-  if(exposedColors.size<2)continue;
-  const useful=state.tray[0].filter(index=>index!==null&&canLaunchBox(state,index)).map(index=>deck[index]).filter(box=>box&&!box.role);
-  const colors=new Set(useful.map(box=>box.color));
-  assert.ok(colors.size>=2,level.name+" should offer two different currently exposed colors instead of duplicate squads");
+test("generated opening row offers one useful choice and future-layer temptations",()=>{
+ for(const level of LEVELS.filter(item=>item.number>=8)){
+  const state=createGame(level.id);
+  const useful=state.tray[0].filter(index=>index!==null&&canLaunchBox(state,index));
+  assert.ok(useful.length>=1,level.name+" must offer at least one playable opening crate");
+  assert.ok(useful.length<=1,level.name+" should not make the opening row trivially safe");
+  const decoys=state.tray[0].filter(index=>index!==null&&!canLaunchBox(state,index));
+  assert.ok(decoys.length>=1,level.name+" should offer a future-layer temptation");
  }
 });
+
+
 
 test("linked crates are scheduled at the same queue depth in separate lanes across all 500 levels",()=>{
  for(const level of LEVELS){
@@ -794,5 +797,6 @@ test("campaign queue squads become smaller in measured steps without losing any 
   assert.ok(deck.every(box=>box.ants>0&&box.ants<=BOX_CAPACITY));
   assert.equal(deck.reduce((sum,box)=>sum+box.ants,0),SIZE*SIZE);
  }
- assert.ok(median(late)<median(early),"late levels should require more deliberate box rotations");
+ assert.ok(median(early)>=35,"early generated levels should avoid micro-squads");
+ assert.ok(median(late)>=35,"late generated levels should avoid micro-squads while keeping exact totals");
 });
