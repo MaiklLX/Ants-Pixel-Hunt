@@ -909,7 +909,8 @@ export function buildIncoming(board,levelNumber=1){
  let left=Object.values(totals).reduce((sum,value)=>sum+value,0);
  if(!left)return [];
  let lastColor=null,guard=0,step=0;
- // Derive a complete deterministic outside-in peel order before building crates.
+ // Peel at most one squad's worth per pass. This preserves alternating
+ // exposed layers instead of swallowing an entire dominant-colour silhouette.
  while(left>0&&guard++<SIZE*SIZE*2){
   const exposed=getExposedPixels(work),counts=Object.fromEntries(colors.map(color=>[color,0]));
   for(const point of exposed){const color=work[point.y][point.x];if(color)counts[color]++;}
@@ -918,7 +919,7 @@ export function buildIncoming(board,levelNumber=1){
   const alternatives=candidates.filter(color=>color!==lastColor);
   if(alternatives.length)candidates=alternatives;
   candidates.sort((a,b)=>counts[b]-counts[a]||colors.indexOf(a)-colors.indexOf(b));
-  const color=candidates[0],batch=exposed.filter(point=>work[point.y][point.x]===color);
+  const color=candidates[0],batch=exposed.filter(point=>work[point.y][point.x]===color).slice(0,60);
   if(!batch.length)break;
   for(const point of batch){peeled[color].push(step++);work[point.y][point.x]="";totals[color]--;left--;}
   lastColor=color;
@@ -928,16 +929,18 @@ export function buildIncoming(board,levelNumber=1){
   const positions=peeled[color],total=positions.length;
   if(!total)continue;
   const count=Math.max(1,Math.ceil(total/60)),base=Math.floor(total/count),extra=total%count;
+  const sizes=Array.from({length:count},(_,i)=>base+(i<extra?1:0));
+  // When a pigment needs several squads, slight deterministic variation keeps
+  // box contents from looking mechanically identical without leaving 10–60.
+  if(count>=3&&base>10&&base<60&&new Set(sizes).size===1){sizes[0]--;sizes[1]++;sizes[2]++;}
   let offset=0;
-  for(let i=0;i<count;i++){
-   const ants=base+(i<extra?1:0),firstStep=positions[offset];
-   crates.push({color,ants,firstStep:firstStep??Number.MAX_SAFE_INTEGER});
+  for(const ants of sizes){
+   crates.push({color,ants,firstStep:positions[offset]??Number.MAX_SAFE_INTEGER});
    offset+=ants;
   }
  }
  crates.sort((a,b)=>a.firstStep-b.firstStep||colors.indexOf(a.color)-colors.indexOf(b.color));
  if(left>0){
-  // Defensive fallback for malformed custom boards; campaign art must peel fully.
   const missing=Object.fromEntries(colors.map(color=>[color,0]));
   for(const row of work)for(const color of row)if(color)missing[color]++;
   for(const color of colors)if(missing[color]){
