@@ -425,12 +425,9 @@ const GENERATED_CHAPTERS=[
  "Сказочная чаща","Большой лес"
 ];
 function generatedPartCount(number){
- // Keep each subject large enough to read as a real pixel illustration.
- // New subjects are introduced gradually; the board never becomes a collage
- // of tiny icons that lose their defining details.
- if(number<=8)return 1;
- if(number<151)return 2;
- return 3;
+ // Every level is one coherent illustration. Variety comes from changing
+ // the subject, pose, details and palette — never from combining unrelated icons.
+ return 1;
 }
 function generatedChapter(number){
  if(number<=50)return "Светлячковая роща";
