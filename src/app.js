@@ -1,4 +1,5 @@
 import {COLORS,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,LEVELS,getLevel,getIncoming,createGame,setArtworkBoard,canChoose,chooseTopColumn,canLaunchBox,isLockedBox,getLinkedPartner,findAntWave,applyAntPickup,completeBoxDeparture,isDefeat,isGameComplete,getExposedTargets,getExposedPixels,countQueuedBySlot,countDispatchingWorkers,countSlotWorkers,registerCustomArtwork} from "./game.js";
+import {PILOT_ARTWORK} from "./pilot-artwork-data.js";
 import {createArtworkSvg} from "./artwork-renderer.js";
 import {decodeSpriteArtwork} from "./custom-artwork.js";
 import {getAntTripFrame,getAntLaunchDelay,getAntQueueDelay,createPausableClock,getTrailPose,getAntTravelDurations,getAntGaitFrame} from "./ant-animation.js";
@@ -7,6 +8,7 @@ import {BUILDINGS,createEconomy,normalizeEconomy,collectCube,completeMeadow,purc
 const $=id=>document.getElementById(id);
 const shell=$("app-shell"),boardEl=$("board"),slotsEl=$("slots"),choicesEl=$("choices"),antLayer=$("ant-layer"),nestEntrance=$("nest-entrance");
 const boardCtx=boardEl.getContext("2d"),antCtx=antLayer.getContext("2d");
+let boardArtworkPromise=Promise.resolve(true);
 let state=createGame(),resolverRunning=false,resetting=false,resetAfterMenu=false,antFrame=0,antCanvasWidth=0,antCanvasHeight=0,gameStarted=false,totalBlocks=state.remaining+(state.obstacles||[]).reduce((sum,item)=>sum+item.hp,0);
 const ZEN_ARTWORK_KEY="ants-zen-artwork-v1";
 let zenMode=false,zenRunCollected=0,zenPendingNectar=0;
@@ -106,10 +108,10 @@ function renderMap(){
   button.dataset.levelState=completed?"completed":isNext?"next":unlocked?"available":"locked";
   if(isNext)button.setAttribute("aria-current","step");
   const pilot=item.number>=501&&item.number<=504,pilotIndex=item.number-500;
-  const visibleNumber=pilot?`ПИЛОТНЫЙ ${pilotIndex}`:String(item.number).padStart(3,"0");
-  button.setAttribute("aria-label",`${pilot?`Пилотный уровень ${pilotIndex}`:`Уровень ${item.number}`}: ${item.name}. ${completed?"Пройден":unlocked?(isNext?"Следующий доступный":"Доступен"):"Закрыт"}`);
+  const visibleNumber=pilot?(PILOT_ARTWORK[item.number]?.label||`ПИЛОТНЫЙ ${pilotIndex}`):String(item.number).padStart(3,"0");
+  button.setAttribute("aria-label",`${pilot?(PILOT_ARTWORK[item.number]?.label||`Пилотный уровень ${pilotIndex}`):`Уровень ${item.number}`}: ${item.name}. ${completed?"Пройден":unlocked?(isNext?"Следующий доступный":"Доступен"):"Закрыт"}`);
   const icon=document.createElement("span");icon.className="campaign-emoji";
-  if(pilot){const preview=document.createElement("img");preview.className="pilot-art-preview";preview.alt="";preview.loading="lazy";preview.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(createArtworkSvg(item.number));icon.append(preview);}
+  if(pilot){const preview=document.createElement("img");preview.className="pilot-art-preview";preview.alt="";preview.loading="lazy";preview.src=PILOT_ARTWORK[item.number]?.dataUrl||"data:image/svg+xml;charset=utf-8,"+encodeURIComponent(createArtworkSvg(item.number));icon.append(preview);}
   else icon.textContent=completed?"✓":unlocked?item.emoji:"🔒";
   const number=document.createElement("span");number.className="trail-number";number.textContent=visibleNumber;
   const name=document.createElement("strong");name.className="trail-name";name.textContent=item.name;
@@ -131,7 +133,9 @@ const colorRGB=Object.fromEntries(Object.entries(COLORS).map(([key,value])=>[key
 let boardEmptyGradient=null,boardArtworkKey="";
 function rasterizeArtworkToBlocks(image){
  const canvas=document.createElement("canvas");canvas.width=450;canvas.height=450;
- const ctx=canvas.getContext("2d",{willReadFrequently:true});ctx.clearRect(0,0,450,450);ctx.drawImage(image,0,0,450,450);
+ const ctx=canvas.getContext("2d",{willReadFrequently:true});ctx.clearRect(0,0,450,450);
+ const scale=Math.min(450/image.naturalWidth,450/image.naturalHeight),drawWidth=image.naturalWidth*scale,drawHeight=image.naturalHeight*scale;
+ ctx.drawImage(image,(450-drawWidth)/2,(450-drawHeight)/2,drawWidth,drawHeight);
  const pixels=ctx.getImageData(0,0,450,450).data;
  const toLab=(r,g,b)=>{
   const linear=value=>{value/=255;return value<=.04045?value/12.92:((value+.055)/1.055)**2.4;};
@@ -188,29 +192,28 @@ function rasterizeArtworkToBlocks(image){
 }
 function ensureBoardArtwork(){
  const key=state.levelId;
- if(boardArtworkKey===key)return;
- if(readCustomArtwork(key)){applySavedArtwork(key);boardArtworkKey=key;state=createGame(key);totalBlocks=tasksRemaining();return;}
+ if(boardArtworkKey===key)return boardArtworkPromise;
+ if(readCustomArtwork(key)){applySavedArtwork(key);boardArtworkKey=key;state=createGame(key);totalBlocks=tasksRemaining();boardArtworkPromise=Promise.resolve(true);return boardArtworkPromise;}
  boardArtworkKey=key;
- // Pilot levels 501–504 already have authored, matching motif boards in game.js.
- // Do not replace them with the generic SVG motif selected by the legacy renderer.
- const levelNumber=getLevel(key).number;
- if(levelNumber>=501&&levelNumber<=504)return;
- const image=new Image();
- image.onload=()=>{
-  if(boardArtworkKey!==key||state.levelId!==key)return;
-  const untouched=state.slots.every(slot=>!slot)&&state.nextContainer===TRAY_SIZE*TRAY_SIZE;
-  if(!untouched)return;
-  const board=rasterizeArtworkToBlocks(image);
-  setArtworkBoard(key,board);
-  // The SVG is never shown as an overlay: its sampled pigments now are the
-  // actual collectible cells, so ants remove the visible image tile by tile.
-  state=createGame(key);
-  totalBlocks=state.remaining+(state.obstacles||[]).reduce((sum,item)=>sum+item.hp,0);
-  lastExposedPixels=new Set();
-  render();
- };
- image.onerror=()=>{if(boardArtworkKey===key)boardArtworkKey="";};
- image.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(createArtworkSvg(Number(getLevel(key).number)));
+ const levelNumber=getLevel(key).number,pilotArtwork=PILOT_ARTWORK[levelNumber];
+ boardArtworkPromise=new Promise(resolve=>{
+  const image=new Image();
+  image.onload=()=>{
+   if(boardArtworkKey!==key||state.levelId!==key){resolve(false);return;}
+   const untouched=state.slots.every(slot=>!slot)&&state.nextContainer===TRAY_SIZE*TRAY_SIZE;
+   if(!untouched){resolve(false);return;}
+   const board=rasterizeArtworkToBlocks(image);
+   setArtworkBoard(key,board);
+   // The PNG/SVG is sampled into the actual collectible board, never overlaid.
+   state=createGame(key);
+   totalBlocks=state.remaining+(state.obstacles||[]).reduce((sum,item)=>sum+item.hp,0);
+   lastExposedPixels=new Set();
+   render();resolve(true);
+  };
+  image.onerror=()=>resolve(false);
+  image.src=pilotArtwork?.dataUrl||"data:image/svg+xml;charset=utf-8,"+encodeURIComponent(createArtworkSvg(levelNumber));
+ });
+ return boardArtworkPromise;
 }
 function tasksRemaining(){
  return state.remaining+(state.obstacles||[]).reduce((sum,item)=>sum+item.hp,0);
@@ -536,7 +539,7 @@ function renderChoices(){
 }
 function render(){
  const level=getLevel(state.levelId);
- $("level-number").textContent=zenMode?"ДЗЕН · ВАШ РИСУНОК":level.number>=501&&level.number<=504?`ПИЛОТНЫЙ ${level.number-500}`:`ПОЛЯНКА № ${level.number}`;
+ $("level-number").textContent=zenMode?"ДЗЕН · ВАШ РИСУНОК":PILOT_ARTWORK[level.number]?.label||`ПОЛЯНКА № ${level.number}`;
  $("level-title").textContent=level.name;
  $("board").setAttribute("aria-label",`${level.name}: иллюстрация из цветных фрагментов на сетке 35 на 35`);
  renderBoard();renderSlots();renderChoices();renderConveyor();
@@ -1036,8 +1039,11 @@ function startGame(){
 async function startFreshGame(levelId=state.levelId){
  if(workerPromises.size>0||loadingSlots.size>0||resetAfterMenu)return;
  clearZenLaunchParam();zenMode=false;zenRunCollected=0;zenPendingNectar=0;
- resetting=true;cancelAnimationFrame(antFrame);activeAnts.clear();pickupEffects.length=0;deliveryEffects.length=0;reservedTargets.clear();slotNextLaunchAt.clear();applySavedArtwork(levelId);state=createGame(levelId);boardArtworkKey=readCustomArtwork(levelId)?levelId:"";totalBlocks=tasksRemaining();resetting=false;
- gameStarted=true;render();$("save-status").textContent="Новая партия · прогресс уровня не сохраняется";shell.classList.remove("menu-open");resizeAntLayer();updateMainMenu();kickColony();
+ resetting=true;boardArtworkPromise=Promise.resolve(true);cancelAnimationFrame(antFrame);activeAnts.clear();pickupEffects.length=0;deliveryEffects.length=0;reservedTargets.clear();slotNextLaunchAt.clear();applySavedArtwork(levelId);state=createGame(levelId);boardArtworkKey=readCustomArtwork(levelId)?levelId:"";totalBlocks=tasksRemaining();
+ gameStarted=true;render();$("save-status").textContent="Новая партия · прогресс уровня не сохраняется";shell.classList.remove("menu-open");resizeAntLayer();updateMainMenu();
+ await boardArtworkPromise;
+ if(state.levelId!==levelId||resetAfterMenu)return;
+ resetting=false;render();kickColony();
 }
 function readZenPayload(){
  try{return JSON.parse(localStorage.getItem(ZEN_ARTWORK_KEY)||"null");}catch{return null;}
