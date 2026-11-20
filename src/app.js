@@ -514,7 +514,7 @@ function render(){
  const level=getLevel(state.levelId);
  $("level-number").textContent=`ПОЛЯНКА № ${level.number}`;
  $("level-title").textContent=level.name;
- $("board").setAttribute("aria-label",`${level.name}: иллюстрация из цветных фрагментов на сетке 45 на 45`);
+ $("board").setAttribute("aria-label",`${level.name}: иллюстрация из цветных фрагментов на сетке 35 на 35`);
  renderBoard();renderSlots();renderChoices();renderConveyor();
  $("message").textContent=state.message;
  updateResultOverlay();
