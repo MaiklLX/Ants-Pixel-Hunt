@@ -168,7 +168,7 @@ export function createArtworkSvg(levelNumber){
  let placements=[];
  if(isStarter)placements=[[50,50,350,350]];
  else{
-  const count=levelNumber<=8?1:levelNumber<151?2:3;
+  const count=1;
   const variant=(levelNumber+Math.floor(levelNumber/11))%3;
   placements=sceneLayout(count);
   for(let part=0;part<count;part++){
