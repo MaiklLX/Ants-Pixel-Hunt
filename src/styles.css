@@ -4899,7 +4899,7 @@ footer{color:#78877a}
 .zen-location:disabled{opacity:.55;cursor:not-allowed;filter:saturate(.55)}
 .zen-workshop{background:linear-gradient(145deg,#f6f4e9,#e7e9dd);border-color:#d4d7c8;color:#56624f}
 .zen-status-message{margin:-2px 4px 0;text-align:center;color:#82917d;font-size:10px}
-.zen-run-hud{width:min(100%,470px);margin:-3px auto 0;padding:9px 12px;border:1px solid #cbd8c5;border-radius:13px;background:linear-gradient(145deg,#f7f5eb,#e3eadc);box-shadow:0 3px 0 #c2cfbc,0 5px 12px #344b3818;color:#4c614c}
+.zen-run-hud{order:2;width:min(100%,470px);margin:-3px auto 0;padding:9px 12px;border:1px solid #cbd8c5;border-radius:13px;background:linear-gradient(145deg,#f7f5eb,#e3eadc);box-shadow:0 3px 0 #c2cfbc,0 5px 12px #344b3818;color:#4c614c}
 .zen-run-hud[hidden]{display:none}
 .zen-run-top{display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:850}
 .zen-run-top strong{font-size:17px;color:#9a7b3d}
