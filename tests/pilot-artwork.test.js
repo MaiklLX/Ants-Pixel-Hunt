@@ -77,7 +77,7 @@ test("pilot PNG rasterization keeps small accent colors instead of merging them 
  const game=await readFile(new URL("../src/game.js",import.meta.url),"utf8");
  assert.match(app,/setArtworkBoard\(key,board,pilotArtwork\?3:18,!!pilotArtwork\)/);
  assert.match(game,/setArtworkBoard\(levelId,board,minimumColorCount=18,addInkContours=false\)/);
- assert.match(game,/mergeSparseArtworkColors\(board\.map\(row=>row\.slice\(\)\),minimumColorCount\)/);
+ assert.match(game,/mergeSparseArtworkColors\(addInkContours\?applyPixelArtOutlines\(source\):source,minimumColorCount\)/);
 });
 
 test("main menu progress reset clears campaign and colony progression only after confirmation",async()=>{
