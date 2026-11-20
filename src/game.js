@@ -1129,9 +1129,12 @@ function createLevelObstacles(levelId,board){
  if(customArtworkLevels.has(levelId))return [];
  const number=getLevel(levelId).number;
  if(number<26)return [];
- const count=number<51?1:number<151?2:number<301?3:4;
- const roles=count===1?["builder"]:count===2?["builder","warrior"]:count===3?["builder","warrior","builder"]:["builder","warrior","builder","warrior"];
- const hp=number>=301?15:number>=151?12:10;
+ // More distributed barriers create several separate decisions instead of one
+ // specialist squad crowding a single target. The roles alternate so both
+ // builder and warrior crates must be used throughout the campaign.
+ const count=number<51?3:number<151?5:number<301?7:9;
+ const roles=Array.from({length:count},(_,index)=>index%2===0?"builder":"warrior");
+ const hp=number>=301?12:number>=151?10:8;
  const candidates=getExposedPixels(board).slice();
  if(!candidates.length)return [];
  const selected=[candidates[0]];
@@ -1152,10 +1155,11 @@ function createLevelObstacles(levelId,board){
  }));
 }
 const incomingCache=new Map();
-export function setArtworkBoard(levelId,board,minimumColorCount=18){
+export function setArtworkBoard(levelId,board,minimumColorCount=18,addInkContours=false){
  const id=getLevel(levelId).id;
  if(!Array.isArray(board)||board.length!==SIZE||board.some(row=>!Array.isArray(row)||row.length!==SIZE))throw new Error("Artwork board must be a 35×35 grid");
- const normalized=mergeSparseArtworkColors(board.map(row=>row.slice()),minimumColorCount);
+ const source=board.map(row=>row.slice());
+ const normalized=mergeSparseArtworkColors(addInkContours?applyPixelArtOutlines(source):source,minimumColorCount);
  artworkBoardCache.set(id,normalized);
  incomingCache.delete(id);
 }
@@ -1164,11 +1168,13 @@ export function getIncoming(levelId="meadow-01"){
  if(!incomingCache.has(id)){
   const board=createArtworkBoard(id),obstacles=createLevelObstacles(id,board);
   const deck=buildIncoming(board,getLevel(id).number);
-  const roleBoxes=[];
-  for(const role of ["builder","warrior"]){
-   const ants=obstacles.filter(item=>item.role===role).reduce((sum,item)=>sum+item.hp,0);
-   if(ants)roleBoxes.push({color:role==="builder"?"orange":"red",ants,role,special:"specialist"});
-  }
+  // One specialist crate is bound to one concrete obstacle. This prevents a
+  // huge crowd from hammering a single barrier and makes every blocker a
+  // separate queue decision with its own limited ant squad.
+  const roleBoxes=obstacles.map(obstacle=>({
+   color:obstacle.role==="builder"?"orange":"red",
+   ants:obstacle.hp,role:obstacle.role,obstacleId:obstacle.id,special:"specialist"
+  }));
   deck.unshift(...roleBoxes);
   const start=deck.length>=14?LINKED_BOX_START:deck.length>=11?9:3;
   if(deck.length>start+1){
@@ -1265,17 +1271,22 @@ export function findAntWave(state,reservedTargets=new Set(),pendingBySlot=new Ma
  for(const target of exposed){
   const key=target.x+","+target.y;if(reservedTargets.has(key))continue;
   if(target.kind==="obstacle"){
-   if(!byRole.has(target.role))byRole.set(target.role,[]);
-   byRole.get(target.role).push(target);
+   const roleKey=target.role+"|"+target.id;
+   if(!byRole.has(roleKey))byRole.set(roleKey,[]);
+   byRole.get(roleKey).push(target);
   }else{
    if(!byColor.has(target.color))byColor.set(target.color,[]);
    byColor.get(target.color).push(target);
   }
  }
- const supplies=state.slots.map((box,slot)=>({slot,color:box?.color,role:box?.role,remaining:box&&box.ants>0&&box.status!=="departing"?Math.max(0,box.ants-(pendingBySlot.get(slot)||0)):0,assigned:0}));
+ const supplies=state.slots.map((box,slot)=>({slot,color:box?.color,role:box?.role,obstacleId:box?.obstacleId,remaining:box&&box.ants>0&&box.status!=="departing"?Math.max(0,box.ants-(pendingBySlot.get(slot)||0)):0,assigned:0}));
  const scheduleOne=supply=>{
   if(!supply.remaining||supply.assigned>=supply.remaining)return false;
-  const targets=supply.role?byRole.get(supply.role)||[]:byColor.get(supply.color)||[],key=supply.role||supply.color,index=cursor.get(key)||0;
+  const key=supply.role?(supply.role+"|"+(supply.obstacleId||"")):supply.color;
+  const targets=supply.role
+   ?(supply.obstacleId?byRole.get(supply.role+"|"+supply.obstacleId)||[]:[...byRole.entries()].filter(([entry])=>entry.startsWith(supply.role+"|")).flatMap(([,items])=>items))
+   :(byColor.get(supply.color)||[]);
+  const index=cursor.get(key)||0;
   if(index>=targets.length)return false;
   const target=targets[index];
   wave.push({slot:supply.slot,color:supply.color,role:supply.role,target:target.kind==="pixel"?{x:target.x,y:target.y}:target});
@@ -1335,7 +1346,7 @@ export function canLaunchBox(state,index){
  if(!box||isLockedBox(state,index))return false;
  const exposed=getExposedTargets(state);
  const hasTarget=candidate=>candidate.role
-  ?exposed.some(target=>target.kind==="obstacle"&&target.role===candidate.role)
+  ?exposed.some(target=>target.kind==="obstacle"&&target.role===candidate.role&&(!candidate.obstacleId||target.id===candidate.obstacleId))
   :exposed.some(target=>target.kind==="pixel"&&target.color===candidate.color);
  if(box.special==="linked"){
   const partnerIndex=getLinkedPartner(state.levelId,index),partner=incoming[partnerIndex];
@@ -1420,7 +1431,7 @@ export function applyAntMove(state,slot,target){
  const box=state.slots[slot];
  if(!box||box.ants<=0||box.status==="departing")return false;
  if(target.kind==="obstacle"){
-  const obstacle=state.obstacles?.find(item=>item.x===target.x&&item.y===target.y&&item.role===box.role);
+  const obstacle=state.obstacles?.find(item=>item.x===target.x&&item.y===target.y&&item.role===box.role&&(!box.obstacleId||item.id===box.obstacleId));
   if(!obstacle)return false;
   obstacle.hp--;
   if(obstacle.hp<=0)state.obstacles=state.obstacles.filter(item=>item!==obstacle);
@@ -1450,7 +1461,7 @@ export function applyAntMove(state,slot,target){
 /** Browser runtime pickup: the ant count was already deducted when it left its box. */
 export function applyAntPickup(state,slot,target,color,role=null){
  if(target.kind==="obstacle"){
-  const obstacle=state.obstacles?.find(item=>item.x===target.x&&item.y===target.y&&item.role===role);
+  const obstacle=state.obstacles?.find(item=>item.x===target.x&&item.y===target.y&&item.role===role&&(!state.slots[slot]?.obstacleId||item.id===state.slots[slot].obstacleId));
   if(!obstacle)return false;
   obstacle.hp--;
   if(obstacle.hp<=0)state.obstacles=state.obstacles.filter(item=>item!==obstacle);

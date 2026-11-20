@@ -451,7 +451,7 @@ test("builder squad clears a reinforced root barrier before revealing the covere
   assert.equal(state.remaining,before,"hitting the barrier must not remove the colored block underneath");
   if(hit<hits-1)assert.equal(state.obstacles[0].hp,hits-hit-1);
  }
- assert.equal(state.obstacles.length,0,"the full builder squad removes the reinforced barrier");
+ assert.ok(!state.obstacles.some(item=>item.id===obstacle.id),"the builder squad removes its assigned barrier");
  assert.equal(state.board[obstacle.y][obstacle.x],coveredColor,"the covered artwork block remains intact");
  assert.ok(getExposedTargets(state).some(item=>item.kind==="pixel"&&item.x===obstacle.x&&item.y===obstacle.y&&item.color===coveredColor));
 });
@@ -967,4 +967,28 @@ test("a Zen artwork queue has a complete five-slot clearing route",()=>{
  }
  assert.equal(remaining,0,"a complete five-slot strategy must clear every custom pixel");
  assert.ok(steps<10000,"the Zen route must finish without an endless wait");
+});
+
+
+test("specialist obstacles scale into several separated tactical blockers",()=>{
+ const expected=[[26,3],[51,5],[151,7],[301,9]];
+ for(const [number,count] of expected){
+  const state=createGame("meadow-"+String(number).padStart(3,"0"));
+  assert.equal(state.obstacles.length,count,"level "+number+" should create several blockers");
+  assert.equal(new Set(state.obstacles.map(item=>item.x+","+item.y)).size,count);
+  assert.ok(state.obstacles.every(item=>item.hp===(number>=301?12:number>=151?10:8)));
+ }
+});
+
+test("builder ants split their first attacks across separate root barriers",()=>{
+ const state=createGame("meadow-026");
+ const builders=getIncoming(state.levelId).filter(item=>item.role==="builder");
+ assert.ok(builders.length>=2);
+ state.slots[0]={...builders[0],ants:1};
+ state.slots[1]={...builders[1],ants:1};
+ const first=findAntWave(state,new Set(),new Map(),2);
+ assert.equal(first.length,2);
+ assert.equal(new Set(first.map(move=>move.target.x+","+move.target.y)).size,2,
+  "the first two builder ants must not crowd the same root block");
+ assert.ok(first.every(move=>move.role==="builder"));
 });

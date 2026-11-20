@@ -1,4 +1,4 @@
-const CACHE="ants-pixel-hunt-shell-v114-kt306-detailed-pilot-artwork";
+const CACHE="ants-pixel-hunt-shell-v115-kt307-ink-obstacles";
 const STATIC_FILES=["./manifest.webmanifest","./assets/icon-192.svg","./assets/icon-512.svg"];
 self.addEventListener("install",event=>{
  event.waitUntil((async()=>{

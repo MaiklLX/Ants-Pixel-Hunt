@@ -775,7 +775,7 @@ test("KT-226 renders clean square pigment blocks and converts full illustrations
  assert.match(app,/const radius=Math\.max\(\.35,cell\*\.075\)/);
  assert.match(app,/rasterizeArtworkToBlocks\(image\)/);
  assert.match(app,/ctx\.getImageData\(0,0,450,450\)/);
- assert.match(app,/setArtworkBoard\(key,board(?:,pilotArtwork\?3:18)?\)/);
+ assert.match(app,/setArtworkBoard\(key,board(?:,pilotArtwork\?3:18)?(?:,!!pilotArtwork)?\)/);
  const renderer=await readFile(new URL("../src/artwork-renderer.js",import.meta.url),"utf8");
  assert.match(renderer,/if\(count===1\)return \[\[4,4,442,442\]\]/);
  assert.match(renderer,/if\(count===2\)return \[\[0,74,292,292\],\[158,74,292,292\]\]/);

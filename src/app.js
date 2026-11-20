@@ -210,7 +210,7 @@ function ensureBoardArtwork(){
    const untouched=state.slots.every(slot=>!slot)&&state.nextContainer===TRAY_SIZE*TRAY_SIZE;
    if(!untouched){resolve(false);return;}
    const board=rasterizeArtworkToBlocks(image);
-   setArtworkBoard(key,board,pilotArtwork?3:18);
+   setArtworkBoard(key,board,pilotArtwork?3:18,!!pilotArtwork);
    // The PNG/SVG is sampled into the actual collectible board, never overlaid.
    state=createGame(key);
    totalBlocks=state.remaining+(state.obstacles||[]).reduce((sum,item)=>sum+item.hp,0);

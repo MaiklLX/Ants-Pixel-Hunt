@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {readFile} from "node:fs/promises";
 import {PILOT_ARTWORK} from "../src/pilot-artwork-data.js";
-import {LEVELS} from "../src/game.js";
+import {LEVELS,createArtworkBoard,setArtworkBoard} from "../src/game.js";
 
 const expected=[
  [501,"ПИЛОТНЫЙ 1","Слон на полянке","elephant.png"],
@@ -75,9 +75,9 @@ test("pilot images are converted to the actual collectible board before dispatch
 test("pilot PNG rasterization keeps small accent colors instead of merging them into the body color",async()=>{
  const app=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
  const game=await readFile(new URL("../src/game.js",import.meta.url),"utf8");
- assert.match(app,/setArtworkBoard\(key,board,pilotArtwork\?3:18\)/);
- assert.match(game,/setArtworkBoard\(levelId,board,minimumColorCount=18\)/);
- assert.match(game,/mergeSparseArtworkColors\(board\.map\(row=>row\.slice\(\)\),minimumColorCount\)/);
+ assert.match(app,/setArtworkBoard\(key,board,pilotArtwork\?3:18,!!pilotArtwork\)/);
+ assert.match(game,/setArtworkBoard\(levelId,board,minimumColorCount=18,addInkContours=false\)/);
+ assert.match(game,/mergeSparseArtworkColors\(addInkContours\?applyPixelArtOutlines\(source\):source,minimumColorCount\)/);
 });
 
 test("main menu progress reset clears campaign and colony progression only after confirmation",async()=>{
@@ -88,4 +88,16 @@ test("main menu progress reset clears campaign and colony progression only after
  assert.match(handler,/localStorage\.removeItem\(ECONOMY_STORAGE_KEY\)/);
  assert.match(handler,/location\.reload\(\)/);
  assert.doesNotMatch(handler,/localStorage\.clear\(/);
+});
+
+
+test("pilot mosaics receive black outer and internal ink contours before color merging",()=>{
+ const board=Array.from({length:35},(_,y)=>Array.from({length:35},(_,x)=>
+  x>=8&&x<=26&&y>=8&&y<=26?(x>=14&&x<=20&&y>=14&&y<=20?"yellow":"red"):""
+ ));
+ setArtworkBoard("meadow-504",board,3,true);
+ const raster=createArtworkBoard("meadow-504");
+ const black=raster.flat().filter(color=>color==="black").length;
+ assert.ok(black>=60,"pilot silhouette and inner shape must retain a visible black block contour");
+ assert.ok(raster.flat().includes("yellow"),"internal details must remain visible beside the contour");
 });
