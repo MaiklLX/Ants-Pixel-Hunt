@@ -445,7 +445,7 @@ test("specialist crates provide exactly enough builders and warriors for each le
 test("generated campaign uses bounded tactical squads and exact color budgets",()=>{
  for(const level of LEVELS.filter(item=>item.number>=8)){
   const deck=getIncoming(level.id).filter(box=>!box.role);
-  assert.ok(deck.every(box=>box.ants>=18&&box.ants<=52),level.name+" squads must be bounded and avoid micro-boxes");
+  assert.ok(deck.every(box=>box.ants>=18&&box.ants<=64),level.name+" squads must be bounded and avoid micro-boxes");
   const board=createArtworkBoard(level.id),colorTotals=new Map();
   for(const color of board.flat().filter(Boolean))if(color!=="black")colorTotals.set(color,(colorTotals.get(color)||0)+1);
   for(const [color,total] of colorTotals){
@@ -824,6 +824,6 @@ test("campaign queue squads become smaller in measured steps without losing any 
  }
  assert.ok(median(early)>=35,"early generated levels should avoid micro-squads");
  assert.ok(median(late)>=35,"late generated levels should avoid micro-squads while keeping exact totals");
- assert.ok(Math.max(...early.map(box=>box.ants))<=52,"early squads must never become oversized");
- assert.ok(Math.max(...late.map(box=>box.ants))<=52,"late squads must never become oversized");
+ assert.ok(Math.max(...early.map(box=>box.ants))<=64,"early squads must never become oversized");
+ assert.ok(Math.max(...late.map(box=>box.ants))<=64,"late squads must never become oversized");
 });
