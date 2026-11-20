@@ -873,3 +873,18 @@ test("small colour budgets stay small while large budgets split into balanced sq
  assert.equal(red.reduce((sum,count)=>sum+count,0),SIZE*SIZE-4);
  assert.ok(deck.every(box=>box.ants>=1&&box.ants<=30));
 });
+
+
+test("late-game queue generation preserves a playable five-slot route without crashing",()=>{
+ for(const number of [1,8,26,51,151,301,500]){
+  const level=LEVELS.find(item=>item.number===number);
+  assert.ok(level,"difficulty checkpoint "+number+" must exist");
+  const diagnostics={};
+  const deck=buildIncoming(createArtworkBoard(level.id),level.number,diagnostics);
+  assert.ok(deck.length>0,level.name+" must keep visible boxes");
+  assert.equal(diagnostics.completed,true,level.name+" must assign every artwork block");
+  assert.ok(diagnostics.maxActiveSquads<=SLOT_COUNT,
+   level.name+" must not require more than "+SLOT_COUNT+" simultaneously waiting colour squads; observed "+diagnostics.maxActiveSquads);
+  assert.ok(diagnostics.decisions>0,level.name+" must exercise the queue planner");
+ }
+});
