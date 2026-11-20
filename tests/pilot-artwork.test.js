@@ -76,7 +76,7 @@ test("pilot PNG rasterization keeps small accent colors instead of merging them 
  const app=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
  const game=await readFile(new URL("../src/game.js",import.meta.url),"utf8");
  assert.match(app,/setArtworkBoard\(key,board,pilotArtwork\?3:18,!!pilotArtwork\)/);
- assert.match(game,/setArtworkBoard\(levelId,board,minimumColorCount=18\)/);
+ assert.match(game,/setArtworkBoard\(levelId,board,minimumColorCount=18,addInkContours=false\)/);
  assert.match(game,/mergeSparseArtworkColors\(board\.map\(row=>row\.slice\(\)\),minimumColorCount\)/);
 });
 
