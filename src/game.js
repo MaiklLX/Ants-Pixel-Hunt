@@ -902,43 +902,58 @@ export function createArtworkBoard(levelId="meadow-01"){
 
 export const INITIAL_BOARD=createArtworkBoard();
 export function buildIncoming(board,levelNumber=1){
- const colors=Object.keys(COLORS);
- const work=board.map(row=>row.slice());
+ const colors=Object.keys(COLORS),work=board.map(row=>row.slice());
  const totals=Object.fromEntries(colors.map(color=>[color,0]));
+ const peeled=Object.fromEntries(colors.map(color=>[color,[]]));
  for(const row of work)for(const color of row)if(color)totals[color]++;
  let left=Object.values(totals).reduce((sum,value)=>sum+value,0);
  if(!left)return [];
- const deck=[];let lastColor=null,guard=0;
- // Generate a real outside-in peeling order; each box clears only currently exposed matching blocks.
+ let lastColor=null,guard=0,step=0;
+ // Derive a complete deterministic outside-in peel order before building crates.
  while(left>0&&guard++<SIZE*SIZE*2){
   const exposed=getExposedPixels(work),counts=Object.fromEntries(colors.map(color=>[color,0]));
   for(const point of exposed){const color=work[point.y][point.x];if(color)counts[color]++;}
   let candidates=colors.filter(color=>counts[color]>0&&totals[color]>0);
   if(!candidates.length)break;
-  const alternatives=candidates.filter(color=>color!==lastColor);if(alternatives.length)candidates=alternatives;
+  const alternatives=candidates.filter(color=>color!==lastColor);
+  if(alternatives.length)candidates=alternatives;
   candidates.sort((a,b)=>counts[b]-counts[a]||colors.indexOf(a)-colors.indexOf(b));
-  const color=candidates[0],ants=Math.min(60,counts[color]);if(!ants)break;
-  deck.push({color,ants});let collected=0;
-  while(collected<ants){
-   const point=getExposedPixels(work).find(item=>work[item.y][item.x]===color);
-   if(!point)break;
-   work[point.y][point.x]='';collected++;left--;totals[color]--;
+  const color=candidates[0],batch=exposed.filter(point=>work[point.y][point.x]===color);
+  if(!batch.length)break;
+  for(const point of batch){peeled[color].push(step++);work[point.y][point.x]="";totals[color]--;left--;}
+  lastColor=color;
+ }
+ const crates=[];
+ for(const color of colors){
+  const positions=peeled[color],total=positions.length;
+  if(!total)continue;
+  const count=Math.max(1,Math.ceil(total/60)),base=Math.floor(total/count),extra=total%count;
+  let offset=0;
+  for(let i=0;i<count;i++){
+   const ants=base+(i<extra?1:0),firstStep=positions[offset];
+   crates.push({color,ants,firstStep:firstStep??Number.MAX_SAFE_INTEGER});
+   offset+=ants;
   }
-  if(collected!==ants){deck.pop();break;}lastColor=color;
  }
+ crates.sort((a,b)=>a.firstStep-b.firstStep||colors.indexOf(a.color)-colors.indexOf(b.color));
  if(left>0){
-  const leftovers=Object.fromEntries(colors.map(color=>[color,0]));
-  for(const row of work)for(const color of row)if(color)leftovers[color]++;
-  for(const color of colors){let total=leftovers[color];while(total>0){const ants=Math.min(60,total);deck.push({color,ants});total-=ants;}}
+  // Defensive fallback for malformed custom boards; campaign art must peel fully.
+  const missing=Object.fromEntries(colors.map(color=>[color,0]));
+  for(const row of work)for(const color of row)if(color)missing[color]++;
+  for(const color of colors)if(missing[color]){
+   const existing=crates.filter(crate=>crate.color===color);
+   if(existing.length)existing[existing.length-1].ants+=missing[color];
+   else crates.push({color,ants:missing[color],firstStep:Number.MAX_SAFE_INTEGER});
+  }
  }
- return deck;
+ return crates.map(({color,ants})=>({color,ants}));
 }
 function createLevelObstacles(levelId,board){
  const number=getLevel(levelId).number;
  if(number<26)return [];
  const count=number<51?1:number<151?2:number<301?3:4;
  const roles=count===1?["builder"]:count===2?["builder","warrior"]:count===3?["builder","warrior","builder"]:["builder","warrior","builder","warrior"];
- const hp=number>=301?12:number>=151?10:8;
+ const hp=number>=301?15:number>=151?12:10;
  const candidates=getExposedPixels(board).slice();
  if(!candidates.length)return [];
  const selected=[candidates[0]];
