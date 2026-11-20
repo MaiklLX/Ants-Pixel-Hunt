@@ -1129,9 +1129,12 @@ function createLevelObstacles(levelId,board){
  if(customArtworkLevels.has(levelId))return [];
  const number=getLevel(levelId).number;
  if(number<26)return [];
- const count=number<51?1:number<151?2:number<301?3:4;
- const roles=count===1?["builder"]:count===2?["builder","warrior"]:count===3?["builder","warrior","builder"]:["builder","warrior","builder","warrior"];
- const hp=number>=301?15:number>=151?12:10;
+ // More distributed barriers create several separate decisions instead of one
+ // specialist squad crowding a single target. The roles alternate so both
+ // builder and warrior crates must be used throughout the campaign.
+ const count=number<51?3:number<151?5:number<301?7:9;
+ const roles=Array.from({length:count},(_,index)=>index%2===0?"builder":"warrior");
+ const hp=number>=301?12:number>=151?10:8;
  const candidates=getExposedPixels(board).slice();
  if(!candidates.length)return [];
  const selected=[candidates[0]];
@@ -1152,10 +1155,11 @@ function createLevelObstacles(levelId,board){
  }));
 }
 const incomingCache=new Map();
-export function setArtworkBoard(levelId,board,minimumColorCount=18){
+export function setArtworkBoard(levelId,board,minimumColorCount=18,addInkContours=false){
  const id=getLevel(levelId).id;
  if(!Array.isArray(board)||board.length!==SIZE||board.some(row=>!Array.isArray(row)||row.length!==SIZE))throw new Error("Artwork board must be a 35×35 grid");
- const normalized=mergeSparseArtworkColors(board.map(row=>row.slice()),minimumColorCount);
+ const source=board.map(row=>row.slice());
+ const normalized=mergeSparseArtworkColors(addInkContours?applyPixelArtOutlines(source):source,minimumColorCount);
  artworkBoardCache.set(id,normalized);
  incomingCache.delete(id);
 }
