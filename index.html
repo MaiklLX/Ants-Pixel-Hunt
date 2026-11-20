@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#14251d">
-  <meta name="app-version" content="KT-295">
+  <meta name="app-version" content="KT-296">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Муравьишки">
@@ -74,13 +74,14 @@
       </div>
     </section>
 
-        <section class="board-wrap" aria-label="Игровое поле">
-      <canvas id="board" class="board" width="450" height="450" role="img" aria-label="Пиксельный рисунок из крупных цветных блоков на сетке 45 на 45"></canvas>
-      <section id="zen-run-hud" class="zen-run-hud" aria-live="polite" hidden>
+    <section id="zen-run-hud" class="zen-run-hud" aria-live="polite" hidden>
       <div class="zen-run-top"><span>🌼 Нектар в пути</span><strong><b id="zen-pending-nectar">0</b></strong></div>
       <div class="zen-run-track"><span id="zen-progress-fill"></span></div>
-      <p>Собрано блоков: <b id="zen-collected">0</b> · награда поступит только после полной победы</p>
+      <p>Собрано: <b id="zen-collected">0</b></p>
     </section>
+
+        <section class="board-wrap" aria-label="Игровое поле">
+      <canvas id="board" class="board" width="450" height="450" role="img" aria-label="Пиксельный рисунок из крупных цветных блоков на сетке 45 на 45"></canvas>
       <div class="board-corners" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
     </section>
 
