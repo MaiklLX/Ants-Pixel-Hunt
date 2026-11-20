@@ -3,7 +3,7 @@ import {RASTER_ARTWORK} from "./artwork-data.js";
 export const SIZE=45;
 export const GRID_SIZE=450;
 export const BLOCK_SIZE=GRID_SIZE/SIZE;
-export const BOX_CAPACITY=150;
+export const BOX_CAPACITY=30;
 export const SLOT_COUNT=5;
 export const TRAY_SIZE=3;
 export const LOCKED_BOX_INDEX=8;
@@ -920,10 +920,12 @@ export function buildIncoming(board,levelNumber=1){
  const chunks={},nextChunk={},remaining={...totals};
  for(const color of colors){
   const total=totals[color];if(!total)continue;
-  if(total<10)throw new Error("Artwork pigment "+color+" has fewer than ten blocks");
-  const count=Math.max(1,Math.ceil(total/60)),base=Math.floor(total/count),extra=total%count;
+  // Split each colour budget into as few balanced squads as possible.
+  // This keeps squads near capacity when a colour is abundant, while allowing
+  // genuinely small groups (1–9) only when the artwork itself has few cells.
+  const count=Math.max(1,Math.ceil(total/BOX_CAPACITY));
+  const base=Math.floor(total/count),extra=total%count;
   const sizes=Array.from({length:count},(_,i)=>base+(i<extra?1:0));
-  if(count>=3&&base>10&&base<60&&new Set(sizes).size===1){sizes[0]--;sizes[1]++;}
   chunks[color]=sizes;nextChunk[color]=0;
  }
  const active=new Map(),deck=[];let left=leftTotal,lastColor=null,guard=0;
