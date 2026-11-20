@@ -907,3 +907,17 @@ test("late-game queue generation preserves a playable five-slot route without cr
   assert.ok(diagnostics.decisions>0,level.name+" must exercise the queue planner");
  }
 });
+
+test("all campaign illustrations are centered by their visible pixel bounds",()=>{
+ for(const level of LEVELS){
+  const board=createArtworkBoard(level.id);
+  let minX=SIZE,minY=SIZE,maxX=-1,maxY=-1,count=0;
+  for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)if(board[y][x]){
+   count++;minX=Math.min(minX,x);maxX=Math.max(maxX,x);minY=Math.min(minY,y);maxY=Math.max(maxY,y);
+  }
+  assert.ok(count>0,level.name+" must contain visible artwork");
+  const centerX=(minX+maxX)/2,centerY=(minY+maxY)/2;
+  assert.ok(Math.abs(centerX-(SIZE-1)/2)<=.5,level.name+" must be horizontally centered");
+  assert.ok(Math.abs(centerY-(SIZE-1)/2)<=.5,level.name+" must be vertically centered");
+ }
+});
