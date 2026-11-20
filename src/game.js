@@ -911,7 +911,7 @@ export function createArtworkBoard(levelId="meadow-01"){
 }
 
 export const INITIAL_BOARD=createArtworkBoard();
-export function buildIncoming(board,levelNumber=1){
+export export function buildIncoming(board,levelNumber=1,diagnostics=null){
  const colors=Object.keys(COLORS),work=board.map(row=>row.slice());
  const totals=Object.fromEntries(colors.map(color=>[color,0]));
  for(const row of work)for(const color of row)if(color)totals[color]++;
@@ -940,6 +940,7 @@ export function buildIncoming(board,levelNumber=1){
   chunks[color]=sizes;nextChunk[color]=0;
  }
  const active=new Map(),deck=[];let left=leftTotal,lastColor=null,guard=0,decisionStep=0;
+ if(diagnostics){diagnostics.maxActiveSquads=0;diagnostics.completed=false;diagnostics.decisions=0;}
  // Generate the deck by simulating the real outside-in game. A colour gets
  // one active squad at a time; it may wait for deeper matching blocks while
  // other colours are cleared, then its next squad enters only after it leaves.
@@ -959,7 +960,18 @@ export function buildIncoming(board,levelNumber=1){
   if(!candidates.length)throw new Error("Artwork queue has no playable colour while blocks remain");
   const alternatives=candidates.filter(color=>color!==lastColor);
   if(alternatives.length)candidates=alternatives;
-  const pressureTurn=levelNumber>=8&&decisionStep%3===2;
+  // Keep a reserve starter slot for recovery. Deliberate waiting squads are
+  // introduced only while at least two slots remain available; once four
+  // colours are already waiting, prefer an existing squad or a new colour
+  // that can be cleared in this exposed layer.
+  const pressureTurn=levelNumber>=8&&decisionStep%3===2&&active.size<SLOT_COUNT-1;
+  if(active.size>=SLOT_COUNT-1){
+   const safeCandidates=candidates.filter(color=>{
+    const size=active.has(color)?active.get(color):chunks[color][nextChunk[color]];
+    return active.has(color)||size<=counts[color];
+   });
+   if(safeCandidates.length)candidates=safeCandidates;
+  }
   const pressure=candidates.filter(color=>{
    const size=active.has(color)?active.get(color):chunks[color][nextChunk[color]];
    return Number.isFinite(size)&&size>counts[color];
@@ -982,8 +994,10 @@ export function buildIncoming(board,levelNumber=1){
   const remainingAnts=available-batch.length;
   if(remainingAnts===0)active.delete(color);else active.set(color,remainingAnts);
   lastColor=color;decisionStep++;
+  if(diagnostics){diagnostics.maxActiveSquads=Math.max(diagnostics.maxActiveSquads,active.size);diagnostics.decisions=decisionStep;}
  }
  if(left>0)throw new Error("Artwork queue stopped before every block was assigned");
+ if(diagnostics)diagnostics.completed=left===0;
  // Keep two genuinely playable opening choices, then place one future-layer
  // colour in the third lane as a deliberate planning temptation.
  const openingColors=new Set(getExposedPixels(board).map(point=>board[point.y][point.x]));
