@@ -20,11 +20,11 @@ test("the four campaign pilots have explicit labels and matching animal names",(
   assert.equal(artwork.name,name);
   assert.equal(artwork.sourceFile,sourceFile);
   assert.equal(level?.name,name);
-  assert.match(artwork.sourceUrl,/^https:\/\/raw\.githubusercontent\.com\/Tiddybub\/2d-assets\/main\/characters\/animal-pack\/PNG\/Round\//);
+  assert.equal(artwork.sourceUrl,"generated:pilot-artwork-kt306");
  }
 });
 
-test("pilot PNGs are embedded RGBA sources for offline use",()=>{
+test("detailed pilot PNGs are embedded indexed-color sources for offline use",()=>{
  const signature=[137,80,78,71,13,10,26,10],seen=new Set();
  for(const [number] of expected){
   const dataUrl=PILOT_ARTWORK[number].dataUrl;
@@ -32,7 +32,10 @@ test("pilot PNGs are embedded RGBA sources for offline use",()=>{
   assert.equal(dataUrl.includes("\n"),false,"embedded base64 must stay on one valid JS string line");
   const bytes=Buffer.from(dataUrl.slice(dataUrl.indexOf(",")+1),"base64");
   assert.deepEqual([...bytes.subarray(0,8)],signature);
-  assert.equal(bytes[25],6,"PNG must retain its alpha channel");
+  assert.equal(bytes[25],3,"PNG must use a compact indexed color palette");
+  const paletteChunk=bytes.indexOf(Buffer.from("PLTE"));
+  assert.ok(paletteChunk>0,"PNG must contain a color palette");
+  assert.ok(bytes.readUInt32BE(paletteChunk-4)>=24,"pilot art must retain at least eight distinct palette colors");
   assert.ok(bytes.readUInt32BE(16)>0&&bytes.readUInt32BE(20)>0);
   assert.ok(bytes.length>1500);
   seen.add(bytes.toString("base64"));
