@@ -904,50 +904,47 @@ export const INITIAL_BOARD=createArtworkBoard();
 export function buildIncoming(board,levelNumber=1){
  const colors=Object.keys(COLORS),work=board.map(row=>row.slice());
  const totals=Object.fromEntries(colors.map(color=>[color,0]));
- const pending=Object.fromEntries(colors.map(color=>[color,[]]));
  for(const row of work)for(const color of row)if(color)totals[color]++;
- let left=Object.values(totals).reduce((sum,value)=>sum+value,0);
- if(!left)return [];
- const crates=[];let lastColor=null,guard=0,step=0;
- // Peel no more than 60 exposed blocks per pass. This keeps the queue layered:
- // other exposed pigments get a turn before a dominant colour consumes the art.
- while(left>0&&guard++<SIZE*SIZE*2){
+ const leftTotal=Object.values(totals).reduce((sum,value)=>sum+value,0);
+ if(!leftTotal)return [];
+ const chunks={},nextChunk={},remaining={...totals};
+ for(const color of colors){
+  const total=totals[color];if(!total)continue;
+  if(total<10)throw new Error("Artwork pigment "+color+" has fewer than ten blocks");
+  const count=Math.max(1,Math.ceil(total/60)),base=Math.floor(total/count),extra=total%count;
+  const sizes=Array.from({length:count},(_,i)=>base+(i<extra?1:0));
+  if(count>=3&&base>10&&base<60&&new Set(sizes).size===1){sizes[0]--;sizes[1]++;}
+  chunks[color]=sizes;nextChunk[color]=0;
+ }
+ const active=new Map(),deck=[];let left=leftTotal,lastColor=null,guard=0;
+ // Generate the deck by simulating the real outside-in game. A colour gets
+ // one active squad at a time; it may wait for deeper matching blocks while
+ // other colours are cleared, then its next squad enters only after it leaves.
+ while(left>0&&guard++<SIZE*SIZE*4){
   const exposed=getExposedPixels(work),counts=Object.fromEntries(colors.map(color=>[color,0]));
   for(const point of exposed){const color=work[point.y][point.x];if(color)counts[color]++;}
-  let candidates=colors.filter(color=>counts[color]>0&&totals[color]>0);
-  if(!candidates.length)throw new Error("Artwork queue cannot peel all remaining blocks");
+  let candidates=colors.filter(color=>active.has(color)&&counts[color]>0);
+  if(!candidates.length)candidates=colors.filter(color=>!active.has(color)&&counts[color]>0&&(nextChunk[color]||0)<(chunks[color]?.length||0));
+  if(!candidates.length)throw new Error("Artwork queue has no playable colour while blocks remain");
   const alternatives=candidates.filter(color=>color!==lastColor);
   if(alternatives.length)candidates=alternatives;
   candidates.sort((a,b)=>counts[b]-counts[a]||colors.indexOf(a)-colors.indexOf(b));
-  const color=candidates[0],batch=exposed.filter(point=>work[point.y][point.x]===color).slice(0,60);
-  if(!batch.length)throw new Error("Artwork queue produced an empty peel batch");
-  for(const point of batch){
-   pending[color].push(step++);
-   work[point.y][point.x]="";totals[color]--;left--;
+  const color=candidates[0];
+  if(!active.has(color)){
+   const size=chunks[color][nextChunk[color]++];
+   deck.push({color,ants:size});
+   active.set(color,size);
   }
-  // Small exposed fragments stay buffered until at least ten ants can be
-  // assigned. Those cells remain exposed in the live board, so the resulting
-  // squad can work immediately and wait for later blocks of the same colour.
-  while(pending[color].length>=10){
-   const ants=Math.min(60,pending[color].length),steps=pending[color].splice(0,ants);
-   crates.push({color,ants,firstStep:steps[0],lastStep:steps[steps.length-1]});
-  }
+  const available=active.get(color);
+  const batch=exposed.filter(point=>work[point.y][point.x]===color).slice(0,available);
+  if(!batch.length)throw new Error("Artwork queue produced an empty active squad");
+  for(const point of batch){work[point.y][point.x]="";left--;}
+  const remainingAnts=available-batch.length;
+  if(remainingAnts===0)active.delete(color);else active.set(color,remainingAnts);
   lastColor=color;
  }
  if(left>0)throw new Error("Artwork queue stopped before every block was assigned");
- // Finish sub-ten remainders without creating micro-boxes or exceeding 60.
- for(const color of colors){
-  const tail=pending[color];if(!tail.length)continue;
-  const last=[...crates].reverse().find(crate=>crate.color===color);
-  if(!last){crates.push({color,ants:tail.length,firstStep:tail[0],lastStep:tail[tail.length-1]});continue;}
-  if(last.ants+tail.length<=60){last.ants+=tail.length;last.lastStep=tail[tail.length-1];continue;}
-  const transfer=10-tail.length;
-  if(last.ants-transfer<10)throw new Error("Cannot balance a colour remainder into 10–60 ant squads");
-  last.ants-=transfer;
-  crates.push({color,ants:10,firstStep:tail[0],lastStep:tail[tail.length-1]});
- }
- crates.sort((a,b)=>a.firstStep-b.firstStep||a.lastStep-b.lastStep||colors.indexOf(a.color)-colors.indexOf(b.color));
- return crates.map(({color,ants})=>({color,ants}));
+ return deck;
 }
 function createLevelObstacles(levelId,board){
  const number=getLevel(levelId).number;
