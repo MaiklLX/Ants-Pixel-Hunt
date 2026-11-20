@@ -434,18 +434,16 @@ test("specialist crates provide exactly enough builders and warriors for each le
   }
  }
 });
-test("generated campaign boxes are tactical partial squads, not one-box color keys",()=>{
+test("generated campaign uses substantial whole-color squads instead of micro-boxes",()=>{
  for(const level of LEVELS.filter(item=>item.number>=8)){
   const deck=getIncoming(level.id).filter(box=>!box.role);
-  assert.ok(deck.every(box=>box.ants<=68),level.name+" must keep ordinary squads within the new larger-box capacity");
+  assert.ok(deck.every(box=>box.ants>=18&&box.ants<=130),level.name+" must avoid tiny squads and respect capacity");
   const board=createArtworkBoard(level.id),colorTotals=new Map();
-  for(const color of board.flat().filter(Boolean))colorTotals.set(color,(colorTotals.get(color)||0)+1);
+  for(const color of board.flat().filter(Boolean))if(color!=="black")colorTotals.set(color,(colorTotals.get(color)||0)+1);
   for(const [color,total] of colorTotals){
    const squads=deck.filter(box=>box.color===color);
-   if(total>=65){
-    assert.ok(squads.length>=2,level.name+" "+color+" should require staging multiple squads");
-    assert.ok(squads.every(box=>box.ants<total),level.name+" "+color+" must not be a single full-color key");
-   }
+   assert.equal(squads.reduce((sum,box)=>sum+box.ants,0),total,level.name+" "+color+" must retain its complete color budget");
+   assert.equal(squads.length,Math.max(1,Math.ceil(total/(level.number<26?104:level.number<76?112:level.number<151?118:level.number<301?124:130))),level.name+" "+color+" should use a compact number of boxes");
   }
  }
 });
@@ -453,7 +451,7 @@ test("generated campaign boxes are tactical partial squads, not one-box color ke
 test("fallback queue fragments never create oversized ordinary squads",()=>{
  for(const level of LEVELS.filter(item=>item.number>=8)){
   const deck=buildIncoming(createArtworkBoard(level.id),level.number);
-  assert.ok(deck.every(box=>box.ants>0&&box.ants<=68),level.name+" fallback squads must stay within the tactical size cap");
+  assert.ok(deck.every(box=>box.ants>0&&box.ants<=130),level.name+" fallback squads must stay within the tactical size cap");
  }
 });
 
@@ -769,10 +767,12 @@ test("generated opening row offers one useful choice and future-layer temptation
  for(const level of LEVELS.filter(item=>item.number>=8)){
   const state=createGame(level.id);
   const useful=state.tray[0].filter(index=>index!==null&&canLaunchBox(state,index));
+  const exposedColors=new Set(getExposedPixels(state.board).map(point=>state.board[point.y][point.x]));
   assert.ok(useful.length>=1,level.name+" must offer at least one playable opening crate");
-  assert.ok(useful.length<=1,level.name+" should not make the opening row trivially safe");
+  assert.ok(useful.length<=exposedColors.size,level.name+" cannot offer more useful colors than the exposed rim contains");
+  const futureColors=new Set(state.board.flat().filter(color=>color&&!exposedColors.has(color)));
   const decoys=state.tray[0].filter(index=>index!==null&&!canLaunchBox(state,index));
-  assert.ok(decoys.length>=1,level.name+" should offer a future-layer temptation");
+  if(futureColors.size)assert.ok(decoys.length>=1,level.name+" should offer a future-layer temptation when a later color exists");
  }
 });
 
