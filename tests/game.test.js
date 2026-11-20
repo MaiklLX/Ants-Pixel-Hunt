@@ -943,7 +943,7 @@ test("a Zen artwork queue has a complete five-slot clearing route",()=>{
  for(let y=5;y<30;y++)for(let x=5;x<30;x++){
   board[y][x]=["green","blue","yellow","red","purple"][(Math.floor(x/5)+Math.floor(y/5))%5];
  }
- const level=registerCustomArtwork("test-zen-route","Тест",board);
+ const level=registerCustomArtwork("test-zen-route",board,"Тест");
  const work=createGame(level.id).board,deck=getIncoming(level.id).map(box=>({...box,special:null}));
  const active=Array(SLOT_COUNT).fill(null);
  let remaining=work.flat().filter(Boolean).length,steps=0;
