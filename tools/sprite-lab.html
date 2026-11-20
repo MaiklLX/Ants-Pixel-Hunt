@@ -3,7 +3,7 @@
 <style>
 :root{color-scheme:dark;--bg:#101b16;--panel:#1b2b22;--line:#365441;--gold:#e7c66d;--text:#f3eedc;--muted:#a9b7a8}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#253d2d,#101b16 65%);color:var(--text);font:15px/1.45 system-ui,sans-serif;padding:22px}.wrap{max-width:1120px;margin:auto}h1{margin:0 0 6px;font-size:clamp(24px,4vw,38px)}p{color:var(--muted)}.panel{background:#1b2b22eF;border:1px solid var(--line);border-radius:18px;padding:18px;margin:16px 0}.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}button,label.file{background:#d9b85e;color:#1b2119;border:0;border-radius:11px;padding:11px 15px;font-weight:750;cursor:pointer}button:disabled{opacity:.4;cursor:not-allowed}input[type=file]{max-width:100%}input[type=range]{accent-color:var(--gold);width:180px}canvas{image-rendering:pixelated;background:#26372c;border:1px solid #52745a;border-radius:12px;width:min(100%,450px);height:auto}.preview{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:18px}.preview section{min-width:0}.caption{font-size:13px;color:var(--muted);margin:8px 0}.stat{color:var(--gold);font-weight:700}.swatches{display:flex;gap:5px;flex-wrap:wrap}.swatch{width:20px;height:20px;border-radius:5px;border:1px solid #ffffff55}.notice{border-left:3px solid var(--gold);padding-left:12px}.small{font-size:13px;color:var(--muted)}a{color:#e8cf83}
 </style></head><body><main class="wrap"><h1>Мастерская спрайтов</h1><p>Превращаем любимые спрайты из Tiddybub/2d-assets в настоящие цветные блоки для полянок «Муравьишек».</p>
-<div class="panel"><div class="row"><label class="file" for="file">Выбрать PNG / WebP / JPG</label><input id="file" type="file" accept="image/png,image/webp,image/jpeg"><span class="small">Лучше выбирать отдельный спрайт или предварительно обрезанную область листа</span><span id="loadStatus" class="stat" role="status">Файл ещё не выбран</span></div><p class="notice">Исходник не отправляется на сервер. Обработка выполняется прямо в браузере. Перед добавлением в игру проверьте лицензию набора и сохраните SOURCE.md.</p></div>
+<div class="panel"><div class="row"><label class="file" for="file">Выбрать PNG / WebP / JPG</label><input id="file" type="file" accept="image/png,image/webp,image/jpeg"><span class="small">Или загрузить оригинал прямо из Tiddybub:</span></div><div class="row" style="margin-top:12px"><input id="imageUrl" type="url" placeholder="https://raw.githubusercontent.com/Tiddybub/2d-assets/…" style="flex:1;min-width:260px;padding:11px;border-radius:10px;border:1px solid #52745a;background:#101b16;color:#f3eedc"><button id="loadUrl" type="button">Загрузить по ссылке</button></div><div class="small" style="margin-top:8px">Для прямой загрузки принимаются только PNG/WebP/JPG из raw.githubusercontent.com/Tiddybub/2d-assets. Если браузер заблокирует CORS, скачайте файл и используйте кнопку выбора файла.</div><div class="row" style="margin-top:10px"><span id="loadStatus" class="stat" role="status">Файл ещё не выбран</span></div><p class="notice">Исходник не отправляется на сервер. Обработка выполняется прямо в браузере. Перед добавлением в игру проверьте лицензию набора и сохраните SOURCE.md.</p></div>
 <div class="panel"><div class="row"><label>Количество цветов <input id="colors" type="range" min="4" max="16" value="10"></label><span id="colorsValue" class="stat">10 цветов</span><label>Порог прозрачности <input id="alpha" type="range" min="0" max="240" value="24"></label><span id="alphaValue" class="stat">24</span><label>Упрощение контуров <input id="simplify" type="range" min="0" max="100" value="25"></label><span id="simplifyValue" class="stat">25%</span><label class="small"><input id="removeBg" type="checkbox" checked> Убирать однотонный фон</label><button id="convert" disabled>Преобразовать</button><button id="export" disabled>Скачать JSON полянки</button></div></div>
 <div class="preview"><section class="panel"><h3>Исходный спрайт</h3><canvas id="source" width="450" height="450"></canvas><p class="caption">Изображение вписывается по центру без искажения пропорций.</p></section><section class="panel"><h3>Игровая мозаика 35×35</h3><canvas id="result" width="450" height="450"></canvas><p class="caption">Каждая крупная клетка — один блок, который может забрать один муравей.</p><div id="swatches" class="swatches"></div><p id="stats" class="caption">Выберите спрайт, чтобы начать.</p></section></div>
 <div class="panel"><h3>Следующий шаг</h3><p>Проверьте силуэт и цвета. Если рисунок узнаваем и хорошо читается в сетке, экспортируйте JSON и добавьте его в каталог уровней. Мастерская не меняет игровые правила и не публикует уровень автоматически.</p><p class="small">Библиотека: <a href="https://github.com/Tiddybub/2d-assets" target="_blank" rel="noreferrer">Tiddybub/2d-assets</a> · CC0 согласно README репозитория.</p></div>
@@ -17,26 +17,34 @@ function toLab(rgb){
  return [116*fy-16,500*(fx-fy),200*(fy-fz)];
 }
 function colorDistance(a,b){const A=toLab(a),B=toLab(b);return Math.hypot(A[0]-B[0],A[1]-B[1],A[2]-B[2]);}
-file.addEventListener('change',()=>{
- const f=file.files?.[0],status=document.querySelector('#loadStatus');
- if(!f)return;
- status.textContent='Загружаю '+f.name+'…';
- exportBtn.disabled=true;art=null;image=null;
- if(!f.type.startsWith('image/')){status.textContent='Это не файл изображения. Выберите PNG, WebP или JPG.';return;}
- const url=URL.createObjectURL(f),img=new Image();
+const loadStatus=document.querySelector('#loadStatus'),imageUrl=document.querySelector('#imageUrl'),loadUrl=document.querySelector('#loadUrl');
+function loadImage(img,label,cleanup=()=>{}){
+ loadStatus.textContent='Загружаю '+label+'…';exportBtn.disabled=true;art=null;image=null;
  img.onload=()=>{
   try{
    if(!img.naturalWidth||!img.naturalHeight)throw new Error('Браузер не смог определить размеры изображения.');
    const scale=Math.min(450/img.naturalWidth,450/img.naturalHeight),w=Math.max(1,Math.round(img.naturalWidth*scale)),h=Math.max(1,Math.round(img.naturalHeight*scale)),x=Math.round((450-w)/2),y=Math.round((450-h)/2);
    drawBounds={x,y,w,h};sctx.clearRect(0,0,450,450);sctx.imageSmoothingEnabled=false;sctx.drawImage(img,x,y,w,h);
-   image=img;convert.disabled=false;
-   status.textContent='Изображение загружено: '+img.naturalWidth+'×'+img.naturalHeight;
-   run();
-  }catch(error){status.textContent='Ошибка обработки: '+(error?.message||error);console.error(error);}
-  finally{URL.revokeObjectURL(url);}
+   image=img;convert.disabled=false;loadStatus.textContent='Изображение загружено: '+img.naturalWidth+'×'+img.naturalHeight;run();
+  }catch(error){loadStatus.textContent='Ошибка обработки: '+(error?.message||error);console.error(error);}
+  finally{cleanup();}
  };
- img.onerror=()=>{URL.revokeObjectURL(url);status.textContent='Не удалось прочитать файл. Пересохраните его как PNG или JPG и попробуйте снова.';};
- img.src=url;
+ img.onerror=()=>{cleanup();loadStatus.textContent='Не удалось загрузить изображение. Проверьте ссылку и CORS или скачайте PNG и выберите его с диска.';};
+ img.src=img.dataset.source;
+}
+file.addEventListener('change',()=>{
+ const f=file.files?.[0];if(!f)return;
+ if(!f.type.startsWith('image/')){loadStatus.textContent='Это не файл изображения. Выберите PNG, WebP или JPG.';return;}
+ const url=URL.createObjectURL(f),img=new Image();img.dataset.source=url;loadImage(img,f.name,()=>URL.revokeObjectURL(url));
+});
+loadUrl.addEventListener('click',()=>{
+ let url;
+ try{url=new URL(imageUrl.value.trim());}catch{loadStatus.textContent='Вставьте корректную ссылку на изображение.';return;}
+ if(url.protocol!=='https:'||url.hostname!=='raw.githubusercontent.com'||!url.pathname.startsWith('/Tiddybub/2d-assets/')){
+  loadStatus.textContent='Разрешены только прямые ссылки raw.githubusercontent.com/Tiddybub/2d-assets/…';return;
+ }
+ if(!/\.(png|webp|jpe?g)$/i.test(url.pathname)){loadStatus.textContent='Ссылка должна вести непосредственно на PNG, WebP или JPG.';return;}
+ const img=new Image();img.crossOrigin='anonymous';img.dataset.source=url.href;loadImage(img,url.pathname.split('/').pop());
 });
 colorRange.addEventListener('input',()=>{document.querySelector('#colorsValue').textContent=colorRange.value+' цветов';if(image)run()});alphaRange.addEventListener('input',()=>{document.querySelector('#alphaValue').textContent=alphaRange.value;if(image)run()});simplifyRange.addEventListener('input',()=>{document.querySelector('#simplifyValue').textContent=simplifyRange.value+'%';if(image)run()});removeBg.addEventListener('change',()=>{if(image)run()});convert.addEventListener('click',run);
 function medianCut(entries,limit){
