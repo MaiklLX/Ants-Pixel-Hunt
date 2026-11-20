@@ -1271,8 +1271,9 @@ export function findAntWave(state,reservedTargets=new Set(),pendingBySlot=new Ma
  for(const target of exposed){
   const key=target.x+","+target.y;if(reservedTargets.has(key))continue;
   if(target.kind==="obstacle"){
-   if(!byRole.has(target.role))byRole.set(target.role,[]);
-   byRole.get(target.role).push(target);
+   const roleKey=target.role+"|"+target.id;
+   if(!byRole.has(roleKey))byRole.set(roleKey,[]);
+   byRole.get(roleKey).push(target);
   }else{
    if(!byColor.has(target.color))byColor.set(target.color,[]);
    byColor.get(target.color).push(target);
