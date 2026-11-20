@@ -1,7 +1,9 @@
 export function decodeSpriteArtwork(payload,colors){
  if(!payload||(payload.width!==35&&payload.width!==45)||payload.height!==payload.width||!Array.isArray(payload.palette)||payload.palette.length<1||payload.palette.length>36||typeof payload.data!=="string")throw new Error("Неверный формат. Нужна полянка 35×35 из мастерской спрайтов.");
- const rows=payload.data.split("/");
- if(rows.length!==45||rows.some(row=>row.length!==45))throw new Error("В файле должно быть ровно 45 строк по 45 клеток.");
+ const sourceRows=payload.data.split("/");
+ if(sourceRows.length!==payload.height||sourceRows.some(row=>row.length!==payload.width))throw new Error("Размер строк не соответствует указанной сетке.");
+ // Older 45×45 exports remain importable: reduce them to the new 35×35 board.
+ const rows=payload.width===35?sourceRows:Array.from({length:35},(_,y)=>Array.from({length:35},(_,x)=>sourceRows[Math.floor(y*45/35)][Math.floor(x*45/35)]).join(""));
  const palette=payload.palette.map(value=>{
   if(typeof value!=="string"||!/^#[0-9a-f]{6}$/i.test(value))throw new Error("В палитре обнаружен некорректный цвет.");
   const hex=value.toLowerCase(),key="custom_"+hex.slice(1);
