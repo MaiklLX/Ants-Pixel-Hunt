@@ -438,7 +438,14 @@ function generatedChapter(number){
 }
 const GENERATED_LEVELS=Array.from({length:493},(_,index)=>{
  const number=index+8,count=generatedPartCount(number);
- const motifs=Array.from({length:count},(_,part)=>GENERATED_MOTIFS[(number*7+part*5+Math.floor(number/13))%GENERATED_MOTIFS.length]);
+ const motifIndices=[];
+ for(let part=0;part<count;part++){
+  const seed=(Math.imul(number,0x9e3779b1)^Math.imul(part+1,0x85ebca6b))>>>0;
+  let motifIndex=seed%GENERATED_MOTIFS.length;
+  while(motifIndices.includes(motifIndex))motifIndex=(motifIndex+1)%GENERATED_MOTIFS.length;
+  motifIndices.push(motifIndex);
+ }
+ const motifs=motifIndices.map(index=>GENERATED_MOTIFS[index]);
  const names=motifs.map(item=>item.name);
  const name=names.length===1?names[0]+" на полянке":names.slice(0,-1).join(", ")+" и "+names[names.length-1];
  const artworkHint=count===1?"Знакомимся с новым силуэтом и цветовыми слоями":count===2?"Две самостоятельные картинки на одном поле — следи за цветами обоих рисунков":count===3?"Три части общей картины: планируй очередь для каждой":"Четыре объекта на одном поле — продумывай порядок открытия";
