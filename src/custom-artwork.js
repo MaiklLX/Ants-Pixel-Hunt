@@ -1,5 +1,5 @@
 export function decodeSpriteArtwork(payload,colors){
- if(!payload||payload.width!==45||payload.height!==45||!Array.isArray(payload.palette)||payload.palette.length<1||payload.palette.length>36||typeof payload.data!=="string")throw new Error("Неверный формат. Нужна полянка 45×45 из мастерской спрайтов.");
+ if(!payload||(payload.width!==35&&payload.width!==45)||payload.height!==payload.width||!Array.isArray(payload.palette)||payload.palette.length<1||payload.palette.length>36||typeof payload.data!=="string")throw new Error("Неверный формат. Нужна полянка 35×35 из мастерской спрайтов.");
  const rows=payload.data.split("/");
  if(rows.length!==45||rows.some(row=>row.length!==45))throw new Error("В файле должно быть ровно 45 строк по 45 клеток.");
  const palette=payload.palette.map(value=>{
