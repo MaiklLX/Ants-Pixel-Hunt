@@ -1,5 +1,6 @@
 import {COLORS,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,LEVELS,getLevel,getIncoming,createGame,setArtworkBoard,canChoose,chooseTopColumn,canLaunchBox,isLockedBox,getLinkedPartner,findAntWave,applyAntPickup,completeBoxDeparture,isDefeat,isGameComplete,getExposedTargets,getExposedPixels,countQueuedBySlot,countDispatchingWorkers,countSlotWorkers} from "./game.js";
 import {createArtworkSvg} from "./artwork-renderer.js";
+import {decodeSpriteArtwork} from "./custom-artwork.js";
 import {getAntTripFrame,getAntLaunchDelay,getAntQueueDelay,createPausableClock,getTrailPose,getAntTravelDurations,getAntGaitFrame} from "./ant-animation.js";
 import {isCampaignLevelUnlocked,getNextCampaignLevel} from "./campaign.js";
 import {BUILDINGS,createEconomy,normalizeEconomy,collectCube,completeMeadow,purchaseBuilding,buildingCost} from "./economy.js";
@@ -12,33 +13,10 @@ const CUSTOM_ARTWORK_PREFIX="ants-custom-artwork-v1:";
 function readCustomArtwork(levelId){
  try{return JSON.parse(localStorage.getItem(CUSTOM_ARTWORK_PREFIX+levelId)||"null");}catch{return null;}
 }
-function decodeCustomArtwork(payload){
- if(!payload||payload.width!==SIZE||payload.height!==SIZE||!Array.isArray(payload.palette)||typeof payload.data!=="string")throw new Error("Неверный формат. Нужна полянка 45×45 из мастерской спрайтов.");
- const rows=payload.data.split("/");
- if(rows.length!==SIZE||rows.some(row=>row.length!==SIZE))throw new Error("В файле должно быть ровно 45 строк по 45 клеток.");
- const palette=payload.palette.map(value=>{
-  if(typeof value!=="string"||!/^#[0-9a-f]{6}$/i.test(value))throw new Error("В палитре обнаружен некорректный цвет.");
-  const rgb=[1,3,5].map(index=>parseInt(value.slice(index,index+2),16));
-  let best="green",distance=Infinity;
-  for(const [name,color] of Object.entries(COLORS)){
-   if(name==="black"||name==="gray")continue;
-   const target=color.hex.slice(1).match(/../g).map(part=>parseInt(part,16));
-   const d=rgb.reduce((sum,channel,index)=>sum+(channel-target[index])**2,0);
-   if(d<distance){distance=d;best=name;}
-  }
-  return best;
- });
- return rows.map(row=>Array.from(row,char=>{
-  if(char===".")return "";
-  const index=parseInt(char,36);
-  if(!Number.isInteger(index)||index<0||index>=palette.length)throw new Error("В рисунке есть ссылка на отсутствующий цвет.");
-  return palette[index];
- }));
-}
 function applySavedArtwork(levelId){
  const payload=readCustomArtwork(levelId);
  if(!payload)return false;
- setArtworkBoard(levelId,decodeCustomArtwork(payload));
+ setArtworkBoard(levelId,decodeSpriteArtwork(payload,COLORS));
  return true;
 }
 function importArtworkFile(file){
@@ -48,9 +26,9 @@ function importArtworkFile(file){
    const payload=JSON.parse(String(reader.result||""));
    const board=decodeCustomArtwork(payload);
    const target=state.levelId;
+   if(workerPromises.size||loadingSlots.size)throw new Error("Сначала дождитесь завершения текущего хода, затем импортируйте рисунок.");
    localStorage.setItem(CUSTOM_ARTWORK_PREFIX+target,JSON.stringify(payload));
    setArtworkBoard(target,board);
-   if(workerPromises.size||loadingSlots.size)throw new Error("Сначала дождитесь завершения текущего хода, затем импортируйте рисунок.");
    resetting=true;cancelAnimationFrame(antFrame);activeAnts.clear();pickupEffects.length=0;deliveryEffects.length=0;reservedTargets.clear();slotNextLaunchAt.clear();
    state=createGame(target);totalBlocks=tasksRemaining();boardArtworkKey=target;lastExposedPixels=new Set();resetting=false;
    render();$("save-status").textContent="Новый спрайт загружен в текущую полянку.";
