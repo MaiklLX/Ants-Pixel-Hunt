@@ -95,7 +95,7 @@ function renderMap(){
  const intro=document.querySelector(".map-intro");if(intro)intro.hidden=true;
  const pilotLevels=LEVELS.filter(item=>item.number>=501&&item.number<=504);
  if(pilotLevels.length){
-  const heading=document.createElement("div");heading.className="campaign-section-heading";heading.textContent="Пилотная подборка · можно играть сразу";list.append(heading);
+  const heading=document.createElement("div");heading.className="campaign-section-heading";heading.textContent="ПИЛОТНАЯ СЕРИЯ · 4 ИСПЫТАНИЯ";list.append(heading);
  }
  const displayLevels=[...pilotLevels,...LEVELS.filter(item=>item.number<501||item.number>504)];
  for(const item of displayLevels){
@@ -105,9 +105,13 @@ function renderMap(){
   button.disabled=!unlocked;button.dataset.levelId=String(item.id);button.dataset.levelNumber=String(item.number);
   button.dataset.levelState=completed?"completed":isNext?"next":unlocked?"available":"locked";
   if(isNext)button.setAttribute("aria-current","step");
-  button.setAttribute("aria-label",`Уровень ${item.number}: ${item.name}. ${completed?"Пройден":unlocked?(isNext?"Следующий доступный":"Доступен"):"Закрыт"}`);
-  const icon=document.createElement("span");icon.className="campaign-emoji";icon.textContent=completed?"✓":unlocked?item.emoji:"🔒";
-  const number=document.createElement("span");number.className="trail-number";number.textContent=String(item.number).padStart(3,"0");
+  const pilot=item.number>=501&&item.number<=504,pilotIndex=item.number-500;
+  const visibleNumber=pilot?`ПИЛОТНЫЙ ${pilotIndex}`:String(item.number).padStart(3,"0");
+  button.setAttribute("aria-label",`${pilot?`Пилотный уровень ${pilotIndex}`:`Уровень ${item.number}`}: ${item.name}. ${completed?"Пройден":unlocked?(isNext?"Следующий доступный":"Доступен"):"Закрыт"}`);
+  const icon=document.createElement("span");icon.className="campaign-emoji";
+  if(pilot){const preview=document.createElement("img");preview.className="pilot-art-preview";preview.alt="";preview.loading="lazy";preview.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(createArtworkSvg(item.number));icon.append(preview);}
+  else icon.textContent=completed?"✓":unlocked?item.emoji:"🔒";
+  const number=document.createElement("span");number.className="trail-number";number.textContent=visibleNumber;
   const name=document.createElement("strong");name.className="trail-name";name.textContent=item.name;
   const status=document.createElement("span");status.className="campaign-state";status.textContent=completed?"✓":unlocked?isNext?"СТАРТ":"•":"🔒";
   button.append(icon,number,name,status);
@@ -532,7 +536,7 @@ function renderChoices(){
 }
 function render(){
  const level=getLevel(state.levelId);
- $("level-number").textContent=zenMode?"ДЗЕН · ВАШ РИСУНОК":`ПОЛЯНКА № ${level.number}`;
+ $("level-number").textContent=zenMode?"ДЗЕН · ВАШ РИСУНОК":level.number>=501&&level.number<=504?`ПИЛОТНЫЙ ${level.number-500}`:`ПОЛЯНКА № ${level.number}`;
  $("level-title").textContent=level.name;
  $("board").setAttribute("aria-label",`${level.name}: иллюстрация из цветных фрагментов на сетке 35 на 35`);
  renderBoard();renderSlots();renderChoices();renderConveyor();
