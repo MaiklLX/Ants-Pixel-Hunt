@@ -921,8 +921,8 @@ export function buildIncoming(board,levelNumber=1){
   const totalBlocks=Object.values(totals).reduce((sum,value)=>sum+value,0);
   // Keep ordinary squads tactical: no 90-ant warehouses and no arbitrary
   // one-color mega-crates. The target adapts to picture size while keeping
-  // each crate in a readable 40–52 range whenever that color budget permits.
-  const target=Math.min(52,Math.max(40,Math.ceil(totalBlocks/20)));
+  // each crate in a readable 42–64 range whenever that color budget permits.
+  const target=Math.min(64,Math.max(42,Math.ceil(totalBlocks/20)));
   const queues={};
   for(const color of colors){
    const total=totals[color];queues[color]=[];
