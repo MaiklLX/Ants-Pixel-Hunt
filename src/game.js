@@ -667,7 +667,7 @@ function applyGeneratedDepthPalette(source,palette){
 
 function generatedSceneLayout(count,variant){
  const layouts={
-  1:[[[0,0,45,45]]],
+  1:[[[0,0,35,35]]],
   2:[
    [[0,7,28,31],[17,7,28,31]],
    [[0,1,28,31],[17,13,28,31]],
@@ -995,6 +995,24 @@ export function createArtworkBoard(levelId="meadow-01"){
   // Keep the tested legacy pixel board as an offline fallback; the browser replaces it with the SVG-derived, non-black block mosaic as soon as the local illustration rasterizes.
   board=applyPixelArtOutlines(board);
   board=mergeSparseArtworkColors(board,18);
+  // Center the visible artwork by its occupied pixel bounds, not by the
+  // source canvas dimensions. This fixes transparent/asymmetric source margins
+  // that previously pushed hundreds of campaign pictures toward the lower-right.
+  const occupied=[];
+  for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)if(board[y][x])occupied.push([x,y]);
+  if(occupied.length){
+   const minX=Math.min(...occupied.map(point=>point[0])),maxX=Math.max(...occupied.map(point=>point[0]));
+   const minY=Math.min(...occupied.map(point=>point[1])),maxY=Math.max(...occupied.map(point=>point[1]));
+   const shiftX=Math.round((SIZE-1-minX-maxX)/2),shiftY=Math.round((SIZE-1-minY-maxY)/2);
+   if(shiftX||shiftY){
+    const centered=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
+    for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)if(board[y][x]){
+     const nx=x+shiftX,ny=y+shiftY;
+     if(nx>=0&&ny>=0&&nx<SIZE&&ny<SIZE)centered[ny][nx]=board[y][x];
+    }
+    board=centered;
+   }
+  }
   artworkBoardCache.set(level.id,board);
  }
  // Return a fresh mutable board: gameplay clears cells in place, so cached
