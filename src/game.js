@@ -911,7 +911,7 @@ export function createArtworkBoard(levelId="meadow-01"){
 }
 
 export const INITIAL_BOARD=createArtworkBoard();
-export export function buildIncoming(board,levelNumber=1,diagnostics=null){
+export function buildIncoming(board,levelNumber=1,diagnostics=null){
  const colors=Object.keys(COLORS),work=board.map(row=>row.slice());
  const totals=Object.fromEntries(colors.map(color=>[color,0]));
  for(const row of work)for(const color of row)if(color)totals[color]++;
