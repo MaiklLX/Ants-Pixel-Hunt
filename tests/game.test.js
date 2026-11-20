@@ -57,8 +57,8 @@ test("selection fills the first free start compartment after a valid layer choic
  assert.equal(s.slots[0].sourceIndex,0);assert.equal(s.slots[1].sourceIndex,second);assert.equal(s.slots[2],null);
 });
 test("duplicate color squads can work together without claiming the same exposed pixel",()=>{
- const s=createGame("meadow-026"),deck=getIncoming(s.levelId),firstColor=deck[0].color;
- const duplicate=deck.findIndex((box,index)=>index>0&&!box.role&&box.color===firstColor);
+ const s=createGame("meadow-026"),deck=getIncoming(s.levelId),firstIndex=deck.findIndex(box=>!box.role),firstColor=deck[firstIndex].color;
+ const duplicate=deck.findIndex((box,index)=>index>firstIndex&&!box.role&&box.color===firstColor);
  assert.ok(duplicate>=0,"test level must contain multiple squads of one color");
  s.board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
  for(let x=0;x<8;x++)s.board[0][x]=firstColor;
