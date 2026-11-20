@@ -211,7 +211,11 @@ const GENERATED_MOTIFS=[
  {type:"bird",name:"Птичка",emoji:"🐦"},
  {type:"acorn",name:"Жёлудь",emoji:"🌰"},
  {type:"bee",name:"Пчёлка",emoji:"🐝"},
- {type:"cloud",name:"Облачко",emoji:"☁️"}
+ {type:"cloud",name:"Облачко",emoji:"☁️"},
+ {type:"monster",name:"Лесной монстрик",emoji:"👾"},
+ {type:"dragon",name:"Дракончик",emoji:"🐉"},
+ {type:"pineapple",name:"Ананас",emoji:"🍍"},
+ {type:"crystal-flower",name:"Кристальный цветок",emoji:"💠"}
 ];
 const GENERATED_ART_PALETTES={
  flower:["green","pink","yellow","cream"],tree:["brown","green","lime","yellow"],
@@ -219,7 +223,11 @@ const GENERATED_ART_PALETTES={
  house:["red","brown","cream","blue"],fish:["blue","turquoise","yellow","orange"],
  snail:["green","brown","orange","cream"],rocket:["red","blue","cream","yellow"],
  bird:["brown","sky","yellow","orange"],acorn:["brown","yellow","cream","green"],
- bee:["yellow","brown","cream","blue"],cloud:["sky","cream","yellow","blue"]
+ bee:["yellow","brown","cream","blue"],cloud:["sky","cream","yellow","blue"],
+ monster:["purple","pink","blue","turquoise","lime","yellow","cream","red"],
+ dragon:["forest","green","lime","yellow","orange","red","cream","purple"],
+ pineapple:["yellow","orange","lime","green","brown","cream","red","turquoise"],
+ "crystal-flower":["purple","pink","blue","turquoise","sky","yellow","cream","green"]
 };
 function generatedMotifDetail(type,zone,u,v,variant){
  const x=Math.floor(u*35),y=Math.floor(v*35),phase=variant%7;
@@ -322,6 +330,35 @@ function generatedMotifDetail(type,zone,u,v,variant){
    if(zone===2&&(line(.79,.02,.79,.12)||line(.9,.08,.96,.14)||line(.95,.2,.99,.2)||line(.68,.08,.62,.14)||line(.79,.28,.79,.36)))return 6;
    if(zone===1&&line(.2,.68,.8,.68))return 7;
    break;
+  case "monster":
+   if(zone===1&&(oval(.36,.34,.075,.09)||oval(.64,.34,.075,.09)))return 5;
+   if(zone===1&&(oval(.36,.35,.035,.05)||oval(.64,.35,.035,.05)))return 6;
+   if(zone===1&&line(.39,.51,.61,.51,.9))return 7;
+   if(zone===0&&(line(.4,.69,.6,.69)||line(.43,.76,.57,.76)))return 8;
+   if(zone===4&&(line(.13,.7,.21,.82)||line(.87,.7,.79,.82)))return 9;
+   break;
+  case "dragon":
+   if(zone===1&&(oval(.42,.27,.035,.045)||oval(.58,.27,.035,.045)))return 5;
+   if(zone===1&&(oval(.42,.27,.016,.025)||oval(.58,.27,.016,.025)))return 6;
+   if(zone===2&&(line(.13,.43,.28,.52)||line(.87,.43,.72,.52)))return 7;
+   if(zone===0&&(line(.38,.61,.62,.61)||line(.4,.7,.6,.7)))return 8;
+   if(zone===4&&(line(.45,.87,.4,.94)||line(.55,.87,.6,.94)))return 9;
+   break;
+  case "pineapple":
+   if(zone===0){
+    const gx=Math.floor(u*12),gy=Math.floor(v*14);
+    if((gx+gy)%4===0&&line((gx+.2)/12,(gy+.15)/14,(gx+.8)/12,(gy+.85)/14,.8))return 5;
+    if((gx-gy+24)%5===0&&line((gx+.8)/12,(gy+.1)/14,(gx+.15)/12,(gy+.9)/14,.8))return 6;
+   }
+   if(zone===1&&(line(.5,.22,.5,.08)||line(.5,.2,.35,.04)||line(.5,.2,.66,.04)))return 7;
+   if(zone===2&&line(.35,.88,.65,.88))return 8;
+   break;
+  case "crystal-flower":
+   if(zone===1&&(line(.5,.12,.5,.4)||line(.2,.39,.42,.39)||line(.58,.39,.8,.39)))return 5;
+   if(zone===1&&(oval(.5,.25,.045,.06)||oval(.27,.39,.045,.05)||oval(.73,.39,.045,.05)))return 6;
+   if(zone===2&&(line(.5,.46,.5,.63)||line(.25,.39,.4,.5)||line(.75,.39,.6,.5)))return 7;
+   if(zone===0&&(line(.5,.72,.5,.94)||line(.5,.8,.36,.72)||line(.5,.84,.65,.75)))return 8;
+   break;
  }
  return -1;
 }
@@ -410,12 +447,12 @@ function generatedMotifColor(type,zone,u,v,variant,scenePalette){
  const sourcePalette=GENERATED_ART_PALETTES[type]||GENERATED_ART_PALETTES.flower;
  // Four clear pigments form broad, connected color regions. Details are
  // intentional pixel-art features, not random speckles or near-identical shades.
- const palette=sourcePalette.map((color,index)=>index<4?color:sourcePalette[(index-4)%4]);
+ const palette=sourcePalette;
  if(u>.06&&u<.94&&v>.06&&v<.93){
   const pixelDetail=generatedPixelIconDetail(type,zone,u,v,variant);
-  if(pixelDetail>=0)return palette[pixelDetail%4];
+  if(pixelDetail>=0)return palette[pixelDetail%palette.length];
   const detail=generatedMotifDetail(type,zone,u,v,variant);
-  if(detail>=0)return palette[detail%4];
+  if(detail>=0)return palette[detail%palette.length];
  }
  return palette[zone%4]||palette[0];
 }
@@ -448,7 +485,12 @@ const GENERATED_LEVELS=Array.from({length:493},(_,index)=>{
  const artworkHint=count===1?"Знакомимся с новым силуэтом и цветовыми слоями":count===2?"Две самостоятельные картинки на одном поле — следи за цветами обоих рисунков":count===3?"Три части общей картины: планируй очередь для каждой":"Четыре объекта на одном поле — продумывай порядок открытия";
  const obstacleHint=number>=301?"Корни, камни и осы: чередуй строителей и военных, у преград несколько уровней прочности":number>=151?"Корневые завалы и пауки-стражи: сначала расчисти путь специалистами":number>=51?"На рисунке есть жук-страж — военные прогонят его, строители разбирают корни":number>=26?"Корневой завал закрывает цветной блок — отправь к нему муравьёв-строителей":"";
  return {id:"meadow-"+String(number).padStart(3,"0"),number,chapter:generatedChapter(number),name,emoji:motifs[0].emoji,hint:obstacleHint?artworkHint+" · "+obstacleHint:artworkHint};
-});
+}).concat([
+ {id:"meadow-501",number:501,chapter:"Испытательная тропа",name:"Монстрик из мшистой пещеры",emoji:"👾",hint:"Пилотный уровень: 8 цветов, лицо и тело открываются разными слоями"},
+ {id:"meadow-502",number:502,chapter:"Испытательная тропа",name:"Маленький лесной дракон",emoji:"🐉",hint:"Пилотный уровень: крылья, чешуя и мордочка образуют отдельные цветовые группы"},
+ {id:"meadow-503",number:503,chapter:"Испытательная тропа",name:"Золотой ананас",emoji:"🍍",hint:"Пилотный уровень: плотная фактура кожуры и листья проверяют работу очереди"},
+ {id:"meadow-504",number:504,chapter:"Испытательная тропа",name:"Кристальный цветок",emoji:"💠",hint:"Пилотный уровень: многослойные лепестки и стебель с контрастными оттенками"}
+]);
 function inTriangle(px,py,ax,ay,bx,by,cx,cy){
  const sign=(x1,y1,x2,y2,x3,y3)=>(x1-x3)*(y2-y3)-(x2-x3)*(y1-y3);
  const a=sign(px,py,ax,ay,bx,by),b=sign(px,py,bx,by,cx,cy),c=sign(px,py,cx,cy,ax,ay);
@@ -533,6 +575,30 @@ function generatedMotifZone(type,u,v,variant){
    if(E(.34,.57,.22,.2)||E(.53,.42,.25,.27)||E(.73,.58,.2,.18))return 1;
    if(E(.79,.2,.13,.13))return 2;
    if(L(.79,.02,.79,.07)||L(.95,.2,.99,.2)||L(.63,.2,.59,.2)||L(.79,.36,.79,.4))return 3;
+   break;
+  case "monster":
+   if(E(.5,.64,.29,.25)||E(.5,.84,.23,.12))return 0;
+   if(E(.5,.36,.34,.29)||E(.25,.36,.11,.19)||E(.75,.36,.11,.19))return 1;
+   if(T(.24,.2,.3,.02,.43,.24)||T(.57,.24,.7,.02,.76,.2))return 2;
+   if(E(.32,.37,.09,.11)||E(.68,.37,.09,.11))return 3;
+   if(T(.16,.64,.04,.84,.28,.78)||T(.84,.64,.96,.84,.72,.78))return 4;
+   break;
+  case "dragon":
+   if(E(.49,.55,.25,.3)||E(.5,.8,.19,.14))return 0;
+   if(E(.5,.27,.23,.2)||T(.34,.23,.18,.04,.43,.13)||T(.57,.13,.82,.04,.66,.24))return 1;
+   if(T(.3,.48,.03,.31,.18,.68)||T(.7,.48,.97,.31,.82,.68))return 2;
+   if(T(.39,.77,.24,.98,.47,.9)||T(.61,.77,.76,.98,.53,.9))return 3;
+   if(T(.48,.51,.52,.51,.5,.62))return 4;
+   break;
+  case "pineapple":
+   if(E(.5,.59,.29,.35))return 0;
+   if(T(.5,.32,.29,.04,.47,.25)||T(.5,.32,.7,.02,.55,.26)||T(.5,.28,.44,.09,.36,.25))return 1;
+   if(E(.5,.88,.18,.06))return 2;
+   break;
+  case "crystal-flower":
+   if(E(.5,.25,.14,.18)||E(.27,.39,.17,.15)||E(.73,.39,.17,.15)||E(.34,.65,.16,.15)||E(.66,.65,.16,.15))return 1;
+   if(T(.5,.07,.42,.27,.58,.27)||T(.5,.43,.42,.68,.58,.68)||T(.08,.39,.31,.29,.31,.49)||T(.92,.39,.69,.29,.69,.49))return 2;
+   if(R(.46,.65,.54,.97))return 0;
    break;
  }
  return -1;
@@ -648,7 +714,9 @@ function createComposedArtworkBoard(number){
   let motifIndex=motifSeed%GENERATED_MOTIFS.length;
   while(usedMotifs.has(motifIndex))motifIndex=(motifIndex+1)%GENERATED_MOTIFS.length;
   usedMotifs.add(motifIndex);
-  const motif=GENERATED_MOTIFS[motifIndex],variant=(Math.imul(number,0x45d9f3b)+part*0x27d4eb2d)>>>0;
+  const motif=number>=501&&number<=504
+   ?GENERATED_MOTIFS.find(item=>item.type===({501:"monster",502:"dragon",503:"pineapple",504:"crystal-flower"}[number]))
+   :GENERATED_MOTIFS[motifIndex],variant=(Math.imul(number,0x45d9f3b)+part*0x27d4eb2d)>>>0;
   const [ox,oy,width,height]=placements[part];
   const raster=createRasterArtworkBoard(motif.type);
   if(raster){
@@ -814,6 +882,13 @@ const ART_PALETTES={
  cloud:["sky","blue","cream","yellow","turquoise"]
 };
 function artworkPaletteForLevel(level){
+ const pilotPalettes={
+  501:["purple","pink","blue","turquoise","lime","yellow","cream","red"],
+  502:["forest","green","lime","yellow","orange","red","cream","purple"],
+  503:["yellow","orange","lime","green","brown","cream","red","turquoise"],
+  504:["purple","pink","blue","turquoise","sky","yellow","cream","green"]
+ };
+ if(pilotPalettes[level.number])return pilotPalettes[level.number];
  if(level.number===1)return ART_PALETTES.frog;
  if(level.number===2)return ART_PALETTES.butterfly;
  if(level.number===3)return ART_PALETTES.flower;
