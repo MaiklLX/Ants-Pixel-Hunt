@@ -211,12 +211,14 @@ const GENERATED_MOTIFS=[
  {type:"bird",name:"Птичка",emoji:"🐦"},
  {type:"acorn",name:"Жёлудь",emoji:"🌰"},
  {type:"bee",name:"Пчёлка",emoji:"🐝"},
- {type:"cloud",name:"Облачко",emoji:"☁️"},
- {type:"monster",name:"Лесной монстрик",emoji:"👾"},
- {type:"dragon",name:"Дракончик",emoji:"🐉"},
- {type:"pineapple",name:"Ананас",emoji:"🍍"},
- {type:"crystal-flower",name:"Кристальный цветок",emoji:"💠"}
+ {type:"cloud",name:"Облачко",emoji:"☁️"}
 ];
+const PILOT_MOTIFS={
+ 501:{type:"monster",name:"Лесной монстрик",emoji:"👾"},
+ 502:{type:"dragon",name:"Дракончик",emoji:"🐉"},
+ 503:{type:"pineapple",name:"Ананас",emoji:"🍍"},
+ 504:{type:"crystal-flower",name:"Кристальный цветок",emoji:"💠"}
+};
 const GENERATED_ART_PALETTES={
  flower:["green","pink","yellow","cream"],tree:["brown","green","lime","yellow"],
  mushroom:["red","cream","brown","green"],butterfly:["purple","blue","pink","yellow"],
@@ -731,9 +733,7 @@ function createComposedArtworkBoard(number){
   let motifIndex=motifSeed%GENERATED_MOTIFS.length;
   while(usedMotifs.has(motifIndex))motifIndex=(motifIndex+1)%GENERATED_MOTIFS.length;
   usedMotifs.add(motifIndex);
-  const motif=number>=501&&number<=504
-   ?GENERATED_MOTIFS.find(item=>item.type===({501:"monster",502:"dragon",503:"pineapple",504:"crystal-flower"}[number]))
-   :GENERATED_MOTIFS[motifIndex],variant=(Math.imul(number,0x45d9f3b)+part*0x27d4eb2d)>>>0;
+  const motif=PILOT_MOTIFS[number]||GENERATED_MOTIFS[motifIndex],variant=(Math.imul(number,0x45d9f3b)+part*0x27d4eb2d)>>>0;
   const [ox,oy,width,height]=placements[part];
   const raster=createRasterArtworkBoard(motif.type);
   if(raster){
