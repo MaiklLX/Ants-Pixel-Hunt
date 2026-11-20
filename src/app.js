@@ -422,6 +422,7 @@ function renderChoices(){
   const button=document.createElement("button");button.type="button";button.className="choice-card"+(sealed?" sealed-box":box?" selectable":" empty-box")+(reveal?" sealed-reveal":"");
   if(reveal)state.lockedBoxRevealPlayed=true;
   if(index!==null&&index!==undefined){button.dataset.boxIndex=String(index);button.dataset.queueKey=`${col}:${index}`;}
+  const frontierReady=box&&canLaunchBox(state,index);
   const linked=box?.special==="linked",partner=linked?getLinkedPartner(state.levelId,index):null;
   const waitingForPartner=linked&&state.pendingLinkedIndex!==index&&!state.tray[0].includes(partner),needsPairSlots=linked&&(state.pendingLinkedIndex===null||state.pendingLinkedIndex===undefined)&&state.slots.filter(slot=>slot===null).length<2;
   const blockedByPair=state.pendingLinkedIndex!==null&&state.pendingLinkedIndex!==undefined&&index!==state.pendingLinkedIndex;
@@ -443,7 +444,7 @@ function renderChoices(){
    else{const gem=document.createElement("i");gem.style.setProperty("--gem-color",COLORS[box.color].hex);crate.append(gem);}
    if(!frontierReady&&!linked)button.title="Можно поставить в стартовую зону заранее. Муравьи начнут сбор, когда этот цвет откроется на краю рисунка.";const colorName=document.createElement("span");colorName.className="box-color-name";colorName.textContent=box.role==="builder"?"Строители":box.role==="warrior"?"Военные":COLORS[box.color].name;
    const count=document.createElement("small");count.className="box-count";count.textContent=`${box.ants.toLocaleString("ru-RU")} 🐜`;
-   button.append(crate,colorName,count);if(!frontierReady&&!linked)button.title="Этот цвет пока закрыт рисунком. Сначала расчисти доступный слой";button.setAttribute("aria-label",`${linked?"Связанный бокс. ":""}${box.role?"Бокс: "+colorName.textContent+". ":"Выбрать бокс: "}${box.ants} муравьёв`);
+   button.append(crate,colorName,count);if(!frontierReady&&!linked)button.title="Бокс можно отправить сейчас. Муравьи начнут работу сразу, когда на открытом краю появится блок их цвета.";button.setAttribute("aria-label",`${linked?"Связанный бокс. ":""}${box.role?"Бокс: "+colorName.textContent+". ":"Выбрать бокс: "}${box.ants} муравьёв`);
   }else{button.textContent="Очередь закончилась";button.setAttribute("aria-label","В этой колонке больше нет боксов");}
   button.addEventListener("click",()=>onChoose(col));lane.append(button);
   const preview=document.createElement("div");preview.className="queue-preview";preview.setAttribute("aria-label","Следующие боксы в колонке");
