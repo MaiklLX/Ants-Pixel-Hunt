@@ -1,4 +1,4 @@
-import {COLORS,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,LEVELS,getLevel,getIncoming,createGame,setArtworkBoard,canChoose,chooseTopColumn,canLaunchBox,isLockedBox,getLinkedPartner,findAntWave,applyAntPickup,completeBoxDeparture,isDefeat,isGameComplete,getExposedTargets,getExposedPixels,countQueuedBySlot,countDispatchingWorkers,countSlotWorkers,registerCustomArtwork,createArtworkBoard} from "./game.js";
+import {COLORS,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,LEVELS,getLevel,getIncoming,createGame,setArtworkBoard,canChoose,chooseTopColumn,canLaunchBox,isLockedBox,getLinkedPartner,findAntWave,applyAntPickup,completeBoxDeparture,isDefeat,isGameComplete,getExposedTargets,getExposedPixels,countQueuedBySlot,countDispatchingWorkers,countSlotWorkers,registerCustomArtwork} from "./game.js";
 import {createArtworkSvg} from "./artwork-renderer.js";
 import {decodeSpriteArtwork} from "./custom-artwork.js";
 import {getAntTripFrame,getAntLaunchDelay,getAntQueueDelay,createPausableClock,getTrailPose,getAntTravelDurations,getAntGaitFrame} from "./ant-animation.js";
@@ -1013,7 +1013,7 @@ function clearZenLaunchParam(){
 }
 function showMainMenu(){
  if(zenMode)clearZenLaunchParam();
- shell.classList.add("menu-open");
+ shell.classList.add("menu-open");resizeAntLayer();
  if(gameStarted){resetAfterMenu=true;maybeFinalizeMenuExit();}
  updateMainMenu();
 }
@@ -1026,7 +1026,7 @@ function maybeFinalizeMenuExit(){
 }
 function startGame(){
  if(resetAfterMenu)return;
- shell.classList.remove("menu-open");gameStarted=true;updateMainMenu();
+ shell.classList.remove("menu-open");gameStarted=true;resizeAntLayer();updateMainMenu();
  kickColony();
 }
 async function startFreshGame(levelId=state.levelId){
