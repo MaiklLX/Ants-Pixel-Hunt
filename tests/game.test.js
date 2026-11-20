@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {COLORS,createGame,LEVELS,getLevel,getIncoming,createArtworkBoard,resolveAll,INITIAL_BOARD,INCOMING,isAccessible,getExposedPixels,getExposedTargets,findAccessiblePixel,findAccessiblePixels,findAntWave,chooseTopColumn,canLaunchBox,findNextMove,applyAntMove,applyAntPickup,completeBoxDeparture,freeSlotCount,isDefeat,SIZE,GRID_SIZE,BLOCK_SIZE,BOX_CAPACITY,SLOT_COUNT,TRAY_SIZE,canChoose,restoreGame,serializeGame,countOutboundBySlot,countQueuedBySlot,countDispatchingWorkers,countSlotWorkers,canDepartSlot,isLockedBox,getLinkedPair,normalizeLinkedTray,buildIncoming,setArtworkBoard,LOCKED_BOX_INDEX,LOCKED_BOX_COLUMN} from "../src/game.js";
+import {COLORS,createGame,LEVELS,getLevel,getIncoming,createArtworkBoard,resolveAll,INITIAL_BOARD,INCOMING,isAccessible,getExposedPixels,getExposedTargets,findAccessiblePixel,findAccessiblePixels,findAntWave,chooseTopColumn,canLaunchBox,findNextMove,applyAntMove,applyAntPickup,completeBoxDeparture,freeSlotCount,isDefeat,SIZE,GRID_SIZE,BLOCK_SIZE,BOX_CAPACITY,SLOT_COUNT,TRAY_SIZE,canChoose,restoreGame,serializeGame,countOutboundBySlot,countQueuedBySlot,countDispatchingWorkers,countSlotWorkers,canDepartSlot,isLockedBox,getLinkedPair,normalizeLinkedTray,buildIncoming,setArtworkBoard,registerCustomArtwork,LOCKED_BOX_INDEX,LOCKED_BOX_COLUMN} from "../src/game.js";
 const smallBoard=()=>Array.from({length:5},()=>Array(5).fill("green"));
 const makeBoxAvailable=(state,index)=>{
  const deck=getIncoming(state.levelId),box=deck[index];
@@ -920,4 +920,20 @@ test("all campaign illustrations are centered by their visible pixel bounds",()=
   assert.ok(Math.abs(centerX-(SIZE-1)/2)<=.5,level.name+" must be horizontally centered");
   assert.ok(Math.abs(centerY-(SIZE-1)/2)<=.5,level.name+" must be vertically centered");
  }
+});
+
+test("a custom Zen artwork registers as an isolated playable board with a complete box deck",()=>{
+ const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
+ for(let y=8;y<27;y++)for(let x=8;x<27;x++)board[y][x]=y<17?"green":"blue";
+ for(let y=14;y<21;y++)for(let x=14;x<21;x++)board[y][x]="yellow";
+ const level=registerCustomArtwork("test-zen-artwork",board,"Тестовый рисунок");
+ const game=createGame(level.id),deck=getIncoming(level.id);
+ const expected=board.flat().filter(Boolean).length;
+ const assigned=deck.reduce((sum,box)=>sum+box.ants,0);
+ assert.equal(level.name,"Тестовый рисунок");
+ assert.equal(game.levelId,"test-zen-artwork");
+ assert.equal(game.remaining,expected);
+ assert.equal(game.obstacles.length,0,"Zen custom boards do not add campaign obstacles");
+ assert.equal(assigned,expected,"every custom pixel must have a matching ant in the deck");
+ assert.ok(deck.length>=3,"the Zen run should open with a playable three-lane queue");
 });
