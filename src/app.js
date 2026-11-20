@@ -1,4 +1,4 @@
-import {COLORS,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,LEVELS,getLevel,getIncoming,createGame,setArtworkBoard,canChoose,chooseTopColumn,canLaunchBox,isLockedBox,getLinkedPartner,findAntWave,applyAntPickup,completeBoxDeparture,isDefeat,isGameComplete,getExposedTargets,getExposedPixels,countQueuedBySlot,countDispatchingWorkers,countSlotWorkers,registerCustomArtwork} from "./game.js";
+import {COLORS,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,LEVELS,getLevel,getIncoming,createGame,setArtworkBoard,canChoose,chooseTopColumn,canLaunchBox,isLockedBox,getLinkedPartner,findAntWave,applyAntPickup,completeBoxDeparture,isDefeat,isGameComplete,getExposedTargets,getExposedPixels,countQueuedBySlot,countDispatchingWorkers,countSlotWorkers,registerCustomArtwork,createArtworkBoard} from "./game.js";
 import {createArtworkSvg} from "./artwork-renderer.js";
 import {decodeSpriteArtwork} from "./custom-artwork.js";
 import {getAntTripFrame,getAntLaunchDelay,getAntQueueDelay,createPausableClock,getTrailPose,getAntTravelDurations,getAntGaitFrame} from "./ant-animation.js";
@@ -162,6 +162,24 @@ function rasterizeArtworkToBlocks(image){
   }
   board[gy][gx]=nearest.key;
  }
+ // Center the visible pigment bounds, not the SVG canvas bounds. The source
+ // illustrations have asymmetric transparent margins; leaving them untouched
+ // made the collectible picture drift toward the lower-right corner.
+ const occupied=[];
+ for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)if(board[y][x])occupied.push([x,y]);
+ if(occupied.length){
+  const minX=Math.min(...occupied.map(point=>point[0])),maxX=Math.max(...occupied.map(point=>point[0]));
+  const minY=Math.min(...occupied.map(point=>point[1])),maxY=Math.max(...occupied.map(point=>point[1]));
+  const shiftX=Math.round((SIZE-1-minX-maxX)/2),shiftY=Math.round((SIZE-1-minY-maxY)/2);
+  if(shiftX||shiftY){
+   const centered=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
+   for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)if(board[y][x]){
+    const nx=x+shiftX,ny=y+shiftY;
+    if(nx>=0&&ny>=0&&nx<SIZE&&ny<SIZE)centered[ny][nx]=board[y][x];
+   }
+   return centered;
+  }
+ }
  return board;
 }
 function ensureBoardArtwork(){
@@ -169,6 +187,10 @@ function ensureBoardArtwork(){
  if(boardArtworkKey===key)return;
  if(readCustomArtwork(key)){applySavedArtwork(key);boardArtworkKey=key;state=createGame(key);totalBlocks=tasksRemaining();return;}
  boardArtworkKey=key;
+ // Pilot levels 501–504 already have authored, matching motif boards in game.js.
+ // Do not replace them with the generic SVG motif selected by the legacy renderer.
+ const levelNumber=getLevel(key).number;
+ if(levelNumber>=501&&levelNumber<=504)return;
  const image=new Image();
  image.onload=()=>{
   if(boardArtworkKey!==key||state.levelId!==key)return;
@@ -362,10 +384,10 @@ function renderBoard(){
  const width=boardEl.width,height=boardEl.height,cell=width/SIZE;
  boardCtx.clearRect(0,0,width,height);
  boardEmptyGradient=boardCtx.createLinearGradient(0,0,width,height);
- boardEmptyGradient.addColorStop(0,"#c6add4");boardEmptyGradient.addColorStop(.52,"#ad91c1");boardEmptyGradient.addColorStop(1,"#9478aa");
+ boardEmptyGradient.addColorStop(0,"#aebd9f");boardEmptyGradient.addColorStop(.52,"#9eaf91");boardEmptyGradient.addColorStop(1,"#8e9f82");
  boardCtx.fillStyle=boardEmptyGradient;boardCtx.fillRect(0,0,width,height);
- // Subtle woven diamond texture echoes the lavender playfield in the reference.
- boardCtx.save();boardCtx.strokeStyle="#f4e9ff18";boardCtx.lineWidth=.65;
+ // A restrained woodland texture keeps empty cells readable without bright contrast.
+ boardCtx.save();boardCtx.strokeStyle="#e5edda16";boardCtx.lineWidth=.65;
  const weave=Math.max(8,cell*1.8);
  for(let p=-height;p<width+height;p+=weave){
   boardCtx.beginPath();boardCtx.moveTo(p,0);boardCtx.lineTo(p+height,height);boardCtx.stroke();
@@ -1011,7 +1033,7 @@ async function startFreshGame(levelId=state.levelId){
  if(workerPromises.size>0||loadingSlots.size>0||resetAfterMenu)return;
  clearZenLaunchParam();zenMode=false;zenRunCollected=0;zenPendingNectar=0;
  resetting=true;cancelAnimationFrame(antFrame);activeAnts.clear();pickupEffects.length=0;deliveryEffects.length=0;reservedTargets.clear();slotNextLaunchAt.clear();applySavedArtwork(levelId);state=createGame(levelId);boardArtworkKey=readCustomArtwork(levelId)?levelId:"";totalBlocks=tasksRemaining();resetting=false;
- gameStarted=true;render();$("save-status").textContent="Новая партия · прогресс уровня не сохраняется";shell.classList.remove("menu-open");updateMainMenu();kickColony();
+ gameStarted=true;render();$("save-status").textContent="Новая партия · прогресс уровня не сохраняется";shell.classList.remove("menu-open");resizeAntLayer();updateMainMenu();kickColony();
 }
 function readZenPayload(){
  try{return JSON.parse(localStorage.getItem(ZEN_ARTWORK_KEY)||"null");}catch{return null;}
@@ -1026,7 +1048,7 @@ function startZenGame(){
   resetting=true;cancelAnimationFrame(antFrame);antFrame=0;activeAnts.clear();pickupEffects.length=0;deliveryEffects.length=0;reservedTargets.clear();slotNextLaunchAt.clear();
   zenMode=true;zenRunCollected=0;zenPendingNectar=0;
   state=createGame("zen-custom");boardArtworkKey="zen-custom";totalBlocks=tasksRemaining();resetting=false;gameStarted=true;
-  shell.classList.remove("menu-open");render();updateZenHud();updateMainMenu();kickColony();
+  shell.classList.remove("menu-open");render();resizeAntLayer();updateZenHud();updateMainMenu();kickColony();
  }catch(error){
   zenMode=false;resetting=false;$("zen-status-message").textContent=error.message||"Не удалось открыть рисунок. Вернись в мастерскую и экспортируй его заново.";
  }
