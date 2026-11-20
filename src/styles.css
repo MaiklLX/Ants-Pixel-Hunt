@@ -5237,31 +5237,32 @@ footer{order:9}
 .map-overlay .trail-node::after{border-color:#ffffff10!important}
 
 
-/* KT-299 — restore the full arena; keep the Zen meter as a tiny corner overlay. */
-.board-wrap{position:relative}
-.board-wrap .zen-run-hud{
- position:absolute!important;z-index:5;top:7px!important;right:7px!important;bottom:auto!important;left:auto!important;
+/* KT-300 — place the compact Zen nectar meter beside the speed control without changing the arena or page flow. */
+.level-heading{position:relative}
+.level-heading .zen-run-hud{
+ position:absolute!important;z-index:6;top:0!important;right:70px!important;bottom:auto!important;left:auto!important;
  display:grid!important;grid-template-columns:minmax(0,1fr);grid-template-rows:auto 4px auto;
- gap:3px!important;width:108px!important;max-width:calc(100% - 14px)!important;min-width:0!important;
- min-height:0!important;margin:0!important;padding:5px 6px!important;overflow:hidden;
+ gap:2px!important;width:104px!important;max-width:calc(100% - 140px)!important;min-width:0!important;
+ height:36px;min-height:0!important;margin:0!important;padding:4px 6px!important;overflow:hidden;
  border:1px solid #607354;border-radius:9px;
  background:#1b3026ed!important;backdrop-filter:blur(5px);
  box-shadow:0 2px 8px #07140f88,inset 0 1px #ffffff12;
  color:#dce7d1;pointer-events:none;
 }
-.board-wrap .zen-run-hud[hidden]{display:none!important}
-.board-wrap .zen-run-top{
+.level-heading .zen-run-hud[hidden]{display:none!important}
+.level-heading .zen-run-top{
  grid-column:1;grid-row:1;display:flex;align-items:center;justify-content:space-between;
  min-width:0;gap:4px;font-size:8px!important;line-height:1.1;
 }
-.board-wrap .zen-run-top span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.board-wrap .zen-run-top strong{flex:0 0 auto;font-size:12px!important;color:#e3c47b}
-.board-wrap .zen-run-track{grid-column:1;grid-row:2;width:100%;height:4px!important;margin:0!important;background:#102219;border-radius:99px}
-.board-wrap .zen-run-hud p{grid-column:1;grid-row:3;margin:0!important;font-size:7px!important;line-height:1.1;white-space:nowrap;color:#b5c3aa}
-.board-wrap .zen-run-hud p b{color:#e4ead9}
+.level-heading .zen-run-top span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.level-heading .zen-run-top strong{flex:0 0 auto;font-size:11px!important;color:#e3c47b}
+.level-heading .zen-run-track{grid-column:1;grid-row:2;width:100%;height:4px!important;margin:0!important;background:#102219;border-radius:99px}
+.level-heading .zen-run-track span{background:linear-gradient(90deg,#8eae70,#d2b66f)}
+.level-heading .zen-run-hud p{grid-column:1;grid-row:3;margin:0!important;font-size:6px!important;line-height:1.1;white-space:nowrap;color:#b5c3aa}
+.level-heading .zen-run-hud p b{color:#e4ead9}
 @media(max-width:360px){
- .board-wrap .zen-run-hud{top:5px!important;right:5px!important;width:96px!important;padding:4px 5px!important;gap:2px!important}
- .board-wrap .zen-run-top{font-size:7px!important}
- .board-wrap .zen-run-top strong{font-size:11px!important}
- .board-wrap .zen-run-hud p{font-size:6px!important}
+ .level-heading .zen-run-hud{right:68px!important;width:94px!important;max-width:calc(100% - 132px)!important;padding:4px 5px!important;gap:2px!important}
+ .level-heading .zen-run-top{font-size:7px!important}
+ .level-heading .zen-run-top strong{font-size:10px!important}
+ .level-heading .zen-run-hud p{font-size:6px!important}
 }
