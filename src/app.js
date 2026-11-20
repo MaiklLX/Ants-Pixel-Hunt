@@ -24,7 +24,7 @@ function importArtworkFile(file){
  reader.onload=()=>{
   try{
    const payload=JSON.parse(String(reader.result||""));
-   const board=decodeCustomArtwork(payload);
+   const board=decodeSpriteArtwork(payload,COLORS);
    const target=state.levelId;
    if(workerPromises.size||loadingSlots.size)throw new Error("Сначала дождитесь завершения текущего хода, затем импортируйте рисунок.");
    localStorage.setItem(CUSTOM_ARTWORK_PREFIX+target,JSON.stringify(payload));
