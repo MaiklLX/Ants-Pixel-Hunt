@@ -4,15 +4,11 @@ export function decodeSpriteArtwork(payload,colors){
  if(rows.length!==45||rows.some(row=>row.length!==45))throw new Error("В файле должно быть ровно 45 строк по 45 клеток.");
  const palette=payload.palette.map(value=>{
   if(typeof value!=="string"||!/^#[0-9a-f]{6}$/i.test(value))throw new Error("В палитре обнаружен некорректный цвет.");
-  const rgb=[1,3,5].map(index=>parseInt(value.slice(index,index+2),16));
-  let best="green",distance=Infinity;
-  for(const [name,color] of Object.entries(colors)){
-   if(name==="black"||name==="gray")continue;
-   const target=color.hex.slice(1).match(/../g).map(part=>parseInt(part,16));
-   const d=rgb.reduce((sum,channel,index)=>sum+(channel-target[index])**2,0);
-   if(d<distance){distance=d;best=name;}
-  }
-  return best;
+  const hex=value.toLowerCase(),key="custom_"+hex.slice(1);
+  // Keep the sprite's own RGB value. Do not remap it to one of the game's
+  // decorative campaign colors: that second quantization visibly damages art.
+  if(!colors[key])colors[key]={hex,name:"Авторский "+hex.toUpperCase(),short:hex.slice(1,3).toUpperCase()};
+  return key;
  });
  return rows.map(row=>Array.from(row,char=>{
   if(char===".")return "";
