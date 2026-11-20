@@ -147,19 +147,26 @@ function rasterizeArtworkToBlocks(image){
   const fx=f(x),fy=f(y),fz=f(z);
   return{l:116*fy-16,a:500*(fx-fy),b:200*(fy-fz)};
  };
- const palette=Object.entries(COLORS).filter(([key])=>key!=="black"&&key!=="gray").map(([key,value])=>{
+ // Keep the complete 16-color game palette: gray is essential for elephants/hippos, black for outlines.
+ const palette=Object.entries(COLORS).map(([key,value])=>{
   const hex=value.hex,r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
   return{key,...toLab(r,g,b)};
  });
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
  for(let gy=0;gy<SIZE;gy++)for(let gx=0;gx<SIZE;gx++){
   let r=0,g=0,b=0,alpha=0,weight=0;
-  for(let py=gy*10;py<(gy+1)*10;py++)for(let px=gx*10;px<(gx+1)*10;px++){
-   const index=(py*450+px)*4,a=pixels[index+3]/255;
-   if(a<.08)continue;
-   r+=pixels[index]*a;g+=pixels[index+1]*a;b+=pixels[index+2]*a;alpha+=a;weight++;
+  // Map every source pixel to its exact proportional cell bounds.
+  // 450 / 35 is not an integer: fixed 10px sampling skipped the last 100px
+  // on both axes and sampled less than 80% of the illustration.
+  const x0=Math.floor(gx*450/SIZE),x1=Math.floor((gx+1)*450/SIZE);
+  const y0=Math.floor(gy*450/SIZE),y1=Math.floor((gy+1)*450/SIZE);
+  const sampleCount=(x1-x0)*(y1-y0);
+  for(let py=y0;py<y1;py++)for(let px=x0;px<x1;px++){
+   const index=(py*450+px)*4,opacity=pixels[index+3]/255;
+   if(opacity<.08)continue;
+   r+=pixels[index]*opacity;g+=pixels[index+1]*opacity;b+=pixels[index+2]*opacity;alpha+=opacity;weight++;
   }
-  if(!weight||alpha/100<.22)continue;
+  if(!weight||alpha/sampleCount<.22)continue;
   r/=alpha;g/=alpha;b/=alpha;
   const sample=toLab(r,g,b);
   let nearest=palette[0],best=Infinity;
