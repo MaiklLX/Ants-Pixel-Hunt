@@ -786,13 +786,17 @@ test("same-colour starter boxes each receive an independent first dispatch in th
 });
 
 
-test("campaign contains 500 distinct, authored-first and procedurally composed image levels",()=>{
- assert.equal(LEVELS.length,500);
- assert.equal(LEVELS[0].id,"meadow-01");
- assert.equal(LEVELS[6].id,"forest-07");
- assert.equal(LEVELS[7].number,8);
+test("campaign contains 500 levels plus four separately playable Zen pilot illustrations",()=>{
+ const campaignLevels=LEVELS.filter(level=>level.number<=500);
+ const pilotLevels=LEVELS.filter(level=>level.number>=501&&level.number<=504);
+ assert.equal(campaignLevels.length,500);
+ assert.equal(pilotLevels.length,4);
+ assert.equal(LEVELS.length,504);
+ assert.equal(campaignLevels[0].id,"meadow-01");
+ assert.equal(campaignLevels[6].id,"forest-07");
+ assert.equal(campaignLevels[7].number,8);
  const signatures=new Set();
- for(const level of LEVELS.slice(7)){
+ for(const level of campaignLevels.slice(7)){
   const board=createArtworkBoard(level.id);
   assert.equal(board.length,SIZE,level.id);
   assert.ok(board.every(row=>row.length===SIZE),level.id+" must remain 35×35");
@@ -804,7 +808,7 @@ test("campaign contains 500 distinct, authored-first and procedurally composed i
   signatures.add(board.flat().join(","));
  }
  assert.equal(signatures.size,493,"generated levels must not repeat the same pixel artwork");
- assert.equal(new Set(LEVELS.map(level=>level.chapter)).size,13,"the 500 levels are grouped into progressive forest chapters");
+ assert.equal(new Set(campaignLevels.map(level=>level.chapter)).size,13,"the 500 campaign levels are grouped into progressive forest chapters");
 });
 
 
