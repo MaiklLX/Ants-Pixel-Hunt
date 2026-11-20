@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {COLORS,createGame,LEVELS,getLevel,getIncoming,createArtworkBoard,resolveAll,INITIAL_BOARD,INCOMING,isAccessible,getExposedPixels,getExposedTargets,findAccessiblePixel,findAccessiblePixels,findAntWave,chooseTopColumn,canLaunchBox,findNextMove,applyAntMove,applyAntPickup,completeBoxDeparture,freeSlotCount,isDefeat,SIZE,GRID_SIZE,BLOCK_SIZE,BOX_CAPACITY,SLOT_COUNT,TRAY_SIZE,canChoose,restoreGame,serializeGame,countOutboundBySlot,countQueuedBySlot,countDispatchingWorkers,countSlotWorkers,canDepartSlot,isLockedBox,getLinkedPair,normalizeLinkedTray,buildIncoming,LOCKED_BOX_INDEX,LOCKED_BOX_COLUMN} from "../src/game.js";
+import {COLORS,createGame,LEVELS,getLevel,getIncoming,createArtworkBoard,resolveAll,INITIAL_BOARD,INCOMING,isAccessible,getExposedPixels,getExposedTargets,findAccessiblePixel,findAccessiblePixels,findAntWave,chooseTopColumn,canLaunchBox,findNextMove,applyAntMove,applyAntPickup,completeBoxDeparture,freeSlotCount,isDefeat,SIZE,GRID_SIZE,BLOCK_SIZE,BOX_CAPACITY,SLOT_COUNT,TRAY_SIZE,canChoose,restoreGame,serializeGame,countOutboundBySlot,countQueuedBySlot,countDispatchingWorkers,countSlotWorkers,canDepartSlot,isLockedBox,getLinkedPair,normalizeLinkedTray,buildIncoming,setArtworkBoard,LOCKED_BOX_INDEX,LOCKED_BOX_COLUMN} from "../src/game.js";
 const smallBoard=()=>Array.from({length:5},()=>Array(5).fill("green"));
 const makeBoxAvailable=(state,index)=>{
  const deck=getIncoming(state.levelId),box=deck[index];
@@ -835,4 +835,19 @@ test("campaign queue squads become smaller in measured steps without losing any 
  assert.ok(median(late)>=35,"late generated levels should avoid micro-squads while keeping exact totals");
  assert.ok(Math.max(...early.map(box=>box.ants))<=68,"early squads must never become oversized");
  assert.ok(Math.max(...late.map(box=>box.ants))<=68,"late squads must never become oversized");
+});
+
+
+test("rasterized artwork merges sub-ten pigment fragments before generating boxes",()=>{
+ const board=Array.from({length:SIZE},()=>Array(SIZE).fill("red"));
+ for(let i=0;i<5;i++)board[0][i]="blue";
+ for(let i=5;i<10;i++)board[0][i]="black";
+ setArtworkBoard("meadow-500",board);
+ const normalized=createArtworkBoard("meadow-500");
+ assert.equal(normalized.flat().filter(color=>color==="blue").length,0);
+ assert.equal(normalized.flat().filter(color=>color==="black").length,0);
+ const deck=getIncoming("meadow-500").filter(box=>!box.role);
+ assert.ok(deck.length>0,"the artwork must always produce visible queue boxes");
+ assert.equal(deck.reduce((sum,box)=>sum+box.ants,0),SIZE*SIZE,"all collectible cells must have matching box capacity");
+ assert.ok(deck.every(box=>box.ants>=10&&box.ants<=60));
 });
