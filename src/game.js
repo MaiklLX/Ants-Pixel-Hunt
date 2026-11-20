@@ -782,8 +782,18 @@ export const LEVELS=[
 
 ,...GENERATED_LEVELS
 ];
+const customArtworkLevels=new Map();
 export function getLevel(levelId="meadow-01"){
- return LEVELS.find(level=>level.id===levelId)||LEVELS[0];
+ return customArtworkLevels.get(levelId)||LEVELS.find(level=>level.id===levelId)||LEVELS[0];
+}
+export function registerCustomArtwork(levelId,board,name="Мой рисунок"){
+ if(!levelId||typeof levelId!=="string")throw new Error("Не задан идентификатор рисунка");
+ if(!Array.isArray(board)||board.length!==SIZE||board.some(row=>!Array.isArray(row)||row.length!==SIZE))throw new Error("Artwork board must be a 35×35 grid");
+ if(!board.some(row=>row.some(Boolean)))throw new Error("На рисунке нет цветных блоков");
+ const level={id:levelId,number:8,chapter:"Дзен",name:String(name||"Мой рисунок").slice(0,48),emoji:"🎨",hint:"Твоя собственная пиксельная головоломка"};
+ customArtworkLevels.set(levelId,level);
+ setArtworkBoard(levelId,board);
+ return level;
 }
 
 function applyStarterPixelDetails(board,levelNumber){
@@ -1116,6 +1126,7 @@ export function buildIncoming(board,levelNumber=1,diagnostics=null){
  return deck;
 }
 function createLevelObstacles(levelId,board){
+ if(customArtworkLevels.has(levelId))return [];
  const number=getLevel(levelId).number;
  if(number<26)return [];
  const count=number<51?1:number<151?2:number<301?3:4;
