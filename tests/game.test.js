@@ -269,7 +269,7 @@ test("all campaign levels have distinct deterministic artwork and exact matching
 test("four pilot artworks 501–504 have distinct 35x35 silhouettes and rich 8-color palettes",()=>{
  const pilot=LEVELS.filter(level=>level.number>=501&&level.number<=504);
  assert.equal(pilot.length,4);
- assert.deepEqual(pilot.map(level=>level.name),["Монстрик из мшистой пещеры","Маленький лесной дракон","Золотой ананас","Кристальный цветок"]);
+ assert.deepEqual(pilot.map(level=>level.name),["Слон на полянке","Жираф на полянке","Бегемот на полянке","Обезьянка на полянке"]);
  const signatures=new Set();
  for(const level of pilot){
   const board=createArtworkBoard(level.id),colors=new Set(board.flat().filter(Boolean));
