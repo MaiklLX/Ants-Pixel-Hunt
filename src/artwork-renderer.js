@@ -155,6 +155,10 @@ fish:
 '<path d="M67 194Q80 204 95 198" stroke="#e3a17c" stroke-width="5" fill="none" stroke-linecap="round"/>'+
 '<g fill="#f6d17b" opacity=".75"><circle cx="145" cy="151" r="5"/><circle cx="172" cy="174" r="5"/><circle cx="144" cy="204" r="5"/><circle cx="204" cy="188" r="4"/></g></g>'
 };
+Object.assign(M,{monster:'<g filter="url(#shadow)"><path d="M92 150Q70 80 125 67L150 91L175 57L200 91L229 67Q284 80 258 150L278 238Q269 303 175 319Q81 303 72 238Z" fill="#8b70b6" stroke="#493b69" stroke-width="9"/><ellipse cx="132" cy="175" rx="30" ry="39" fill="url(#eye)"/><ellipse cx="218" cy="175" rx="30" ry="39" fill="url(#eye)"/><circle cx="139" cy="180" r="13" fill="#263b4b"/><circle cx="211" cy="180" r="13" fill="#263b4b"/><path d="M132 245Q175 278 218 245L204 270H146Z" fill="#e88d9b" stroke="#493b69" stroke-width="6"/></g>',
+dragon:'<g filter="url(#shadow)"><path d="M112 208Q55 122 30 156Q35 228 105 260L130 238M238 208Q295 122 320 156Q315 228 245 260L220 238" fill="#79a96a" stroke="#365d42" stroke-width="8"/><path d="M94 208Q82 120 150 91Q220 60 267 135L248 231Q216 294 144 286Q96 266 94 208Z" fill="#79b66b" stroke="#365d42" stroke-width="9"/><path d="M124 105L107 48L157 85M213 91L246 42L253 120" fill="#d9bd77" stroke="#365d42" stroke-width="8"/><circle cx="142" cy="160" r="10" fill="#fff2d2"/><circle cx="208" cy="160" r="10" fill="#fff2d2"/><path d="M142 228Q175 250 208 228" fill="none" stroke="#b94e48" stroke-width="8"/></g>',
+pineapple:'<g filter="url(#shadow)"><path d="M175 108Q92 133 102 238Q111 322 175 339Q239 322 248 238Q258 133 175 108Z" fill="#e5ad43" stroke="#96632e" stroke-width="9"/><path d="M175 112Q119 66 130 26Q162 48 175 88Q188 48 220 26Q231 66 175 112Z" fill="#6f9c54" stroke="#3f6e45" stroke-width="7"/><path d="M175 112Q89 76 91 36Q143 43 175 97Q207 43 259 36Q261 76 175 112Z" fill="#8db565" stroke="#3f6e45" stroke-width="7"/><path d="M117 160L231 290M101 207L211 326M233 160L119 290M249 207L139 326" stroke="#9a6a32" stroke-width="6"/></g>',
+"crystal-flower":'<g filter="url(#shadow)"><path d="M175 176Q119 65 91 105Q70 135 151 195Q39 177 48 220Q56 258 154 224Q92 304 130 323Q166 340 175 239Q184 340 220 323Q258 304 196 224Q294 258 302 220Q311 177 199 195Q280 135 259 105Q231 65 175 176Z" fill="#9a8bd0" stroke="#51477f" stroke-width="8"/><path d="M175 176L91 105L151 195L48 220L154 224L130 323L175 239L220 323L196 224L302 220L199 195L259 105Z" fill="#b9e2ef" opacity=".7"/><circle cx="175" cy="199" r="39" fill="#e8c96d" stroke="#806b49" stroke-width="7"/><path d="M175 240V350" stroke="#5e8b58" stroke-width="13" stroke-linecap="round"/></g>'});
 const MOTIF_ORDER=['flower','tree','mushroom','butterfly','house','fish','snail','rocket','bird','acorn','bee','cloud'];
 function sceneLayout(count){
  // Fill the arena with large, readable motifs instead of tiny central stickers.
@@ -164,7 +168,8 @@ function sceneLayout(count){
 }
 export function createArtworkSvg(levelNumber){
  const isStarter=levelNumber<=7;
- const types=isStarter?({1:['frog'],2:['butterfly'],3:['flower'],4:['mushroom'],5:['acorn'],6:['snail'],7:['firefly']})[levelNumber]||['frog']:[];
+ const pilotTypes={501:'monster',502:'dragon',503:'pineapple',504:'crystal-flower'};
+ const types=isStarter?({1:['frog'],2:['butterfly'],3:['flower'],4:['mushroom'],5:['acorn'],6:['snail'],7:['firefly']})[levelNumber]||['frog']:pilotTypes[levelNumber]?[pilotTypes[levelNumber]]:[];
  let placements=[];
  if(isStarter)placements=[[50,50,350,350]];
  else{
