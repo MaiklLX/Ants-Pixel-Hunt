@@ -932,7 +932,7 @@ export function buildIncoming(board,levelNumber=1){
   const sizes=Array.from({length:count},(_,i)=>base+(i<extra?1:0));
   // When a pigment needs several squads, slight deterministic variation keeps
   // box contents from looking mechanically identical without leaving 10–60.
-  if(count>=3&&base>10&&base<60&&new Set(sizes).size===1){sizes[0]--;sizes[1]++;sizes[2]++;}
+  if(count>=3&&base>10&&base<60&&new Set(sizes).size===1){sizes[0]--;sizes[1]++;}
   let offset=0;
   for(const ants of sizes){
    crates.push({color,ants,firstStep:positions[offset]??Number.MAX_SAFE_INTEGER});
