@@ -851,3 +851,12 @@ test("rasterized artwork merges sub-ten pigment fragments before generating boxe
  assert.equal(deck.reduce((sum,box)=>sum+box.ants,0),SIZE*SIZE,"all collectible cells must have matching box capacity");
  assert.ok(deck.every(box=>box.ants>=10&&box.ants<=60));
 });
+
+test("queue alternates newly exposed colours instead of letting a dominant active squad monopolize the deck",()=>{
+ const board=Array.from({length:SIZE},()=>Array(SIZE).fill("red"));
+ for(let y=0;y<10;y++)for(let x=0;x<10;x++)board[y][x]="blue";
+ const deck=buildIncoming(board,500);
+ assert.equal(deck.reduce((sum,box)=>sum+box.ants,0),SIZE*SIZE);
+ assert.ok(deck.every(box=>box.ants>=10&&box.ants<=60));
+ assert.notEqual(deck[0].color,deck[1].color,"both colours are exposed at the start, so the opening must offer a real second choice");
+});
