@@ -56,12 +56,14 @@ test("selection fills the first free start compartment after a valid layer choic
  assert.equal(chooseTopColumn(s,1),true);
  assert.equal(s.slots[0].sourceIndex,0);assert.equal(s.slots[1].sourceIndex,second);assert.equal(s.slots[2],null);
 });
-test("duplicate color squads cannot launch together, but crates can be staged",()=>{
+test("duplicate color squads can work together without claiming the same exposed pixel",()=>{
  const s=createGame();s.resolving=true;
  assert.equal(chooseTopColumn(s,0),true);
- assert.equal(canLaunchBox(s,1),false,"same color squad is already active");
- assert.equal(chooseTopColumn(s,1),true,"the next crate may wait in another starter compartment");
+ assert.equal(canLaunchBox(s,1),true,"an exposed color remains playable while another squad works");
+ assert.equal(chooseTopColumn(s,1),true,"the next crate can occupy another starter compartment");
  assert.equal(freeSlotCount(s),3);assert.equal(canChoose(s),true);
+ const wave=findAntWave(s,new Set(),new Map(),8);
+ assert.equal(new Set(wave.map(move=>move.target.x+","+move.target.y)).size,wave.length,"shared target cursor must prevent duplicate pickups");
 });
 test("accessibility checks use actual board dimensions",()=>{
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill("green"));
