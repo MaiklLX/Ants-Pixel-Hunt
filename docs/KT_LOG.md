@@ -1230,3 +1230,10 @@ KT-097: создать одну авторскую седьмую полянку
 - App version KT-303; Service Worker cache v118; public shell cache v111.
 - Не менялись правила, решаемость, очередь, 35×35 поле и первые 500 уровней.
 - CI, production build и визуальный запуск в браузере ещё не подтверждены.
+
+
+## KT-304 follow-up — 2026-11-20
+- GitHub Actions run `44743617628` completed successfully: all gameplay tests passed, Vite production build passed, and GitHub Pages deployment passed.
+- The previous failed run exposed two stale assertions: `game.test.js` still expected the former monster/dragon/pineapple/crystal-flower pilot names, and `sprite-catalog.test.js` expected an obsolete Russian policy phrase. Both tests now match the current animal pilot set and catalog policy.
+- Updated the visible app version to KT-304 and refreshed both service-worker cache identifiers.
+- Source PNGs were inspected and confirmed as elephant, giraffe, hippo, and monkey. Actual in-game visual confirmation after deployment remains pending; do not mark the art task visually closed until the board is checked in the browser.
