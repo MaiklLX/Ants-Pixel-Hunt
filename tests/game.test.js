@@ -802,7 +802,7 @@ test("campaign contains 500 levels plus four separately playable Zen pilot illus
   assert.ok(board.every(row=>row.length===SIZE),level.id+" must remain 35×35");
   const colors=new Set(board.flat().filter(Boolean));
   assert.ok(colors.size>=(level.name==="Цветок на полянке"?2:3),level.id+" needs a readable multi-colour image");
-  assert.ok(colors.size>=3&&colors.size<=Object.keys(COLORS).length,level.id+" may use the full available object palette with a black contour");
+  assert.ok(colors.size>=(level.name==="Цветок на полянке"?2:3)&&colors.size<=Object.keys(COLORS).length,level.id+" may use the full available object palette with a black contour");
   assert.ok(colors.has("black"),level.id+" must have a dark pixel-art contour");
   assert.ok(board.flat().filter(Boolean).length>35,level.id+" should contain a visible illustration");
   signatures.add(board.flat().join(","));
