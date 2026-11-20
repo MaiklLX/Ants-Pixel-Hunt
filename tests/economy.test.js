@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {createEconomy,normalizeEconomy,collectCube,completeMeadow,purchaseBuilding,BUILDINGS,buildingCost} from "../src/economy.js";
+import {createEconomy,normalizeEconomy,collectCube,completeMeadow,purchaseBuilding,BUILDINGS,buildingCost,zenRunPendingReward,completeZenRun} from "../src/economy.js";
 
 test("nectar is awarded for every ten collected cubes and progress carries over",()=>{
  let state=createEconomy();for(let i=0;i<9;i++)state=collectCube(state);
