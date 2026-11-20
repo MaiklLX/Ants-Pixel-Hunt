@@ -1198,13 +1198,13 @@ export function chooseTopColumn(state,column){
  };
  if(box.special==="linked"){
   const partnerIndex=getLinkedPartner(state.levelId,selectedIndex),partnerColumn=state.tray[0].findIndex(index=>index===partnerIndex);
-  if(partnerColumn<0||partnerColumn===column)return false;
+  if(partnerColumn===column)return false;
   const partnerBox=incoming[partnerIndex];
   if(!partnerBox||partnerBox.special!=="linked"||partnerBox.pairId!==box.pairId)return false;
-  if(freeSlots.length===1){
+  if(freeSlots.length===1||partnerColumn<0){
    const freeSlot=freeSlots[0];state.slots[freeSlot]={...box,sourceIndex:selectedIndex};
    shiftColumn(column);normalizeLinkedTray(state);state.pendingLinkedIndex=null;
-   state.message="Первая часть связки отправлена. Второй бокс можно отправить, когда освободится отсек.";
+   state.message="Первая часть связки отправлена. Вторая останется в очереди и сможет занять следующий свободный отсек.";
    return true;
   }
   if(freeSlots.length<2)return false;
