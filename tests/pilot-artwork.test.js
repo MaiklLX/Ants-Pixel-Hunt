@@ -67,3 +67,22 @@ test("pilot images are converted to the actual collectible board before dispatch
  assert.match(app,/PILOT_ARTWORK\[launchLevel\.number\]\?\.label/);
  assert.match(app,/await boardArtworkPromise/);
 });
+
+
+test("pilot PNG rasterization keeps small accent colors instead of merging them into the body color",async()=>{
+ const app=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
+ const game=await readFile(new URL("../src/game.js",import.meta.url),"utf8");
+ assert.match(app,/setArtworkBoard\(key,board,pilotArtwork\?3:18\)/);
+ assert.match(game,/setArtworkBoard\(levelId,board,minimumColorCount=18\)/);
+ assert.match(game,/mergeSparseArtworkColors\(board\.map\(row=>row\.slice\(\)\),minimumColorCount\)/);
+});
+
+test("main menu progress reset clears campaign and colony progression only after confirmation",async()=>{
+ const app=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
+ const handler=app.slice(app.indexOf('$("reset-progress").addEventListener'),app.indexOf('$("how-to-play").addEventListener'));
+ assert.match(handler,/window\.confirm\(/);
+ assert.match(handler,/localStorage\.removeItem\(CAMPAIGN_KEY\)/);
+ assert.match(handler,/localStorage\.removeItem\(ECONOMY_STORAGE_KEY\)/);
+ assert.match(handler,/location\.reload\(\)/);
+ assert.doesNotMatch(handler,/localStorage\.clear\(/);
+});
