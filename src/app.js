@@ -9,7 +9,7 @@ const shell=$("app-shell"),boardEl=$("board"),slotsEl=$("slots"),choicesEl=$("ch
 const boardCtx=boardEl.getContext("2d"),antCtx=antLayer.getContext("2d");
 let state=createGame(),resolverRunning=false,resetting=false,resetAfterMenu=false,antFrame=0,antCanvasWidth=0,antCanvasHeight=0,gameStarted=false,totalBlocks=state.remaining+(state.obstacles||[]).reduce((sum,item)=>sum+item.hp,0);
 const ZEN_ARTWORK_KEY="ants-zen-artwork-v1";
-let zenMode=false,zenRunCollected=0,zenPendingNectar=0,zenRewardPaid=false;
+let zenMode=false,zenRunCollected=0,zenPendingNectar=0;
 
 const CUSTOM_ARTWORK_PREFIX="ants-custom-artwork-v1:";
 function readCustomArtwork(levelId){
@@ -881,6 +881,7 @@ function updateResultOverlay(){
  if(next)$("result-next").textContent=`Следующая полянка: ${next.name} →`;
  overlay.hidden=!(complete||failed);
  if(!complete&&!failed)return;
+ const kicker=$("result-overlay").querySelector(".result-kicker");if(kicker)kicker.textContent=zenMode?"ДЗЕН-ИСПЫТАНИЕ":`ПОЛЯНКА № ${getLevel(state.levelId).number}`;
  $("result-emoji").textContent=complete?"🏆":zenMode?"🌧️":"🐜";
  $("result-title").textContent=zenMode?(complete?"Твой рисунок собран!":"Нектар потерян"):(complete?"Портрет собран!":"Колония остановилась");
  $("result-copy").textContent=zenMode
@@ -895,7 +896,7 @@ function settleColony(){
   if(!state.won){
    if(zenMode){
     const result=completeZenRun(colony,zenPendingNectar);
-    colony=result.economy;zenPendingNectar=result.reward;zenRewardPaid=true;updateEconomy();
+    colony=result.economy;zenPendingNectar=result.reward;updateEconomy();
    }else{markLevelComplete(state.levelId);colony=completeMeadow(colony);updateEconomy();}
   }
   state.won=true;state.message=zenMode?"Рисунок собран! Нектар отправлен в Муравейник ✨":"Победа! Портрет собран ✨";
@@ -1013,7 +1014,7 @@ function showMainMenu(){
 function maybeFinalizeMenuExit(){
  if(!resetAfterMenu||workerPromises.size||loadingSlots.size||resetting)return;
  resetting=true;cancelAnimationFrame(antFrame);antFrame=0;activeAnts.clear();pickupEffects.length=0;deliveryEffects.length=0;reservedTargets.clear();slotNextLaunchAt.clear();
- const wasZen=zenMode;zenMode=false;zenRunCollected=0;zenPendingNectar=0;zenRewardPaid=false;
+ const wasZen=zenMode;zenMode=false;zenRunCollected=0;zenPendingNectar=0;
  state=createGame(wasZen?"meadow-01":state.levelId);totalBlocks=state.remaining;gameStarted=false;resetAfterMenu=false;resetting=false;updateZenHud();
  render();$("save-status").textContent="Партия сброшена · открытые полянки сохранены";updateMainMenu();
 }
@@ -1024,7 +1025,7 @@ function startGame(){
 }
 async function startFreshGame(levelId=state.levelId){
  if(workerPromises.size>0||loadingSlots.size>0||resetAfterMenu)return;
- zenMode=false;zenRunCollected=0;zenPendingNectar=0;zenRewardPaid=false;
+ zenMode=false;zenRunCollected=0;zenPendingNectar=0;
  resetting=true;cancelAnimationFrame(antFrame);activeAnts.clear();pickupEffects.length=0;deliveryEffects.length=0;reservedTargets.clear();slotNextLaunchAt.clear();applySavedArtwork(levelId);state=createGame(levelId);boardArtworkKey=readCustomArtwork(levelId)?levelId:"";totalBlocks=tasksRemaining();resetting=false;
  gameStarted=true;render();$("save-status").textContent="Новая партия · прогресс уровня не сохраняется";shell.classList.remove("menu-open");updateMainMenu();kickColony();
 }
@@ -1039,7 +1040,7 @@ function startZenGame(){
   const board=decodeSpriteArtwork(payload,COLORS);
   registerCustomArtwork("zen-custom",board,payload.name||payload.title||"Мой рисунок");
   resetting=true;cancelAnimationFrame(antFrame);antFrame=0;activeAnts.clear();pickupEffects.length=0;deliveryEffects.length=0;reservedTargets.clear();slotNextLaunchAt.clear();
-  zenMode=true;zenRunCollected=0;zenPendingNectar=0;zenRewardPaid=false;
+  zenMode=true;zenRunCollected=0;zenPendingNectar=0;
   state=createGame("zen-custom");boardArtworkKey="zen-custom";totalBlocks=tasksRemaining();resetting=false;gameStarted=true;
   shell.classList.remove("menu-open");render();updateZenHud();updateMainMenu();kickColony();
  }catch(error){
