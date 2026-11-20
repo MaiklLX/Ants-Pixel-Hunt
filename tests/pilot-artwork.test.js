@@ -29,6 +29,7 @@ test("pilot PNGs are embedded RGBA sources for offline use",()=>{
  for(const [number] of expected){
   const dataUrl=PILOT_ARTWORK[number].dataUrl;
   assert.match(dataUrl,/^data:image\/png;base64,/);
+  assert.equal(dataUrl.includes("\n"),false,"embedded base64 must stay on one valid JS string line");
   const bytes=Buffer.from(dataUrl.slice(dataUrl.indexOf(",")+1),"base64");
   assert.deepEqual([...bytes.subarray(0,8)],signature);
   assert.equal(bytes[25],6,"PNG must retain its alpha channel");
@@ -44,4 +45,7 @@ test("pilot images are converted to the actual collectible board before dispatch
  assert.match(app,/PILOT_ARTWORK\[item\.number\]\?\.dataUrl/);
  assert.match(app,/await boardArtworkPromise/);
  assert.match(app,/drawImage\(image,\(450-drawWidth\)\/2,\(450-drawHeight\)\/2,drawWidth,drawHeight\)/);
+ assert.match(app,/PILOT_ARTWORK\[resultLevel\.number\]\?\.label/);
+ assert.match(app,/PILOT_ARTWORK\[launchLevel\.number\]\?\.label/);
+ assert.match(app,/await boardArtworkPromise/);
 });
