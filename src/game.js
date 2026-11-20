@@ -944,6 +944,11 @@ export function buildIncoming(board,levelNumber=1){
   lastColor=color;
  }
  if(left>0)throw new Error("Artwork queue stopped before every block was assigned");
+ // Keep two genuinely playable opening choices, then place one future-layer
+ // colour in the third lane as a deliberate planning temptation.
+ const openingColors=new Set(getExposedPixels(board).map(point=>board[point.y][point.x]));
+ const decoyIndex=deck.findIndex((box,index)=>index>=2&&!openingColors.has(box.color));
+ if(decoyIndex>2){const [decoy]=deck.splice(decoyIndex,1);deck.splice(2,0,decoy);}
  return deck;
 }
 function createLevelObstacles(levelId,board){
