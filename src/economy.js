@@ -28,3 +28,15 @@ export function purchaseBuilding(economy,id){
  if(next.nectar<cost)return{ok:false,economy:next,reason:"funds",cost};
  next.nectar-=cost;next.buildings[id]++;return{ok:true,economy:next,cost};
 }
+
+export function zenRunPendingReward(collected,economy){
+ const count=Math.max(0,Math.floor(Number(collected)||0));
+ const colony=normalizeEconomy(economy);
+ return Math.floor(count/10)*(1+colony.buildings.garden);
+}
+export function completeZenRun(economy,pendingNectar){
+ const next=normalizeEconomy(economy);
+ const reward=Math.max(0,Math.floor(Number(pendingNectar)||0))+10+next.buildings.granary*5+next.buildings.nursery*3;
+ next.nectar+=reward;next.completed++;
+ return{economy:next,reward};
+}
