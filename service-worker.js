@@ -1,4 +1,4 @@
-const CACHE="ants-pixel-hunt-shell-v106-kt290-pilot-levels";
+const CACHE="ants-pixel-hunt-shell-v107-kt291-centered-zen";
 const STATIC_FILES=["./manifest.webmanifest","./assets/icon-192.svg","./assets/icon-512.svg"];
 self.addEventListener("install",event=>{
  event.waitUntil((async()=>{
