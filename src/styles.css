@@ -4830,3 +4830,65 @@ footer{color:#796589}
 .artwork-import-button{border:1px solid #b7a2cf;background:linear-gradient(145deg,#f5edff,#e8dafa);color:#57416f;border-radius:999px;padding:7px 13px;font:800 11px/1.2 system-ui,sans-serif;letter-spacing:.2px;cursor:pointer;box-shadow:0 2px 0 #bba8cb}
 .artwork-import-button:active{transform:translateY(1px);box-shadow:0 1px 0 #bba8cb}
 .artwork-import-status{flex-basis:100%;text-align:center;color:#8b7a98;font-size:10px;line-height:1.35;min-height:13px}
+
+
+/* KT-292 — calm woodland palette: warm stone, sage and muted brass. */
+:root{
+ --bg:#e4e9df;--panel:#f4f2e8;--panel2:#dce5d7;--gold:#b99a5e;
+ --muted:#758477;--text:#34443a;--line:#cbd6c8;
+}
+html,body{background:#dfe5db}
+body{
+ background:
+  radial-gradient(ellipse at 50% -10%,#f3f4e9 0%,#e5eadf 48%,#d4ddd1 100%);
+ color:#34443a;
+}
+.app-shell{
+ background:linear-gradient(160deg,#f2f2e8 0%,#e7ebdf 55%,#dce4d8 100%);
+ border-color:#f8f7ef;
+ box-shadow:0 14px 36px #344b3822,inset 0 1px 0 #fff;
+}
+h1,.level-heading h2{color:#49634d}
+.subtitle,.board-status,.level-kicker{color:#7d8d79}
+.board-wrap{
+ background:linear-gradient(145deg,#e9ede2 0%,#d1dbcc 58%,#c3d0c0 100%);
+ border:2px solid #f1f1e7;
+ box-shadow:0 6px 0 #b8c6b4,0 12px 22px #344b3826,inset 0 2px 5px #fff;
+}
+.board{border-radius:12px;filter:drop-shadow(0 2px 2px #354c3838);background:#d9dfd1}
+.board-corners i{border-color:#c2a66d}
+.slot,.slot.filled{
+ background:linear-gradient(145deg,#f5f3e9,#e0e7d9);
+ border:1px solid #f8f6ed;
+ box-shadow:0 4px 0 #c1cdbd,0 7px 12px #344b3828,inset 0 1px 0 #fff;
+ border-radius:13px;
+}
+.slot.filled{background:linear-gradient(145deg,#f8f6ec,#e5ebdc)}
+.slot.active{box-shadow:0 5px 0 #b8c7b3,0 8px 13px #344b3838,inset 0 1px 0 #fff}
+.choice-card,.choice-card.locked,.choice-card.empty-box{
+ background:linear-gradient(150deg,#f8f6ed 0%,#e9ede2 62%,#dce5d8 100%);
+ border:1px solid #f8f6ed;
+ box-shadow:0 5px 0 #bdcbb9,0 8px 13px #344b3828,inset 0 2px 0 #fff;
+ border-radius:14px;
+}
+.choice-card.locked{background:linear-gradient(150deg,#e8e9df,#d9ded3);border-color:#cbd4c6}
+.conveyor{
+ background:linear-gradient(180deg,#e8ede2,#d1ddcf);
+ border-color:#c5d2c1;box-shadow:inset 0 1px #fff,0 3px 0 #b7c7b5;
+}
+.belt{background:repeating-linear-gradient(135deg,#aab9a1 0 7px,#d5dfce 7px 14px);box-shadow:inset 0 3px 5px #344b3838,0 1px 1px #fff}
+footer{color:#78877a}
+.main-menu{
+ background:radial-gradient(ellipse at 50% 8%,#f4f2e7 0%,#e7ecdf 42%,#d7e1d5 100%);
+ color:#405342;
+}
+.main-menu::before{background-image:radial-gradient(#91a88d 1px,transparent 1px);opacity:.16}
+.zen-location{
+ background:linear-gradient(145deg,#f3f3e8,#e0e8d9);
+ border-color:#c9d6c4;
+ box-shadow:0 3px 0 #c2d0bd,0 6px 12px #344b3818,inset 0 1px #fff;
+ color:#4d674e;
+}
+.zen-location .hub-location-icon{background:linear-gradient(145deg,#f5f3e8,#d9e4d4)}
+.zen-location .hub-location-copy strong{color:#4d674e}
+.zen-location .hub-location-arrow{color:#8da284}
