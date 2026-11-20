@@ -918,11 +918,15 @@ export function buildIncoming(board,levelNumber=1){
   for(const point of getExposedPixels(board)){
    const color=board[point.y][point.x];if(color)exposedCounts[color]++;
   }
+  const totalBlocks=Object.values(totals).reduce((sum,value)=>sum+value,0);
+  // Keep ordinary squads tactical: no 90-ant warehouses and no arbitrary
+  // one-color mega-crates. The target adapts to picture size while keeping
+  // each crate in a readable 40–52 range whenever that color budget permits.
+  const target=Math.min(52,Math.max(40,Math.ceil(totalBlocks/24)));
   const queues={};
   for(const color of colors){
    const total=totals[color];queues[color]=[];
    if(!total)continue;
-   const target=Math.min(118,Math.max(36,levelNumber<26?104:levelNumber<76?112:levelNumber<151?118:levelNumber<301?124:130));
    const count=Math.max(1,Math.ceil(total/target));
    const base=Math.floor(total/count),remainder=total%count;
    for(let index=0;index<count;index++){
@@ -939,8 +943,8 @@ export function buildIncoming(board,levelNumber=1){
    deck.push(queues[color].shift());used.add(color);
   };
   // First: one useful front color, a tempting future layer, then a second
-  // useful color when available. Both useful squads are large enough to
-  // persist through a change of layer instead of vanishing after 1–3 ants.
+  // useful color when available. Every crate is a bounded work batch; if its
+  // next matching block is covered, the remaining ants wait in the slot.
   take(openingColors[0]);
   take(futureColors[0]);
   take(openingColors[1]);
