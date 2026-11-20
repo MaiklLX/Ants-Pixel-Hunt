@@ -7,7 +7,7 @@
     "licenseNote": "Upstream README states all packs are CC0; each pack includes SOURCE.md with original source and author details.",
     "checkedAt": "2026-11-20"
   },
-  "usage": "Use original sprites as source material. Convert selected sprite regions into collectible 45x45 color-block artwork before adding a campaign level.",
+  "usage": "Use original sprites as source material. Convert selected sprite regions into collectible 35x35 color-block artwork before adding a campaign level.",
   "packs": [
     {
       "id": "foliage-sprites",
