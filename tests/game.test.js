@@ -513,6 +513,23 @@ test("ant wave planner can cap simultaneous workers without reserving extra targ
  assert.deepEqual(findAntWave(s,new Set(),new Map(),0),[]);
 });
 
+test("a waiting color resumes automatically as soon as another squad exposes its first block",()=>{
+ const s=createGame();s.board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
+ s.board[1][1]="red";
+ for(const [x,y] of [[1,0],[0,1],[2,1],[1,2]])s.board[y][x]="blue";
+ s.remaining=5;s.obstacles=[];
+ s.slots[0]={color:"red",ants:1};s.slots[1]={color:"blue",ants:4};
+ const opening=findAntWave(s,new Set(),new Map(),8);
+ assert.equal(opening.length,4);
+ assert.ok(opening.every(move=>move.color==="blue"),"only the exposed blue ring can work first");
+ for(const move of opening)assert.equal(applyAntMove(s,move.slot,move.target),true);
+ assert.equal(completeBoxDeparture(s,1),true,"the blue squad frees its slot when its four blocks are gone");
+ const resumed=findAntWave(s,new Set(),new Map(),8);
+ assert.equal(resumed.length,1);
+ assert.equal(resumed[0].slot,0);
+ assert.equal(resumed[0].color,"red","the waiting red squad starts as soon as its centre block is exposed");
+});
+
 test("a large ant box can wait while a smaller matching box clears and frees its slot",()=>{
  const s=createGame();s.board=Array.from({length:7},()=>Array(7).fill("green"));
  s.board[0][0]="red";s.board[0][1]="red";s.board[1][0]="red";
