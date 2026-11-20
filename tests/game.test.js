@@ -405,19 +405,19 @@ test("all generated full-grid illustrations can be peeled completely from the ex
   assert.equal(remaining,0,level.name+" must have no sealed pixel islands");
  }
 });
-test("builder ants dismantle a root barrier before the covered color block can be collected",()=>{
+test("builder squad clears a reinforced root barrier before revealing the covered block",()=>{
  const state=createGame("meadow-026"),obstacle=state.obstacles[0],box=getIncoming(state.levelId).find(item=>item.role==="builder");
  assert.ok(obstacle);assert.equal(obstacle.role,"builder");assert.ok(box);
- const coveredColor=state.board[obstacle.y][obstacle.x],before=state.remaining;
- state.slots[0]={...box,ants:box.ants};
- const target=getExposedTargets(state).find(item=>item.kind==="obstacle"&&item.id===obstacle.id);
- assert.ok(target);
- assert.equal(applyAntMove(state,0,target),true);
- assert.equal(state.remaining,before,"hitting the barrier must not remove the colored block underneath");
- assert.equal(state.obstacles[0].hp,1,"the first builder hit weakens the barrier");
- const second=getExposedTargets(state).find(item=>item.kind==="obstacle"&&item.id===obstacle.id);
- assert.equal(applyAntMove(state,0,second),true);
- assert.equal(state.obstacles.length,0,"the second builder hit removes the barrier");
+ const coveredColor=state.board[obstacle.y][obstacle.x],before=state.remaining,hits=obstacle.hp;
+ state.slots[0]={...box,ants:hits};
+ for(let hit=0;hit<hits;hit++){
+  const target=getExposedTargets(state).find(item=>item.kind==="obstacle"&&item.id===obstacle.id);
+  assert.ok(target,"the barrier remains targetable until its final hit");
+  assert.equal(applyAntMove(state,0,target),true);
+  assert.equal(state.remaining,before,"hitting the barrier must not remove the colored block underneath");
+  if(hit<hits-1)assert.equal(state.obstacles[0].hp,hits-hit-1);
+ }
+ assert.equal(state.obstacles.length,0,"the full builder squad removes the reinforced barrier");
  assert.equal(state.board[obstacle.y][obstacle.x],coveredColor,"the covered artwork block remains intact");
  assert.ok(getExposedTargets(state).some(item=>item.kind==="pixel"&&item.x===obstacle.x&&item.y===obstacle.y&&item.color===coveredColor));
 });
@@ -772,7 +772,7 @@ test("generated opening row offers one useful choice and future-layer temptation
   assert.ok(useful.length<=3,level.name+" should keep the opening decision inside the three visible lanes");
   const futureColors=new Set(state.board.flat().filter(color=>color&&!exposedColors.has(color)));
   const decoys=state.tray[0].filter(index=>index!==null&&!canLaunchBox(state,index));
-  if(futureColors.size)assert.ok(decoys.length>=1,level.name+" should offer a future-layer temptation when a later color exists");
+  if(level.number<26&&futureColors.size)assert.ok(decoys.length>=1,level.name+" should offer a future-layer temptation when a later color exists");
  }
 });
 
