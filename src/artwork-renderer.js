@@ -168,12 +168,14 @@ export function createArtworkSvg(levelNumber){
  let placements=[];
  if(isStarter)placements=[[50,50,350,350]];
  else{
-  const count=levelNumber<51?1:levelNumber<301?2:3;
+  const count=levelNumber<=8?1:levelNumber<151?2:3;
   const variant=(levelNumber+Math.floor(levelNumber/11))%3;
   placements=sceneLayout(count);
   for(let part=0;part<count;part++){
     const motifSeed=(Math.imul(levelNumber,0x9e3779b1)^Math.imul(part+1,0x85ebca6b))>>>0;
-    types.push(MOTIF_ORDER[motifSeed%MOTIF_ORDER.length]);
+    let motifIndex=motifSeed%MOTIF_ORDER.length;
+    if(part&&types.includes(MOTIF_ORDER[motifIndex]))motifIndex=(motifIndex+1)%MOTIF_ORDER.length;
+    types.push(MOTIF_ORDER[motifIndex]);
    }
  }
  const body=placements.map((p,i)=>{
