@@ -64,6 +64,11 @@
       <h2 id="level-title">Портрет лягушонка</h2>
       <p id="board-status" class="board-status">Осталось: —</p>
       <div class="level-progress" role="progressbar" aria-label="Сбор пиксельного портрета" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="progress-fill"></span></div>
+      <div class="artwork-import-control">
+        <button type="button" id="artwork-import-button" class="artwork-import-button">＋ Свой спрайт</button>
+        <input id="artwork-import-file" type="file" accept="application/json,.json" hidden>
+        <span id="artwork-import-status" class="artwork-import-status" role="status" aria-live="polite">Импортируйте JSON из мастерской, чтобы заменить рисунок этой полянки.</span>
+      </div>
       <div class="speed-control">
         <button type="button" id="speed-toggle" class="speed-toggle" aria-label="Скорость муравьишек: 1×. Нажми, чтобы переключить скорость" aria-valuetext="1×">
           <span id="speed-current" aria-live="polite">1×</span><span class="speed-cycle-icon" aria-hidden="true">↻</span>
