@@ -7,10 +7,12 @@ function payload(){
  const rows=Array.from({length:45},(_,y)=>Array.from({length:45},(_,x)=>x<15?".":x<30?"0":y%2?"1":"2").join(""));
  return {width:45,height:45,palette,data:rows.join("/")};
 }
-test("sprite import decodes a 45x45 image into the game's named color blocks",()=>{
- const board=decodeSpriteArtwork(payload(),COLORS);
+test("sprite import preserves exact source RGB colors as game colors",()=>{
+ const source=payload(),board=decodeSpriteArtwork(source,COLORS);
  assert.equal(board.length,45);assert.ok(board.every(row=>row.length===45));
- assert.equal(board[0][0],"");assert.equal(board[0][20],"yellow");assert.equal(board[0][35],"turquoise");
+ assert.equal(board[0][0],"");assert.equal(COLORS[board[0][20]].hex,"#e7c66d");
+ assert.equal(COLORS[board[0][35]].hex,"#55b8ad");
+ assert.equal(COLORS[board[1][35]].hex,"#3977aa");
 });
 test("sprite import rejects wrong dimensions and malformed rows",()=>{
  const wrong=payload();wrong.width=35;
