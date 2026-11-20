@@ -1006,7 +1006,12 @@ function updateMainMenu(){
  fresh.hidden=true;
  progress.textContent=completed.has(launchLevel.id)?"Кампания пройдена · можно повторить":`Последний доступный уровень · ${total} в кампании`;
 }
+function clearZenLaunchParam(){
+ const url=new URL(location.href);
+ if(url.searchParams.has("mode")){url.searchParams.delete("mode");history.replaceState(null,"",url.pathname+url.search+url.hash);}
+}
 function showMainMenu(){
+ if(zenMode)clearZenLaunchParam();
  shell.classList.add("menu-open");
  if(gameStarted){resetAfterMenu=true;maybeFinalizeMenuExit();}
  updateMainMenu();
@@ -1016,7 +1021,7 @@ function maybeFinalizeMenuExit(){
  resetting=true;cancelAnimationFrame(antFrame);antFrame=0;activeAnts.clear();pickupEffects.length=0;deliveryEffects.length=0;reservedTargets.clear();slotNextLaunchAt.clear();
  const wasZen=zenMode;zenMode=false;zenRunCollected=0;zenPendingNectar=0;
  state=createGame(wasZen?"meadow-01":state.levelId);totalBlocks=state.remaining;gameStarted=false;resetAfterMenu=false;resetting=false;updateZenHud();
- render();$("save-status").textContent="Партия сброшена · открытые полянки сохранены";updateMainMenu();
+ render();$("save-status").textContent=wasZen?"Дзен-попытка оставлена · временный нектар сброшен":"Партия сброшена · открытые полянки сохранены";updateMainMenu();
 }
 function startGame(){
  if(resetAfterMenu)return;
@@ -1025,7 +1030,7 @@ function startGame(){
 }
 async function startFreshGame(levelId=state.levelId){
  if(workerPromises.size>0||loadingSlots.size>0||resetAfterMenu)return;
- zenMode=false;zenRunCollected=0;zenPendingNectar=0;
+ clearZenLaunchParam();zenMode=false;zenRunCollected=0;zenPendingNectar=0;
  resetting=true;cancelAnimationFrame(antFrame);activeAnts.clear();pickupEffects.length=0;deliveryEffects.length=0;reservedTargets.clear();slotNextLaunchAt.clear();applySavedArtwork(levelId);state=createGame(levelId);boardArtworkKey=readCustomArtwork(levelId)?levelId:"";totalBlocks=tasksRemaining();resetting=false;
  gameStarted=true;render();$("save-status").textContent="Новая партия · прогресс уровня не сохраняется";shell.classList.remove("menu-open");updateMainMenu();kickColony();
 }
