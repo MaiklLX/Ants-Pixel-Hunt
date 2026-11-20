@@ -1,4 +1,4 @@
-import {COLORS,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,LEVELS,getLevel,getIncoming,createGame,setArtworkBoard,canChoose,chooseTopColumn,canLaunchBox,isLockedBox,getLinkedPartner,findAntWave,applyAntPickup,completeBoxDeparture,isDefeat,isGameComplete,getExposedTargets,getExposedPixels,countQueuedBySlot,countDispatchingWorkers,countSlotWorkers} from "./game.js";
+import {COLORS,SIZE,GRID_SIZE,BLOCK_SIZE,SLOT_COUNT,TRAY_SIZE,LEVELS,getLevel,getIncoming,createGame,setArtworkBoard,canChoose,chooseTopColumn,canLaunchBox,isLockedBox,getLinkedPartner,findAntWave,applyAntPickup,completeBoxDeparture,isDefeat,isGameComplete,getExposedTargets,getExposedPixels,countQueuedBySlot,countDispatchingWorkers,countSlotWorkers,registerCustomArtwork} from "./game.js";
 import {createArtworkSvg} from "./artwork-renderer.js";
 import {decodeSpriteArtwork} from "./custom-artwork.js";
 import {getAntTripFrame,getAntLaunchDelay,getAntQueueDelay,createPausableClock,getTrailPose,getAntTravelDurations,getAntGaitFrame} from "./ant-animation.js";
@@ -8,6 +8,8 @@ const $=id=>document.getElementById(id);
 const shell=$("app-shell"),boardEl=$("board"),slotsEl=$("slots"),choicesEl=$("choices"),antLayer=$("ant-layer"),nestEntrance=$("nest-entrance");
 const boardCtx=boardEl.getContext("2d"),antCtx=antLayer.getContext("2d");
 let state=createGame(),resolverRunning=false,resetting=false,resetAfterMenu=false,antFrame=0,antCanvasWidth=0,antCanvasHeight=0,gameStarted=false,totalBlocks=state.remaining+(state.obstacles||[]).reduce((sum,item)=>sum+item.hp,0);
+const ZEN_ARTWORK_KEY="ants-zen-artwork-v1";
+let zenMode=false,zenRunCollected=0,zenPendingNectar=0,zenRewardPaid=false;
 
 const CUSTOM_ARTWORK_PREFIX="ants-custom-artwork-v1:";
 function readCustomArtwork(levelId){
@@ -208,15 +210,27 @@ function ensureBoardArtwork(){
 function tasksRemaining(){
  return state.remaining+(state.obstacles||[]).reduce((sum,item)=>sum+item.hp,0);
 }
+function updateZenHud(){
+ const hud=$("zen-run-hud");if(!hud)return;
+ hud.hidden=!zenMode;
+ if(!zenMode)return;
+ const collected=$("zen-collected"),pending=$("zen-pending-nectar"),progress=$("zen-progress-fill");
+ if(collected)collected.textContent=zenRunCollected.toLocaleString("ru-RU");
+ if(pending)pending.textContent=zenPendingNectar.toLocaleString("ru-RU");
+ if(progress)progress.style.width=Math.round(zenRunCollected/Math.max(1,totalBlocks)*100)+"%";
+}
 function updateBoardProgress(){
  const obstacleCount=(state.obstacles||[]).length;
- $("board-status").textContent=obstacleCount
-  ? `Осталось: ${state.remaining.toLocaleString("ru-RU")} блоков · преград: ${obstacleCount}`
-  : `Осталось: ${state.remaining.toLocaleString("ru-RU")}`;
+ $("board-status").textContent=zenMode
+  ? `ДЗЕН · осталось блоков: ${state.remaining.toLocaleString("ru-RU")}`
+  : obstacleCount
+   ? `Осталось: ${state.remaining.toLocaleString("ru-RU")} блоков · преград: ${obstacleCount}`
+   : `Осталось: ${state.remaining.toLocaleString("ru-RU")}`;
  const collected=totalBlocks-tasksRemaining(),percent=Math.round(collected/Math.max(1,totalBlocks)*100);
  const progress=$("progress-fill"),track=progress?.parentElement;
  if(progress)progress.style.width=percent+"%";
  if(track)track.setAttribute("aria-valuenow",String(percent));
+ updateZenHud();
 }
 function drawBoardGridCell(x,y,cell){
  const px=x*cell,py=y*cell;
@@ -827,7 +841,11 @@ async function runSlotWorker(move,workerId){
  try{
   await animateAntTrip(move,workerId,()=>{
    const worker=workerPromises.get(workerId);if(worker)worker.phase="returning";
-   colony=collectCube(colony);updateEconomy();
+   if(zenMode){
+    zenRunCollected++;
+    zenPendingNectar=Math.floor(zenRunCollected/10)*(1+colony.buildings.garden);
+    updateZenHud();
+   }else{colony=collectCube(colony);updateEconomy();}
    reservedTargets.delete(key);
   },()=>{
    const worker=workerPromises.get(workerId);if(worker)worker.phase="outbound";
@@ -863,17 +881,29 @@ function updateResultOverlay(){
  if(next)$("result-next").textContent=`Следующая полянка: ${next.name} →`;
  overlay.hidden=!(complete||failed);
  if(!complete&&!failed)return;
- $("result-emoji").textContent=complete?"🏆":"🐜";
- $("result-title").textContent=complete?"Портрет собран!":"Колония остановилась";
- $("result-copy").textContent=complete
-  ?"Все цветные кубики нашли своё место. Отличная работа, команда!"
+ $("result-emoji").textContent=complete?"🏆":zenMode?"🌧️":"🐜";
+ $("result-title").textContent=zenMode?(complete?"Твой рисунок собран!":"Нектар потерян"):(complete?"Портрет собран!":"Колония остановилась");
+ $("result-copy").textContent=zenMode
+  ? complete?`Ты собрал рисунок и сохранил ${zenPendingNectar.toLocaleString("ru-RU")} 🌼 нектара в Муравейнике. Отличная работа!`:"Пять отсеков заняты, а доступных ходов больше нет. Весь нектар этой попытки сгорел. Твой рисунок сохранён — попробуй пройти его заново."
+  : complete?"Все цветные кубики нашли своё место. Отличная работа, команда!"
   :"Все пять отсеков заняты, а доступных кубиков нужных цветов больше нет. Попробуй другой порядок боксов.";
- $("result-retry").textContent=complete?"Собрать портрет ещё раз":"Попробовать снова";
+ $("result-retry").textContent=zenMode?"Пройти рисунок заново":complete?"Собрать портрет ещё раз":"Попробовать снова";
 }
 function settleColony(){
  if(resolverRunning||workerPromises.size||loadingSlots.size||resetting)return;
- if(isGameComplete(state)){if(!state.won){markLevelComplete(state.levelId);colony=completeMeadow(colony);updateEconomy();}state.won=true;state.message="Победа! Портрет собран ✨";}
- else if(isDefeat(state)){state.lost=true;state.message="Поражение: все пять стартовых отсеков заняты, доступных пикселей нет.";}
+ if(isGameComplete(state)){
+  if(!state.won){
+   if(zenMode){
+    const reward=zenPendingNectar+10+colony.buildings.granary*5+colony.buildings.nursery*3;
+    zenPendingNectar=reward;colony.nectar+=reward;colony.completed++;zenRewardPaid=true;updateEconomy();
+   }else{markLevelComplete(state.levelId);colony=completeMeadow(colony);updateEconomy();}
+  }
+  state.won=true;state.message=zenMode?"Рисунок собран! Нектар отправлен в Муравейник ✨":"Победа! Портрет собран ✨";
+ }
+ else if(isDefeat(state)){
+  if(zenMode){zenPendingNectar=0;updateZenHud();}
+  state.lost=true;state.message=zenMode?"Попытка не удалась · временный нектар потерян":"Поражение: все пять стартовых отсеков заняты, доступных пикселей нет.";
+ }
  else state.message=`Колония ждёт подходящий цвет · свободно отсеков: ${state.slots.filter(box=>!box).length}`;
  render();
 }
@@ -937,6 +967,9 @@ function cycleGameSpeed(){
 }
 function updateMainMenu(){
  const primary=$("start-game"),fresh=$("new-game"),progress=$("menu-progress");
+ const zenButton=$("zen-start"),zenStatus=$("zen-status-message"),hasZenArtwork=!!readZenPayload();
+ if(zenButton)zenButton.disabled=!hasZenArtwork;
+ if(zenStatus)zenStatus.textContent=hasZenArtwork?"Свой рисунок готов к прохождению":"Сначала создай рисунок в мастерской";
  const completed=completedLevels(),completedCount=LEVELS.filter(item=>completed.has(item.id)).length;
  const latestAvailable=LEVELS.filter(item=>isLevelUnlocked(item)).at(-1)||LEVELS[0];
  const launchLevel=latestAvailable,total=LEVELS.length;
@@ -980,7 +1013,8 @@ function showMainMenu(){
 function maybeFinalizeMenuExit(){
  if(!resetAfterMenu||workerPromises.size||loadingSlots.size||resetting)return;
  resetting=true;cancelAnimationFrame(antFrame);antFrame=0;activeAnts.clear();pickupEffects.length=0;deliveryEffects.length=0;reservedTargets.clear();slotNextLaunchAt.clear();
- state=createGame(state.levelId);totalBlocks=state.remaining;gameStarted=false;resetAfterMenu=false;resetting=false;
+ const wasZen=zenMode;zenMode=false;zenRunCollected=0;zenPendingNectar=0;zenRewardPaid=false;
+ state=createGame(wasZen?"meadow-01":state.levelId);totalBlocks=state.remaining;gameStarted=false;resetAfterMenu=false;resetting=false;updateZenHud();
  render();$("save-status").textContent="Партия сброшена · открытые полянки сохранены";updateMainMenu();
 }
 function startGame(){
@@ -990,15 +1024,33 @@ function startGame(){
 }
 async function startFreshGame(levelId=state.levelId){
  if(workerPromises.size>0||loadingSlots.size>0||resetAfterMenu)return;
+ zenMode=false;zenRunCollected=0;zenPendingNectar=0;zenRewardPaid=false;
  resetting=true;cancelAnimationFrame(antFrame);activeAnts.clear();pickupEffects.length=0;deliveryEffects.length=0;reservedTargets.clear();slotNextLaunchAt.clear();applySavedArtwork(levelId);state=createGame(levelId);boardArtworkKey=readCustomArtwork(levelId)?levelId:"";totalBlocks=tasksRemaining();resetting=false;
  gameStarted=true;render();$("save-status").textContent="Новая партия · прогресс уровня не сохраняется";shell.classList.remove("menu-open");updateMainMenu();kickColony();
 }
-
+function readZenPayload(){
+ try{return JSON.parse(localStorage.getItem(ZEN_ARTWORK_KEY)||"null");}catch{return null;}
+}
+function startZenGame(){
+ if(workerPromises.size||loadingSlots.size||resetAfterMenu)return;
+ const payload=readZenPayload();
+ if(!payload){$("zen-status-message").textContent="Сначала создай рисунок в Дзен-мастерской и нажми «Играть в Дзен».";return;}
+ try{
+  const board=decodeSpriteArtwork(payload,COLORS);
+  registerCustomArtwork("zen-custom",board,payload.name||payload.title||"Мой рисунок");
+  resetting=true;cancelAnimationFrame(antFrame);antFrame=0;activeAnts.clear();pickupEffects.length=0;deliveryEffects.length=0;reservedTargets.clear();slotNextLaunchAt.clear();
+  zenMode=true;zenRunCollected=0;zenPendingNectar=0;zenRewardPaid=false;
+  state=createGame("zen-custom");boardArtworkKey="zen-custom";totalBlocks=tasksRemaining();resetting=false;gameStarted=true;
+  shell.classList.remove("menu-open");render();updateZenHud();updateMainMenu();kickColony();
+ }catch(error){
+  zenMode=false;resetting=false;$("zen-status-message").textContent=error.message||"Не удалось открыть рисунок. Вернись в мастерскую и экспортируй его заново.";
+ }
+}
 
 async function boot(){
  if(applySavedArtwork(state.levelId)){state=createGame(state.levelId);boardArtworkKey=state.levelId;}
  totalBlocks=tasksRemaining();
- render();resizeAntLayer();updateMainMenu();
+ render();resizeAntLayer();updateMainMenu();updateZenHud();
  if("serviceWorker"in navigator){
   try{
    navigator.serviceWorker.addEventListener("controllerchange",()=>{
@@ -1011,11 +1063,14 @@ async function boot(){
  }
  $("save-status").textContent="Партия не сохраняется · прогресс колонии сохраняется";
  updateEconomy();
+ if(new URLSearchParams(location.search).get("mode")==="zen")startZenGame();
 }
 $("speed-toggle").addEventListener("click",cycleGameSpeed);
 updateGameSpeed(1);
 $("menu-toggle").addEventListener("click",showMainMenu);
 $("start-game").addEventListener("click",startGame);
+$("zen-start").addEventListener("click",startZenGame);
+$("zen-workshop").addEventListener("click",()=>{location.href="./tools/sprite-lab.html";});
  $("menu-current-level").addEventListener("click",()=>startFreshGame($("menu-current-level").dataset.levelId||state.levelId));
 $("new-game").addEventListener("click",()=>startFreshGame(state.levelId));
 $("result-retry").addEventListener("click",()=>startFreshGame(state.levelId));
