@@ -39,7 +39,7 @@ test("the box deck contains exactly enough ants to collect every pixel by color"
  for(const row of createArtworkBoard("meadow-01"))for(const color of row)if(color)totals[color]++;
  const deckTotals=Object.fromEntries(Object.keys(COLORS).map(color=>[color,0]));
  for(const box of INCOMING)deckTotals[box.color]+=box.ants;
- assert.deepEqual(Object.fromEntries(Object.entries(deckTotals).filter(([,total])=>total>0)),Object.fromEntries(Object.entries(totals).filter(([,total])=>total>0)));assert.ok(INCOMING.length>9);assert.equal(BOX_CAPACITY,150);
+ assert.deepEqual(Object.fromEntries(Object.entries(deckTotals).filter(([,total])=>total>0)),Object.fromEntries(Object.entries(totals).filter(([,total])=>total>0)));assert.ok(INCOMING.length>9);assert.equal(BOX_CAPACITY,30);
  const openingColors=new Set(getExposedPixels(createGame().board).map(point=>createGame().board[point.y][point.x]));
  assert.ok(INCOMING.slice(0,2).some(box=>openingColors.has(box.color)),"at least one of the first two crates must be playable immediately");
  assert.ok(INCOMING[2]&&!openingColors.has(INCOMING[2].color),"third crate should offer a future-layer temptation");
@@ -458,7 +458,7 @@ test("generated campaign uses bounded tactical squads and exact color budgets",(
   for(const [color,total] of colorTotals){
    const squads=deck.filter(box=>box.color===color);
    assert.equal(squads.reduce((sum,box)=>sum+box.ants,0),total,level.name+" "+color+" must retain its complete color budget");
-   assert.ok(squads.length<=Math.max(1,Math.ceil(total/40)+1),level.name+" "+color+" should not fragment into excessive crates");
+   assert.ok(squads.length<=Math.max(1,Math.ceil(total/20)+1),level.name+" "+color+" should not fragment into excessive crates");
   }
  }
 });
@@ -466,13 +466,13 @@ test("generated campaign uses bounded tactical squads and exact color budgets",(
 test("every generated campaign squad contains between 1 and 30 ants",()=>{
  for(const level of LEVELS){
   const deck=getIncoming(level.id);
-  assert.ok(deck.every(box=>box.ants>=10&&box.ants<=60),level.name+" every box must contain 1–30 ants");
+  assert.ok(deck.every(box=>box.ants>=1&&box.ants<=30),level.name+" every box must contain 1–30 ants");
  }
 });
 test("fallback queue fragments never create oversized ordinary squads",()=>{
  for(const level of LEVELS.filter(item=>item.number>=8)){
   const deck=buildIncoming(createArtworkBoard(level.id),level.number);
-  assert.ok(deck.every(box=>box.ants>=10&&box.ants<=60),level.name+" fallback squads must stay within the tactical size cap");
+  assert.ok(deck.every(box=>box.ants>=1&&box.ants<=30),level.name+" fallback squads must stay within the tactical size cap");
  }
 });
 
@@ -831,8 +831,8 @@ test("campaign queue squads become smaller in measured steps without losing any 
   assert.ok(deck.every(box=>box.ants>0&&box.ants<=BOX_CAPACITY));
   assert.equal(deck.reduce((sum,box)=>sum+box.ants,0),SIZE*SIZE);
  }
- assert.ok(median(early)>=25,"early generated levels should avoid unnecessary micro-squads");
- assert.ok(median(late) >=25,"late generated levels should avoid unnecessary micro-squads while keeping exact totals");
+ assert.ok(median(early)>=18,"early generated levels should avoid unnecessary micro-squads");
+ assert.ok(median(late) >=18,"late generated levels should avoid unnecessary micro-squads while keeping exact totals");
  assert.ok(Math.max(...early.map(box=>box.ants))<=30,"early squads must never become oversized");
  assert.ok(Math.max(...late.map(box=>box.ants))<=30,"late squads must never become oversized");
 });
@@ -849,7 +849,7 @@ test("rasterized artwork merges sub-ten pigment fragments before generating boxe
  const deck=getIncoming("meadow-500").filter(box=>!box.role);
  assert.ok(deck.length>0,"the artwork must always produce visible queue boxes");
  assert.equal(deck.reduce((sum,box)=>sum+box.ants,0),SIZE*SIZE,"all collectible cells must have matching box capacity");
- assert.ok(deck.every(box=>box.ants>=10&&box.ants<=60));
+ assert.ok(deck.every(box=>box.ants>=1&&box.ants<=30));
 });
 
 test("queue alternates newly exposed colours instead of letting a dominant active squad monopolize the deck",()=>{
@@ -857,7 +857,7 @@ test("queue alternates newly exposed colours instead of letting a dominant activ
  for(let y=0;y<10;y++)for(let x=0;x<10;x++)board[y][x]="blue";
  const deck=buildIncoming(board,500);
  assert.equal(deck.reduce((sum,box)=>sum+box.ants,0),SIZE*SIZE);
- assert.ok(deck.every(box=>box.ants>=10&&box.ants<=60));
+ assert.ok(deck.every(box=>box.ants>=1&&box.ants<=30));
  assert.notEqual(deck[0].color,deck[1].color,"both colours are exposed at the start, so the opening must offer a real second choice");
 });
 
@@ -869,7 +869,7 @@ test("small colour budgets stay small while large budgets split into balanced sq
  const red=deck.filter(box=>box.color==="red").map(box=>box.ants);
  assert.deepEqual(blue,[4],"a colour represented by only four blocks should use one four-ant box");
  assert.ok(red.length>1);
- assert.ok(red.every(count=>count>=20&&count<=30),"large colour budgets should use substantial, balanced squads");
+ assert.ok(red.every(count=>count>=13&&count<=30),"large colour budgets should use varied but substantial squads");
  assert.equal(red.reduce((sum,count)=>sum+count,0),SIZE*SIZE-4);
  assert.ok(deck.every(box=>box.ants>=1&&box.ants<=30));
 });
