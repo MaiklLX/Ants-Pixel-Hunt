@@ -89,7 +89,7 @@ function renderMap(){
  const track=document.createElement("div");track.className="map-summary-track";track.setAttribute("role","progressbar");track.setAttribute("aria-label","Прогресс кампании");track.setAttribute("aria-valuemin","0");track.setAttribute("aria-valuemax",String(LEVELS.length));track.setAttribute("aria-valuenow",String(finished));track.setAttribute("aria-valuetext",`${finished} из ${LEVELS.length} уровней пройдено`);
  const fill=document.createElement("span");fill.style.width=(finished/LEVELS.length*100)+"%";track.append(fill);
  const next=document.createElement("small");next.className="map-summary-next";next.textContent=finished===LEVELS.length?"Все 504 уровня пройдены — можно возвращаться к любимым":nextPlayable?"Следующий шаг · "+nextPlayable.name:"Кампания открыта";
- const continueButton=document.createElement("button");continueButton.type="button";continueButton.className="map-continue";continueButton.textContent=nextPlayable?"Продолжить · уровень "+nextPlayable.number:"Все уровни пройдены";continueButton.disabled=!nextPlayable;
+ const continueButton=document.createElement("button");continueButton.type="button";continueButton.className="map-continue";continueButton.textContent=nextPlayable?"Продолжить · "+(PILOT_ARTWORK[nextPlayable.number]?.label||"уровень "+nextPlayable.number):"Все уровни пройдены";continueButton.disabled=!nextPlayable;
  continueButton.setAttribute("aria-label",nextPlayable?"Начать следующий уровень: "+nextPlayable.name:"Все уровни пройдены");
  if(nextPlayable)continueButton.addEventListener("click",()=>{closeMap();void startFreshGame(nextPlayable.id);});
  summary.append(stat,track,next,continueButton);
@@ -889,7 +889,7 @@ function updateResultOverlay(){
  if(next)$("result-next").textContent=`Следующая полянка: ${next.name} →`;
  overlay.hidden=!(complete||failed);
  if(!complete&&!failed)return;
- const kicker=$("result-overlay").querySelector(".result-kicker");if(kicker)kicker.textContent=zenMode?"ДЗЕН-ИСПЫТАНИЕ":`ПОЛЯНКА № ${getLevel(state.levelId).number}`;
+ const kicker=$("result-overlay").querySelector(".result-kicker"),resultLevel=getLevel(state.levelId);if(kicker)kicker.textContent=zenMode?"ДЗЕН-ИСПЫТАНИЕ":PILOT_ARTWORK[resultLevel.number]?.label||`ПОЛЯНКА № ${resultLevel.number}`;
  $("result-emoji").textContent=complete?"🏆":zenMode?"🌧️":"🐜";
  $("result-title").textContent=zenMode?(complete?"Твой рисунок собран!":"Нектар потерян"):(complete?"Портрет собран!":"Колония остановилась");
  $("result-copy").textContent=zenMode
@@ -985,7 +985,7 @@ function updateMainMenu(){
  const unlockedCount=LEVELS.filter(item=>isLevelUnlocked(item)).length;
  const percent=total?Math.round(completedCount/total*100):0;
  $("menu-level-name").textContent=launchLevel.name;
- $("menu-level-number").textContent=`УРОВЕНЬ ${String(launchLevel.number).padStart(3,"0")}`;
+ $("menu-level-number").textContent=PILOT_ARTWORK[launchLevel.number]?.label||`УРОВЕНЬ ${String(launchLevel.number).padStart(3,"0")}`;
  $("menu-level-emoji").textContent=launchLevel.emoji;
  $("menu-progress-count").textContent=`${completedCount} / ${total}`;
  $("menu-progress-fill").style.width=percent+"%";
@@ -997,19 +997,19 @@ function updateMainMenu(){
  if(playMark)playMark.textContent="НАЧАТЬ →";
  currentButton.disabled=resetAfterMenu||!isLevelUnlocked(launchLevel);
  currentButton.dataset.levelId=launchLevel.id;
- currentButton.setAttribute("aria-label",`Начать последний доступный уровень ${launchLevel.number}: ${launchLevel.name}`);
+ currentButton.setAttribute("aria-label",`Начать последний доступный ${PILOT_ARTWORK[launchLevel.number]?.label||`уровень ${launchLevel.number}`}: ${launchLevel.name}`);
  const list=$("campaign-levels");
  if(list){list.replaceChildren();for(const item of LEVELS){
   const unlocked=isLevelUnlocked(item),done=completed.has(item.id),button=document.createElement("button");button.type="button";
   button.className="campaign-level"+(item.id===launchLevel.id?" current":"")+(unlocked?"":" locked");button.disabled=!unlocked;
   const icon=document.createElement("span");icon.className="campaign-emoji";icon.textContent=unlocked?"📦":"🔒";
   const copy=document.createElement("span");copy.className="campaign-copy";
-  const number=document.createElement("small");number.textContent=`${item.chapter} · ${String(item.number).padStart(3,"0")}`;
+  const number=document.createElement("small");number.textContent=`${item.chapter} · ${PILOT_ARTWORK[item.number]?.label||String(item.number).padStart(3,"0")}`;
   const name=document.createElement("strong");name.textContent=unlocked?(done?"Пройдена":"Открыта"):"Ещё не открыта";copy.append(number,name);
   const status=document.createElement("span");status.className="campaign-state";status.textContent=done?"✓":unlocked?"›":"🔒";
   button.append(icon,copy,status);button.addEventListener("click",()=>{if(unlocked){closeMap();void startFreshGame(item.id);}});list.append(button);
  }}
- primary.textContent=`Начать уровень ${String(launchLevel.number).padStart(3,"0")}`;primary.disabled=resetAfterMenu;
+ primary.textContent=`Начать ${PILOT_ARTWORK[launchLevel.number]?.label||`уровень ${String(launchLevel.number).padStart(3,"0")}`}`;primary.disabled=resetAfterMenu;
  primary.querySelector("span")?.remove();const arrow=document.createElement("span");arrow.setAttribute("aria-hidden","true");arrow.textContent="→";primary.append(arrow);
  fresh.hidden=true;
  progress.textContent=completed.has(launchLevel.id)?"Кампания пройдена · можно повторить":`Последний доступный уровень · ${total} в кампании`;
