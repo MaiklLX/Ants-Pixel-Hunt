@@ -4823,6 +4823,6 @@ footer{color:#796589}
 
 /* KT-289: compact local artwork import controls. */
 .artwork-import-control{display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;margin:8px auto 2px;max-width:520px}
-.artwork-import-button{border:1px solid #b7a2cf;background:linear-gradient(145deg,#f5edff,#e8dafa);color:#57416f;border-radius:999px;padding:7px 13px;font:800 11px/1.2 inherit;letter-spacing:.2px;cursor:pointer;box-shadow:0 2px 0 #bba8cb}
+.artwork-import-button{border:1px solid #b7a2cf;background:linear-gradient(145deg,#f5edff,#e8dafa);color:#57416f;border-radius:999px;padding:7px 13px;font:800 11px/1.2 system-ui,sans-serif;letter-spacing:.2px;cursor:pointer;box-shadow:0 2px 0 #bba8cb}
 .artwork-import-button:active{transform:translateY(1px);box-shadow:0 1px 0 #bba8cb}
 .artwork-import-status{flex-basis:100%;text-align:center;color:#8b7a98;font-size:10px;line-height:1.35;min-height:13px}
