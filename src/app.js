@@ -424,11 +424,11 @@ function renderChoices(){
   if(index!==null&&index!==undefined){button.dataset.boxIndex=String(index);button.dataset.queueKey=`${col}:${index}`;}
   const frontierReady=box&&canLaunchBox(state,index);
   const linked=box?.special==="linked",partner=linked?getLinkedPartner(state.levelId,index):null;
-  const waitingForPartner=linked&&state.pendingLinkedIndex!==index&&!state.tray[0].includes(partner),needsPairSlots=linked&&(state.pendingLinkedIndex===null||state.pendingLinkedIndex===undefined)&&state.slots.filter(slot=>slot===null).length<2;
+  
   const blockedByPair=state.pendingLinkedIndex!==null&&state.pendingLinkedIndex!==undefined&&index!==state.pendingLinkedIndex;
   // A visible front-row box is always a legal strategic choice, even when
   // its color is buried. It occupies a slot and starts automatically later.
-  button.disabled=!box||sealed||resetting||resetAfterMenu||state.won||state.lost||!canChoose(state)||blockedByPair||waitingForPartner||needsPairSlots;
+  button.disabled=!box||sealed||resetting||resetAfterMenu||state.won||state.lost||!canChoose(state)||blockedByPair;
   if(sealed){
    const crate=document.createElement("span");crate.className="choice-crate sealed-crate";crate.setAttribute("aria-hidden","true");
     for(let plank=0;plank<3;plank++){const board=document.createElement("i");board.className="sealed-plank";crate.append(board);}
@@ -438,7 +438,7 @@ function renderChoices(){
    button.append(crate,count);button.title="Закрытый бокс откроется после размещения обычных боксов из двух других колонок";
    button.setAttribute("aria-label",`Закрытый бокс, прогресс открытия ${(state.lockProgressColumns||[]).length} из 2`);
   }else if(box){button.style.setProperty("--ant-color",COLORS[box.color].hex);if(!frontierReady)button.classList.add("waiting-box");
-   if(linked){button.classList.add("linked-box");const chain=document.createElement("span");chain.className="linked-mark";chain.textContent="⛓";button.append(chain);button.title=blockedByPair?"Сначала выбери первый связанный бокс":waitingForPartner?"Связанный бокс появится в верхнем ряду позже":needsPairSlots?"Для пары нужны два свободных отсека":"Связанная пара: после этого бокса выбери второй";}
+   if(linked){button.classList.add("linked-box");const chain=document.createElement("span");chain.className="linked-mark";chain.textContent="⛓";button.append(chain);button.title=blockedByPair?"Сначала выбери первый связанный бокс":"Связанный бокс можно отправить даже в последний свободный отсек";}
    const crate=document.createElement("span");crate.className="choice-crate"+(box.role?" specialist-crate":"");crate.setAttribute("aria-hidden","true");
    if(box.role){const mark=document.createElement("b");mark.textContent=box.role==="builder"?"⚒":"⚔";crate.append(mark);}
    else{const gem=document.createElement("i");gem.style.setProperty("--gem-color",COLORS[box.color].hex);crate.append(gem);}
