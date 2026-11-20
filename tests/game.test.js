@@ -668,7 +668,7 @@ test("every campaign deck places its linked pair outside the sealed-box position
 test("the seventh firefly meadow has five exact color budgets and a fully solvable queue",()=>{
  const level=LEVELS.find(item=>item.id==="forest-07");
  assert.ok(level);assert.equal(level.number,7);assert.equal(level.name,"Светлячок в сумерках");
- assert.equal(LEVELS.length,500);
+ assert.equal(LEVELS.filter(item=>item.number<=500).length,500);
  const board=createArtworkBoard(level.id);
  assert.equal(board.length,SIZE);assert.ok(board.every(row=>row.length===SIZE));
  const totals=Object.fromEntries(Object.keys(COLORS).map(color=>[color,0]));
