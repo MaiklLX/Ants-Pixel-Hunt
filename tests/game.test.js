@@ -19,7 +19,7 @@ const makeBoxAvailable=(state,index)=>{
 
 test("the authored frog is built from large collectible blocks on a 450x450 display grid",()=>{
  const s=createGame();
- assert.equal(GRID_SIZE,450);assert.equal(BLOCK_SIZE,10);assert.equal(SIZE,45);
+ assert.equal(GRID_SIZE,450);assert.equal(BLOCK_SIZE,450/35);assert.equal(SIZE,35);
  assert.equal(INITIAL_BOARD.length,SIZE);assert.ok(INITIAL_BOARD.every(r=>r.length===SIZE));
  assert.equal(s.board.length,SIZE);assert.equal(s.slots.length,SLOT_COUNT);
  assert.equal(s.tray.length,TRAY_SIZE);assert.ok(s.tray.every(r=>r.length===TRAY_SIZE));
@@ -91,7 +91,7 @@ test("legacy 7x7 save starts the new authored level instead of stretching old pi
  const restored=restoreGame({board:old,slots:Array(5).fill(null),remaining:49});
  assert.equal(restored.board.length,SIZE);assert.equal(restored.remaining,createGame().remaining);
 });
-test("45x45 collectible block board survives save restoration for the 450x450 display grid",()=>{
+test("35x35 collectible block board survives save restoration for the 450x450 display grid",()=>{
  const board=Array.from({length:SIZE},()=>Array(SIZE).fill("green"));board[0][0]="red";
  const saved={board,slots:Array(5).fill(null),tray:[[0,1,2],[3,4,5],[6,7,8]],nextContainer:9,remaining:SIZE*SIZE};
  const restored=restoreGame(saved);assert.equal(restored.board.length,SIZE);assert.equal(restored.board[SIZE-1].length,SIZE);
@@ -184,7 +184,7 @@ test("a full wave never assigns the same board cell to two ants",()=>{
  assert.ok(wave.every(m=>s.board[m.target.y][m.target.x]===m.color));
 });
 
-test("the 45x45 artwork produces a complete deterministic deck with bounded box sizes",()=>{
+test("the 35x35 artwork produces a complete deterministic deck with bounded box sizes",()=>{
  const totals=Object.fromEntries(Object.keys(COLORS).map(color=>[color,0]));
  for(const row of INITIAL_BOARD)for(const color of row)if(color)totals[color]++;
  const deckTotals=Object.fromEntries(Object.keys(COLORS).map(color=>[color,0]));
@@ -776,7 +776,7 @@ test("campaign contains 500 distinct, authored-first and procedurally composed i
  for(const level of LEVELS.slice(7)){
   const board=createArtworkBoard(level.id);
   assert.equal(board.length,SIZE,level.id);
-  assert.ok(board.every(row=>row.length===SIZE),level.id+" must remain 45×45");
+  assert.ok(board.every(row=>row.length===SIZE),level.id+" must remain 35×35");
   const colors=new Set(board.flat().filter(Boolean));
   assert.ok(colors.size>=3,level.id+" needs a readable multi-colour image");
   assert.ok(colors.size>=3&&colors.size<=Object.keys(COLORS).length,level.id+" may use the full available object palette with a black contour");
