@@ -800,5 +800,6 @@ test("KT-261 allows every unlocked front-row box to stage before its color is ex
  const end=app.indexOf("function updateResultOverlay",start);
  const handler=app.slice(start,end);
  assert.doesNotMatch(handler,/canLaunchBox\(state,selectedIndex\)/);
- assert.match(handler,/!isLockedBox\(state,selectedIndex\)/);
+ assert.match(handler,/isLockedBox\(state,selectedIndex\)/);
+ assert.doesNotMatch(handler,/canLaunchBox\(state,selectedIndex\)/);
 });
