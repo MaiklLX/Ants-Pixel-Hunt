@@ -1278,7 +1278,7 @@ export function findAntWave(state,reservedTargets=new Set(),pendingBySlot=new Ma
    byColor.get(target.color).push(target);
   }
  }
- const supplies=state.slots.map((box,slot)=>({slot,color:box?.color,role:box?.role,remaining:box&&box.ants>0&&box.status!=="departing"?Math.max(0,box.ants-(pendingBySlot.get(slot)||0)):0,assigned:0}));
+ const supplies=state.slots.map((box,slot)=>({slot,color:box?.color,role:box?.role,obstacleId:box?.obstacleId,remaining:box&&box.ants>0&&box.status!=="departing"?Math.max(0,box.ants-(pendingBySlot.get(slot)||0)):0,assigned:0}));
  const scheduleOne=supply=>{
   if(!supply.remaining||supply.assigned>=supply.remaining)return false;
   const key=supply.role?(supply.role+"|"+(supply.obstacleId||"")):supply.color;
