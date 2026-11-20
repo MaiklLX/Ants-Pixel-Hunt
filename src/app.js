@@ -21,27 +21,6 @@ function applySavedArtwork(levelId){
  setArtworkBoard(levelId,decodeSpriteArtwork(payload,COLORS));
  return true;
 }
-function importArtworkFile(file){
- const reader=new FileReader();
- reader.onload=()=>{
-  try{
-   const payload=JSON.parse(String(reader.result||""));
-   const board=decodeSpriteArtwork(payload,COLORS);
-   const target=state.levelId;
-   if(workerPromises.size||loadingSlots.size)throw new Error("Сначала дождитесь завершения текущего хода, затем импортируйте рисунок.");
-   localStorage.setItem(CUSTOM_ARTWORK_PREFIX+target,JSON.stringify(payload));
-   setArtworkBoard(target,board);
-   resetting=true;cancelAnimationFrame(antFrame);activeAnts.clear();pickupEffects.length=0;deliveryEffects.length=0;reservedTargets.clear();slotNextLaunchAt.clear();
-   state=createGame(target);totalBlocks=tasksRemaining();boardArtworkKey=target;lastExposedPixels=new Set();resetting=false;
-   render();$("save-status").textContent="Новый спрайт загружен в текущую полянку.";
-   $("artwork-import-status").textContent="Спрайт применён к полянке № "+getLevel(target).number+". Исходный рисунок сохранён на этом устройстве.";
-  }catch(error){$("artwork-import-status").textContent=error.message||"Не удалось импортировать рисунок.";}
-  $("artwork-import-file").value="";
- };
- reader.onerror=()=>{$("artwork-import-status").textContent="Не удалось прочитать файл.";$("artwork-import-file").value="";};
- reader.readAsText(file);
-}
-
 const animationClock=createPausableClock(()=>performance.now());
 if(document.hidden)animationClock.pause();
 document.addEventListener("visibilitychange",()=>{
