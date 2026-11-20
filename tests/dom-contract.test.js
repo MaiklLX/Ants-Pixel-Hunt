@@ -457,8 +457,10 @@ test("KT-113 gives the playfield frame a restrained carved-wood and moss finish"
  assert.match(frame,/pointer-events:none/);
  assert.match(frame,/@media\(prefers-reduced-motion:reduce\)/);
  assert.match(frame,/\.board\s*\{/);
- assert.match(frame,/border-radius:11px/);
- assert.match(frame,/lavender toy-world visual direction/);
+ const woodland=styles.slice(styles.indexOf("KT-292 — calm woodland palette"));
+ assert.ok(woodland.length>0,"the calm woodland theme must replace the lavender palette");
+ assert.match(woodland,/.board-wrap\s*\{[\s\S]*?background:linear-gradient\(145deg,#e9ede2/);
+ assert.doesNotMatch(woodland,/#[bB]9[aA]0[cC]8/);
 });
 
 
