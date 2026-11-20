@@ -1073,7 +1073,7 @@ $("zen-start").addEventListener("click",startZenGame);
 $("zen-workshop").addEventListener("click",()=>{location.href="./tools/sprite-lab.html";});
  $("menu-current-level").addEventListener("click",()=>startFreshGame($("menu-current-level").dataset.levelId||state.levelId));
 $("new-game").addEventListener("click",()=>startFreshGame(state.levelId));
-$("result-retry").addEventListener("click",()=>startFreshGame(state.levelId));
+$("result-retry").addEventListener("click",()=>zenMode?startZenGame():startFreshGame(state.levelId));
 $("result-next").addEventListener("click",()=>{const index=LEVELS.findIndex(level=>level.id===state.levelId),next=LEVELS[index+1];if(next&&isLevelUnlocked(next))void startFreshGame(next.id);});
 $("result-menu").addEventListener("click",showMainMenu);
 $("nest-open").addEventListener("click",openNest);
