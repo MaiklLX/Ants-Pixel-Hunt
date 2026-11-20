@@ -426,11 +426,13 @@ test("KT-110 adds subtle ant body highlights and a clearly outlined carried pixe
 });
 
 
-test("KT-184 uses a clean lavender woven playfield instead of forest-floor speckles", async()=>{
+test("KT-295 keeps the playfield in a restrained woodland palette with a subtle woven texture", async()=>{
  const source=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
  const renderer=source.slice(source.indexOf("function renderBoard()"),source.indexOf("function renderBoardAfterPickup"));
- assert.match(renderer,/c6add4/);
- assert.match(renderer,/woven diamond texture/);
+ assert.match(renderer,/#aebd9f/);
+ assert.match(renderer,/#e5edda16/);
+ assert.match(renderer,/restrained woodland texture/);
+ assert.doesNotMatch(renderer,/c6add4|woven diamond texture/);
  assert.doesNotMatch(renderer,/drawBoardGroundCell\(x,y,cell\)/);
  assert.match(source,/drawBoardGroundCell\(target\.x,target\.y,cell\)/);
 });
@@ -804,4 +806,14 @@ test("KT-261 allows every unlocked front-row box to stage before its color is ex
  assert.doesNotMatch(handler,/canLaunchBox\(state,selectedIndex\)/);
  assert.match(handler,/isLockedBox\(state,selectedIndex\)/);
  assert.doesNotMatch(handler,/canLaunchBox\(state,selectedIndex\)/);
+});
+
+test("KT-295 aligns animated ant coordinates with the overlay canvas and maps the four pilot motifs",async()=>{
+ const source=await readFile(new URL("../src/app.js",import.meta.url),"utf8");
+ const renderer=await readFile(new URL("../src/artwork-renderer.js",import.meta.url),"utf8");
+ assert.match(source,/const rect=antLayer\.getBoundingClientRect\(\)/);
+ assert.match(source,/s=antLayer\.getBoundingClientRect\(\)/);
+ for(const [level,motif] of [[501,"monster"],[502,"dragon"],[503,"pineapple"],[504,"crystal-flower"]]){
+  assert.match(renderer,new RegExp(level+":"+String.raw`'`+motif+String.raw`'`));
+ }
 });
