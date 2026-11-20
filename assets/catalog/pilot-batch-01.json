@@ -15,7 +15,7 @@
     "paletteLimit": 16,
     "boardCellCount": 1225
   },
-  "policy": "Каждая ссылка ниже ведёт на конкретный PNG, перечисленный в upstream GitHub directory listing. Это исходники для загрузки в мастерскую, не готовые игровые рисунки. Каждый вариант нужно визуально проверить на сетке 35x35 и только затем включать в тестовый уровень.",
+  "policy": "The 28 links below are concrete source PNGs. Four Animal Pack — Round sprites are now used by pilot levels 501–504; every imported image is rendered as real collectible blocks on the 35×35 board. The other candidates remain unimported until their own visual and gameplay checks.",
   "packs": [
     {
       "id": "animal-pack",
@@ -194,5 +194,36 @@
       "verifiedInUpstreamIndex": true,
       "verifiedPngDirectory": true
     }
-  ]
+  ],
+  "selectedPilotLevels": [
+    {
+      "number": 501,
+      "label": "ПИЛОТНЫЙ 1",
+      "name": "Слон на полянке",
+      "sourceFile": "elephant.png",
+      "sourcePack": "Animal Pack — Round"
+    },
+    {
+      "number": 502,
+      "label": "ПИЛОТНЫЙ 2",
+      "name": "Жираф на полянке",
+      "sourceFile": "giraffe.png",
+      "sourcePack": "Animal Pack — Round"
+    },
+    {
+      "number": 503,
+      "label": "ПИЛОТНЫЙ 3",
+      "name": "Бегемот на полянке",
+      "sourceFile": "hippo.png",
+      "sourcePack": "Animal Pack — Round"
+    },
+    {
+      "number": 504,
+      "label": "ПИЛОТНЫЙ 4",
+      "name": "Обезьянка на полянке",
+      "sourceFile": "monkey.png",
+      "sourcePack": "Animal Pack — Round"
+    }
+  ],
+  "status": "Four source sprites are embedded and used by pilot campaign levels 501–504. The remaining 24 PNGs stay in the candidate list and are not yet imported."
 }
