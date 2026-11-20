@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "batch": "KT-289.1",
-  "title": "Пилотная подборка спрайтов №1",
+  "batch": "KT-289.2",
+  "title": "Пилотная подборка спрайтов №1 — проверенные PNG",
   "checkedAt": "2026-11-20",
   "source": {
     "name": "Tiddybub/2d-assets",
     "url": "https://github.com/Tiddybub/2d-assets",
     "license": "CC0",
-    "licenseBasis": "Upstream README states all packs are CC0; retain each pack SOURCE.md alongside any copied asset."
+    "licenseBasis": "Upstream README states every pack is CC0. Preserve each pack SOURCE.md and License.txt."
   },
   "target": {
     "width": 35,
@@ -15,162 +15,184 @@
     "paletteLimit": 16,
     "boardCellCount": 1225
   },
-  "policy": "Это список кандидатов для ручного визуального отбора, а не утверждение, что исходники уже импортированы в игру. Каждый спрайт нужно открыть в мастерской, проверить силуэт на 35x35, экспортировать JSON и проверить игровую очередь до включения в кампанию.",
+  "policy": "Каждая ссылка ниже ведёт на конкретный PNG, перечисленный в upstream GitHub directory listing. Это исходники для загрузки в мастерскую, не готовые игровые рисунки. Каждый вариант нужно визуально проверить на сетке 35x35 и только затем включать в тестовый уровень.",
   "packs": [
     {
       "id": "animal-pack",
       "genre": "characters",
-      "title": "Animal Pack",
+      "title": "Animal Pack — Round",
       "path": "characters/animal-pack",
-      "tags": [
-        "animals",
-        "pets",
-        "characters"
-      ],
-      "ideas": [
-        "отдельные животные",
-        "пары животных"
-      ],
       "fit": "excellent",
+      "ideas": [
+        "слон",
+        "жираф",
+        "бегемот",
+        "обезьяна",
+        "панда",
+        "попугай",
+        "пингвин",
+        "свинья",
+        "кролик",
+        "змея"
+      ],
+      "spriteFiles": [
+        {
+          "name": "elephant.png",
+          "url": "https://raw.githubusercontent.com/Tiddybub/2d-assets/main/characters/animal-pack/PNG/Round/elephant.png"
+        },
+        {
+          "name": "giraffe.png",
+          "url": "https://raw.githubusercontent.com/Tiddybub/2d-assets/main/characters/animal-pack/PNG/Round/giraffe.png"
+        },
+        {
+          "name": "hippo.png",
+          "url": "https://raw.githubusercontent.com/Tiddybub/2d-assets/main/characters/animal-pack/PNG/Round/hippo.png"
+        },
+        {
+          "name": "monkey.png",
+          "url": "https://raw.githubusercontent.com/Tiddybub/2d-assets/main/characters/animal-pack/PNG/Round/monkey.png"
+        },
+        {
+          "name": "panda.png",
+          "url": "https://raw.githubusercontent.com/Tiddybub/2d-assets/main/characters/animal-pack/PNG/Round/panda.png"
+        },
+        {
+          "name": "parrot.png",
+          "url": "https://raw.githubusercontent.com/Tiddybub/2d-assets/main/characters/animal-pack/PNG/Round/parrot.png"
+        },
+        {
+          "name": "penguin.png",
+          "url": "https://raw.githubusercontent.com/Tiddybub/2d-assets/main/characters/animal-pack/PNG/Round/penguin.png"
+        },
+        {
+          "name": "pig.png",
+          "url": "https://raw.githubusercontent.com/Tiddybub/2d-assets/main/characters/animal-pack/PNG/Round/pig.png"
+        },
+        {
+          "name": "rabbit.png",
+          "url": "https://raw.githubusercontent.com/Tiddybub/2d-assets/main/characters/animal-pack/PNG/Round/rabbit.png"
+        },
+        {
+          "name": "snake.png",
+          "url": "https://raw.githubusercontent.com/Tiddybub/2d-assets/main/characters/animal-pack/PNG/Round/snake.png"
+        }
+      ],
       "url": "https://github.com/Tiddybub/2d-assets/tree/main/characters/animal-pack",
       "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/characters/animal-pack/SOURCE.md",
-      "verifiedInUpstreamIndex": true
+      "licenseFile": "https://github.com/Tiddybub/2d-assets/blob/main/characters/animal-pack/License.txt",
+      "verifiedInUpstreamIndex": true,
+      "verifiedPngDirectory": true
     },
     {
       "id": "fish-pack",
       "genre": "characters",
-      "title": "Fish Pack",
+      "title": "Fish Pack — Default",
       "path": "characters/fish-pack",
-      "tags": [
-        "fish",
-        "underwater",
-        "animals"
-      ],
-      "ideas": [
-        "рыбки",
-        "морские существа"
-      ],
       "fit": "excellent",
+      "ideas": [
+        "синяя рыбка",
+        "оранжевая рыбка",
+        "зелёная рыбка",
+        "розовая рыбка"
+      ],
+      "spriteFiles": [
+        {
+          "name": "fish_blue.png",
+          "url": "https://raw.githubusercontent.com/Tiddybub/2d-assets/main/characters/fish-pack/PNG/Default/fish_blue.png"
+        },
+        {
+          "name": "fish_orange.png",
+          "url": "https://raw.githubusercontent.com/Tiddybub/2d-assets/main/characters/fish-pack/PNG/Default/fish_orange.png"
+        },
+        {
+          "name": "fish_green.png",
+          "url": "https://raw.githubusercontent.com/Tiddybub/2d-assets/main/characters/fish-pack/PNG/Default/fish_green.png"
+        },
+        {
+          "name": "fish_pink.png",
+          "url": "https://raw.githubusercontent.com/Tiddybub/2d-assets/main/characters/fish-pack/PNG/Default/fish_pink.png"
+        },
+        {
+          "name": "fish_red.png",
+          "url": "https://raw.githubusercontent.com/Tiddybub/2d-assets/main/characters/fish-pack/PNG/Default/fish_red.png"
+        },
+        {
+          "name": "fish_brown.png",
+          "url": "https://raw.githubusercontent.com/Tiddybub/2d-assets/main/characters/fish-pack/PNG/Default/fish_brown.png"
+        }
+      ],
       "url": "https://github.com/Tiddybub/2d-assets/tree/main/characters/fish-pack",
       "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/characters/fish-pack/SOURCE.md",
-      "verifiedInUpstreamIndex": true
-    },
-    {
-      "id": "blue-bird-arcade",
-      "genre": "characters",
-      "title": "Blue Bird for Jump-and-Run Arcade",
-      "path": "characters/oga-blue-bird-for-jump-and-run-arcade",
-      "tags": [
-        "bird",
-        "character",
-        "arcade"
-      ],
-      "ideas": [
-        "птица в полёте",
-        "птичий портрет"
-      ],
-      "fit": "good",
-      "url": "https://github.com/Tiddybub/2d-assets/tree/main/characters/oga-blue-bird-for-jump-and-run-arcade",
-      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/characters/oga-blue-bird-for-jump-and-run-arcade/SOURCE.md",
-      "verifiedInUpstreamIndex": true
+      "licenseFile": "https://github.com/Tiddybub/2d-assets/blob/main/characters/fish-pack/License.txt",
+      "verifiedInUpstreamIndex": true,
+      "verifiedPngDirectory": true
     },
     {
       "id": "foliage-pack",
       "genre": "nature",
-      "title": "Foliage Pack",
+      "title": "Foliage Pack — Default size",
       "path": "nature/foliage-pack",
-      "tags": [
-        "nature",
-        "tree",
-        "plants"
-      ],
-      "ideas": [
-        "дерево",
-        "куст",
-        "крона"
-      ],
       "fit": "excellent",
+      "ideas": [
+        "отдельные деревья и кусты",
+        "лиственные формы",
+        "растительные силуэты"
+      ],
+      "spriteFiles": [
+        {
+          "name": "foliagePack_001.png",
+          "url": "https://raw.githubusercontent.com/Tiddybub/2d-assets/main/nature/foliage-pack/PNG/Default%20size/foliagePack_001.png"
+        },
+        {
+          "name": "foliagePack_002.png",
+          "url": "https://raw.githubusercontent.com/Tiddybub/2d-assets/main/nature/foliage-pack/PNG/Default%20size/foliagePack_002.png"
+        },
+        {
+          "name": "foliagePack_003.png",
+          "url": "https://raw.githubusercontent.com/Tiddybub/2d-assets/main/nature/foliage-pack/PNG/Default%20size/foliagePack_003.png"
+        },
+        {
+          "name": "foliagePack_004.png",
+          "url": "https://raw.githubusercontent.com/Tiddybub/2d-assets/main/nature/foliage-pack/PNG/Default%20size/foliagePack_004.png"
+        },
+        {
+          "name": "foliagePack_005.png",
+          "url": "https://raw.githubusercontent.com/Tiddybub/2d-assets/main/nature/foliage-pack/PNG/Default%20size/foliagePack_005.png"
+        },
+        {
+          "name": "foliagePack_006.png",
+          "url": "https://raw.githubusercontent.com/Tiddybub/2d-assets/main/nature/foliage-pack/PNG/Default%20size/foliagePack_006.png"
+        },
+        {
+          "name": "foliagePack_007.png",
+          "url": "https://raw.githubusercontent.com/Tiddybub/2d-assets/main/nature/foliage-pack/PNG/Default%20size/foliagePack_007.png"
+        },
+        {
+          "name": "foliagePack_008.png",
+          "url": "https://raw.githubusercontent.com/Tiddybub/2d-assets/main/nature/foliage-pack/PNG/Default%20size/foliagePack_008.png"
+        },
+        {
+          "name": "foliagePack_009.png",
+          "url": "https://raw.githubusercontent.com/Tiddybub/2d-assets/main/nature/foliage-pack/PNG/Default%20size/foliagePack_009.png"
+        },
+        {
+          "name": "foliagePack_010.png",
+          "url": "https://raw.githubusercontent.com/Tiddybub/2d-assets/main/nature/foliage-pack/PNG/Default%20size/foliagePack_010.png"
+        },
+        {
+          "name": "foliagePack_011.png",
+          "url": "https://raw.githubusercontent.com/Tiddybub/2d-assets/main/nature/foliage-pack/PNG/Default%20size/foliagePack_011.png"
+        },
+        {
+          "name": "foliagePack_012.png",
+          "url": "https://raw.githubusercontent.com/Tiddybub/2d-assets/main/nature/foliage-pack/PNG/Default%20size/foliagePack_012.png"
+        }
+      ],
       "url": "https://github.com/Tiddybub/2d-assets/tree/main/nature/foliage-pack",
       "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/nature/foliage-pack/SOURCE.md",
-      "verifiedInUpstreamIndex": true
-    },
-    {
-      "id": "farm-expansion",
-      "genre": "nature",
-      "title": "Pixel Platformer Farm Expansion",
-      "path": "nature/pixel-platformer-farm-expansion",
-      "tags": [
-        "farm",
-        "pixel",
-        "animals",
-        "plants"
-      ],
-      "ideas": [
-        "фермерские животные",
-        "овощи",
-        "небольшие сценки"
-      ],
-      "fit": "excellent",
-      "url": "https://github.com/Tiddybub/2d-assets/tree/main/nature/pixel-platformer-farm-expansion",
-      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/nature/pixel-platformer-farm-expansion/SOURCE.md",
-      "verifiedInUpstreamIndex": true
-    },
-    {
-      "id": "low-pixel-flowers",
-      "genre": "fantasy",
-      "title": "Flowers (low-pixel)",
-      "path": "fantasy/oga-flowers-low-pixel",
-      "tags": [
-        "flower",
-        "nature",
-        "pixel"
-      ],
-      "ideas": [
-        "цветы с крупными лепестками",
-        "букеты"
-      ],
-      "fit": "excellent",
-      "url": "https://github.com/Tiddybub/2d-assets/tree/main/fantasy/oga-flowers-low-pixel",
-      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/fantasy/oga-flowers-low-pixel/SOURCE.md",
-      "verifiedInUpstreamIndex": true
-    },
-    {
-      "id": "giraffe",
-      "genre": "fantasy",
-      "title": "Giraffe",
-      "path": "fantasy/oga-giraffe",
-      "tags": [
-        "animal",
-        "pixel",
-        "giraffe"
-      ],
-      "ideas": [
-        "жираф",
-        "портрет животного"
-      ],
-      "fit": "good",
-      "url": "https://github.com/Tiddybub/2d-assets/tree/main/fantasy/oga-giraffe",
-      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/fantasy/oga-giraffe/SOURCE.md",
-      "verifiedInUpstreamIndex": true
-    },
-    {
-      "id": "generic-items",
-      "genre": "misc",
-      "title": "Generic Items",
-      "path": "misc/generic-items",
-      "tags": [
-        "household",
-        "items",
-        "tools"
-      ],
-      "ideas": [
-        "предметы быта",
-        "инструменты"
-      ],
-      "fit": "good",
-      "url": "https://github.com/Tiddybub/2d-assets/tree/main/misc/generic-items",
-      "sourceFile": "https://github.com/Tiddybub/2d-assets/blob/main/misc/generic-items/SOURCE.md",
-      "verifiedInUpstreamIndex": true
+      "licenseFile": "https://github.com/Tiddybub/2d-assets/blob/main/nature/foliage-pack/License.txt",
+      "verifiedInUpstreamIndex": true,
+      "verifiedPngDirectory": true
     }
   ]
 }
