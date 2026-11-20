@@ -933,8 +933,12 @@ export function buildIncoming(board,levelNumber=1){
  while(left>0&&guard++<SIZE*SIZE*4){
   const exposed=getExposedPixels(work),counts=Object.fromEntries(colors.map(color=>[color,0]));
   for(const point of exposed){const color=work[point.y][point.x];if(color)counts[color]++;}
-  let candidates=colors.filter(color=>active.has(color)&&counts[color]>0);
-  if(!candidates.length)candidates=colors.filter(color=>!active.has(color)&&counts[color]>0&&(nextChunk[color]||0)<(chunks[color]?.length||0));
+  // Keep already-running squads eligible, but also admit newly exposed
+  // colours in the same decision round. Otherwise a large dominant colour
+  // can monopolize the generator while other playable colours are ignored.
+  let candidates=colors.filter(color=>
+   (active.has(color)||((nextChunk[color]||0)<(chunks[color]?.length||0)))&&counts[color]>0
+  );
   if(!candidates.length)throw new Error("Artwork queue has no playable colour while blocks remain");
   const alternatives=candidates.filter(color=>color!==lastColor);
   if(alternatives.length)candidates=alternatives;
