@@ -32,6 +32,6 @@ test("pilot packs and individual PNG files have concrete upstream paths",()=>{
 });
 
 test("pilot metadata distinguishes source PNGs from imported game artwork",()=>{
- assert.match(catalog.policy,/не готовые игровые рисунки/);
+ assert.match(catalog.policy,/other candidates remain unimported/);
  assert.equal(catalog.source.license,"CC0");
 });
