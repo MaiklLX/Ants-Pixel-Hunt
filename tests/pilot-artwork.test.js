@@ -5,10 +5,10 @@ import {PILOT_ARTWORK} from "../src/pilot-artwork-data.js";
 import {LEVELS} from "../src/game.js";
 
 const expected=[
- [501,"ПИЛОТНЫЙ 1","Слон на полянке","elephant-detailed.png"],
- [502,"ПИЛОТНЫЙ 2","Жираф на полянке","giraffe-detailed.png"],
- [503,"ПИЛОТНЫЙ 3","Бегемот на полянке","hippo-detailed.png"],
- [504,"ПИЛОТНЫЙ 4","Обезьянка на полянке","monkey-detailed.png"]
+ [501,"ПИЛОТНЫЙ 1","Слон на полянке","elephant.png"],
+ [502,"ПИЛОТНЫЙ 2","Жираф на полянке","giraffe.png"],
+ [503,"ПИЛОТНЫЙ 3","Бегемот на полянке","hippo.png"],
+ [504,"ПИЛОТНЫЙ 4","Обезьянка на полянке","monkey.png"]
 ];
 
 test("the four campaign pilots have explicit labels and matching animal names",()=>{
