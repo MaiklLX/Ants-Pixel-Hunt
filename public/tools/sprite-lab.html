@@ -12,7 +12,7 @@ const SIZE=45,CELL=10,file=document.querySelector('#file'),source=document.query
 const hex=n=>n.toString(16).padStart(2,'0'),rgbHex=c=>'#'+c.map(hex).join('');
 function toLab(rgb){
  const linear=rgb.map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4;});
- const [r,g,b]=linear,x=(.4124564*r+.3575761*g+.1804375*b)/.95047,y=(.2126729*r+.7151522*g+.072175*b),z=(.0193339*r+.119192g+.9503041*b)/1.08883;
+ const [r,g,b]=linear,x=(.4124564*r+.3575761*g+.1804375*b)/.95047,y=(.2126729*r+.7151522*g+.072175*b),z=(.0193339*r+.119192*g+.9503041*b)/1.08883;
  const f=t=>t>.008856?Math.cbrt(t):7.787*t+16/116,fx=f(x),fy=f(y),fz=f(z);
  return [116*fy-16,500*(fx-fy),200*(fy-fz)];
 }
