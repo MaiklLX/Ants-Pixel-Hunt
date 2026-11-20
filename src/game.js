@@ -939,10 +939,14 @@ export function buildIncoming(board,levelNumber=1){
   }
   chunks[color]=sizes;nextChunk[color]=0;
  }
- const active=new Map(),deck=[];let left=leftTotal,lastColor=null,guard=0;
+ const active=new Map(),deck=[];let left=leftTotal,lastColor=null,guard=0,decisionStep=0;
  // Generate the deck by simulating the real outside-in game. A colour gets
  // one active squad at a time; it may wait for deeper matching blocks while
  // other colours are cleared, then its next squad enters only after it leaves.
+ // Every third decision deliberately considers a colour whose current rim is
+ // smaller than its squad. That box is a commitment: it will occupy a starter
+ // compartment until other colours uncover enough matching cells. The other
+ // decisions favour broad clears, so pressure is tactical rather than random.
  while(left>0&&guard++<SIZE*SIZE*4){
   const exposed=getExposedPixels(work),counts=Object.fromEntries(colors.map(color=>[color,0]));
   for(const point of exposed){const color=work[point.y][point.x];if(color)counts[color]++;}
@@ -955,7 +959,16 @@ export function buildIncoming(board,levelNumber=1){
   if(!candidates.length)throw new Error("Artwork queue has no playable colour while blocks remain");
   const alternatives=candidates.filter(color=>color!==lastColor);
   if(alternatives.length)candidates=alternatives;
-  candidates.sort((a,b)=>counts[b]-counts[a]||colors.indexOf(a)-colors.indexOf(b));
+  const pressureTurn=levelNumber>=8&&decisionStep%3===2;
+  const pressure=candidates.filter(color=>{
+   const size=active.has(color)?active.get(color):chunks[color][nextChunk[color]];
+   return Number.isFinite(size)&&size>counts[color];
+  });
+  if(pressureTurn&&pressure.length){
+   pressure.sort((a,b)=>(counts[a]/(active.has(a)?active.get(a):chunks[a][nextChunk[a]]))-
+    (counts[b]/(active.has(b)?active.get(b):chunks[b][nextChunk[b]]))||counts[a]-counts[b]);
+   candidates=pressure;
+  }else candidates.sort((a,b)=>counts[b]-counts[a]||colors.indexOf(a)-colors.indexOf(b));
   const color=candidates[0];
   if(!active.has(color)){
    const size=chunks[color][nextChunk[color]++];
@@ -968,7 +981,7 @@ export function buildIncoming(board,levelNumber=1){
   for(const point of batch){work[point.y][point.x]="";left--;}
   const remainingAnts=available-batch.length;
   if(remainingAnts===0)active.delete(color);else active.set(color,remainingAnts);
-  lastColor=color;
+  lastColor=color;decisionStep++;
  }
  if(left>0)throw new Error("Artwork queue stopped before every block was assigned");
  // Keep two genuinely playable opening choices, then place one future-layer
