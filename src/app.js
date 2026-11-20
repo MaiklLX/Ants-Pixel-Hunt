@@ -210,7 +210,7 @@ function ensureBoardArtwork(){
    const untouched=state.slots.every(slot=>!slot)&&state.nextContainer===TRAY_SIZE*TRAY_SIZE;
    if(!untouched){resolve(false);return;}
    const board=rasterizeArtworkToBlocks(image);
-   setArtworkBoard(key,board);
+   setArtworkBoard(key,board,pilotArtwork?3:18);
    // The PNG/SVG is sampled into the actual collectible board, never overlaid.
    state=createGame(key);
    totalBlocks=state.remaining+(state.obstacles||[]).reduce((sum,item)=>sum+item.hp,0);
@@ -1117,6 +1117,12 @@ $("map-close").addEventListener("click",closeMap);
 $("map-overlay").addEventListener("click",event=>{if(event.target===$("map-overlay"))closeMap();});
 $("nest-close").addEventListener("click",closeNest);
 $("nest-overlay").addEventListener("click",event=>{if(event.target===$("nest-overlay"))closeNest();});
+$("reset-progress").addEventListener("click",()=>{
+ if(!window.confirm("Сбросить весь прогресс кампании и развитие муравейника? Все открытые полянки, собранные награды и улучшения будут потеряны. Это действие нельзя отменить."))return;
+ try{localStorage.removeItem(CAMPAIGN_KEY);localStorage.removeItem(ECONOMY_STORAGE_KEY);}
+ catch{$("save-status").textContent="Не удалось сбросить прогресс. Проверь настройки хранения браузера.";return;}
+ location.reload();
+});
 $("how-to-play").addEventListener("click",()=>{
  const button=$("how-to-play");
  const panel=$("how-panel");
