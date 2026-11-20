@@ -4894,3 +4894,12 @@ footer{color:#78877a}
 .board{background:#9eaf91}
 .app-shell:not(.menu-open){background:linear-gradient(160deg,#e8ece2 0%,#e1e8dc 58%,#d9e2d5 100%)}
 body{background:#dfe5db}
+
+/* KT-295 — remove pale arena patches and unify the woodland play surface. */
+.app-shell:not(.menu-open){background:linear-gradient(160deg,#263b30 0%,#21362b 58%,#1b3026 100%);color:#e2e9d6}
+.board-wrap{background:linear-gradient(145deg,#354b39,#293e31);border-color:#53694c;box-shadow:0 9px 24px #07140f55,inset 0 1px #ffffff12}
+.board{background:#9eaf91}
+.level-heading h2{color:#d6e2c8}
+.board-status{color:#b0c2a5}
+.slots-section,.choices-section{background:linear-gradient(155deg,#263d31dd,#20352bdf);border-color:#405943}
+.nest-return-section{background:transparent}
