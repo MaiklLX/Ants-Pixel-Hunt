@@ -1152,10 +1152,10 @@ function createLevelObstacles(levelId,board){
  }));
 }
 const incomingCache=new Map();
-export function setArtworkBoard(levelId,board){
+export function setArtworkBoard(levelId,board,minimumColorCount=18){
  const id=getLevel(levelId).id;
  if(!Array.isArray(board)||board.length!==SIZE||board.some(row=>!Array.isArray(row)||row.length!==SIZE))throw new Error("Artwork board must be a 35×35 grid");
- const normalized=mergeSparseArtworkColors(board.map(row=>row.slice()),18);
+ const normalized=mergeSparseArtworkColors(board.map(row=>row.slice()),minimumColorCount);
  artworkBoardCache.set(id,normalized);
  incomingCache.delete(id);
 }
