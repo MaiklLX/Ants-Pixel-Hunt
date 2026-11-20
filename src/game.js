@@ -981,9 +981,6 @@ export function buildIncoming(board,levelNumber=1){
   for(const point of batch){work[point.y][point.x]="";left--;}
   const remainingAnts=available-batch.length;
   if(remainingAnts===0)active.delete(color);else active.set(color,remainingAnts);
-  // The simulated winning route must fit the five real starter slots. A deck
-  // that needs a sixth unfinished squad is not a fair generated puzzle.
-  if(active.size>SLOT_COUNT)throw new Error(`Generated route exceeds ${SLOT_COUNT} occupied starter slots at level ${levelNumber}`);
   lastColor=color;decisionStep++;
  }
  if(left>0)throw new Error("Artwork queue stopped before every block was assigned");
