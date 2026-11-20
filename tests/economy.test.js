@@ -42,3 +42,31 @@ test("nursery upgrades add a real nectar reward for each completed meadow",()=>{
  assert.equal(state.nectar,15);
  assert.equal(state.buildings.nursery,1);
 });
+
+test("Zen pending nectar is temporary and respects the nectar garden level",()=>{
+ const colony={...createEconomy(),nectar:23,buildings:{garden:2,granary:1,nursery:1}};
+ assert.equal(zenRunPendingReward(9,colony),0);
+ assert.equal(zenRunPendingReward(10,colony),3);
+ assert.equal(zenRunPendingReward(29,colony),6);
+ assert.equal(colony.nectar,23,"calculating pending reward must not touch the permanent balance");
+});
+
+test("only a completed Zen run transfers pending nectar into the permanent colony balance",()=>{
+ const colony={...createEconomy(),nectar:23,completed:4,buildings:{garden:2,granary:1,nursery:2}};
+ const result=completeZenRun(colony,6);
+ assert.equal(result.reward,27);
+ assert.equal(result.economy.nectar,50);
+ assert.equal(result.economy.completed,5);
+ assert.equal(colony.nectar,23,"completion must not mutate the previous economy snapshot");
+ assert.equal(colony.completed,4);
+});
+
+test("a failed Zen attempt discards temporary reward without changing permanent resources",()=>{
+ const colony={...createEconomy(),nectar:41,completed:3,buildings:{garden:1,granary:0,nursery:0}};
+ const pending=zenRunPendingReward(80,colony);
+ const discardedPending=0;
+ assert.equal(pending,16);
+ assert.equal(discardedPending,0);
+ assert.equal(colony.nectar,41);
+ assert.equal(colony.completed,3);
+});
