@@ -4984,7 +4984,6 @@ html,body{background:#17271f}
 }
 .app-shell:not(.menu-open) footer{color:#8fa18a;border-top-color:#344b38}
 .app-shell:not(.menu-open) .save-status{color:#9aab91}
-.app-shell:not(.menu-open) .nest-return-section{background:transparent}
 .zen-run-hud{
  order:2;position:relative;inset:auto;z-index:1;
  display:grid;grid-template-columns:minmax(0,1fr) auto;
