@@ -1,6 +1,6 @@
 import {RASTER_ARTWORK} from "./artwork-data.js";
 
-export const SIZE=45;
+export const SIZE=35;
 export const GRID_SIZE=450;
 export const BLOCK_SIZE=GRID_SIZE/SIZE;
 export const BOX_CAPACITY=30;
@@ -615,7 +615,7 @@ function createRasterArtworkBoard(type,native=false){
    if(bits>=8){bits-=8;bytes.push((accumulator>>bits)&255);accumulator&=(1<<bits)-1;}
   }
   // The authored masters are 35×35. Starter portraits keep their original
-  // collectible footprint while the enlarged 45×45 field gains a scenic
+  // collectible footprint while the 35×35 field gains a scenic
   // non-collectible margin; procedural compositions use crisp nearest-neighbour
   // enlargement to fill their larger placements.
   const sourceSize=35,sourceBoard=Array.from({length:sourceSize},()=>Array(sourceSize).fill(""));
@@ -1033,7 +1033,7 @@ function createLevelObstacles(levelId,board){
 const incomingCache=new Map();
 export function setArtworkBoard(levelId,board){
  const id=getLevel(levelId).id;
- if(!Array.isArray(board)||board.length!==SIZE||board.some(row=>!Array.isArray(row)||row.length!==SIZE))throw new Error("Artwork board must be a 45×45 grid");
+ if(!Array.isArray(board)||board.length!==SIZE||board.some(row=>!Array.isArray(row)||row.length!==SIZE))throw new Error("Artwork board must be a 35×35 grid");
  const normalized=mergeSparseArtworkColors(board.map(row=>row.slice()),18);
  artworkBoardCache.set(id,normalized);
  incomingCache.delete(id);
