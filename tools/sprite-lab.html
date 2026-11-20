@@ -4,11 +4,11 @@
 :root{color-scheme:dark;--bg:#101b16;--panel:#1b2b22;--line:#365441;--gold:#e7c66d;--text:#f3eedc;--muted:#a9b7a8}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#253d2d,#101b16 65%);color:var(--text);font:15px/1.45 system-ui,sans-serif;padding:22px}.wrap{max-width:1120px;margin:auto}h1{margin:0 0 6px;font-size:clamp(24px,4vw,38px)}p{color:var(--muted)}.panel{background:#1b2b22eF;border:1px solid var(--line);border-radius:18px;padding:18px;margin:16px 0}.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}button,label.file{background:#d9b85e;color:#1b2119;border:0;border-radius:11px;padding:11px 15px;font-weight:750;cursor:pointer}button:disabled{opacity:.4;cursor:not-allowed}input[type=file]{max-width:100%}input[type=range]{accent-color:var(--gold);width:180px}canvas{image-rendering:pixelated;background:#26372c;border:1px solid #52745a;border-radius:12px;width:min(100%,450px);height:auto}.preview{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:18px}.preview section{min-width:0}.caption{font-size:13px;color:var(--muted);margin:8px 0}.stat{color:var(--gold);font-weight:700}.swatches{display:flex;gap:5px;flex-wrap:wrap}.swatch{width:20px;height:20px;border-radius:5px;border:1px solid #ffffff55}.notice{border-left:3px solid var(--gold);padding-left:12px}.small{font-size:13px;color:var(--muted)}a{color:#e8cf83}
 </style></head><body><main class="wrap"><h1>Мастерская спрайтов</h1><p>Превращаем любимые спрайты из Tiddybub/2d-assets в настоящие цветные блоки для полянок «Муравьишек».</p>
 <div class="panel"><div class="row"><label class="file" for="file">Выбрать PNG / WebP / JPG</label><input id="file" type="file" accept="image/png,image/webp,image/jpeg"><span class="small">Лучше выбирать отдельный спрайт или предварительно обрезанную область листа</span><span id="loadStatus" class="stat" role="status">Файл ещё не выбран</span></div><p class="notice">Исходник не отправляется на сервер. Обработка выполняется прямо в браузере. Перед добавлением в игру проверьте лицензию набора и сохраните SOURCE.md.</p></div>
-<div class="panel"><div class="row"><label>Количество цветов в палитре <input id="colors" type="range" min="4" max="10" value="8"></label><span id="colorsValue" class="stat">8 цветов</span><label>Порог прозрачности <input id="alpha" type="range" min="0" max="240" value="24"></label><span id="alphaValue" class="stat">24</span><button id="convert" disabled>Преобразовать</button><button id="export" disabled>Скачать JSON полянки</button></div></div>
+<div class="panel"><div class="row"><label>Количество цветов <input id="colors" type="range" min="4" max="8" value="6"></label><span id="colorsValue" class="stat">8 цветов</span><label>Порог прозрачности <input id="alpha" type="range" min="0" max="240" value="24"></label><span id="alphaValue" class="stat">24</span><label>Упрощение контуров <input id="simplify" type="range" min="0" max="100" value="25"></label><span id="simplifyValue" class="stat">25%</span><label class="small"><input id="removeBg" type="checkbox" checked> Убирать однотонный фон</label><button id="convert" disabled>Преобразовать</button><button id="export" disabled>Скачать JSON полянки</button></div></div>
 <div class="preview"><section class="panel"><h3>Исходный спрайт</h3><canvas id="source" width="450" height="450"></canvas><p class="caption">Изображение вписывается по центру без искажения пропорций.</p></section><section class="panel"><h3>Игровая мозаика 45×45</h3><canvas id="result" width="450" height="450"></canvas><p class="caption">Каждая крупная клетка — один блок, который может забрать один муравей.</p><div id="swatches" class="swatches"></div><p id="stats" class="caption">Выберите спрайт, чтобы начать.</p></section></div>
 <div class="panel"><h3>Следующий шаг</h3><p>Проверьте силуэт и цвета. Если рисунок узнаваем и хорошо читается в сетке, экспортируйте JSON и добавьте его в каталог уровней. Мастерская не меняет игровые правила и не публикует уровень автоматически.</p><p class="small">Библиотека: <a href="https://github.com/Tiddybub/2d-assets" target="_blank" rel="noreferrer">Tiddybub/2d-assets</a> · CC0 согласно README репозитория.</p></div>
 </main><script>
-const SIZE=45,CELL=10,file=document.querySelector('#file'),source=document.querySelector('#source'),result=document.querySelector('#result'),sctx=source.getContext('2d',{willReadFrequently:true}),rctx=result.getContext('2d'),convert=document.querySelector('#convert'),exportBtn=document.querySelector('#export'),colorRange=document.querySelector('#colors'),alphaRange=document.querySelector('#alpha');let image=null,art=null,palette=[];
+const SIZE=45,CELL=10,file=document.querySelector('#file'),source=document.querySelector('#source'),result=document.querySelector('#result'),sctx=source.getContext('2d',{willReadFrequently:true}),rctx=result.getContext('2d'),convert=document.querySelector('#convert'),exportBtn=document.querySelector('#export'),colorRange=document.querySelector('#colors'),alphaRange=document.querySelector('#alpha'),simplifyRange=document.querySelector('#simplify'),removeBg=document.querySelector('#removeBg');let image=null,art=null,palette=[],drawBounds=null;
 const hex=n=>n.toString(16).padStart(2,'0'),rgbHex=c=>'#'+c.map(hex).join('');
 function toLab(rgb){
  const linear=rgb.map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4;});
@@ -27,9 +27,8 @@ file.addEventListener('change',()=>{
  img.onload=()=>{
   try{
    if(!img.naturalWidth||!img.naturalHeight)throw new Error('Браузер не смог определить размеры изображения.');
-   const scale=Math.min(450/img.naturalWidth,450/img.naturalHeight),w=Math.max(1,Math.round(img.naturalWidth*scale)),h=Math.max(1,Math.round(img.naturalHeight*scale));
-   sctx.clearRect(0,0,450,450);sctx.fillStyle='#26372c';sctx.fillRect(0,0,450,450);
-   sctx.imageSmoothingEnabled=false;sctx.drawImage(img,(450-w)/2,(450-h)/2,w,h);
+   const scale=Math.min(450/img.naturalWidth,450/img.naturalHeight),w=Math.max(1,Math.round(img.naturalWidth*scale)),h=Math.max(1,Math.round(img.naturalHeight*scale)),x=Math.round((450-w)/2),y=Math.round((450-h)/2);
+   drawBounds={x,y,w,h};sctx.clearRect(0,0,450,450);sctx.imageSmoothingEnabled=false;sctx.drawImage(img,x,y,w,h);
    image=img;convert.disabled=false;
    status.textContent='Изображение загружено: '+img.naturalWidth+'×'+img.naturalHeight;
    run();
@@ -39,7 +38,7 @@ file.addEventListener('change',()=>{
  img.onerror=()=>{URL.revokeObjectURL(url);status.textContent='Не удалось прочитать файл. Пересохраните его как PNG или JPG и попробуйте снова.';};
  img.src=url;
 });
-colorRange.addEventListener('input',()=>{document.querySelector('#colorsValue').textContent=colorRange.value+' цветов';if(image)run()});alphaRange.addEventListener('input',()=>{document.querySelector('#alphaValue').textContent=alphaRange.value;if(image)run()});convert.addEventListener('click',run);
+colorRange.addEventListener('input',()=>{document.querySelector('#colorsValue').textContent=colorRange.value+' цветов';if(image)run()});alphaRange.addEventListener('input',()=>{document.querySelector('#alphaValue').textContent=alphaRange.value;if(image)run()});simplifyRange.addEventListener('input',()=>{document.querySelector('#simplifyValue').textContent=simplifyRange.value+'%';if(image)run()});removeBg.addEventListener('change',()=>{if(image)run()});convert.addEventListener('click',run);
 function medianCut(entries,limit){
  if(entries.length<=limit)return entries.map(entry=>entry.rgb);
  const boxes=[entries];
@@ -53,35 +52,65 @@ function medianCut(entries,limit){
  }
  return boxes.map(box=>{const total=box.reduce((sum,e)=>sum+e.count,0),mean=[0,1,2].map(c=>box.reduce((sum,e)=>sum+e.rgb[c]*e.count,0)/total);return box.slice().sort((a,b)=>{const da=a.rgb.reduce((s,v,i)=>s+(v-mean[i])**2,0),db=b.rgb.reduce((s,v,i)=>s+(v-mean[i])**2,0);return da-db||b.count-a.count;})[0].rgb;});
 }
+function removeFlatEdgeBackground(raw){
+ const {x,y,w,h}=drawBounds||{x:0,y:0,w:450,h:450},data=raw.data,threshold=Number(alphaRange.value),samples=[];
+ const add=(px,py)=>{const i=(py*450+px)*4;if(data[i+3]>threshold)samples.push([data[i],data[i+1],data[i+2]]);};
+ for(let px=x;px<x+w;px+=Math.max(1,Math.floor(w/90))){add(px,y);add(px,y+h-1);}
+ for(let py=y;py<y+h;py+=Math.max(1,Math.floor(h/90))){add(x,py);add(x+w-1,py);}
+ if(samples.length<8)return 0;
+ const median=c=>samples.map(v=>v[c]).sort((a,b)=>a-b)[Math.floor(samples.length/2)],bg=[median(0),median(1),median(2)];
+ if(samples.filter(c=>colorDistance(c,bg)<20).length/samples.length<.62)return 0;
+ const seen=new Uint8Array(450*450),queue=new Int32Array(450*450);let head=0,tail=0,removed=0;
+ const seed=(px,py)=>{const pos=py*450+px,i=pos*4;if(!seen[pos]&&data[i+3]>threshold&&colorDistance([data[i],data[i+1],data[i+2]],bg)<24){seen[pos]=1;queue[tail++]=pos;}};
+ for(let px=x;px<x+w;px++){seed(px,y);seed(px,y+h-1);}
+ for(let py=y;py<y+h;py++){seed(x,py);seed(x+w-1,py);}
+ while(head<tail){const pos=queue[head++],px=pos%450,py=Math.floor(pos/450),i=pos*4;data[i+3]=0;removed++;
+  const visit=(nx,ny)=>{if(nx<x||ny<y||nx>=x+w||ny>=y+h)return;const np=ny*450+nx,ni=np*4;if(seen[np]||data[ni+3]<=threshold)return;seen[np]=1;if(colorDistance([data[ni],data[ni+1],data[ni+2]],bg)<24)queue[tail++]=np;};
+  visit(px-1,py);visit(px+1,py);visit(px,py-1);visit(px,py+1);
+ }
+ return removed;
+}
+function removeTinyComponents(cells,minSize){
+ if(minSize<=1)return 0;const seen=new Uint8Array(SIZE*SIZE);let removed=0;
+ for(let i=0;i<cells.length;i++){if(cells[i]===null||seen[i])continue;const group=[i];seen[i]=1;
+  for(let q=0;q<group.length;q++){const p=group[q],x=p%SIZE,y=Math.floor(p/SIZE),neighbors=[x>0?p-1:-1,x<SIZE-1?p+1:-1,y>0?p-SIZE:-1,y<SIZE-1?p+SIZE:-1];for(const n of neighbors)if(n>=0&&!seen[n]&&cells[n]!==null){seen[n]=1;group.push(n);}}
+  if(group.length<minSize)for(const p of group){cells[p]=null;removed++;}
+ }
+ return removed;
+}
 function run(){
  if(!image)return;
  const status=document.querySelector('#loadStatus');
- const raw=sctx.getImageData(0,0,450,450),pixels=[],histogram=new Map(),threshold=Number(alphaRange.value);
- for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){
-  const local=new Map();
+ const scale=Math.min(450/image.naturalWidth,450/image.naturalHeight),w=Math.max(1,Math.round(image.naturalWidth*scale)),h=Math.max(1,Math.round(image.naturalHeight*scale)),x=Math.round((450-w)/2),y=Math.round((450-h)/2);
+ drawBounds={x,y,w,h};sctx.clearRect(0,0,450,450);sctx.imageSmoothingEnabled=false;sctx.drawImage(image,x,y,w,h);
+ const raw=sctx.getImageData(0,0,450,450),threshold=Number(alphaRange.value),simplify=Number(simplifyRange.value);
+ if(removeBg.checked)removeFlatEdgeBackground(raw);
+ const pixels=[],histogram=new Map(),minCoverage=.12+(simplify/100)*.36;
+ for(let cy=0;cy<SIZE;cy++)for(let cx=0;cx<SIZE;cx++){
+  const bins=new Map();let visible=0;
   for(let yy=0;yy<CELL;yy++)for(let xx=0;xx<CELL;xx++){
-   const i=((y*CELL+yy)*450+x*CELL+xx)*4,a=raw.data[i+3];if(a<=threshold)continue;
-   const rgb=[raw.data[i],raw.data[i+1],raw.data[i+2]],key=rgb.join(',');
-   local.set(key,(local.get(key)||0)+a);
+   const i=((cy*CELL+yy)*450+cx*CELL+xx)*4,a=raw.data[i+3];if(a<=threshold)continue;visible++;
+   const rgb=[raw.data[i],raw.data[i+1],raw.data[i+2]],key=rgb.map(v=>Math.round(v/16)*16).join(',');
+   let bin=bins.get(key);if(!bin){bin={sum:[0,0,0],count:0};bins.set(key,bin);}for(let c=0;c<3;c++)bin.sum[c]+=rgb[c];bin.count++;
   }
-  let dominant=null,weight=0;
-  for(const [key,count] of local)if(count>weight){dominant=key;weight=count;}
-  const rgb=dominant?dominant.split(',').map(Number):null;pixels.push(rgb);
-  if(rgb){const key=rgb.join(',');histogram.set(key,(histogram.get(key)||0)+1);}
+  let best=null;for(const bin of bins.values())if(!best||bin.count>best.count)best=bin;
+  const rgb=visible/100>=minCoverage&&best?best.sum.map(v=>Math.round(v/best.count)):null;
+  pixels.push(rgb);if(rgb){const key=rgb.join(',');histogram.set(key,(histogram.get(key)||0)+1);}
  }
- const limit=Number(colorRange.value),entries=[...histogram].map(([key,count])=>({rgb:key.split(',').map(Number),count})),rawPalette=medianCut(entries,Math.min(limit,10));
+ const removedSpecks=removeTinyComponents(pixels,1+Math.floor(simplify/55));
+ histogram.clear();pixels.forEach(rgb=>{if(rgb){const key=rgb.join(',');histogram.set(key,(histogram.get(key)||0)+1);}});
+ const limit=Number(colorRange.value),entries=[...histogram].map(([key,count])=>({rgb:key.split(',').map(Number),count})),rawPalette=medianCut(entries,Math.min(limit,8));
  const candidates=rawPalette.map(rgb=>({rgb,count:entries.reduce((sum,e)=>sum+(colorDistance(e.rgb,rgb)<18?e.count:0),0)})).sort((a,b)=>b.count-a.count);
- palette=[];
- for(const candidate of candidates)if(palette.every(existing=>colorDistance(existing,candidate.rgb)>=22))palette.push(candidate.rgb);
+ palette=[];for(const candidate of candidates)if(palette.every(existing=>colorDistance(existing,candidate.rgb)>=24))palette.push(candidate.rgb);
  if(!palette.length&&candidates.length)palette=[candidates[0].rgb];
  const nearest=p=>{let best=0,dist=Infinity;palette.forEach((c,i)=>{const d=colorDistance(p,c);if(d<dist){dist=d;best=i;}});return best;};
  art=Array.from({length:SIZE},()=>Array(SIZE).fill(null));rctx.clearRect(0,0,450,450);let filled=0,error=0;
- pixels.forEach((p,i)=>{if(!p||!palette.length)return;const x=i%SIZE,y=Math.floor(i/SIZE),id=nearest(p),target=palette[id];art[y][x]=id;filled++;error+=colorDistance(p,target)**2;rctx.fillStyle=rgbHex(target);rctx.fillRect(x*CELL,y*CELL,CELL,CELL);});
+ pixels.forEach((p,i)=>{if(!p||!palette.length)return;const px=i%SIZE,py=Math.floor(i/SIZE),id=nearest(p),target=palette[id];art[py][px]=id;filled++;error+=colorDistance(p,target)**2;rctx.fillStyle=rgbHex(target);rctx.fillRect(px*CELL,py*CELL,CELL,CELL);});
  const sw=document.querySelector('#swatches');sw.replaceChildren();palette.forEach(c=>{const el=document.createElement('span');el.className='swatch';el.title=rgbHex(c);el.style.background=rgbHex(c);sw.append(el);});
  const delta=filled?Math.sqrt(error/filled):0;
- document.querySelector('#stats').textContent=filled+' блоков · '+palette.length+' хорошо различимых цветов · средняя ошибка цвета ΔE '+delta.toFixed(1)+' · '+(100*filled/(SIZE*SIZE)).toFixed(1)+'% заполнения';
+ document.querySelector('#stats').textContent=filled+' блоков · '+palette.length+' цветов · удалено мелких фрагментов: '+removedSpecks+' · ΔE '+delta.toFixed(1)+' · заполнение '+(100*filled/(SIZE*SIZE)).toFixed(1)+'%';
  exportBtn.disabled=!filled;
- if(status)status.textContent=filled?'Готово: '+filled+' блоков, '+palette.length+' цветов.':'Изображение загружено, но после удаления прозрачности не осталось видимых пикселей. Уменьшите порог прозрачности.';
+ if(status)status.textContent=filled?'Готово: '+filled+' блоков, '+palette.length+' цветов.':'Не найдено достаточно крупных цветных областей. Уменьшите упрощение или отключите удаление фона.';
 }
-exportBtn.addEventListener('click',()=>{if(!art)return;const data={id:'imported-sprite-'+Date.now(),width:SIZE,height:SIZE,palette:palette.map(rgbHex),data:art.map(row=>row.map(v=>v===null?'.':v.toString(36)).join('')).join('/'),source:{library:'Tiddybub/2d-assets',license:'CC0',originalFile:file.files?.[0]?.name||'unknown'},note:'Palette uses perceptually separated source RGB colors. Review readability before adding to campaign.'};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=data.id+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
+exportBtn.addEventListener('click',()=>{if(!art)return;const data={id:'imported-sprite-'+Date.now(),width:SIZE,height:SIZE,palette:palette.map(rgbHex),data:art.map(row=>row.map(v=>v===null?'.':v.toString(36)).join('')).join('/'),source:{library:'Tiddybub/2d-assets',license:'CC0',originalFile:file.files?.[0]?.name||'unknown'},note:'Artwork simplified by cell coverage and small-component cleanup; flat edge background removal may be enabled. Review silhouette readability before adding to campaign.'};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=data.id+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
 </script></body></html>
