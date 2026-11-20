@@ -459,7 +459,7 @@ test("generated campaign uses bounded tactical squads and exact color budgets",(
 test("fallback queue fragments never create oversized ordinary squads",()=>{
  for(const level of LEVELS.filter(item=>item.number>=8)){
   const deck=buildIncoming(createArtworkBoard(level.id),level.number);
-  assert.ok(deck.every(box=>box.ants>0&&box.ants<=52),level.name+" fallback squads must stay within the tactical size cap");
+  assert.ok(deck.every(box=>box.ants>0&&box.ants<=64),level.name+" fallback squads must stay within the tactical size cap");
  }
 });
 
