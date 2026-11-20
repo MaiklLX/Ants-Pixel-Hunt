@@ -903,14 +903,65 @@ export function buildIncoming(board,levelNumber=1){
   boardSeed=Math.imul(boardSeed^code,16777619)>>>0;
  }
  if(levelNumber>=8){
-  // Each batch mirrors one currently exposed color group. When that squad
-  // finishes, its slot is free before the next inner color wave is revealed.
-  const working=board.map(row=>row.slice()),waves=[];
-  let remaining=working.reduce((sum,row)=>sum+row.filter(Boolean).length,0),wave=0;
-  while(remaining>0){
-   const exposed=getExposedPixels(working);
-   if(!exposed.length)break;
-   const totals=Object.fromEntries(colors.map(color=>[color,0]));
+  // Generated levels use whole-color squads, not a new set of tiny crates
+  // for every thin exposure rim. A large squad can clear its current pixels,
+  // wait for the next layer, then resume; this makes slot order meaningful.
+  const totals=Object.fromEntries(colors.map(color=>[color,0]));
+  for(const row of board)for(const color of row)if(color)totals[color]++;
+  const exposedCounts=Object.fromEntries(colors.map(color=>[color,0]));
+  for(const point of getExposedPixels(board)){
+   const color=board[point.y][point.x];if(color)exposedCounts[color]++;
+  }
+  const queues={};
+  for(const color of colors){
+   const total=totals[color];queues[color]=[];
+   if(!total)continue;
+   const target=Math.min(118,Math.max(36,levelNumber<26?104:levelNumber<76?112:levelNumber<151?118:levelNumber<301?124:130));
+   const count=Math.max(1,Math.ceil(total/target));
+   const base=Math.floor(total/count),remainder=total%count;
+   for(let index=0;index<count;index++){
+    const ants=base+(index<remainder?1:0);
+    queues[color].push({color,ants});
+   }
+  }
+  const openingColors=colors.filter(color=>exposedCounts[color]>0)
+   .sort((a,b)=>exposedCounts[b]-exposedCounts[a]||colors.indexOf(a)-colors.indexOf(b));
+  const futureColors=colors.filter(color=>totals[color]>0&&!exposedCounts[color]);
+  const deck=[],used=new Set();
+  const take=color=>{
+   if(!color||used.has(color)||!queues[color]?.length)return;
+   deck.push(queues[color].shift());used.add(color);
+  };
+  // First: one useful front color, a tempting future layer, then a second
+  // useful color when available. Both useful squads are large enough to
+  // persist through a change of layer instead of vanishing after 1–3 ants.
+  take(openingColors[0]);
+  take(futureColors[0]);
+  take(openingColors[1]);
+  const order=[...openingColors.slice(2),...futureColors.slice(1)];
+  let pending=true,round=0;
+  while(pending){
+   pending=false;
+   const colorsThisRound=round%2?order.slice().reverse():order;
+   for(const color of colorsThisRound){
+    if(queues[color]?.length){deck.push(queues[color].shift());pending=true;}
+   }
+   round++;
+  }
+  // Any remaining squads of the three opening colors follow after the first
+  // decision row, interleaved so no one pigment dominates the visible queue.
+  let extras=true,extraRound=0;
+  while(extras){
+   extras=false;
+   const extraOrder=extraRound%2?colors.slice().reverse():colors;
+   for(const color of extraOrder){
+    if(queues[color]?.length){deck.push(queues[color].shift());extras=true;}
+   }
+   extraRound++;
+  }
+  return deck;
+ }
+  const totals=Object.fromEntries(colors.map(color=>[color,0]));
    for(const point of exposed){const color=working[point.y][point.x];if(color)totals[color]++;}
    const queues={};
    for(const color of colors){
