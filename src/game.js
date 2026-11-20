@@ -428,8 +428,8 @@ function generatedPartCount(number){
  // Keep each subject large enough to read as a real pixel illustration.
  // New subjects are introduced gradually; the board never becomes a collage
  // of tiny icons that lose their defining details.
- if(number<51)return 1;
- if(number<301)return 2;
+ if(number<=8)return 1;
+ if(number<151)return 2;
  return 3;
 }
 function generatedChapter(number){
@@ -641,7 +641,8 @@ function createComposedArtworkBoard(number){
  const placements=generatedSceneLayout(count,layoutVariant);
  for(let part=0;part<count;part++){
   const motifSeed=(Math.imul(number,0x9e3779b1)^Math.imul(part+1,0x85ebca6b))>>>0;
-  const motifIndex=motifSeed%GENERATED_MOTIFS.length;
+  let motifIndex=motifSeed%GENERATED_MOTIFS.length;
+  if(part&&GENERATED_MOTIFS.slice(0,part).some(item=>item.type===GENERATED_MOTIFS[motifIndex].type))motifIndex=(motifIndex+1)%GENERATED_MOTIFS.length;
   const motif=GENERATED_MOTIFS[motifIndex],variant=(Math.imul(number,0x45d9f3b)+part*0x27d4eb2d)>>>0;
   const [ox,oy,width,height]=placements[part];
   const raster=createRasterArtworkBoard(motif.type);
