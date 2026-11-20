@@ -3,7 +3,7 @@ import {createArtworkSvg} from "./artwork-renderer.js";
 import {decodeSpriteArtwork} from "./custom-artwork.js";
 import {getAntTripFrame,getAntLaunchDelay,getAntQueueDelay,createPausableClock,getTrailPose,getAntTravelDurations,getAntGaitFrame} from "./ant-animation.js";
 import {isCampaignLevelUnlocked,getNextCampaignLevel} from "./campaign.js";
-import {BUILDINGS,createEconomy,normalizeEconomy,collectCube,completeMeadow,purchaseBuilding,buildingCost} from "./economy.js";
+import {BUILDINGS,createEconomy,normalizeEconomy,collectCube,completeMeadow,purchaseBuilding,buildingCost,zenRunPendingReward,completeZenRun} from "./economy.js";
 const $=id=>document.getElementById(id);
 const shell=$("app-shell"),boardEl=$("board"),slotsEl=$("slots"),choicesEl=$("choices"),antLayer=$("ant-layer"),nestEntrance=$("nest-entrance");
 const boardCtx=boardEl.getContext("2d"),antCtx=antLayer.getContext("2d");
@@ -531,7 +531,7 @@ function renderChoices(){
 }
 function render(){
  const level=getLevel(state.levelId);
- $("level-number").textContent=`ПОЛЯНКА № ${level.number}`;
+ $("level-number").textContent=zenMode?"ДЗЕН · ВАШ РИСУНОК":`ПОЛЯНКА № ${level.number}`;
  $("level-title").textContent=level.name;
  $("board").setAttribute("aria-label",`${level.name}: иллюстрация из цветных фрагментов на сетке 35 на 35`);
  renderBoard();renderSlots();renderChoices();renderConveyor();
@@ -843,7 +843,7 @@ async function runSlotWorker(move,workerId){
    const worker=workerPromises.get(workerId);if(worker)worker.phase="returning";
    if(zenMode){
     zenRunCollected++;
-    zenPendingNectar=Math.floor(zenRunCollected/10)*(1+colony.buildings.garden);
+    zenPendingNectar=zenRunPendingReward(zenRunCollected,colony);
     updateZenHud();
    }else{colony=collectCube(colony);updateEconomy();}
    reservedTargets.delete(key);
@@ -877,7 +877,7 @@ function updateResultOverlay(){
  if(!overlay)return;
  const complete=state.won,failed=state.lost;
  const next=nextLevel();
- $("result-next").hidden=!complete||!next||!isLevelUnlocked(next);
+ $("result-next").hidden=zenMode||!complete||!next||!isLevelUnlocked(next);
  if(next)$("result-next").textContent=`Следующая полянка: ${next.name} →`;
  overlay.hidden=!(complete||failed);
  if(!complete&&!failed)return;
@@ -894,8 +894,8 @@ function settleColony(){
  if(isGameComplete(state)){
   if(!state.won){
    if(zenMode){
-    const reward=zenPendingNectar+10+colony.buildings.granary*5+colony.buildings.nursery*3;
-    zenPendingNectar=reward;colony.nectar+=reward;colony.completed++;zenRewardPaid=true;updateEconomy();
+    const result=completeZenRun(colony,zenPendingNectar);
+    colony=result.economy;zenPendingNectar=result.reward;zenRewardPaid=true;updateEconomy();
    }else{markLevelComplete(state.levelId);colony=completeMeadow(colony);updateEconomy();}
   }
   state.won=true;state.message=zenMode?"Рисунок собран! Нектар отправлен в Муравейник ✨":"Победа! Портрет собран ✨";
