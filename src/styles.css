@@ -5017,3 +5017,172 @@ footer{order:9}
  .app-shell:not(.menu-open) .choices-section{border-radius:10px}
 }
 @media(prefers-reduced-motion:reduce){.zen-run-track span{transition:none}}
+
+
+/* KT-297 — extend the woodland night palette to the menu and campaign map. */
+.app-shell.menu-open .main-menu{
+ background:
+  radial-gradient(ellipse at 50% 0%,#344d38 0%,transparent 46%),
+  radial-gradient(ellipse at 12% 85%,#263c30 0%,transparent 42%),
+  linear-gradient(180deg,#1e3228 0%,#17271f 100%);
+ color:#dce7d2;
+}
+.app-shell.menu-open .main-menu::before{background-image:radial-gradient(#a8bd8b 1px,transparent 1px);opacity:.12}
+.app-shell.menu-open .menu-identity{color:#d7e3c8}
+.app-shell.menu-open .menu-identity span{color:#e0e9d5}
+.app-shell.menu-open .menu-identity small{color:#9eaf91}
+.app-shell.menu-open .menu-progress-card{
+ background:linear-gradient(145deg,#293f30,#1d3026);
+ border:1px solid #405943;border-radius:15px;
+ box-shadow:inset 0 1px #ffffff0c,0 5px 14px #07140f55;
+ color:#dce7d2;
+}
+.app-shell.menu-open .menu-progress-top strong{color:#e0e9d5}
+.app-shell.menu-open .menu-progress-top span,
+.app-shell.menu-open #menu-progress-hint{color:#aebfa3}
+.app-shell.menu-open .menu-progress-track{background:#14251b;border:1px solid #405943}
+.app-shell.menu-open .menu-progress-track span{background:linear-gradient(90deg,#83a96c,#d2b66f)}
+.app-shell.menu-open .menu-level-card{
+ background:
+  radial-gradient(ellipse at 12% 8%,#9aaf6d20,transparent 48%),
+  linear-gradient(145deg,#354b37 0%,#263c30 58%,#1e3228 100%)!important;
+ color:#e0e9d5!important;border:1px solid #61744f!important;
+ box-shadow:0 5px 0 #14251b,0 9px 18px #07140f66,inset 0 1px #ffffff12!important;
+}
+.app-shell.menu-open .menu-level-card .level-thumb{
+ background:linear-gradient(145deg,#465a3d,#293e30)!important;
+ border:1px solid #73845b!important;box-shadow:0 3px 0 #17271f,inset 0 1px #ffffff18!important;
+}
+.app-shell.menu-open .menu-level-card .level-card-copy>span{color:#c1b17c!important}
+.app-shell.menu-open .menu-level-card .level-card-copy strong{color:#edf2e4!important}
+.app-shell.menu-open .menu-level-card .level-card-copy small{color:#b0bea5!important}
+.app-shell.menu-open .menu-level-card .level-play-mark{
+ background:linear-gradient(145deg,#665a38,#49452f)!important;
+ border:1px solid #9b8753!important;color:#f0d99b!important;box-shadow:0 3px 0 #17271f!important;
+}
+.app-shell.menu-open .hub-location,
+.app-shell.menu-open .zen-location,
+.app-shell.menu-open .zen-workshop{
+ background:linear-gradient(145deg,#2e4534,#203629)!important;
+ border:1px solid #455d43!important;color:#dce7d2!important;
+ box-shadow:0 3px 0 #14251b,0 6px 12px #07140f55,inset 0 1px #ffffff0b!important;
+}
+.app-shell.menu-open .hub-location-icon{background:linear-gradient(145deg,#3c543b,#263b2d)!important;border-color:#52694b!important;color:#d6e2c8!important}
+.app-shell.menu-open .hub-location-copy strong{color:#e1ead7!important}
+.app-shell.menu-open .hub-location-copy small,
+.app-shell.menu-open .hub-location-arrow,
+.app-shell.menu-open .hub-location-resource{color:#aebfa3!important}
+.app-shell.menu-open .zen-location:disabled{opacity:.52}
+.app-shell.menu-open .zen-status-message{color:#9eaf91}
+.app-shell.menu-open .menu-future{
+ background:linear-gradient(145deg,#263c30,#1b2e25)!important;
+ border:1px solid #3c5540!important;color:#cbd8c1!important;
+}
+.app-shell.menu-open .menu-future-copy strong{color:#dce7d2!important}
+.app-shell.menu-open .menu-future-copy small,
+.app-shell.menu-open .menu-future-status{color:#9eaf91!important}
+.app-shell.menu-open .menu-actions .menu-secondary,
+.app-shell.menu-open .menu-actions .menu-link{
+ background:linear-gradient(145deg,#2d4436,#1e3228)!important;
+ border-color:#4a6047!important;color:#d4e0c9!important;
+}
+.app-shell.menu-open .how-panel{
+ background:linear-gradient(145deg,#263d30,#1c3026)!important;
+ border-color:#405943!important;color:#d1ddc6!important;
+}
+.app-shell.menu-open .how-panel p{color:#b5c3aa}
+.map-overlay{
+ background:radial-gradient(ellipse at 50% 0%,#314a37cc 0%,#0b1711f2 70%)!important;
+}
+.map-overlay .map-card{
+ background:linear-gradient(160deg,#293f31 0%,#1c3026 100%)!important;
+ border:1px solid #526849!important;
+ box-shadow:0 18px 50px #050d09dd,inset 0 1px #ffffff10!important;
+ color:#dce7d2!important;
+}
+.map-overlay .map-summary{
+ background:linear-gradient(145deg,#304833,#21372a)!important;
+ border-color:#4b6344!important;box-shadow:inset 0 1px #ffffff0c!important;
+}
+.map-overlay .map-summary-main strong{color:#e0c783!important}
+.map-overlay .map-summary-main span,
+.map-overlay .map-summary>small{color:#aebfa3!important}
+.map-overlay .map-summary-track{background:#14271d!important}
+.map-overlay .map-summary-track span{background:linear-gradient(90deg,#86a96c,#d2b66f)!important}
+.map-overlay .map-legend{color:#b5c3aa!important}
+.map-overlay .map-chapter{
+ background:linear-gradient(145deg,#263d30,#1b2e25)!important;
+ border-color:#405943!important;box-shadow:inset 0 1px #ffffff08,0 4px 10px #07140f44!important;
+}
+.map-overlay .map-chapter-heading{border-color:#405943!important}
+.map-overlay .map-chapter-heading strong{color:#dce7d2!important}
+.map-overlay .map-chapter-heading small{color:#aebfa3!important}
+.map-overlay .map-trail{
+ background:
+  radial-gradient(ellipse at 12% 18%,#91a76a12,transparent 20%),
+  radial-gradient(ellipse at 88% 34%,#91a76a10,transparent 22%),
+  linear-gradient(180deg,#1b3026aa,#17291fbb)!important;
+}
+.map-overlay .trail-node,
+.map-overlay .map-trail .campaign-level{
+ background:linear-gradient(150deg,#344a36,#24392c)!important;
+ border:1px solid #506447!important;color:#dce7d2!important;
+ box-shadow:0 3px 0 #14251b,0 5px 10px #07140f55!important;
+}
+.map-overlay .trail-node::after{border-color:#ffffff12!important}
+.map-overlay .trail-node .campaign-emoji,
+.map-overlay .map-trail .campaign-emoji{
+ background:radial-gradient(circle at 35% 25%,#526746,#2b402f 78%)!important;
+ border-color:#61764f!important;color:#e1ead7!important;
+}
+.map-overlay .trail-node .trail-number,
+.map-overlay .map-trail .campaign-copy small{color:#b5c39f!important}
+.map-overlay .trail-node .trail-name,
+.map-overlay .map-trail .campaign-copy strong{color:#e1ead7!important}
+.map-overlay .trail-node.completed,
+.map-overlay .map-trail .campaign-level.completed{
+ background:linear-gradient(150deg,#514a32,#383d2c)!important;
+ border-color:#9a8753!important;
+ box-shadow:0 3px 0 #252b20,0 5px 10px #07140f66!important;
+}
+.map-overlay .trail-node.completed .campaign-emoji{background:radial-gradient(circle at 35% 25%,#796a3d,#49452f 78%)!important;border-color:#a18b55!important}
+.map-overlay .trail-node.next-stop,
+.map-overlay .map-trail .campaign-level.current{
+ background:linear-gradient(150deg,#3e593a,#2c452f)!important;
+ border-color:#a0b477!important;outline-color:#8ca86b!important;
+ box-shadow:0 4px 0 #1a2c20,0 7px 15px #07140f77!important;
+}
+.map-overlay .trail-node.next-stop .trail-number{color:#e4d397!important}
+.map-overlay .trail-node.locked,
+.map-overlay .map-trail .campaign-level.locked{
+ opacity:.62;background:linear-gradient(150deg,#27362b,#1e2d24)!important;
+ border-color:#3c4c3c!important;box-shadow:0 2px 0 #142019!important;
+}
+.map-overlay .trail-node.locked .campaign-emoji{background:#29382c!important;filter:grayscale(.65)}
+.map-overlay .map-trail::before{background:#71845a!important;opacity:.55}
+.map-overlay .nest-close{background:#344b3b!important;border-color:#526b55!important;color:#dce7d2!important}
+.map-overlay .nest-header h2{color:#e5eddd!important}
+.map-overlay .nest-kicker{color:#d1b477!important}
+
+/* Keep every Zen counter row in its own lane on narrow screens. */
+.zen-run-hud{
+ min-width:0;grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto auto;
+ gap:4px;width:min(100%,470px);overflow:hidden;
+}
+.zen-run-top{grid-column:1;grid-row:1;min-width:0;gap:8px}
+.zen-run-top span{min-width:0;overflow-wrap:anywhere}
+.zen-run-top strong{flex:0 0 auto}
+.zen-run-track{grid-column:1;grid-row:2;width:100%;min-width:0;height:6px}
+.zen-run-hud p{grid-column:1;grid-row:3;white-space:normal;overflow-wrap:anywhere;font-size:9px;line-height:1.2}
+@media(max-width:599px){
+ .zen-run-hud{width:100%;padding:6px 8px;gap:4px}
+ .zen-run-top{font-size:10px}
+ .zen-run-top strong{font-size:13px}
+ .zen-run-track{height:6px}
+ .zen-run-hud p{font-size:8px}
+}
+@media(max-width:360px){
+ .zen-run-top{font-size:9px}
+ .zen-run-top strong{font-size:12px}
+ .zen-run-hud p{font-size:7px}
+}
