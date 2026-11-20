@@ -445,7 +445,7 @@ test("specialist crates provide exactly enough builders and warriors for each le
 test("generated campaign uses bounded tactical squads and exact color budgets",()=>{
  for(const level of LEVELS.filter(item=>item.number>=8)){
   const deck=getIncoming(level.id).filter(box=>!box.role);
-  assert.ok(deck.every(box=>box.ants>=18&&box.ants<=68),level.name+" squads must be bounded and avoid micro-boxes");
+  assert.ok(deck.every(box=>box.ants>=10&&box.ants<=60),level.name+" squads must be bounded and avoid micro-boxes");
   const board=createArtworkBoard(level.id),colorTotals=new Map();
   for(const color of board.flat().filter(Boolean))if(color!=="black")colorTotals.set(color,(colorTotals.get(color)||0)+1);
   for(const [color,total] of colorTotals){
@@ -456,10 +456,16 @@ test("generated campaign uses bounded tactical squads and exact color budgets",(
  }
 });
 
+test("every generated campaign squad contains between 10 and 60 ants",()=>{
+ for(const level of LEVELS){
+  const deck=getIncoming(level.id);
+  assert.ok(deck.every(box=>box.ants>=10&&box.ants<=60),level.name+" every box must contain 10–60 ants");
+ }
+});
 test("fallback queue fragments never create oversized ordinary squads",()=>{
  for(const level of LEVELS.filter(item=>item.number>=8)){
   const deck=buildIncoming(createArtworkBoard(level.id),level.number);
-  assert.ok(deck.every(box=>box.ants>0&&box.ants<=68),level.name+" fallback squads must stay within the tactical size cap");
+  assert.ok(deck.every(box=>box.ants>=10&&box.ants<=60),level.name+" fallback squads must stay within the tactical size cap");
  }
 });
 
@@ -579,13 +585,15 @@ test("every campaign deck has a crate at the sealed-box position",()=>{
 });
 
 
-test("linked crates wait until both partners are at the top and two slots are free",()=>{
+test("a linked crate can use the last free starter slot without softlocking the queue",()=>{
  const s=createGame(),pair=getLinkedPair(s.levelId);assert.equal(pair.length,2);
  s.tray[0][0]=pair[0];s.tray[0][1]=null;
- assert.equal(chooseTopColumn(s,0),false,"a lone linked crate cannot be activated");assert.equal(s.pendingLinkedIndex,null);
- s.tray[0][1]=pair[1];s.slots[0]={role:"builder",ants:1};s.slots[1]={role:"warrior",ants:1};s.slots[2]={color:"purple",ants:1};s.slots[3]={color:"orange",ants:1};
- makeBoxAvailable(s,pair[0]);const before=s.tray.map(row=>row.slice());assert.equal(chooseTopColumn(s,0),false,"pair needs two free compartments");
- assert.deepEqual(s.tray,before,"failed placement must not advance either queue");assert.equal(s.slots.filter(Boolean).length,4);
+ s.slots[0]={role:"builder",ants:1};s.slots[1]={role:"warrior",ants:1};s.slots[2]={color:"purple",ants:1};s.slots[3]={color:"orange",ants:1};
+ makeBoxAvailable(s,pair[0]);
+ assert.equal(chooseTopColumn(s,0),true,"the first half of a linked pair must fit the final free slot");
+ assert.equal(s.slots[4].sourceIndex,pair[0]);
+ assert.equal(freeSlotCount(s),0);
+ assert.equal(s.pendingLinkedIndex,null,"the second half remains in the normal queue and does not freeze other choices");
 });
 test("linked crates are placed atomically into two start compartments",()=>{
  const s=createGame(),pair=getLinkedPair(s.levelId);s.tray[0][0]=pair[0];s.tray[0][1]=pair[1];makeBoxAvailable(s,pair[0]);const untouched=s.tray[0][2],next0=s.tray[1][0],next1=s.tray[1][1];
