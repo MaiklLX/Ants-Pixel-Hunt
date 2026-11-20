@@ -7,6 +7,61 @@ const $=id=>document.getElementById(id);
 const shell=$("app-shell"),boardEl=$("board"),slotsEl=$("slots"),choicesEl=$("choices"),antLayer=$("ant-layer"),nestEntrance=$("nest-entrance");
 const boardCtx=boardEl.getContext("2d"),antCtx=antLayer.getContext("2d");
 let state=createGame(),resolverRunning=false,resetting=false,resetAfterMenu=false,antFrame=0,antCanvasWidth=0,antCanvasHeight=0,gameStarted=false,totalBlocks=state.remaining+(state.obstacles||[]).reduce((sum,item)=>sum+item.hp,0);
+
+const CUSTOM_ARTWORK_PREFIX="ants-custom-artwork-v1:";
+function readCustomArtwork(levelId){
+ try{return JSON.parse(localStorage.getItem(CUSTOM_ARTWORK_PREFIX+levelId)||"null");}catch{return null;}
+}
+function decodeCustomArtwork(payload){
+ if(!payload||payload.width!==SIZE||payload.height!==SIZE||!Array.isArray(payload.palette)||typeof payload.data!=="string")throw new Error("Неверный формат. Нужна полянка 45×45 из мастерской спрайтов.");
+ const rows=payload.data.split("/");
+ if(rows.length!==SIZE||rows.some(row=>row.length!==SIZE))throw new Error("В файле должно быть ровно 45 строк по 45 клеток.");
+ const palette=payload.palette.map(value=>{
+  if(typeof value!=="string"||!/^#[0-9a-f]{6}$/i.test(value))throw new Error("В палитре обнаружен некорректный цвет.");
+  const rgb=[1,3,5].map(index=>parseInt(value.slice(index,index+2),16));
+  let best="green",distance=Infinity;
+  for(const [name,color] of Object.entries(COLORS)){
+   if(name==="black"||name==="gray")continue;
+   const target=color.hex.slice(1).match(/../g).map(part=>parseInt(part,16));
+   const d=rgb.reduce((sum,channel,index)=>sum+(channel-target[index])**2,0);
+   if(d<distance){distance=d;best=name;}
+  }
+  return best;
+ });
+ return rows.map(row=>Array.from(row,char=>{
+  if(char===".")return "";
+  const index=parseInt(char,36);
+  if(!Number.isInteger(index)||index<0||index>=palette.length)throw new Error("В рисунке есть ссылка на отсутствующий цвет.");
+  return palette[index];
+ }));
+}
+function applySavedArtwork(levelId){
+ const payload=readCustomArtwork(levelId);
+ if(!payload)return false;
+ setArtworkBoard(levelId,decodeCustomArtwork(payload));
+ return true;
+}
+function importArtworkFile(file){
+ const reader=new FileReader();
+ reader.onload=()=>{
+  try{
+   const payload=JSON.parse(String(reader.result||""));
+   const board=decodeCustomArtwork(payload);
+   const target=state.levelId;
+   localStorage.setItem(CUSTOM_ARTWORK_PREFIX+target,JSON.stringify(payload));
+   setArtworkBoard(target,board);
+   if(workerPromises.size||loadingSlots.size)throw new Error("Сначала дождитесь завершения текущего хода, затем импортируйте рисунок.");
+   resetting=true;cancelAnimationFrame(antFrame);activeAnts.clear();pickupEffects.length=0;deliveryEffects.length=0;reservedTargets.clear();slotNextLaunchAt.clear();
+   state=createGame(target);totalBlocks=tasksRemaining();boardArtworkKey=target;lastExposedPixels=new Set();resetting=false;
+   render();$("save-status").textContent="Новый спрайт загружен в текущую полянку.";
+   $("artwork-import-status").textContent="Спрайт применён к полянке № "+getLevel(target).number+". Исходный рисунок сохранён на этом устройстве.";
+  }catch(error){$("artwork-import-status").textContent=error.message||"Не удалось импортировать рисунок.";}
+  $("artwork-import-file").value="";
+ };
+ reader.onerror=()=>{$("artwork-import-status").textContent="Не удалось прочитать файл.";$("artwork-import-file").value="";};
+ reader.readAsText(file);
+}
+
 const animationClock=createPausableClock(()=>performance.now());
 if(document.hidden)animationClock.pause();
 document.addEventListener("visibilitychange",()=>{
@@ -148,6 +203,7 @@ function rasterizeArtworkToBlocks(image){
 function ensureBoardArtwork(){
  const key=state.levelId;
  if(boardArtworkKey===key)return;
+ if(readCustomArtwork(key)){applySavedArtwork(key);boardArtworkKey=key;state=createGame(key);totalBlocks=tasksRemaining();return;}
  boardArtworkKey=key;
  const image=new Image();
  image.onload=()=>{
@@ -951,10 +1007,17 @@ function startGame(){
 }
 async function startFreshGame(levelId=state.levelId){
  if(workerPromises.size>0||loadingSlots.size>0||resetAfterMenu)return;
- resetting=true;cancelAnimationFrame(antFrame);activeAnts.clear();pickupEffects.length=0;deliveryEffects.length=0;reservedTargets.clear();slotNextLaunchAt.clear();state=createGame(levelId);totalBlocks=tasksRemaining();resetting=false;
+ resetting=true;cancelAnimationFrame(antFrame);activeAnts.clear();pickupEffects.length=0;deliveryEffects.length=0;reservedTargets.clear();slotNextLaunchAt.clear();applySavedArtwork(levelId);state=createGame(levelId);boardArtworkKey=readCustomArtwork(levelId)?levelId:"";totalBlocks=tasksRemaining();resetting=false;
  gameStarted=true;render();$("save-status").textContent="Новая партия · прогресс уровня не сохраняется";shell.classList.remove("menu-open");updateMainMenu();kickColony();
 }
+
+$("artwork-import-file")?.addEventListener("change",event=>{
+ const file=event.target.files?.[0];if(file)importArtworkFile(file);
+});
+$("artwork-import-button")?.addEventListener("click",()=> $("artwork-import-file")?.click());
+
 async function boot(){
+ if(applySavedArtwork(state.levelId)){state=createGame(state.levelId);boardArtworkKey=state.levelId;}
  totalBlocks=tasksRemaining();
  render();resizeAntLayer();updateMainMenu();
  if("serviceWorker"in navigator){
