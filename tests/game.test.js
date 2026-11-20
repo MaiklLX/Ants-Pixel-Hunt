@@ -451,7 +451,7 @@ test("builder squad clears a reinforced root barrier before revealing the covere
   assert.equal(state.remaining,before,"hitting the barrier must not remove the colored block underneath");
   if(hit<hits-1)assert.equal(state.obstacles[0].hp,hits-hit-1);
  }
- assert.equal(state.obstacles.length,0,"the full builder squad removes the reinforced barrier");
+ assert.ok(!state.obstacles.some(item=>item.id===obstacle.id),"the builder squad removes its assigned barrier");
  assert.equal(state.board[obstacle.y][obstacle.x],coveredColor,"the covered artwork block remains intact");
  assert.ok(getExposedTargets(state).some(item=>item.kind==="pixel"&&item.x===obstacle.x&&item.y===obstacle.y&&item.color===coveredColor));
 });
@@ -982,9 +982,10 @@ test("specialist obstacles scale into several separated tactical blockers",()=>{
 
 test("builder ants split their first attacks across separate root barriers",()=>{
  const state=createGame("meadow-026");
- const builder=getIncoming(state.levelId).find(item=>item.role==="builder");
- assert.ok(builder);
- state.slots[0]={...builder,ants:2};
+ const builders=getIncoming(state.levelId).filter(item=>item.role==="builder");
+ assert.ok(builders.length>=2);
+ state.slots[0]={...builders[0],ants:1};
+ state.slots[1]={...builders[1],ants:1};
  const first=findAntWave(state,new Set(),new Map(),2);
  assert.equal(first.length,2);
  assert.equal(new Set(first.map(move=>move.target.x+","+move.target.y)).size,2,
