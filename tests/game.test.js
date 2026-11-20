@@ -266,6 +266,25 @@ test("all campaign levels have distinct deterministic artwork and exact matching
  assert.equal(signatures.size,LEVELS.length,"each campaign level must have its own pixel artwork");
  assert.equal(getLevel("unknown").id,"meadow-01");
 });
+test("four pilot artworks 501–504 have distinct 35x35 silhouettes and rich 8-color palettes",()=>{
+ const pilot=LEVELS.filter(level=>level.number>=501&&level.number<=504);
+ assert.equal(pilot.length,4);
+ assert.deepEqual(pilot.map(level=>level.name),["Монстрик из мшистой пещеры","Маленький лесной дракон","Золотой ананас","Кристальный цветок"]);
+ const signatures=new Set();
+ for(const level of pilot){
+  const board=createArtworkBoard(level.id),colors=new Set(board.flat().filter(Boolean));
+  assert.equal(board.length,35);assert.ok(board.every(row=>row.length===35));
+  assert.ok(colors.has("black"));assert.ok(colors.size>=8,level.name+" should retain at least eight visible colors");
+  assert.ok(board.flat().filter(Boolean).length>=250,level.name+" should fill a substantial centered silhouette");
+  const diagnostics={};const deck=buildIncoming(board,level.number,diagnostics);
+  assert.equal(diagnostics.completed,true,level.name+" queue must collect every pixel");
+  assert.ok(diagnostics.maxActiveSquads<=SLOT_COUNT,level.name+" must fit the five starter slots");
+  assert.equal(deck.reduce((sum,box)=>sum+box.ants,0),board.flat().filter(Boolean).length);
+  signatures.add(board.map(row=>row.join(",")).join(";"));
+ }
+ assert.equal(signatures.size,4);
+});
+
 test("cached campaign artwork is deterministic but callers receive independent mutable boards",()=>{
  const first=createArtworkBoard("meadow-008"),second=createArtworkBoard("meadow-008");
  assert.notEqual(first,second);
