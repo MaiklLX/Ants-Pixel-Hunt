@@ -425,8 +425,9 @@ function renderChoices(){
   const linked=box?.special==="linked",partner=linked?getLinkedPartner(state.levelId,index):null;
   const waitingForPartner=linked&&state.pendingLinkedIndex!==index&&!state.tray[0].includes(partner),needsPairSlots=linked&&(state.pendingLinkedIndex===null||state.pendingLinkedIndex===undefined)&&state.slots.filter(slot=>slot===null).length<2;
   const blockedByPair=state.pendingLinkedIndex!==null&&state.pendingLinkedIndex!==undefined&&index!==state.pendingLinkedIndex;
-  const frontierReady=box&&canLaunchBox(state,index);
-  button.disabled=!box||sealed||resetting||resetAfterMenu||state.won||state.lost||!canChoose(state)||!frontierReady||blockedByPair||waitingForPartner||needsPairSlots;
+  // A visible front-row box is always a legal strategic choice, even when
+  // its color is buried. It occupies a slot and starts automatically later.
+  button.disabled=!box||sealed||resetting||resetAfterMenu||state.won||state.lost||!canChoose(state)||blockedByPair||waitingForPartner||needsPairSlots;
   if(sealed){
    const crate=document.createElement("span");crate.className="choice-crate sealed-crate";crate.setAttribute("aria-hidden","true");
     for(let plank=0;plank<3;plank++){const board=document.createElement("i");board.className="sealed-plank";crate.append(board);}
@@ -859,7 +860,7 @@ function kickColony(){
 async function onChoose(column){
  if(resetting||resetAfterMenu||!canChoose(state))return;
  const selectedIndex=state.tray[0][column],incoming=getIncoming(state.levelId),box=incoming[selectedIndex];
- if(selectedIndex===null||selectedIndex===undefined||!box||isLockedBox(state,selectedIndex)||!canLaunchBox(state,selectedIndex))return;
+ if(selectedIndex===null||selectedIndex===undefined||!box||isLockedBox(state,selectedIndex))return;
  const placements=[{index:selectedIndex,column,crate:box}];
  if(box.special==="linked"){
   const partnerIndex=getLinkedPartner(state.levelId,selectedIndex),partnerColumn=state.tray[0].findIndex(index=>index===partnerIndex);
