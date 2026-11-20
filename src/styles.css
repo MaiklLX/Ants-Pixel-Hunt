@@ -685,6 +685,10 @@ body{background:radial-gradient(ellipse at 50% 0%,#fffdf2 0%,#f1faee 42%,#e4f2e7
 .hub-location-resource{padding:6px 9px;border:1px solid #ead9ae;border-radius:11px;background:#fff8e6;color:#99753a;font-size:11px;font-weight:900;white-space:nowrap}
 .nest-location{background:linear-gradient(145deg,#fffef8,#f8f1dc);border-color:#e9dfc1;box-shadow:0 3px 0 #e8dfc8,0 6px 12px #806c3c10,inset 0 1px #fff}
 .nest-location .hub-location-icon{background:linear-gradient(145deg,#fffdf0,#f4e8c8)}
+.zen-location{background:linear-gradient(145deg,#fffaff,#f3eafa);border-color:#e4d4ef;box-shadow:0 3px 0 #dfd0e9,0 6px 12px #75518a12,inset 0 1px #fff;text-decoration:none;color:#73558a}
+.zen-location .hub-location-icon{background:linear-gradient(145deg,#fff,#eadcf5)}
+.zen-location .hub-location-copy strong{color:#73558a}
+.zen-location .hub-location-arrow{color:#b49ac7}
 .map-card{width:min(100%,460px)}
 .map-intro{margin:-3px 2px 15px;color:#849681;font-size:11px;line-height:1.45}
 .map-chapter-label{display:flex;align-items:center;gap:7px;margin:0 1px 9px;color:#82977a;font-size:9px;font-weight:950;letter-spacing:1px}
