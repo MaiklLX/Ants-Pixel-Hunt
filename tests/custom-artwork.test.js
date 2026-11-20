@@ -11,8 +11,8 @@ test("sprite import preserves exact source RGB colors as game colors",()=>{
  const source=payload(),board=decodeSpriteArtwork(source,COLORS);
  assert.equal(board.length,35);assert.ok(board.every(row=>row.length===35));
  assert.equal(board[0][0],"");assert.equal(COLORS[board[0][20]].hex,"#e7c66d");
- assert.equal(COLORS[board[0][35]].hex,"#55b8ad");
- assert.equal(COLORS[board[1][35]].hex,"#3977aa");
+ assert.equal(COLORS[board[0][30]].hex,"#55b8ad");
+ assert.equal(COLORS[board[1][30]].hex,"#3977aa");
 });
 test("sprite import rejects unsupported dimensions and malformed rows",()=>{
  const wrong=payload();wrong.width=40;wrong.height=40;
