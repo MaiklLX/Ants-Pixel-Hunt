@@ -937,3 +937,37 @@ test("a custom Zen artwork registers as an isolated playable board with a comple
  assert.equal(assigned,expected,"every custom pixel must have a matching ant in the deck");
  assert.ok(deck.length>=3,"the Zen run should open with a playable three-lane queue");
 });
+
+test("a Zen artwork queue has a complete five-slot clearing route",()=>{
+ const board=Array.from({length:SIZE},()=>Array(SIZE).fill(""));
+ for(let y=5;y<30;y++)for(let x=5;x<30;x++){
+  board[y][x]=["green","blue","yellow","red","purple"][(Math.floor(x/5)+Math.floor(y/5))%5];
+ }
+ const level=registerCustomArtwork("test-zen-route","Тест",board);
+ const work=createGame(level.id).board,deck=getIncoming(level.id).map(box=>({...box,special:null}));
+ const active=Array(SLOT_COUNT).fill(null);
+ let remaining=work.flat().filter(Boolean).length,steps=0;
+ while(remaining>0&&steps++<SIZE*SIZE*4){
+  let progressed=false;
+  for(let slot=0;slot<active.length;slot++){
+   const box=active[slot];if(!box)continue;
+   const point=getExposedPixels(work).find(item=>work[item.y][item.x]===box.color);
+   if(!point)continue;
+   work[point.y][point.x]="";box.ants--;remaining--;progressed=true;
+   if(box.ants<=0)active[slot]=null;
+  }
+  let loaded=false;
+  for(let slot=0;slot<active.length;slot++){
+   if(active[slot])continue;
+   let choice=-1,best=Infinity;
+   for(let i=0;i<deck.length;i++){
+    const box=deck[i],assigned=active.reduce((sum,item)=>sum+(item?.color===box.color?item.ants:0),0);
+    const exposed=getExposedPixels(work).filter(point=>work[point.y][point.x]===box.color).length;
+    if(exposed>=box.ants+assigned&&box.ants<best){choice=i;best=box.ants;}
+   }
+   if(choice>=0){active[slot]=deck.splice(choice,1)[0];loaded=true;}
+  }
+  if(!progressed&&!loaded)break;
+ }
+ assert.equal(remaining,0,"a complete strategy must clear every custom pixel");
+});
