@@ -732,3 +732,11 @@ KT-140: исправлен бесконечный цикл балансиров�
 - GitHub Pages workflow run `44743617628`: **success** (gameplay tests, production build, artifact upload, deployment).
 - The earlier KT-304 deploy did not publish because two stale tests failed; both assertions were corrected and the new run passed.
 - Four embedded source PNGs are verified as elephant/giraffe/hippo/monkey. Browser-level visual confirmation of the rasterized 35×35 game board is still outstanding.
+
+
+## Current verification — KT-305 (2026-11-20)
+- Pilot artwork color merging threshold is now 3 cells (previously 18), preserving small accent details; standard campaign art remains unchanged.
+- Main menu includes `Сбросить прогресс` with confirmation. It resets campaign completion and colony economy only; custom artwork and unrelated local data are not erased.
+- Latest code commit before this state note: `30c894269acdb4a0b3ee795c4a8a388c035a894c`.
+- GitHub Pages run `44744687034`: **success**, 193/193 tests passed, production build and deployment succeeded.
+- Manual visual QA of the four 35×35 animal mosaics is still outstanding.
