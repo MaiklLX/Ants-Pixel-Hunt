@@ -878,6 +878,16 @@ function mergeSparseArtworkColors(board,minimum=18){
   for(const row of board)for(let x=0;x<row.length;x++)if(row[x]===rare)row[x]=nearest.color;
   const target=dominant.find(item=>item.color===nearest.color);if(target)target.count+=count;
  }
+ // Black is intentionally excluded from ordinary sparse-pigment merging so
+ // authored outlines remain crisp. But a tiny rasterized black fragment cannot
+ // form a legal 10-ant squad: fold only sub-ten fragments into the nearest
+ // established pigment, preserving larger black contour regions.
+ const blackCount=board.reduce((sum,row)=>sum+row.filter(color=>color==="black").length,0);
+ if(blackCount>0&&blackCount<10&&dominant.length){
+  const from=rgb("black");
+  const nearest=dominant.map(item=>{const to=rgb(item.color);const distance=(from[0]-to[0])**2*0.3+(from[1]-to[1])**2*0.59+(from[2]-to[2])**2*0.11;return{...item,distance};}).sort((a,b)=>a.distance-b.distance||b.count-a.count)[0];
+  if(nearest)for(const row of board)for(let x=0;x<row.length;x++)if(row[x]==="black")row[x]=nearest.color;
+ }
  return board;
 }
 export function createArtworkBoard(levelId="meadow-01"){
@@ -980,7 +990,8 @@ const incomingCache=new Map();
 export function setArtworkBoard(levelId,board){
  const id=getLevel(levelId).id;
  if(!Array.isArray(board)||board.length!==SIZE||board.some(row=>!Array.isArray(row)||row.length!==SIZE))throw new Error("Artwork board must be a 45×45 grid");
- artworkBoardCache.set(id,board.map(row=>row.slice()));
+ const normalized=mergeSparseArtworkColors(board.map(row=>row.slice()),18);
+ artworkBoardCache.set(id,normalized);
  incomingCache.delete(id);
 }
 export function getIncoming(levelId="meadow-01"){
