@@ -749,7 +749,7 @@ function createComposedArtworkBoard(number){
     const x=ox+px,y=oy+py;if(x<0||y<0||x>=SIZE||y>=SIZE)continue;
     const scaleX=1+(((variant*7)%9)-4)*.025,scaleY=1+(((variant*11)%9)-4)*.025;
     const offsetX=(((variant*13)%7)-3)*.22,offsetY=(((variant*17)%7)-3)*.22;
-    let sourceU=((px+.5)/width-.5)/scaleX+.5+offsetX/SIZE;
+    let sourceU=((px+.5)/width-.5)/scaleX+.5+offsetX/SIZE+(number===343?0.03:0);
     const sourceV=((py+.5)/height-.5)/scaleY+.5+offsetY/SIZE;
     if(variant%2===0)sourceU=1-sourceU;
     const sx=Math.max(0,Math.min(SIZE-1,Math.floor(sourceU*SIZE)));
