@@ -1,4 +1,4 @@
-const CACHE="v111";
+const CACHE="v112";
 const STATIC_FILES=["./manifest.webmanifest","./assets/icon-192.svg","./assets/icon-512.svg"];
 self.addEventListener("install",event=>{
  event.waitUntil((async()=>{
